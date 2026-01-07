@@ -3992,7 +3992,7 @@ function beaconFlushPendingTaps(maxChunks = 6) {
     let sentTotal = 0;
     for (let i = 0; i < maxChunks && pending > 0; i++) {
       const chunk = Math.max(1, Math.min(25, pending));
-      const packet = { packet_id: genPacketId(), count: chunk, created_at: Date.now() };
+      const packet = { packet_id: makePacketId(), count: chunk, created_at: Date.now() };
       queue.push(packet);
 
       const payload = {
