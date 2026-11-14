@@ -1600,7 +1600,7 @@
   --app-safe-top: max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px));
   --app-safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-inset-bottom, 0px));
 }
-.app-shell {height:var(--tg-viewport-stable-height, 100dvh);max-height:none;
+.app-shell {height:var(--tg-viewport-stable-height, 100dvh);max-height:none;max-width:none;border-radius:0;
   padding:calc(var(--app-safe-top) + var(--tg-content-safe-area-inset-top, 0px))
   max(0px, var(--tg-safe-area-inset-right, 0px))
   calc(var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom, 0px))
@@ -1622,7 +1622,7 @@
   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px;
   padding-top:8px;border-top:1px solid rgba(255,255,255,.14);}
 .card-balance-label {grid-column:1;grid-row:1;text-align:left;}
-.card-balance-value {grid-column:1;grid-row:2;text-align:left;overflow-wrap:anywhere;line-height:1.15;font-variant-numeric:tabular-nums;}
+.card-balance-value {grid-column:1;grid-row:2;text-align:left;white-space:nowrap;overflow-wrap:normal;line-height:1.15;font-variant-numeric:tabular-nums;}
 .card-balance-token {grid-column:2;grid-row:1 / 3;max-width:100%;white-space:normal;}
 .global-rank-block {grid-column:1 / -1;grid-row:5;min-width:0;margin-top:2px!important;padding:9px 10px;}
 .global-rank-top-row {display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;}
@@ -1644,7 +1644,7 @@ button:disabled {cursor:default;}
 .tap-metric {min-width:0;overflow-wrap:anywhere;}
 .streak-row {display:grid;grid-template-columns:minmax(0,1fr);gap:6px;}
 .streak-detail {display:grid;grid-template-columns:minmax(40px,1fr) auto;gap:8px;align-items:center;min-width:0;}
-.streak-meter {width:100%;max-width:160px;}
+.streak-meter {width:100%;max-width:none;}
 #streakDaysText {white-space:nowrap;font-size:13px;}
 #streakSubText {grid-column:1 / -1;min-width:0;line-height:1.4;}
 .bottom-nav {position:relative;bottom:auto;flex-shrink:0;margin:0 14px 8px;min-height:58px;}
@@ -1704,8 +1704,10 @@ button:disabled {cursor:default;}
 }
 .card-pill span{font-size:11px!important;padding:5px 8px!important}
 .card-balance-col{
-  flex:0 0 132px!important;
-  max-width:132px!important;
+  width:100%;
+  justify-self:stretch;
+  flex:initial!important;
+  max-width:none!important;
 }
 .launch-boost-pill{
   margin-top:6px;
@@ -2410,6 +2412,7 @@ let tg =
 function initializeTelegram() {
   tg = window.Telegram?.WebApp || null;
   if (!tg) return;
+  try { if (tg.isVersionAtLeast?.("8.0") && !tg.isFullscreen) tg.requestFullscreen?.(); } catch (_) {}
   for (const [method, arg] of [["ready"], ["expand"], ["setHeaderColor", "#050816"], ["setBackgroundColor", "#050816"]]) {
     try { if (typeof tg[method] === "function") tg[method](arg); } catch (_) {}
   }
@@ -4008,23 +4011,52 @@ if (rejected > 0) {
   }
 }
 
-// Owner testing uses fresh, individually confirmed packets. Historical queued
-// taps remain untouched, so re-enabling testing cannot replay an old backlog.
-async function runRecoveryTap() {
+// Isolated owner queue: never replay the historical public tap queue.
+function recoveryQueueKey() {
+  return "jigcoin_owner_taps_v2_" + String(tg?.initDataUnsafe?.user?.id || "unknown");
+}
+function readRecoveryQueue() {
+  return safeParseJSON(appStorage.getItem(recoveryQueueKey()), null) || {pending:0,packet:null};
+}
+function saveRecoveryQueue(q) {
+  return appStorage.setItem(recoveryQueueKey(), JSON.stringify(q));
+}
+async function runRecoveryTap(addTap = true) {
+  let q = readRecoveryQueue();
+  if (addTap) {
+    if (q.pending + (q.packet?.count || 0) >= state.energy) {
+      showToast("Waiting for queued taps to confirm, or energy to refill."); return;
+    }
+    q.pending++;
+    if (!saveRecoveryQueue(q)) { showToast("Cannot save taps on this device."); return; }
+  }
   if (window.__recoveryTapBusy) return;
   window.__recoveryTapBusy = true;
-  const packet = window.__recoveryTapPacket || {packet_id:makePacketId(),count:1};
-  window.__recoveryTapPacket = packet;
   try {
-    const result = await apiPost("/api/tapPacket",packet);
-    if (!result?.ok) throw new Error(result?.error || result?.reason || "TAP_NOT_CONFIRMED");
-    window.__recoveryTapPacket = null;
-    applyBackendState(result); render(); updateTaskCardStates();
-  } catch (_) { showToast("Tap not confirmed yet. Tap again to safely retry."); }
+    while (true) {
+      q = readRecoveryQueue();
+      if (!q.packet) {
+        if (!q.pending) break;
+        const count = Math.min(20, q.pending);
+        q.packet = {packet_id:makePacketId(),count}; q.pending -= count;
+        if (!saveRecoveryQueue(q)) throw new Error("QUEUE_SAVE_FAILED");
+      }
+      const result = await apiPost("/api/tapPacket",q.packet);
+      if (!result?.ok) throw new Error(result?.error || "TAP_NOT_CONFIRMED");
+      // Read again because additional presses may have queued during the request.
+      q = readRecoveryQueue(); q.packet = null;
+      if (!saveRecoveryQueue(q)) throw new Error("QUEUE_SAVE_FAILED");
+      applyBackendState(result); render(); updateTaskCardStates();
+    }
+  } catch (_) { showToast("Taps saved on this device. Tap again to retry confirmation."); }
   finally { window.__recoveryTapBusy = false; }
 }
+window.addEventListener("jigcoin:account-ready", () => {
+  if (window.__lastState?.recovery_gameplay) void runRecoveryTap(false);
+});
 
 function onTapPress(ev) {
+  if (ev?.type === "click" && Date.now() - __lastPointerTapAt < 450) return;
   if (!accountIsReady() || !Number.isFinite(state.bal)) {
     showToast("Your account must finish syncing before you can tap.");
     return;
