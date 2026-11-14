@@ -2316,7 +2316,7 @@
       </div>
 
       <div class="vip-box" style="opacity:.8;">
-        Tip: If a quest sends you to a partner site, come back here and tap <b>Claim</b>.
+        Claim becomes available after your ad reward is confirmed. Each claimed quest returns in 24 hours.
       </div>
     </div>
   </div>
@@ -4562,6 +4562,51 @@ function fmtPayout(m) {
   return `+${amt.toLocaleString("en-GB")}`;
 }
 
+// Loaded on an explicit rewarded-quest action, once per page. The private
+// postback secret is never present in this client or its API responses.
+async function ensureMonetagSDK() {
+  if (typeof window.show_12257359 === "function") return;
+  if (!window.__monetagSDKPromise) {
+    window.__monetagSDKPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://libtl.com/sdk.js";
+      script.dataset.zone = "12257359";
+      script.dataset.sdk = "show_12257359";
+      script.async = true;
+      const timer = setTimeout(() => { script.remove(); reject(new Error("AD_SDK_UNAVAILABLE")); }, 10000);
+      script.onload = () => {
+        clearTimeout(timer);
+        if (typeof window.show_12257359 === "function") resolve();
+        else { script.remove(); reject(new Error("AD_SDK_UNAVAILABLE")); }
+      };
+      script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error("AD_SDK_UNAVAILABLE")); };
+      document.head.appendChild(script);
+    }).catch(error => { window.__monetagSDKPromise = null; throw error; });
+  }
+  await window.__monetagSDKPromise;
+}
+
+async function runMonetagQuest(code) {
+  await ensureMonetagSDK();
+  const attempt = await apiPost("/api/mission/start", { code });
+  if (!attempt?.ok) throw new Error(attempt?.error || "AD_REWARDS_UNAVAILABLE");
+  if (attempt.provider !== "monetag" || String(attempt.zone_id) !== "12257359" ||
+      !/^[a-f0-9-]{36}$/.test(attempt.ymid || "") || attempt.request_var !== code) {
+    throw new Error("AD_REWARDS_UNAVAILABLE");
+  }
+  window.Telegram?.WebApp?.ready();
+  await window.show_12257359({ ymid: attempt.ymid, requestVar: attempt.request_var });
+  // A resolved SDK promise means the ad closed, not that a reward was earned.
+  // Only a subsequent backend response can enable Claim.
+  showToast("Checking your ad reward…");
+}
+
+function sponsorHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[ch]));
+}
+
 function renderSponsorMissions(missions) {
   // clear any existing countdown tick
   if (window.__sponsorCountdownTick) {
@@ -4612,7 +4657,16 @@ function renderSponsorMissions(missions) {
       let btnAction = "start";
       let remaining = 0; // used by countdown ticker
 
-      if (cdRemaining > 0 || status === "cooldown") {
+      if (status === "unavailable") {
+        btnText = "Unavailable";
+        btnDisabled = "disabled";
+        btnAction = "none";
+      } else if (status === "pending") {
+        remaining = Math.max(1, Number(m.retry_after_seconds || 60));
+        btnText = "Confirming…";
+        btnDisabled = "disabled";
+        btnAction = "none";
+      } else if (cdRemaining > 0 || status === "cooldown") {
         remaining = cdRemaining;
         btnText = `Available in ${msToCountdown(remaining * 1000)}`;
         btnDisabled = "disabled";
@@ -4641,12 +4695,12 @@ function renderSponsorMissions(missions) {
       return `
         <div class="withdraw-row" style="align-items:flex-start; gap:12px;">
           <div style="flex:1;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px;"><div style="font-weight:700;">${m.title || m.code}</div><div class="pill ${status==="claimable" ? "good" : (status==="wait" ? "warn" : (status==="cooldown" ? "cooldown" : "dim"))}">${status==="claimable" ? "Claimable" : (status==="wait" ? "Waiting" : (status==="cooldown" ? "Cooldown" : "Available"))}</div></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px;"><div style="font-weight:700;">${sponsorHtml(m.title || m.code)}</div><div class="pill ${status==="claimable" ? "good" : (status==="waiting" ? "warn" : (status==="cooldown" ? "cooldown" : "dim"))}">${status==="unavailable" ? "Unavailable" : status==="pending" ? "Confirming" : status==="claimable" ? "Claimable" : (status==="waiting" ? "Waiting" : (status==="cooldown" ? "Cooldown" : "Available"))}</div></div>
             <div style="font-size:11px; margin-bottom:2px; color:rgba(250,204,21,0.92);">${tierLabel}</div>
-            <div style="opacity:.85; font-size:12px; line-height:1.3;">${cleanDesc}</div>
+            <div style="opacity:.85; font-size:12px; line-height:1.3;">${sponsorHtml(cleanDesc)}</div>
             <div style="margin-top:6px; font-size:12px; opacity:.85;">${payout ? payout : ""}</div>
           </div>
-          <button class="btn small" data-mcode="${m.code}" data-url="${m.url || ""}" data-action="${btnAction}" data-status="${status || ""}" data-wait="${Number(m.wait_seconds_remaining||m.wait_seconds||0)}" data-cooldown="${Number(m.cooldown_remaining_seconds||m.cooldown_seconds||0)}" data-remaining="${remaining}" data-mode="${(cdRemaining>0 || status==="cooldown") ? "cooldown" : "claim"}" ${btnDisabled}>
+          <button class="btn small" data-mcode="${sponsorHtml(m.code)}" data-provider="${sponsorHtml(m.provider || "")}" data-attempt="${sponsorHtml(m.attempt_id || "")}" data-url="${sponsorHtml(m.url || "")}" data-action="${btnAction}" data-status="${status || ""}" data-deadline="${btnAction === "none" && status !== "unavailable" ? Number(m.countdown_as_of_ms ?? Date.now()) + remaining * 1000 : 0}" data-mode="${status==="pending" ? "pending" : (cdRemaining>0 || status==="cooldown") ? "cooldown" : "claim"}" ${btnDisabled}>
             ${btnText}
           </button>
         </div>
@@ -4655,40 +4709,47 @@ function renderSponsorMissions(missions) {
     .join("");
 
 
-  // start live countdown ticker (updates button labels without re-fetch)
-  const updateCountdowns = () => {
-    const now = Date.now();
-    sponsorList.querySelectorAll('button[data-mcode]').forEach((btn) => {
-      const status = btn.getAttribute("data-status") || "";
-      const wait = Number(btn.getAttribute("data-wait") || "0");
-      const cd = Number(btn.getAttribute("data-cooldown") || "0");
-      let text = btn.textContent.trim();
-      // If backend gives remaining seconds, decrement locally
-      if (status === "wait" && wait > 0) {
-        const next = Math.max(0, wait - 1);
-        btn.setAttribute("data-wait", String(next));
-        btn.textContent = next > 0 ? `Claim in ${msToCountdown(next * 1000)}` : "Claim";
-        btn.disabled = next > 0;
-        btn.classList.toggle("dim", next > 0);
-      } else if (status === "cooldown" && cd > 0) {
-        const next = Math.max(0, cd - 1);
-        btn.setAttribute("data-cooldown", String(next));
-        btn.textContent = next > 0 ? `Available in ${msToCountdown(next * 1000)}` : "Start";
-        btn.disabled = next > 0;
-        btn.classList.toggle("dim", next > 0);
-      }
-    });
-  };
-
-  updateCountdowns();
-  window.__sponsorCountdownTick = setInterval(updateCountdowns, 1000);
-
   sponsorList.querySelectorAll("button[data-mcode]").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const code = btn.getAttribute("data-mcode");
       const action = btn.getAttribute("data-action");
-      if (!code || action === "none") return;
+      if (!code || action === "none" || btn.disabled) return;
+
+      if (btn.getAttribute("data-provider") === "monetag") {
+        btn.disabled = true;
+        btn.textContent = action === "start" ? "Loading ad…" : "Claiming…";
+        try {
+          if (action === "start") {
+            await runMonetagQuest(code);
+          } else if (action === "claim") {
+            const result = await apiPost("/api/mission/complete", {
+              code, attempt_id: btn.getAttribute("data-attempt"),
+            });
+            if (!result?.ok) throw new Error(result?.error || "REWARD_SERVICE_UNAVAILABLE");
+            showToast(result.already_claimed ? "This reward is already in your balance." : "+200 coins claimed!");
+            await refreshBalance();
+          }
+        } catch (error) {
+          const message = {
+            AD_CONFIRMATION_PENDING: "Your ad is still being confirmed. Check back shortly.",
+            AD_RETRY_LATER: "Please wait briefly before trying another ad.",
+            MISSION_COOLDOWN: "This quest is cooling down.",
+            REWARD_ALREADY_READY: "Your reward is ready to claim.",
+            AD_REWARDS_UNAVAILABLE: "Rewarded ads are temporarily unavailable.",
+          }[error.message];
+          showToast(message || "The ad or reward could not be confirmed. Please check the quest status.");
+        } finally {
+          try { await loadSponsorMissions(true); }
+          catch (_) {
+            // Do not leave an apparently ready action after an unknown outcome.
+            btn.disabled = true;
+            btn.textContent = "Reopen quests to retry";
+            showToast("Could not refresh quests. Close and reopen this panel to retry.");
+          }
+        }
+        return;
+      }
 
       if (action === "start") {
         // Open link immediately (keeps user gesture so Telegram/webview does not block it)
@@ -4728,13 +4789,9 @@ function renderSponsorMissions(missions) {
         } else if (!immediateUrl && !res.redirect_url) {
           showToast("Partner link coming soon.");
         }
-        // optimistic UI: mark as started
-        const updated = (window.__sponsorMissions || []).map((m) =>
-          m.code === code ? { ...m, status: "started" } : m
-        );
-        window.__sponsorMissions = updated;
-        renderSponsorMissions(updated);
-        showToast("Quest started. Come back to claim.");
+        // Use the server's waiting/claimable state; starting is not a completed ad.
+        await loadSponsorMissions(true);
+        showToast("Quest started. Check the quest for its claim status.");
         return;
       }
 
@@ -4824,48 +4881,82 @@ await loadSponsorMissions(true);
     });
   });
 
-  // Live countdown tick for cooldown buttons
-  window.__sponsorCountdownTick = setInterval(async () => {
+  // One clock per rendered sheet. Wall-clock deadlines survive suspended mobile
+  // timers. Expiry requests authoritative state; it never authorizes a reward.
+  let refreshPending = false;
+  let retryAfter = 0;
+  let nextConfirmationPoll = Date.now() + 5000;
+  const updateCountdowns = async (allowRefresh = true) => {
+    const now = Date.now();
     let anyExpired = false;
-    sponsorList.querySelectorAll("button[data-remaining]").forEach((b) => {
-      const rem = Number(b.getAttribute("data-remaining") || 0);
-      if (rem > 0) {
-        const next = rem - 1;
-        b.setAttribute("data-remaining", String(next));
-        if (next > 0) {
-          {
-          const mode = b.getAttribute("data-mode") || "claim";
-          const prefix = mode === "cooldown" ? "Available in " : "Claim in ";
-          b.textContent = `${prefix}${msToCountdown(next * 1000)}`;
-        }
-        } else {
-          anyExpired = true;
-        }
+    let confirming = false;
+    sponsorList.querySelectorAll("button[data-deadline]").forEach((btn) => {
+      const deadline = Number(btn.getAttribute("data-deadline") || 0);
+      if (!deadline) return;
+      const remaining = Math.max(0, Math.ceil((deadline - now) / 1000));
+      btn.disabled = true;
+      btn.setAttribute("data-action", "none");
+      if (btn.getAttribute("data-mode") === "pending") {
+        confirming = true;
+        btn.textContent = "Confirming…";
+      } else if (remaining > 0) {
+        const prefix = btn.getAttribute("data-mode") === "cooldown"
+          ? "Available in " : "Claim in ";
+        btn.textContent = `${prefix}${msToCountdown(remaining * 1000)}`;
+      } else {
+        btn.textContent = "Checking…";
+        anyExpired = true;
       }
     });
-    if (anyExpired) {
-      await loadSponsorMissions(true);
+    if (allowRefresh && (anyExpired || (confirming && now >= nextConfirmationPoll)) && !refreshPending && now >= retryAfter) {
+      refreshPending = true;
+      nextConfirmationPoll = now + 5000;
+      try {
+        await loadSponsorMissions(true);
+      } catch (_err) {
+        // Keep the claim disabled when the server cannot confirm its status.
+        retryAfter = Date.now() + 5000;
+      } finally {
+        refreshPending = false;
+      }
     }
-  }, 1000);
+  };
+  if ([...sponsorList.querySelectorAll('button[data-deadline]')].some(btn => Number(btn.getAttribute('data-deadline')) > 0)) {
+    window.__sponsorCountdownTick = setInterval(() => updateCountdowns(), 1000);
+    void updateCountdowns(false);
+  }
+
 }
 
 async function loadSponsorMissions(forceRefresh = false) {
   if (!forceRefresh && Array.isArray(window.__sponsorMissions)) {
-    renderSponsorMissions(window.__sponsorMissions);
+    if (sponsorSheet.classList.contains("show")) renderSponsorMissions(window.__sponsorMissions);
     return window.__sponsorMissions;
   }
 
   const res = await apiPost("/api/mission/list", { kind: "sponsor" });
-  const missions = (res && res.ok && Array.isArray(res.missions)) ? res.missions : [];
+  if (!res || !res.ok || !Array.isArray(res.missions)) {
+    throw new Error("Could not refresh sponsor quest status");
+  }
+  const receivedAt = Date.now();
+  const missions = res.missions.map((mission) => ({
+    ...mission,
+    countdown_as_of_ms: receivedAt,
+  }));
 
   window.__sponsorMissions = missions;
-  renderSponsorMissions(missions);
+  // A response arriving after Close must not restart a hidden countdown.
+  if (sponsorSheet.classList.contains("show")) renderSponsorMissions(missions);
   return missions;
 }
 
 async function handleSponsorQuests() {
   openSponsorSheet();
-  await loadSponsorMissions(true);
+  try {
+    await loadSponsorMissions(true);
+  } catch (_err) {
+    showToast("Could not load quest status. Please try again.");
+  }
 }
 
 async function refreshVipStatus() {
