@@ -10,7 +10,7 @@
   />
 
   <!-- Telegram WebApp JS – needed so window.Telegram exists -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script defer src="https://telegram.org/js/telegram-web-app.js" onload="window.dispatchEvent(new Event('jigcoin:telegram-ready'))"></script>
 
   <style>
     * {
@@ -1595,6 +1595,65 @@
   padding:4px 8px;
   white-space:nowrap;
 }
+/* Reliable mobile layout: one scroll surface, full-width rank, reserved navigation. */
+:root {
+  --app-safe-top: max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px));
+  --app-safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-inset-bottom, 0px));
+}
+.app-shell {height:var(--tg-viewport-stable-height, 100dvh);max-height:none;
+  padding:calc(var(--app-safe-top) + var(--tg-content-safe-area-inset-top, 0px))
+  max(0px, var(--tg-safe-area-inset-right, 0px))
+  calc(var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom, 0px))
+  max(0px, var(--tg-safe-area-inset-left, 0px));}
+.main {min-height:0;overflow-x:hidden;overflow-y:auto;padding:0 0 16px!important;overscroll-behavior-y:contain;}
+.top-bar {padding:8px 14px 4px;gap:8px;flex-wrap:wrap;}
+.header {padding:4px 14px 0;}
+.header .card {display:grid;grid-template-columns:32px minmax(0, 1fr);gap:8px;
+  padding:14px!important;align-items:center;}
+.card-main {display:contents;}
+.header .card > *, .card-main > * {position:relative;z-index:1;}
+.tap-btn-main:disabled {filter:saturate(.35);}
+.card-badge {grid-column:1;grid-row:1;align-self:center;}
+.card-title {grid-column:2;grid-row:1;}
+.card-subtitle {grid-column:1 / -1;grid-row:2;min-width:0;}
+.card-pill {grid-column:1 / -1;grid-row:3;flex-wrap:wrap;max-width:100%;margin:0;}
+.card-pill span {white-space:normal;}
+.card-balance-col {grid-column:1 / -1;grid-row:4;max-width:none!important;min-width:0;flex:initial!important;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.14);}
+.card-balance-label {grid-column:1;grid-row:1;text-align:left;}
+.card-balance-value {grid-column:1;grid-row:2;text-align:left;overflow-wrap:anywhere;line-height:1.15;font-variant-numeric:tabular-nums;}
+.card-balance-token {grid-column:2;grid-row:1 / 3;max-width:100%;white-space:normal;}
+.global-rank-block {grid-column:1 / -1;grid-row:5;min-width:0;margin-top:2px!important;padding:9px 10px;}
+.global-rank-top-row {display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;}
+.global-rank-label {white-space:normal;letter-spacing:.10em;}
+.global-rank-value {overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
+.global-rank-tier,.global-rank-next {white-space:normal;overflow:visible;text-overflow:clip;text-align:left;line-height:1.4;}
+.rank-bar {gap:8px;flex-wrap:wrap;border-radius:12px;}
+.rank-label,.rank-points {min-width:0;overflow-wrap:anywhere;}
+.account-status {margin:10px 14px;padding:12px;border:1px solid #475569;border-radius:14px;
+  background:#111c31;display:flex;gap:10px;align-items:center;font-size:12px;}
+.account-status[hidden] {display:none;}
+.account-status p {margin:4px 0 0;line-height:1.45;color:#cbd5e1;}
+.account-status button {flex-shrink:0;min-height:44px;padding:8px 12px;border:1px solid #64748b;
+  border-radius:10px;background:#243d70;color:white;cursor:pointer;}
+.account-content {padding:6px 14px 12px;}
+.account-content[inert] .tap-card {opacity:.7;}
+button:disabled {cursor:default;}
+.tap-metrics {min-width:0;}
+.tap-metric {min-width:0;overflow-wrap:anywhere;}
+.streak-row {display:grid;grid-template-columns:minmax(0,1fr);gap:6px;}
+.streak-detail {display:grid;grid-template-columns:minmax(40px,1fr) auto;gap:8px;align-items:center;min-width:0;}
+.streak-meter {width:100%;max-width:160px;}
+#streakDaysText {white-space:nowrap;font-size:13px;}
+#streakSubText {grid-column:1 / -1;min-width:0;line-height:1.4;}
+.bottom-nav {position:relative;bottom:auto;flex-shrink:0;margin:0 14px 8px;min-height:58px;}
+.fab-shop {display:none;}
+.toast {bottom:calc(82px + var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom, 0px));
+  max-width:calc(100vw - 32px);box-sizing:border-box;}
+.sheet {padding-bottom:calc(16px + var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom, 0px));}
+@media (prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;}}
+
 </style>
 
 <style>
@@ -1672,6 +1731,7 @@
 </head>
 <body>
   <div class="app-shell">
+    <div class="main" id="mainScroll">
     <div class="top-bar">
       <div class="top-bar-left">
         <div class="top-dot-menu">
@@ -1704,27 +1764,27 @@
           <span class="card-balance-value" id="balanceText">…</span>
           <span class="card-balance-token">
             <span>🌕</span>
-            <span id="rankName">Recruit</span>
+            <span id="rankName">—</span>
           </span>
 
+        </div>
           <!-- Global Rank block -->
           <div class="global-rank-block">
             <div class="global-rank-top-row">
               <span class="global-rank-label">Global rank</span>
-              <span class="global-rank-value" id="globalRankValue">#–</span>
+              <span class="global-rank-value" id="globalRankValue">—</span>
             </div>
             <div class="global-rank-bar">
               <div class="global-rank-fill" id="globalRankFill"></div>
             </div>
             <div class="global-rank-tier" id="globalRankTierText">
-              Not ranked yet — start farming to enter the global ladder.
+              Waiting for your account…
             </div>
             <div class="global-rank-next" id="globalRankNextText">
-              Others are climbing — play to join the leaderboard.
+              Rank is confirmed by the server.
             </div>
           </div>
           <!-- END Global Rank block -->
-        </div>
       </div>
 
 
@@ -1744,12 +1804,16 @@
           <span id="rankPointsText">…</span>
         </div>
         <div class="rank-points">
-          Next rank at <span id="nextRankPointsText">10,000</span> pts
+          Next rank at <span id="nextRankPointsText">—</span> pts
         </div>
       </div>
     </div>
 
-    <div class="main">
+    <div class="account-status" id="accountStatus" role="status" aria-live="polite">
+      <div><strong id="accountStatusTitle">Loading your account</strong><p id="accountStatusBody">Connecting to your saved balance and global rank…</p></div>
+      <button id="accountRetry" type="button" hidden>Retry</button>
+    </div>
+    <div class="account-content" id="accountContent" inert>
       <div class="tap-card">
         <div class="tap-card-header">
           <div class="tap-card-left">
@@ -1778,9 +1842,9 @@
         </div>
 
         <div class="tap-btn-wrap">
-          <button class="tap-btn-main" id="tapBtn">
+          <button class="tap-btn-main" id="tapBtn" disabled>
             <div class="tap-btn-ring"></div>
-            <div class="tap-btn-label">Tap</div>
+            <div class="tap-btn-label" id="tapButtonLabel">Loading</div>
           </button>
         </div>
 
@@ -1813,7 +1877,7 @@
             <span>🔥</span>
             <span>Daily streak</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
+          <div class="streak-detail">
             <div class="streak-meter">
               <div class="streak-meter-fill" id="streakMeterFill"></div>
             </div>
@@ -1831,10 +1895,10 @@
           You’re early. Protect momentum, climb the rankings, and unlock perks.
         </div>
 
-<div class="starter-banner" id="starterBanner">
-  <div class="starter-banner-title">Starter boost almost unlocked</div>
+<div class="starter-banner" id="starterBanner" style="display:none">
+  <div class="starter-banner-title">Your next points milestone</div>
   <div class="starter-banner-sub">
-    Complete one quick quest now to lock in today’s bonus and protect your streak.
+    Complete eligible quests to earn points and move toward your next milestone.
   </div>
   <div class="starter-banner-progress">
     <div class="starter-banner-fill" id="starterBannerFill"></div>
@@ -1939,6 +2003,8 @@
         <span class="fab-label">Boost</span>
       </button>
 
+    </div>
+    </div>
       <div class="bottom-nav">
         <button class="nav-btn active" id="tabFarm">
           <div class="nav-icon">🏠</div>
@@ -1957,7 +2023,6 @@
           <span>Vault</span>
         </button>
       </div>
-    </div>
   </div>
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
@@ -2323,19 +2388,27 @@
   </div>
 
 <script>
-const tg =
+// Storage errors must not prevent a saved account loading. Queue writes are
+// checked separately before optimistic tapping so a private/full store loses no taps.
+const appStorage = {
+  getItem(key) { try { return window.localStorage.getItem(key); } catch (_) { return null; } },
+  setItem(key, value) { try { window.localStorage.setItem(key, value); return true; } catch (_) { return false; } },
+  removeItem(key) { try { window.localStorage.removeItem(key); } catch (_) {} },
+};
+let tg =
   window.Telegram && window.Telegram.WebApp
     ? window.Telegram.WebApp
     : null;
 
-if (tg) {
-  tg.expand();
-  if (typeof tg.requestFullscreen === "function") {
-    tg.requestFullscreen();
+function initializeTelegram() {
+  tg = window.Telegram?.WebApp || null;
+  if (!tg) return;
+  for (const [method, arg] of [["ready"], ["expand"], ["setHeaderColor", "#050816"], ["setBackgroundColor", "#050816"]]) {
+    try { if (typeof tg[method] === "function") tg[method](arg); } catch (_) {}
   }
-  tg.setHeaderColor("#050816");
-  tg.setBackgroundColor("#050816");
 }
+window.addEventListener("jigcoin:telegram-ready", initializeTelegram);
+initializeTelegram();
 
 // Signed mini-app payload from Telegram (for backend)
 // initData is read dynamically inside apiPost() for iOS Telegram reliability.
@@ -2349,7 +2422,7 @@ const telegramIdFromWebApp =
 // Dev / browser fallback ID
 let fallbackTelegramId = null;
 if (!telegramIdFromWebApp) {
-  const stored = localStorage.getItem("ae_dev_telegram_id");
+  const stored = appStorage.getItem("ae_dev_telegram_id");
   if (stored) {
     const parsed = Number(stored);
     if (!Number.isNaN(parsed) && parsed > 0) {
@@ -2360,7 +2433,7 @@ if (!telegramIdFromWebApp) {
   if (!fallbackTelegramId) {
     fallbackTelegramId =
       1000000000 + Math.floor(Math.random() * 9000000000);
-    localStorage.setItem(
+    appStorage.setItem(
       "ae_dev_telegram_id",
       String(fallbackTelegramId)
     );
@@ -2388,7 +2461,7 @@ function getEffectiveTelegramId() {
   } catch (e) {}
 
   try {
-    const stored = localStorage.getItem("telegram_id");
+    const stored = appStorage.getItem("telegram_id");
     if (stored) return stored;
   } catch (e) {}
 
@@ -2509,10 +2582,10 @@ const FALLBACK_REF_LINK = "https://t.me/JIGCOINBOT";
 // Stable client id for anti-abuse / device linking (frontend-only; backend can start using anytime)
 const CLIENT_ID_KEY = "ae_client_id";
 function getClientId() {
-  let id = localStorage.getItem(CLIENT_ID_KEY);
+  let id = appStorage.getItem(CLIENT_ID_KEY);
   if (!id) {
     id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("cid_" + Math.random().toString(16).slice(2) + Date.now().toString(16));
-    localStorage.setItem(CLIENT_ID_KEY, id);
+    appStorage.setItem(CLIENT_ID_KEY, id);
   }
   return id;
 }
@@ -2652,7 +2725,7 @@ function formatNumber(n) {
 }
 
 function getTodayString() {
-  return new Date().toDateString();
+  return new Date().toISOString().slice(0, 10);
 }
 
 const rankConfig = [
@@ -2665,9 +2738,8 @@ const rankConfig = [
 ];
 
 const state = {
-  // bal starts as null so we never briefly show a misleading “0” while
-  // waiting for the first backend state. We render a cached value (if any)
-  // immediately, then reconcile with backend as soon as it arrives.
+  // A new session starts without account numbers; only a server response
+  // confirms the balance, rank, energy and streak.
   bal: null,
   energy: maxEnergy,
   today: 0,
@@ -2701,7 +2773,7 @@ const onboardingState = {
 
 function isOnboardingDoneLocal() {
   try {
-    return localStorage.getItem(ONBOARDING_LOCAL_KEY) === "1";
+    return appStorage.getItem(ONBOARDING_LOCAL_KEY) === "1";
   } catch (e) {
     return false;
   }
@@ -2709,7 +2781,7 @@ function isOnboardingDoneLocal() {
 
 function markOnboardingDoneLocal() {
   try {
-    localStorage.setItem(ONBOARDING_LOCAL_KEY, "1");
+    appStorage.setItem(ONBOARDING_LOCAL_KEY, "1");
   } catch (e) {
     // ignore storage failures
   }
@@ -2825,14 +2897,14 @@ function saveStateLocal(s) {
   // Retain the local UI cache; a fresh server response controls the balance
   // on each open, so cached optimistic taps cannot become saved coins.
   if (Number.isFinite(s.bal)) {
-    localStorage.setItem(BALANCE_KEY, String(s.bal));
+    appStorage.setItem(BALANCE_KEY, String(s.bal));
   }
-  localStorage.setItem(ENERGY_KEY, String(s.energy));
-  localStorage.setItem(TODAY_KEY, String(s.today));
-  localStorage.setItem(LAST_DAY_KEY, s.lastDay || "");
+  appStorage.setItem(ENERGY_KEY, String(s.energy));
+  appStorage.setItem(TODAY_KEY, String(s.today));
+  appStorage.setItem(LAST_DAY_KEY, s.lastDay || "");
 
-  localStorage.setItem(STREAK_DAYS_KEY, String(s.streakDays || 0));
-  localStorage.setItem(LAST_CHECKIN_KEY, s.lastCheckin || "");
+  appStorage.setItem(STREAK_DAYS_KEY, String(s.streakDays || 0));
+  appStorage.setItem(LAST_CHECKIN_KEY, s.lastCheckin || "");
 }
 
 function loadStateLocal() {
@@ -2845,13 +2917,12 @@ function loadStateLocal() {
   state.today = 0;
   state.lastDay = todayStr;
 
-  // Keep ONLY streak data locally
-  const savedStreak = parseInt(localStorage.getItem(STREAK_DAYS_KEY) || "0", 10);
-  const savedLastCheckin = localStorage.getItem(LAST_CHECKIN_KEY) || "";
-
-  state.streakDays = isNaN(savedStreak) ? 0 : savedStreak;
-  state.lastCheckin = savedLastCheckin;
+  state.streakDays = 0;
+  state.lastCheckin = "";
+  state.globalRank = null;
+  state.globalTotal = null;
 }
+
 
 function findRank(bal) {
   let current = rankConfig[0];
@@ -2867,105 +2938,96 @@ function findRank(bal) {
   return current;
 }
 
-// Global rank visuals (local + backend)
+// Global position must come from the server; a balance cannot estimate it.
 function updateGlobalRankVisuals() {
   if (!globalRankValueEl || !globalRankFillEl || !globalRankNextTextEl) return;
-
-  const balance = Math.max(0, Number(state.bal || 0));
-  let tierPercentile = null;
-
-  const milestones = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
-  let nextMilestone = milestones[milestones.length - 1];
-  for (const m of milestones) {
-    if (balance < m) {
-      nextMilestone = m;
-      break;
-    }
-  }
-
-  const hasBackendRank =
-    typeof state.globalRank === "number" &&
-    state.globalRank > 0 &&
-    typeof state.globalTotal === "number" &&
-    state.globalTotal > 0;
-
-  if (hasBackendRank) {
-    const rank = Math.max(1, Math.floor(state.globalRank));
-    const total = Math.max(rank, Math.floor(state.globalTotal));
-    globalRankValueEl.textContent = `#${formatNumber(rank)}`;
-
-    const percentile = 1 - rank / total;
-    const clamped = Math.max(0, Math.min(1, percentile));
-    tierPercentile = clamped;
-    globalRankFillEl.style.transform = `scaleX(${clamped})`;
-  } else {
-    const totalPlayersApprox = 1000000;
-    const cappedBalance = Math.max(0, Math.min(balance, totalPlayersApprox));
-    const percentile = 1 - cappedBalance / totalPlayersApprox;
-    const pseudoRank = Math.max(1, Math.round(percentile * totalPlayersApprox));
-    tierPercentile = Math.max(0, Math.min(1, percentile));
-    globalRankValueEl.textContent = `#${formatNumber(pseudoRank)}`;
-
-    const fill = Math.max(0, Math.min(1, balance / nextMilestone));
-    globalRankFillEl.style.transform = `scaleX(${fill})`;
-  }
-
-  if (balance === 0) {
-    globalRankNextTextEl.textContent = "Others are climbing — play to join the leaderboard.";
-  } else if (balance >= milestones[milestones.length - 1]) {
-    globalRankNextTextEl.textContent = "You’re among the top players — stay active to hold your spot.";
-  } else {
-    const diff = nextMilestone - balance;
-    globalRankNextTextEl.textContent = `+${formatNumber(diff)} pts to next milestone`;
-  }
-
+  const rank = state.globalRank, total = state.globalTotal;
+  const valid = Number.isSafeInteger(rank) && rank > 0 && Number.isSafeInteger(total) && total >= rank;
+  globalRankValueEl.textContent = valid ? `#${formatNumber(rank)}` : "—";
+  globalRankFillEl.style.transform = `scaleX(${valid ? (total === 1 ? 1 : (total-rank)/(total-1)) : 0})`;
   if (globalRankTierTextEl) {
-    if (balance === 0 || tierPercentile === null) {
-      globalRankTierTextEl.textContent = "Not ranked yet — start farming to enter the global ladder.";
-    } else {
-      const topPct = Math.max(
-        1,
-        Math.min(99, Math.round((1 - tierPercentile) * 100))
-      );
-      let msg;
-      if (topPct <= 1) {
-        msg = "Top 1% globally";
-      } else if (topPct <= 5) {
-        msg = "Top 5% globally";
-      } else if (topPct <= 10) {
-        msg = "Top 10% globally";
-      } else if (topPct <= 25) {
-        msg = "Top 25% globally";
-      } else {
-        msg = "Outside top 25% — climb to improve your bracket.";
-      }
-      globalRankTierTextEl.textContent = msg;
+    globalRankTierTextEl.textContent = valid ? `Position ${formatNumber(rank)} of ${formatNumber(total)} players`
+      : accountIsReady() ? "Global rank is temporarily unavailable." : "Waiting for a confirmed global rank.";
+  }
+  globalRankNextTextEl.textContent = valid
+    ? (accountIsReady() ? "Based on the latest saved leaderboard." : "Last confirmed rank · reconnect to update.")
+    : "Your rank will appear when it is confirmed.";
+}
+
+function accountIsReady() {
+  return window.__accountPhase === "ready";
+}
+
+function setAccountPhase(phase) {
+  const previous = window.__accountPhase;
+  window.__accountPhase = phase;
+  const confirmed = Number.isFinite(state.bal);
+  const messages = {
+    loading: ["Loading your account", "Connecting to your saved balance and global rank…"],
+    connecting: ["Connecting to the server", "The server is taking longer to respond. We’ll keep trying automatically."],
+    maintenance: ["JigCoin is under maintenance", "Account updates and gameplay are temporarily paused. Try again shortly."],
+    offline: ["You’re offline", "Reconnect to load your saved account. We’ll retry when your connection returns."],
+    auth: ["Open JigCoin from Telegram", "Your Telegram session could not be verified. Close the mini app and open it again from the bot."],
+    error: ["Your account could not be refreshed", "Please retry. Gameplay is paused until your account is confirmed."],
+  };
+  const status = document.getElementById("accountStatus");
+  const title = document.getElementById("accountStatusTitle");
+  const body = document.getElementById("accountStatusBody");
+  const retry = document.getElementById("accountRetry");
+  const content = document.getElementById("accountContent");
+  if (status) status.hidden = phase === "ready";
+  if (title) title.textContent = (messages[phase] || messages.loading)[0];
+  if (body) body.textContent = (messages[phase] || messages.loading)[1] +
+    (confirmed && phase !== "ready" ? " Figures shown are from the last successful sync." : "");
+  if (retry) retry.hidden = phase === "ready" || phase === "loading";
+  if (content) content.inert = phase !== "ready";
+  for (const id of ["tabTasks", "tabFriends", "tabWithdraw"]) {
+    const button = document.getElementById(id);
+    if (button) button.disabled = phase !== "ready";
+  }
+  // An old open overlay must not hide a connection/maintenance message.
+  if (phase !== "ready") {
+    for (const sheet of document.querySelectorAll?.(".sheet.show") || []) sheet.classList.remove("show");
+    document.getElementById("sheetBackdrop")?.classList?.remove("show");
+    if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick = null; }
+    for (const id of ["fomoBackdrop", "fomoModal", "streakBackdrop", "streakRestoreModal"]) {
+      const el = document.getElementById(id); if (el) el.style.display = "none";
     }
+  }
+  if (phase === "ready" && previous !== "ready") {
+    window.dispatchEvent(new Event("jigcoin:account-ready"));
   }
 }
 
+
 function render() {
-  const balSafe = Number.isFinite(state.bal) ? Number(state.bal) : 0;
-  const balDisplay = Number.isFinite(state.bal) ? formatNumber(state.bal) : "…";
+  const confirmed = Number.isFinite(state.bal);
+  const balSafe = confirmed ? Number(state.bal) : 0;
+  const loading = !window.__accountPhase || ["loading", "connecting"].includes(window.__accountPhase);
+  const balDisplay = confirmed ? formatNumber(state.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
-  tapBtn.disabled = !Number.isFinite(state.bal) || window.__lastState?.recovery_test === true;
-  todayText.textContent = formatNumber(state.today);
+  tapBtn.disabled = !accountIsReady() || !confirmed || window.__lastState?.recovery_test === true;
+  const tapLabel = document.getElementById("tapButtonLabel");
+  if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Ad test" : "Tap";
+  todayText.textContent = confirmed ? formatNumber(state.today) : "—";
 
   // Points per tap (x2 when boost active)
   const effectivePerTap = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
   if (perTapText) {
-    perTapText.textContent = `+${effectivePerTap}`;
+    perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
   }
 
-  const energyPct = Math.max(0, Math.min(1, state.energy / maxEnergy));
+  const energyPct = confirmed ? Math.max(0, Math.min(1, state.energy / maxEnergy)) : 0;
   const energyFill = document.getElementById("energyFill");
   if (energyFill) {
     energyFill.style.transform = `scaleX(${energyPct})`;
   }
-  energyText.textContent = `${state.energy} / ${maxEnergy}`;
+  energyText.textContent = confirmed ? `${state.energy} / ${maxEnergy}` : "—";
   if (energySubText) {
-    if ((state.energy || 0) >= maxEnergy) {
+    if (!confirmed) {
+      energySubText.textContent = "Waiting for your account.";
+    } else if ((state.energy || 0) >= maxEnergy) {
       energySubText.textContent = "Full — now is the time to push.";
     } else if ((state.energy || 0) <= 0) {
       energySubText.textContent = "Empty — energy refills while you rest or via Boost Hub.";
@@ -2976,10 +3038,10 @@ function render() {
 
 
   const rank = findRank(balSafe);
-  rankNameEl.textContent = rank.name;
+  rankNameEl.textContent = confirmed ? rank.name : "—";
   rankPointsTextEl.textContent = balDisplay;
   const nextRankPoints = rank.max;
-  nextRankPointsTextEl.textContent = formatNumber(nextRankPoints);
+  nextRankPointsTextEl.textContent = confirmed ? formatNumber(nextRankPoints) : "—";
   const rankMetricPoints = document.getElementById("rankMetricPointsText");
   if (rankMetricPoints) {
     rankMetricPoints.textContent = balDisplay;
@@ -2990,7 +3052,7 @@ function render() {
   const progress = Math.max(0, Math.min(1, (balSafe - rank.min) / range));
   rankProgressFill.style.transform = `scaleX(${progress})`;
 
-  streakDaysText.textContent = `${state.streakDays} day${state.streakDays === 1 ? "" : "s"}`;
+  streakDaysText.textContent = confirmed ? `${state.streakDays} day${state.streakDays === 1 ? "" : "s"}` : "—";
   const streakPct = Math.max(0, Math.min(1, state.streakDays / 7));
   streakMeterFill.style.width = `${Math.round(streakPct * 100)}%`;
   if (streakSubText) {
@@ -3012,7 +3074,9 @@ function render() {
       ? `Next tier in ${nextIn} day${nextIn === 1 ? "" : "s"}: ${nextTier}.`
       : (nextTier && nextIn === 0 ? `Next tier unlocked: ${nextTier}.` : "");
 
-    if (days <= 0) {
+    if (!confirmed) {
+      streakSubText.textContent = "Waiting for your saved streak.";
+    } else if (days <= 0) {
       streakSubText.textContent = benefit ? `${benefit} Start today — claim the daily once.` : "Start your streak today — claim the daily once.";
     } else if (state.lastCheckin === todayStr) {
       streakSubText.textContent = benefit ? `${benefit} ${next} Don’t miss tomorrow.` : `Great — don’t miss tomorrow to keep your ${days}-day streak.`;
@@ -3022,8 +3086,8 @@ function render() {
   }
 
 
-  friendsJoinedText.textContent = formatNumber(state.friendsJoined || 0);
-  referralPointsText.textContent = formatNumber(state.referralPoints || 0);
+  friendsJoinedText.textContent = confirmed ? formatNumber(state.friendsJoined || 0) : "—";
+  referralPointsText.textContent = confirmed ? formatNumber(state.referralPoints || 0) : "—";
   inviteLinkText.textContent = state.inviteLink || FALLBACK_REF_LINK;
 
   withdrawBalanceText.textContent = balDisplay;
@@ -3036,17 +3100,17 @@ if (starterBanner && starterBannerFill) {
   const hasClaimedToday = state.lastCheckin === todayStr;
   const balSafe = Number.isFinite(state.bal) ? Number(state.bal) : 0;
 
-  if (!hasClaimedToday) {
+  if (accountIsReady() && confirmed && !hasClaimedToday && balSafe < 10000) {
     starterBanner.style.display = "flex";
 
-    // Progress: always looks "almost done" to create a micro-milestone feeling.
+    // Show actual progress toward the displayed points milestone.
     const milestones = [1000, 5000, 10000];
     let next = milestones[milestones.length - 1];
     for (const m of milestones) {
       if (balSafe < m) { next = m; break; }
     }
     const pctRaw = next > 0 ? balSafe / next : 0.0;
-    const pct = Math.max(0.65, Math.min(0.95, pctRaw || 0.75));
+    const pct = Math.max(0, Math.min(1, pctRaw));
     starterBannerFill.style.transform = `scaleX(${pct})`;
   } else {
     starterBanner.style.display = "none";
@@ -3069,14 +3133,14 @@ function msToCountdown(ms) {
 }
 
 function getStoredMs(key) {
-  const raw = localStorage.getItem(key);
+  const raw = appStorage.getItem(key);
   if (!raw) return null;
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 function setStoredMs(key, ms) {
-  localStorage.setItem(key, String(ms));
+  appStorage.setItem(key, String(ms));
 }
 
 function updateTaskCardStates() {
@@ -3153,88 +3217,39 @@ setInterval(updateTaskCardStates, 1000);
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  // Always read Telegram auth dynamically (iOS can populate initData slightly late).
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  let initData = "";
-  let telegram_id = null;
-
-  // Cache Telegram auth once we see it. This is important for iOS Telegram WebViews:
-  // during pagehide/visibilitychange the WebView may stop executing quickly, so we
-  // must be able to send a final save using cached auth without waiting.
-  window.__tgAuthCache = window.__tgAuthCache || { initData: "", telegram_id: null };
-
-  // Fast-path for keepalive/background flushes: do not sleep/retry here.
-  if (opts.fastAuth || opts.keepalive) {
-    try {
-      const cached = window.__tgAuthCache || {};
-      initData = cached.initData || "";
-      telegram_id = cached.telegram_id || null;
-      if (!telegram_id) telegram_id = localStorage.getItem("telegram_id") || null;
-    } catch (e) {}
+  const readOnly = /^\/api\/(state|config|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends))$/.test(path);
+  if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
+  let initData = "", telegram_id = null;
+  const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
+  for (let i = 0; i < tries; i++) {
+    const current = window.Telegram?.WebApp;
+    initData = current?.initData || window.__tgAuthCache?.initData || "";
+    telegram_id = current?.initDataUnsafe?.user?.id || window.__tgAuthCache?.telegram_id || null;
+    if (initData) break;
+    if (i + 1 < tries) await new Promise(resolve => setTimeout(resolve, 150));
   }
-
-  const maxTries = (opts.fastAuth || opts.keepalive) ? 1 : 8;
-  for (let i = 0; i < maxTries; i++) {
-    const tgNow = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    initData = tgNow && tgNow.initData ? tgNow.initData : "";
-    telegram_id =
-      (tgNow && tgNow.initDataUnsafe && tgNow.initDataUnsafe.user && tgNow.initDataUnsafe.user.id)
-        ? tgNow.initDataUnsafe.user.id
-        : null;
-
-    if (!telegram_id) {
-      try {
-        telegram_id = localStorage.getItem("telegram_id") || null;
-      } catch (e) {}
-    }
-
-    if (telegram_id) {
-      try { localStorage.setItem("telegram_id", String(telegram_id)); } catch (e) {}
-    }
-
-    // Update cache if we got anything.
-    if (initData) window.__tgAuthCache.initData = initData;
-    if (telegram_id) window.__tgAuthCache.telegram_id = telegram_id;
-
-    if (initData || telegram_id) break;
-    // give Telegram a moment to populate initData on iOS
-    if (!(opts.fastAuth || opts.keepalive)) await sleep(150);
-  }
-
-  if (!initData && !telegram_id) {
-    console.warn("No Telegram auth data – open inside Telegram mini app.");
-    if (!opts.silent) showToast("Open from Telegram to save your progress.");
-    // Do NOT call backend without Telegram auth; treat as transient so callers can retry.
-    return { ok: false, reason: "NO_TELEGRAM_ID" };
-  }
-
+  // A cached user ID alone is not authentication.
+  if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
+  window.__tgAuthCache = { initData, telegram_id };
+  const controller = readOnly ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
-    const res = await fetch(API_BASE + path, {
-      method: "POST",
-      keepalive: !!opts.keepalive,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        initData: initData || "",
-        telegram_id: telegram_id,
-        client: getClientSignals(),
-        ...body,
-      }),
+    const response = await fetch(API_BASE + path, {
+      method: "POST", keepalive: !!opts.keepalive,
+      ...(controller ? { signal: controller.signal } : {}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, initData, telegram_id, client: getClientSignals() }),
     });
-
-    const data = await res.json().catch(() => null);
-    return data || { ok: false, reason: "BAD_RESPONSE" };
+    const data = await response.json().catch(() => null);
+    if (!response.ok) return { ...(data || {}), ok: false,
+      reason: data?.reason || data?.error || `HTTP_${response.status}`, status: response.status };
+    return data && typeof data === "object" ? data : { ok: false, reason: "BAD_RESPONSE" };
   } catch (err) {
-    console.error("API error", err);
-    if (!opts.silent) showToast("Network error – retrying...");
-    return { ok: false, reason: "NETWORK", details: String(err || "") };
+    return { ok: false, reason: controller?.signal.aborted ? "TIMEOUT" : "NETWORK" };
+  } finally {
+    if (timer !== null) clearTimeout(timer);
   }
 }
-
-
-
 
 
 async function loadTeamSummary() {
@@ -3517,46 +3532,55 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // If the first state fetch fails or times out, retry automatically so the user
 // doesn't have to close/re-open the mini app.
 let __stateRequestVersion = 0;
+let __stateInFlight = null;
 async function refreshState(attempt = 0) {
   const requestVersion = ++__stateRequestVersion;
   const stateRevision = window.__backendStateRevision || 0;
-  const res = await apiPost("/api/state", {});
-
-  // A slow poll must not overwrite a newer refresh or a confirmed mutation.
-  if (requestVersion !== __stateRequestVersion ||
-      stateRevision !== (window.__backendStateRevision || 0)) return res;
-
-  if (res && res.ok) {
-    applyBackendState(res);
+  const current = () => requestVersion === __stateRequestVersion &&
+    stateRevision === (window.__backendStateRevision || 0);
+  let res;
+  for (let n = attempt; n <= 6; n++) {
+    if (!current()) return res;
+    if (navigator.onLine === false) {
+      setAccountPhase("offline"); render(); return { ok: false, reason: "NETWORK" };
+    }
+    res = await apiPost("/api/state", {}, { silent: true, timeoutMs: 15000 });
+    // Every state read, including retries, shares the response ordering guard.
+    if (!current()) return res;
+    if (res?.ok && Number.isFinite(res.balance) && res.balance >= 0) {
+      applyBackendState({ ...res, global_rank: res.global_rank ?? null, global_total: res.global_total ?? null });
+      setAccountPhase("ready");
+      render();
+      return res;
+    }
+    const reason = String(res?.reason || res?.error || "BAD_RESPONSE");
+    if (reason === "MAINTENANCE_MODE") {
+      setAccountPhase("maintenance"); render(); return res;
+    }
+    const auth = reason === "NO_TELEGRAM_ID" || /AUTH|INIT_DATA|TELEGRAM/.test(reason) || res?.status === 401 || res?.status === 403;
+    const transient = ["NETWORK", "TIMEOUT", "BAD_RESPONSE", "NO_TELEGRAM_ID"].includes(reason) ||
+      /^HTTP_5\d\d$/.test(reason) || res?.status >= 500;
+    const retry = transient && n < 6 && !document.hidden;
+    setAccountPhase(navigator.onLine === false ? "offline" : auth ? "auth" : retry ? "connecting" : "error");
     render();
-    return res;
+    if (!retry) return res;
+    await new Promise(resolve => setTimeout(resolve, Math.min(8000, 500 * 2 ** n)));
   }
-
-  const reason = (res && (res.reason || res.error)) || "Failed to load state";
-  console.warn("refreshState failed", { attempt, reason, res });
-
-  // Retry a few times for transient conditions.
-  // Treat HTTP 5xx from Render/Supabase as transient too (cold starts, brief outages).
-  const transient =
-    reason === "NETWORK" ||
-    reason === "NO_TELEGRAM_ID" ||
-    /^HTTP_5\d\d$/.test(String(reason));
-  if (transient && attempt < 6) {
-    const delay = Math.min(8000, 500 * Math.pow(2, attempt));
-    await sleep(delay);
-    return refreshState(attempt + 1);
-  }
-
-  // Only toast once we've exhausted retries.
-  showToast(reason);
   return res;
 }
 
-// Convenience alias used by some UI actions (missions, shop, etc.)
-// Keeps naming stable while using the main state refresher.
-async function refreshBalance() {
-  return refreshState();
+// Automatic refresh sources share one in-flight promise. Explicit action refreshes
+// can supersede it; the version/revision guard prevents old results being applied.
+function syncStateIfIdle() {
+  if (__stateInFlight) return __stateInFlight;
+  const pending = refreshState().finally(() => {
+    if (__stateInFlight === pending) __stateInFlight = null;
+  });
+  __stateInFlight = pending;
+  return pending;
 }
+async function refreshBalance() { return refreshState(); }
+
 
 function setupWithdrawRequest() {
   const btn = document.getElementById("withdrawRequestBtn");
@@ -3597,47 +3621,17 @@ function setupWithdrawRequest() {
 
 
 
-// --- Energy smoothing (UI-only): prevents big regen jumps when /api/state arrives late ---
-// Server remains source of truth; we just step the UI toward the latest target energy at a controlled pace.
-// Fast 0–10, medium 10–30, slow 30–50 (~1–2 min total). Pauses while tapping / while taps are queued.
-function __energyStepInterval(nextEnergy) {
-  if (nextEnergy < 10) return 300;   // fast
-  if (nextEnergy < 30) return 1500;  // medium
-  return 2500;                       // slow
-}
-function __startEnergyAnimator() {
-  if (window.__energyAnimTimer) return;
-  const tick = () => {
-    window.__energyAnimTimer = null;
 
-    const now = Date.now();
-    const active = (now - (window.__lastTapAt || 0) < 1200) || (typeof getPendingTaps === "function" && getPendingTaps() > 0);
-    if (active) return; // don't regen while active tapping / pending taps
 
-    const target = (typeof window.__energyTarget === "number") ? window.__energyTarget : null;
-    if (target == null) return;
-
-    const cur = (typeof state.energy === "number") ? state.energy : 0;
-    if (cur >= target) return;
-
-    state.energy = cur + 1;
-    render();
-
-    const delay = __energyStepInterval(state.energy);
-    window.__energyAnimTimer = setTimeout(tick, delay);
-  };
-  // kick immediately
-  window.__energyAnimTimer = setTimeout(tick, 0);
-}
-// --- end energy smoothing ---
 function applyBackendState(data) {
   if (!data || !data.ok) return;
   // Keep the last successful server state and invalidate older in-flight polls.
   window.__lastState = data;
   window.__backendStateRevision = (window.__backendStateRevision || 0) + 1;
 
-  if (typeof data.max_energy === "number" && data.max_energy > 0) {
-    maxEnergy = data.max_energy;
+  const confirmedMaxEnergy = data.max_energy_effective ?? data.max_energy;
+  if (Number.isFinite(confirmedMaxEnergy) && confirmedMaxEnergy > 0) {
+    maxEnergy = confirmedMaxEnergy;
   }
 
   // Reconciliation rules:
@@ -3660,7 +3654,7 @@ function applyBackendState(data) {
   const balanceCeilOnce = (typeof window.__balanceCeilOnce === "number") ? window.__balanceCeilOnce : null;
   if (balanceCeilOnce !== null) window.__balanceCeilOnce = null;
 
-  if (Number.isFinite(data.balance)) {
+  if (Number.isFinite(data.balance) && data.balance >= 0) {
   let incoming = data.balance;
   const current = (typeof state.bal === "number") ? state.bal : 0;
 
@@ -3679,40 +3673,22 @@ function applyBackendState(data) {
   const incoming = data.today;
   const current = (typeof state.today === "number") ? state.today : 0;
 
-  // Never allow Today to go DOWN unless it was a spend/reset action.
-  if (incoming < current && !allowDecrease) {
+  // Preserve optimistic taps only while outstanding; accept daily rollover at rest.
+  if (incoming < current && tapWorkPending && !allowDecrease && !recoveryTest) {
     // ignore
   } else {
     state.today = incoming;
   }
 }
 
-  if (typeof data.energy === "number") {
-    const incoming = data.energy;
-    const current = (typeof state.energy === "number") ? state.energy : 0;
-
-    // Allow ONE forced energy increase (e.g. refill boost) even during active tapping/pending taps.
+  if (Number.isFinite(data.energy) && data.energy >= 0) {
     const allowIncrease = !!window.__allowEnergyIncreaseOnce;
-    if (allowIncrease) window.__allowEnergyIncreaseOnce = false;
-
-    if (allowIncrease) {
-      state.energy = incoming;
-      window.__energyTarget = incoming;
-      __startEnergyAnimator();
-    } else {
-      // While actively tapping (or with queued taps), never allow energy to increase.
-      if ((pending > 0 || activeTapping) && incoming > current) {
-        window.__energyTarget = Math.min(incoming, current);
-      } else {
-        // Accept decreases immediately (spent energy), but smooth increases while idle.
-        if (incoming < current) {
-          state.energy = incoming;
-        }
-        window.__energyTarget = incoming;
-        __startEnergyAnimator();
-      }
+    window.__allowEnergyIncreaseOnce = false;
+    if (allowIncrease || recoveryTest || !tapWorkPending || data.energy <= state.energy) {
+      state.energy = Math.min(maxEnergy, data.energy);
     }
   }
+
 
   if (typeof data.referrals_count === "number") {
     state.friendsJoined = data.referrals_count;
@@ -3721,12 +3697,12 @@ function applyBackendState(data) {
     state.referralPoints = data.referrals_points;
   }
 
-  if (typeof data.global_rank === "number") {
-    state.globalRank = data.global_rank;
-  }
-
-  if (typeof data.global_total === "number") {
-    state.globalTotal = data.global_total;
+  // Explicit null/invalid rank clears an old position; never invent a replacement.
+  if ("global_rank" in data || "global_total" in data) {
+    const integer = value => (typeof value === "number" || (typeof value === "string" && /^\d+$/.test(value)))
+      && Number.isSafeInteger(Number(value)) ? Number(value) : null;
+    state.globalRank = integer(data.global_rank);
+    state.globalTotal = integer(data.global_total);
   }
 
 
@@ -3745,16 +3721,19 @@ function applyBackendState(data) {
   }
 
 
+  if (Number.isFinite(data.balance) && data.balance >= 0 && !window.__accountPhase) setAccountPhase("ready");
+
   // Streak meta (tiers, restore window)
   if (data && data.streak_meta) {
     state.streakMeta = data.streak_meta;
+    state.lastCheckin = typeof data.streak_meta.last_checkin_day === "string" ? data.streak_meta.last_checkin_day : "";
     // If the streak is currently broken, display 0 days (the stored streak_count is the last achieved streak).
     if (state.streakMeta && state.streakMeta.active === false && state.streakMeta.broken_at) {
       state.streakDays = 0;
     }
     // Auto-prompt restore if applicable (do not interrupt during onboarding screens)
     try {
-      if (state.streakMeta && state.streakMeta.restore_available) {
+      if (accountIsReady() && state.streakMeta && state.streakMeta.restore_available) {
         showStreakRestoreModal(state.streakMeta);
       }
     } catch (e) {}
@@ -3797,7 +3776,7 @@ function applyBackendState(data) {
   // First-session guided path flag
   if (typeof data.onboarding_required === "boolean") {
     state.onboardingRequired = data.onboarding_required;
-    if (typeof maybeStartOnboardingFromBackend === "function") {
+    if (accountIsReady() && typeof maybeStartOnboardingFromBackend === "function") {
       maybeStartOnboardingFromBackend(data);
     }
   }
@@ -3813,7 +3792,7 @@ function applyBackendState(data) {
 async function loadRemoteConfig() {
   try {
     // Config endpoint is lightweight; it reads from public.app_settings so we can tune behaviour without redeploying.
-    const res = await apiPost("/api/config", {});
+    const res = await apiPost("/api/config", {}, { silent: true, timeoutMs: 8000 });
     if (res && res.ok && res.config) {
       window.__config = res.config;
     } else {
@@ -3826,27 +3805,31 @@ async function loadRemoteConfig() {
 }
 
 async function initFromBackend() {
-  if (typeof loadRemoteConfig === "function") {
-    try { await loadRemoteConfig(); } catch (e) { console.warn("loadRemoteConfig failed", e); }
-  }
-  const res = await refreshState(0);
-  // Always render at least once so the UI doesn't look "frozen" if the
-  // first request fails.
-  render();
-  updateTaskCardStates();
-
-  // upgrades: load tier + events, wire withdraw request
-  loadReferralStatus();
-  loadTeamSummary();
-  loadEventsAndSeason();
+  // Configuration and optional cards must never hold up the saved account.
+  loadRemoteConfig();
   setupWithdrawRequest();
-
-  // Keep the UI in sync even if the app sits open for a while.
-  clearInterval(window.__statePollInterval);
-  window.__statePollInterval = setInterval(() => refreshState(3), 20000);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) refreshState(3);
+  document.getElementById("accountRetry")?.addEventListener("click", () => {
+    if (navigator.onLine === false) return;
+    syncStateIfIdle();
   });
+  const optionalCards = () => {
+    if (!accountIsReady()) return;
+    loadReferralStatus(); loadTeamSummary(); loadEventsAndSeason(); prefetchMissionUrls();
+  };
+  window.addEventListener("jigcoin:account-ready", optionalCards);
+  clearInterval(window.__statePollInterval);
+  window.__statePollInterval = setInterval(() => {
+    if (!document.hidden && navigator.onLine !== false) syncStateIfIdle();
+  }, 20000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncStateIfIdle();
+  });
+  window.addEventListener("offline", () => {
+    ++__stateRequestVersion; __stateInFlight = null;
+    setAccountPhase("offline"); render();
+  });
+  window.addEventListener("online", () => { setAccountPhase("loading"); syncStateIfIdle(); });
+  await syncStateIfIdle();
 }
 
 
@@ -3858,13 +3841,14 @@ async function initFromBackend() {
 // =============================
 const PENDING_TAPS_KEY = "ae_pending_taps";
 function getPendingTaps() {
-  const n = Number(localStorage.getItem(PENDING_TAPS_KEY) || "0");
+  const n = Number(appStorage.getItem(PENDING_TAPS_KEY) || "0");
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 function setPendingTaps(n) {
   const v = Math.max(0, Math.floor(Number(n) || 0));
-  localStorage.setItem(PENDING_TAPS_KEY, String(v));
+  const saved = appStorage.setItem(PENDING_TAPS_KEY, String(v));
   window.__pendingTapCount = v; // for quick debugging if needed
+  return saved;
 }
 
 const TAP_QUEUE_KEY = "ae_tap_packet_queue_v1";
@@ -3877,12 +3861,12 @@ function safeParseJSON(str, fallback) {
   }
 }
 function getTapQueue() {
-  const raw = localStorage.getItem(TAP_QUEUE_KEY) || "[]";
+  const raw = appStorage.getItem(TAP_QUEUE_KEY) || "[]";
   const q = safeParseJSON(raw, []);
   return Array.isArray(q) ? q : [];
 }
 function setTapQueue(q) {
-  localStorage.setItem(TAP_QUEUE_KEY, JSON.stringify(Array.isArray(q) ? q : []));
+  return appStorage.setItem(TAP_QUEUE_KEY, JSON.stringify(Array.isArray(q) ? q : []));
 }
 function makePacketId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
@@ -3915,7 +3899,7 @@ function scheduleTapRetry(delayMs = 800) {
 
 async function flushPendingTaps(opts = {}) {
   // Preserve old packets for later review; do not submit them during this test.
-  if (window.__lastState?.recovery_test === true) return;
+  if (!accountIsReady() || window.__lastState?.recovery_test === true) return;
   if (__tapFlushing) {
     scheduleTapFlush(220);
     return;
@@ -3931,7 +3915,10 @@ async function flushPendingTaps(opts = {}) {
     if (queue.length === 0 && pending > 0) {
       const chunk = Math.max(1, Math.min(20, pending));
       queue = [{ packet_id: makePacketId(), count: chunk, created_at: Date.now() }];
-      setTapQueue(queue);
+      if (setTapQueue(queue) === false) {
+        showToast("Unable to save taps on this device. Please reopen the mini app.");
+        return;
+      }
     }
 
     if (queue.length === 0) return;
@@ -4015,8 +4002,8 @@ if (rejected > 0) {
 }
 
 function onTapPress(ev) {
-  if (!Number.isFinite(state.bal)) {
-    showToast("Loading your saved balance…");
+  if (!accountIsReady() || !Number.isFinite(state.bal)) {
+    showToast("Your account must finish syncing before you can tap.");
     return;
   }
   if (window.__lastState?.recovery_test === true) {
@@ -4036,7 +4023,10 @@ function onTapPress(ev) {
   window.__lastTapAt = now;
 
   // Queue tap first (never lose it)
-  setPendingTaps(getPendingTaps() + 1);
+  if (setPendingTaps(getPendingTaps() + 1) === false) {
+    showToast("Unable to save taps on this device. Close and reopen the mini app.");
+    return;
+  }
 
   // Optimistic UI update for responsiveness
   const perTap = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
@@ -4073,7 +4063,7 @@ tapBtn.addEventListener("click", (ev) => {
 // iOS Telegram WebView may kill timers/fetch quickly on background/close.
 // We use sendBeacon for a *best-effort* final flush, then fall back to keepalive fetch.
 function beaconFlushPendingTaps(maxChunks = 6) {
-  if (window.__lastState?.recovery_test === true) return true;
+  if (!accountIsReady() || window.__lastState?.recovery_test === true) return true;
   try {
     if (!navigator.sendBeacon) return false;
     let pending = getPendingTaps();
@@ -4084,11 +4074,11 @@ function beaconFlushPendingTaps(maxChunks = 6) {
     let initData = cached.initData || "";
     let telegram_id = cached.telegram_id || null;
     try {
-      if (!telegram_id) telegram_id = localStorage.getItem("telegram_id") || null;
+      if (!telegram_id) telegram_id = appStorage.getItem("telegram_id") || null;
     } catch (e) {}
 
     // If we have no Telegram identity, we can't safely save.
-    if (!telegram_id && !initData) return false;
+    if (!initData) return false;
 
     // Move pending taps into durable packet queue first, then beacon-send them best-effort.
     let queue = getTapQueue();
@@ -4169,7 +4159,8 @@ async function handleDailyTask(reward) {
         return;
       }
 
-      applyServerState(res2);
+      applyBackendState(res2);
+      render();
       // Cooldown is now active for the next 24h
       setStoredMs(DAILY_CLAIM_AT_KEY, Date.now());
       updateTaskCardStates();
@@ -5943,26 +5934,13 @@ lbTabFriends.addEventListener("click", () => {
   loadFriendsLeaderboard();
 });
 
-// Init
+// Init: render placeholders synchronously, then hydrate without blocking on config.
 loadStateLocal();
+setAccountPhase("loading");
 render();
-// Preload sponsor URLs so link taps never get blocked by async timing
-prefetchMissionUrls();
 initFromBackend();
 
-// Keep countdown labels/timers fresh without needing a refresh
-setInterval(() => {
-  updateTaskCardStates();
-}, 1000);
 
-// Auto-refresh from backend (energy, rank, etc.)
-setInterval(async () => {
-  const res = await apiPost("/api/state", {});
-  if (res && res.ok) {
-    applyBackendState(res);
-    render();
-  }
-}, 15000);
   </script>
 
 <script>
@@ -6086,7 +6064,8 @@ async function startNewStreakNow() {
         setStoredMs(DAILY_CLAIM_AT_KEY, nextAtMs - DAILY_COOLDOWN_MS);
       }
     }
-    applyServerState(res);
+    applyBackendState(res);
+    render();
     showToast("New streak started.");
   } else {
     showToast("Could not start a new streak yet.");
@@ -6106,7 +6085,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("fomoModal");
   if (!backdrop || !modal) return;
 
-  const show = () => { backdrop.style.display = "block"; modal.style.display = "block"; };
+  const show = () => { if (!accountIsReady()) return; backdrop.style.display = "block"; modal.style.display = "block"; };
   const hide = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
 
   // Decide whether Early Access announcement is active (server-side user count)
@@ -6134,11 +6113,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let acknowledgedThisSession = false;
 
   async function refreshAndMaybeShow(options) {
+    if (!accountIsReady()) return;
     const onlyUpdate = options && options.onlyUpdate;
     try {
       const r = await fetch(API_BASE + "/api/stats", { method: "GET" });
       const data = await r.json().catch(() => null);
-      const total = Number(data?.total_users ?? data?.totalUsers ?? 0);
+      if (!r.ok || !data?.ok || !accountIsReady()) return;
+      const total = Number(data.total_users ?? data.totalUsers);
+      if (!Number.isFinite(total)) return;
       const remaining = Number(
         data?.early_bonus_remaining ?? Math.max(0, LIMIT - total)
       );
@@ -6190,34 +6172,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     } catch (_e) {
-      // If stats fail, still show (better for conversion than silence)
-      if (inviteBonusEl) inviteBonusEl.textContent = fallbackInviteBonus.toLocaleString("en-GB");
-      if (inviteBtnAmtEl) inviteBtnAmtEl.textContent = fallbackInviteBonus.toLocaleString("en-GB");
-      if (spotsEl) spotsEl.textContent = "—";
-      if (countdownEl) countdownEl.textContent = "Limited";
-      if (launchBoostCountdownEl) {
-        launchBoostCountdownEl.textContent = "⏳ Window: Limited";
-      }
-
-      if (!onlyUpdate && !acknowledgedThisSession) {
-        show();
-      }
+      // Optional promotion stays hidden if its server data is unavailable.
     }
   }
+  const showWhenReady = () => refreshAndMaybeShow({ onlyUpdate: false });
+  window.addEventListener("jigcoin:account-ready", showWhenReady);
+  if (accountIsReady()) showWhenReady();
 
-  // 1) Show immediately so user always sees Launch Phase before any interaction.
-  show();
 
-  // 2) Hydrate the numbers/countdown from backend, but don't re-block if already acknowledged.
-  refreshAndMaybeShow({ onlyUpdate: true });
 
   // On visibility change, just refresh numbers & state; do NOT re-open the modal mid-session.
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       refreshAndMaybeShow({ onlyUpdate: true });
-      if (typeof refreshState === "function") {
-        refreshState(3);
-      }
+      syncStateIfIdle();
     }
   });
 
@@ -6231,9 +6199,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // When the user closes the modal, immediately refresh backend state
     // so the balance/energy are 100% correct when they start tapping.
-    if (typeof refreshState === "function") {
-      refreshState(3);
-    }
+    syncStateIfIdle();
   };
 
   okBtn && okBtn.addEventListener("click", acknowledge);
