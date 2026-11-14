@@ -543,7 +543,7 @@
       position: relative;
       overflow: hidden;
     
-      touch-action: manipulation;
+      touch-action: none;
       -webkit-user-select: none;
       user-select: none;
 }
@@ -558,7 +558,7 @@
     }
 
     .tap-btn-main:active {
-      transform: scale(0.97);
+      transform: none;
       box-shadow:
         0 18px 45px rgba(15, 23, 42, 0.9),
         0 0 0 1px rgba(248, 250, 252, 0.08),
@@ -1660,6 +1660,19 @@ button:disabled {cursor:default;}
 .ad-quest-row > div{flex-basis:100%!important;}
 .ad-quest-row > div > div:first-child{flex-wrap:wrap;}
 .ad-quest-row button{max-width:100%;white-space:normal;min-height:40px;}
+/* Keep fast-touch hit geometry fixed, including decorative children. */
+.tap-btn-main > *,.tap-btn-main::before {pointer-events:none;}
+.tap-sync-status {min-height:36px;margin:8px 0 0;text-align:center;color:#e2e8f0;font-size:12px;line-height:1.5;}
+.tap-sync-status[hidden] {display:none;}
+#sponsorSheet .sheet-header {flex-shrink:0;}
+#sponsorSheet .sheet-body {min-height:0;overscroll-behavior:contain;}
+#sponsorList .ad-quest-row {padding:14px 0;border-bottom:1px solid #334155;}
+#sponsorList .ad-quest-row:last-child {border-bottom:0;}
+#sponsorList .ad-quest-row button {appearance:none;-webkit-appearance:none;display:block;
+ width:100%;padding:11px 14px;border:1px solid #64748b;border-radius:12px;
+ background:#f8fafc;color:#0f172a;-webkit-text-fill-color:#0f172a;font:inherit;font-size:13px;font-weight:600;}
+#sponsorList .ad-quest-row button:disabled {opacity:1;background:#17243b;color:#f1f5f9;
+ -webkit-text-fill-color:#f1f5f9;border-color:#64748b;cursor:default;}
 .ad-quest-row.reward-focus{outline:1px solid rgba(250,204,21,.65);outline-offset:4px;border-radius:12px;}
 </style>
 
@@ -1857,6 +1870,7 @@ button:disabled {cursor:default;}
           </button>
         </div>
 
+        <div id="tapSyncStatus" class="tap-sync-status" role="status" aria-live="polite" hidden></div>
         <div class="tap-metrics">
           <div class="tap-metric">
             <div class="metric-label">Energy</div>
@@ -3017,6 +3031,7 @@ function render() {
   const balDisplay = confirmed ? formatNumber(state.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
+  updateRecoveryTapFeedback();
   tapBtn.disabled = !accountIsReady() || !confirmed || (window.__lastState?.recovery_test === true && !window.__lastState?.recovery_gameplay);
   const tapLabel = document.getElementById("tapButtonLabel");
   if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Test tap" : "Tap";
@@ -3241,7 +3256,7 @@ async function apiPost(path, body, opts = {}) {
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = readOnly ? new AbortController() : null;
+  const controller = (readOnly || path === "/api/tapPacket") ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -3582,6 +3597,13 @@ async function refreshState(attempt = 0) {
 // Automatic refresh sources share one in-flight promise. Explicit action refreshes
 // can supersede it; the version/revision guard prevents old results being applied.
 function syncStateIfIdle() {
+  if (accountIsReady() && window.__lastState?.recovery_gameplay) {
+    const q = readRecoveryQueue();
+    if (window.__recoveryTapBusy || q.pending || q.packet) {
+      resumeRecoveryTaps();
+      return Promise.resolve(window.__lastState);
+    }
+  }
   if (__stateInFlight) return __stateInFlight;
   const pending = refreshState().finally(() => {
     if (__stateInFlight === pending) __stateInFlight = null;
@@ -4011,49 +4033,108 @@ if (rejected > 0) {
   }
 }
 
-// Isolated owner queue: never replay the historical public tap queue.
+// Durable owner queue, separate from the suspended historical public queue.
 function recoveryQueueKey() {
-  return "jigcoin_owner_taps_v2_" + String(tg?.initDataUnsafe?.user?.id || "unknown");
+  const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || tg?.initDataUnsafe?.user?.id;
+  return Number.isSafeInteger(id) && id > 0 ? "jigcoin_owner_taps_v2_" + id : null;
 }
 function readRecoveryQueue() {
-  return safeParseJSON(appStorage.getItem(recoveryQueueKey()), null) || {pending:0,packet:null};
+  const key = recoveryQueueKey();
+  const q = safeParseJSON(key ? appStorage.getItem(key) : null, null) || {pending:0,packet:null};
+  const count = q.pending + (q.packet?.count || 0);
+  // Migrate the previous queue without losing its in-flight idempotency key.
+  return {...q, received:q.received ?? count, confirmed:q.confirmed ?? 0, limited:q.limited ?? 0};
 }
 function saveRecoveryQueue(q) {
-  return appStorage.setItem(recoveryQueueKey(), JSON.stringify(q));
+  const key = recoveryQueueKey();
+  return !!key && appStorage.setItem(key, JSON.stringify(q));
+}
+let recoveryFlushTimer = null;
+let recoveryRetryDelay = 1000;
+let recoveryTapMessage = "";
+function updateRecoveryTapFeedback() {
+  const el = document.getElementById("tapSyncStatus");
+  if (!el) return;
+  el.hidden = !window.__lastState?.recovery_gameplay;
+  if (el.hidden) return;
+  const q = readRecoveryQueue();
+  const pending = q.pending + (q.packet?.count || 0);
+  el.textContent = `${q.received} registered · ${q.confirmed} confirmed · ${pending} pending` +
+    (q.limited ? ` · ${q.limited} limited by energy/daily cap` : "") +
+    (recoveryTapMessage ? ` — ${recoveryTapMessage}` : pending ? " — Saving…" : " — Balance saved");
+}
+function scheduleRecoveryFlush(delay = 100) {
+  if (recoveryFlushTimer !== null) return;
+  recoveryFlushTimer = setTimeout(() => { recoveryFlushTimer = null; void runRecoveryTap(false); }, delay);
 }
 async function runRecoveryTap(addTap = true) {
+  if (!accountIsReady() || !window.__lastState?.recovery_gameplay) return;
   let q = readRecoveryQueue();
   if (addTap) {
     if (q.pending + (q.packet?.count || 0) >= state.energy) {
-      showToast("Waiting for queued taps to confirm, or energy to refill."); return;
+      recoveryTapMessage = "Energy is reserved for pending taps; wait for confirmation or refill.";
+      updateRecoveryTapFeedback(); return;
     }
-    q.pending++;
+    q.pending++; q.received++;
     if (!saveRecoveryQueue(q)) { showToast("Cannot save taps on this device."); return; }
+    ++__stateRequestVersion; // Discard state polls begun before this input.
+    window.__lastTapAt = Date.now();
+    recoveryTapMessage = "";
+    updateRecoveryTapFeedback(); // Immediate acknowledgement, independent of server latency.
+    scheduleRecoveryFlush(); return;
   }
-  if (window.__recoveryTapBusy) return;
+  if (window.__recoveryTapBusy || navigator.onLine === false || document.hidden) return;
   window.__recoveryTapBusy = true;
+  let retry = false;
   try {
-    while (true) {
-      q = readRecoveryQueue();
-      if (!q.packet) {
-        if (!q.pending) break;
-        const count = Math.min(20, q.pending);
-        q.packet = {packet_id:makePacketId(),count}; q.pending -= count;
-        if (!saveRecoveryQueue(q)) throw new Error("QUEUE_SAVE_FAILED");
-      }
-      const result = await apiPost("/api/tapPacket",q.packet);
-      if (!result?.ok) throw new Error(result?.error || "TAP_NOT_CONFIRMED");
-      // Read again because additional presses may have queued during the request.
-      q = readRecoveryQueue(); q.packet = null;
+    q = readRecoveryQueue();
+    if (!q.packet) {
+      if (!q.pending) return;
+      const count = Math.min(20, q.pending);
+      q.packet = {packet_id:makePacketId(),count}; q.pending -= count;
       if (!saveRecoveryQueue(q)) throw new Error("QUEUE_SAVE_FAILED");
-      applyBackendState(result); render(); updateTaskCardStates();
     }
-  } catch (_) { showToast("Taps saved on this device. Tap again to retry confirmation."); }
-  finally { window.__recoveryTapBusy = false; }
+    const sent = {...q.packet};
+    // A timeout can mean the server committed. Retry the identical packet.
+    const result = await apiPost("/api/tapPacket",sent,{silent:true,timeoutMs:12000});
+    if (!result?.ok) {
+      const reason = String(result?.error || result?.reason || "BAD_RESPONSE");
+      retry = /NETWORK|TIMEOUT|RATE_LIMIT|BAD_RESPONSE|HTTP_5/.test(reason) || result?.status >= 500 || result?.status === 429;
+      throw new Error(reason);
+    }
+    if (!Number.isSafeInteger(result.applied) || result.applied < 0 || result.applied > sent.count) {
+      retry = true; throw new Error("BAD_RECEIPT");
+    }
+    q = readRecoveryQueue();
+    if (q.packet?.packet_id !== sent.packet_id) throw new Error("QUEUE_CHANGED");
+    q.confirmed += result.applied;
+    q.limited += sent.count - result.applied;
+    q.packet = null;
+    if (!saveRecoveryQueue(q)) throw new Error("QUEUE_SAVE_FAILED");
+    recoveryRetryDelay = 1000;
+    recoveryTapMessage = "";
+    applyBackendState(result); render(); updateTaskCardStates();
+  } catch (error) {
+    recoveryTapMessage = retry ? "Connection delayed; taps saved and retrying." :
+      `Confirmation paused (${error.message}). Reopen to retry; taps remain saved.`;
+  } finally {
+    window.__recoveryTapBusy = false;
+    updateRecoveryTapFeedback();
+    const remaining = readRecoveryQueue();
+    if (retry) {
+      scheduleRecoveryFlush(recoveryRetryDelay);
+      recoveryRetryDelay = Math.min(15000, recoveryRetryDelay * 2);
+    } else if (!recoveryTapMessage && (remaining.pending || remaining.packet)) scheduleRecoveryFlush(180);
+  }
 }
-window.addEventListener("jigcoin:account-ready", () => {
-  if (window.__lastState?.recovery_gameplay) void runRecoveryTap(false);
-});
+function resumeRecoveryTaps() {
+  if (!window.__lastState?.recovery_gameplay) return;
+  updateRecoveryTapFeedback();
+  scheduleRecoveryFlush(0);
+}
+window.addEventListener("jigcoin:account-ready", resumeRecoveryTaps);
+window.addEventListener("online", resumeRecoveryTaps);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) resumeRecoveryTaps(); });
 
 function onTapPress(ev) {
   if (ev?.type === "click" && Date.now() - __lastPointerTapAt < 450) return;
@@ -4103,17 +4184,36 @@ function onTapPress(ev) {
   }
 }
 
-// Use pointerdown for iOS Telegram webview; keep click as fallback.
-tapBtn.addEventListener("pointerdown", (ev) => {
-  __lastPointerTapAt = Date.now();
-  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
-  onTapPress(ev);
-}, { passive: false });
-
-tapBtn.addEventListener("click", (ev) => {
-  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
-  onTapPress(ev);
-}, { passive: false });
+// Choose one physical-input stream. Touch events include every changed finger;
+// synthetic mouse/click events from that same touch must not award again.
+function installTapInput(button, press) {
+  const useTouch = "ontouchstart" in window || Number(navigator.maxTouchPoints) > 0;
+  const stop = ev => { if (ev.cancelable) ev.preventDefault(); ev.stopPropagation(); };
+  if (useTouch) {
+    button.addEventListener("touchstart", ev => {
+      stop(ev);
+      __lastPointerTapAt = Date.now();
+      for (const touch of Array.from(ev.changedTouches || [])) press({type:"touchstart",identifier:touch.identifier});
+    }, {passive:false});
+    button.addEventListener("pointerdown", ev => {
+      if (ev.pointerType === "touch" || Date.now()-__lastPointerTapAt < 700) return;
+      if (ev.button !== undefined && ev.button !== 0) return;
+      stop(ev); __lastPointerTapAt = Date.now(); press(ev);
+    }, {passive:false});
+  } else if (window.PointerEvent) {
+    button.addEventListener("pointerdown", ev => {
+      if (ev.button !== undefined && ev.button !== 0) return;
+      stop(ev); __lastPointerTapAt = Date.now(); press(ev);
+    }, {passive:false});
+  }
+  button.addEventListener("click", ev => {
+    stop(ev);
+    if (Date.now()-__lastPointerTapAt < 700) return;
+    // Keyboard/assistive activation or old browsers without either event stream.
+    if (ev.detail === 0 || (!useTouch && !window.PointerEvent)) press(ev);
+  }, {passive:false});
+}
+installTapInput(tapBtn, onTapPress);
 
 // -------- Exit-safe save --------
 // iOS Telegram WebView may kill timers/fetch quickly on background/close.
