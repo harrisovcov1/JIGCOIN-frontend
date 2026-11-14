@@ -1654,6 +1654,13 @@ button:disabled {cursor:default;}
 .sheet {padding-bottom:calc(16px + var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom, 0px));}
 @media (prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;}}
 
+
+/* Reward rows stay readable on small phones, including long cooldown labels. */
+.ad-quest-row{flex-wrap:wrap;}
+.ad-quest-row > div{flex-basis:100%!important;}
+.ad-quest-row > div > div:first-child{flex-wrap:wrap;}
+.ad-quest-row button{max-width:100%;white-space:normal;min-height:40px;}
+.ad-quest-row.reward-focus{outline:1px solid rgba(250,204,21,.65);outline-offset:4px;border-radius:12px;}
 </style>
 
 <style>
@@ -2309,7 +2316,7 @@ button:disabled {cursor:default;}
       <div class="vip-box" style="margin-bottom:12px;">
         <div style="font-weight:800; margin-bottom:6px;">Momentum boosts</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
-          Fast actions for when you’re active. These are designed for impulse momentum.
+          Watch an eligible ad, then claim your confirmed boost.
         </div>
 
         <div class="tasks-grid" style="gap:10px;">
@@ -2318,7 +2325,7 @@ button:disabled {cursor:default;}
               <div class="task-title">Double points</div>
               <div class="task-reward" id="doubleBoostRewardText">x2 · 10 mins</div>
             </div>
-            <div class="task-desc">Activate a short burst to climb quickly.</div>
+            <div class="task-desc">Watch an ad for x2 taps for 10 minutes.</div>
           </div>
 
           <div class="task-card" data-code="boost_energy" data-reward="0" style="padding:10px 11px;">
@@ -2326,7 +2333,7 @@ button:disabled {cursor:default;}
               <div class="task-title">Energy refill</div>
               <div class="task-reward" id="energyRefillRewardText">⚡ Full bar</div>
             </div>
-            <div class="task-desc">Refill instantly when you want to keep farming.</div>
+            <div class="task-desc">Watch an ad to refill your energy bar.</div>
           </div>
         </div>
       </div>
@@ -3007,9 +3014,9 @@ function render() {
   const balDisplay = confirmed ? formatNumber(state.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
-  tapBtn.disabled = !accountIsReady() || !confirmed || window.__lastState?.recovery_test === true;
+  tapBtn.disabled = !accountIsReady() || !confirmed || (window.__lastState?.recovery_test === true && !window.__lastState?.recovery_gameplay);
   const tapLabel = document.getElementById("tapButtonLabel");
-  if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Ad test" : "Tap";
+  if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Test tap" : "Tap";
   todayText.textContent = confirmed ? formatNumber(state.today) : "—";
 
   // Points per tap (x2 when boost active)
@@ -4001,13 +4008,30 @@ if (rejected > 0) {
   }
 }
 
+// Owner testing uses fresh, individually confirmed packets. Historical queued
+// taps remain untouched, so re-enabling testing cannot replay an old backlog.
+async function runRecoveryTap() {
+  if (window.__recoveryTapBusy) return;
+  window.__recoveryTapBusy = true;
+  const packet = window.__recoveryTapPacket || {packet_id:makePacketId(),count:1};
+  window.__recoveryTapPacket = packet;
+  try {
+    const result = await apiPost("/api/tapPacket",packet);
+    if (!result?.ok) throw new Error(result?.error || result?.reason || "TAP_NOT_CONFIRMED");
+    window.__recoveryTapPacket = null;
+    applyBackendState(result); render(); updateTaskCardStates();
+  } catch (_) { showToast("Tap not confirmed yet. Tap again to safely retry."); }
+  finally { window.__recoveryTapBusy = false; }
+}
+
 function onTapPress(ev) {
   if (!accountIsReady() || !Number.isFinite(state.bal)) {
     showToast("Your account must finish syncing before you can tap.");
     return;
   }
   if (window.__lastState?.recovery_test === true) {
-    showToast("Only the ad quest is available during this test.");
+    if (window.__lastState?.recovery_gameplay) void runRecoveryTap();
+    else showToast("Private ad testing is active.");
     return;
   }
   // Prevent ghost clicks / double-fire on iOS.
@@ -4565,6 +4589,8 @@ function closeSponsorSheet() {
 }
 
 function fmtPayout(m) {
+  if (m.payout_type === "energy_refill") return "⚡ Full energy";
+  if (m.payout_type === "double_10m") return "x2 taps · 10 minutes";
   const amt = Number(m.payout_amount || 0);
   if (!amt) return "";
   if (m.payout_type === "points") return `+${amt.toLocaleString("en-GB")} pts`;
@@ -4702,8 +4728,8 @@ function renderSponsorMissions(missions) {
       }
 
       return `
-        <div class="withdraw-row" style="align-items:flex-start; gap:12px;">
-          <div style="flex:1;">
+        <div class="withdraw-row ad-quest-row" data-quest-code="${sponsorHtml(m.code)}" style="align-items:flex-start; gap:12px;">
+          <div style="flex:1;min-width:0;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px;"><div style="font-weight:700;">${sponsorHtml(m.title || m.code)}</div><div class="pill ${status==="claimable" ? "good" : (status==="waiting" ? "warn" : (status==="cooldown" ? "cooldown" : "dim"))}">${status==="unavailable" ? "Unavailable" : status==="pending" ? "Confirming" : status==="claimable" ? "Claimable" : (status==="waiting" ? "Waiting" : (status==="cooldown" ? "Cooldown" : "Available"))}</div></div>
             <div style="font-size:11px; margin-bottom:2px; color:rgba(250,204,21,0.92);">${tierLabel}</div>
             <div style="opacity:.85; font-size:12px; line-height:1.3;">${sponsorHtml(cleanDesc)}</div>
@@ -4726,6 +4752,8 @@ function renderSponsorMissions(missions) {
       if (!code || action === "none" || btn.disabled) return;
 
       if (btn.getAttribute("data-provider") === "monetag") {
+        if (window.__rewardActionBusy) return;
+        window.__rewardActionBusy = true;
         btn.disabled = true;
         btn.textContent = action === "start" ? "Loading ad…" : "Claiming…";
         try {
@@ -4736,7 +4764,7 @@ function renderSponsorMissions(missions) {
               code, attempt_id: btn.getAttribute("data-attempt"),
             });
             if (!result?.ok) throw new Error(result?.error || "REWARD_SERVICE_UNAVAILABLE");
-            showToast(result.already_claimed ? "This reward is already in your balance." : "+200 coins claimed!");
+            showToast(result.already_claimed ? "This reward has already been applied." : `${result.reward_label || "Reward"} claimed!`);
             await refreshBalance();
           }
         } catch (error) {
@@ -4746,9 +4774,12 @@ function renderSponsorMissions(missions) {
             MISSION_COOLDOWN: "This quest is cooling down.",
             REWARD_ALREADY_READY: "Your reward is ready to claim.",
             AD_REWARDS_UNAVAILABLE: "Rewarded ads are temporarily unavailable.",
+            ENERGY_FULL: "Your energy is already full. Use some energy before starting this ad.",
+            DOUBLE_ACTIVE: "Double points is already active. Your pending reward remains available.",
           }[error.message];
           showToast(message || "The ad or reward could not be confirmed. Please check the quest status.");
         } finally {
+          window.__rewardActionBusy = false;
           try { await loadSponsorMissions(true); }
           catch (_) {
             // Do not leave an apparently ready action after an unknown outcome.
@@ -4943,7 +4974,7 @@ async function loadSponsorMissions(forceRefresh = false) {
     return window.__sponsorMissions;
   }
 
-  const res = await apiPost("/api/mission/list", { kind: "sponsor" });
+  const res = await apiPost("/api/mission/list", { kind: "sponsor", include_boost_sponsor_missions: true });
   if (!res || !res.ok || !Array.isArray(res.missions)) {
     throw new Error("Could not refresh sponsor quest status");
   }
@@ -5062,172 +5093,18 @@ function openFriendsSheet() {
 }
 
 
-// ⚡ Energy refill boost
-const ENERGY_REFILL_COST_CLIENT = 200;   // keep in sync with backend   // keep in sync with backend
-const DOUBLE_BOOST_COST_CLIENT = 200;   // keep in sync with backend   // keep in sync with backend
-
-async function handleEnergyBoostTask() {
-  // Points-only: refill costs a flat 200 points and fills energy to max.
-  if ((state.energy || 0) >= maxEnergy) {
-    showToast("Your energy is already full.");
-    updateTaskCardStates();
-    return;
-  }
-
-  const cost = ENERGY_REFILL_COST_CLIENT;
-  if ((state.bal || 0) < cost) {
-    showToast(`Need ${cost.toLocaleString("en-GB")} points to refill.`);
-    return;
-  }
-
-  window.__allowEnergyIncreaseOnce = true;
-  const res = await apiPost("/api/boost/energy", { method: "points" });
-  if (!res) return;
-
-  if (!res.ok) {
-    if (res.reason === "ENERGY_FULL") {
-      showToast("Your energy is already full.");
-    } else if (res.reason === "NOT_ENOUGH_POINTS") {
-      showToast("Not enough points for energy refill.");
-    } else if (res.reason !== "NO_TELEGRAM_ID") {
-      showToast("Energy refill failed – try again.");
-    }
-    return;
-  }
-
-  window.__allowBalanceDecreaseOnce = true;
-  applyBackendState(res);
-  render();
-  updateTaskCardStates();
-  showToast(res.message || "⚡ Energy refilled! (-200)");
+// Both boost cards open the same server-verified ad/claim flow as daily quests.
+async function openRewardPlacement(code) {
+  openSponsorSheet();
+  try {
+    await loadSponsorMissions(true);
+    const row = sponsorList.querySelector(`[data-quest-code="${code}"]`);
+    row?.scrollIntoView({block:"nearest",behavior:"smooth"});
+    row?.classList.add("reward-focus");
+  } catch (_) { showToast("Could not load ad rewards. Please try again."); }
 }
-
-// Double points boost handler
-async function handleDoubleBoostTask() {
-  if (state.doubleBoostActive) {
-    showToast("Double points is already active.");
-    updateTaskCardStates();
-    return;
-  }
-
-  const hasPoints = (state.bal || 0) >= DOUBLE_BOOST_COST_CLIENT;
-
-  // Cancel → sponsor action (free), OK → spend points
-  const ok = window.confirm(
-    `Activate x2 taps for 10 minutes?\n\n` +
-      `Press OK to spend ${DOUBLE_BOOST_COST_CLIENT.toLocaleString("en-GB")} points.\n` +
-      `Press Cancel to complete a sponsor action (free).`
-  );
-
-  // Optimistic spend: deduct immediately for instant feedback, then reconcile with backend.
-  // If backend rejects, roll back.
-  let __prevBal = null;
-  if (ok) {
-    __prevBal = state.bal || 0;
-    state.bal = Math.max(0, __prevBal - DOUBLE_BOOST_COST_CLIENT);
-    // Prevent a stale pre-spend backend response from overwriting the
-    // optimistic spend with a higher balance.
-    window.__balanceCeilOnce = state.bal;
-    render();
-    updateTaskCardStates();
-  }
-
-  if (!ok) {
-    // Sponsor action path (open link instantly)
-    const sponsorCode = "sp_double_points";
-    const url = getMissionUrl(sponsorCode);
-    if (!url || !openExternalLink(url)) {
-      showToast("Couldn't open sponsor link. Please allow popups/external links in Telegram.");
-      return;
-    }
-
-    // Log sponsor mission start (best-effort)
-    apiPost("/api/mission/start", { code: sponsorCode });
-
-    const res = await apiPost("/api/boost/double", { method: "action" });
-
-    if (!res) {
-      if (__prevBal !== null) {
-        state.bal = __prevBal;
-        render();
-        updateTaskCardStates();
-      }
-      return;
-    }
-
-    if (!res.ok) {
-    if (res.reason === "STREAK_BROKEN") {
-      // Show paid restore window modal (card/crypto) with clear benefits
-      const ctx = (res.streak_meta || res.streakMeta || res) || {};
-      showStreakRestoreModal(ctx);
-      return;
-    }
-      if (__prevBal !== null) {
-        state.bal = __prevBal;
-        render();
-        updateTaskCardStates();
-      }
-      if (res.reason !== "NO_TELEGRAM_ID") {
-        showToast("Sponsor boost failed – try again.");
-      }
-      return;
-    }
-
-    window.__allowBalanceDecreaseOnce = true;
-  applyBackendState(res);
-    render();
-    updateTaskCardStates();
-
-    showToast(res.message || "✨ Sponsor action complete – double points activated!");
-    return;
-  }
-
-  // Points path
-  if (!hasPoints) {
-    showToast(`Need ${DOUBLE_BOOST_COST_CLIENT.toLocaleString("en-GB")} points for double boost.`);
-    return;
-  }
-
-  const res = await apiPost("/api/boost/double", { method: "points" });
-
-  if (!res) {
-    if (__prevBal !== null) {
-      state.bal = __prevBal;
-      window.__balanceCeilOnce = null;
-      render();
-      updateTaskCardStates();
-    }
-    return;
-  }
-
-  if (!res.ok) {
-    if (res.reason === "STREAK_BROKEN") {
-      // Show paid restore window modal (card/crypto) with clear benefits
-      const ctx = (res.streak_meta || res.streakMeta || res) || {};
-      showStreakRestoreModal(ctx);
-      return;
-    }
-    if (__prevBal !== null) {
-      state.bal = __prevBal;
-      window.__balanceCeilOnce = null;
-      render();
-      updateTaskCardStates();
-    }
-    if (res.reason === "NOT_ENOUGH_POINTS") {
-      showToast("Not enough points for double boost.");
-    } else if (res.reason !== "NO_TELEGRAM_ID") {
-      showToast("Double boost failed – try again.");
-    }
-    return;
-  }
-
-  window.__allowBalanceDecreaseOnce = true;
-  applyBackendState(res);
-  render();
-  updateTaskCardStates();
-
-  showToast(res.message || "✨ Double points boost activated!");
-}
+async function handleEnergyBoostTask() { await openRewardPlacement("sp_emergency_energy"); }
+async function handleDoubleBoostTask() { await openRewardPlacement("sp_double_points"); }
 
 // Task click router (includes double_boost)
 document.querySelectorAll(".task-card").forEach((card) => {
@@ -6147,9 +6024,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!countdownTimer) {
         countdownTimer = setInterval(() => {
           if (countdownSeconds == null) {
-            if (countdownEl) countdownEl.textContent = "Limited";
+            if (countdownEl) countdownEl.textContent = "Until all bonus places are claimed";
             if (launchBoostCountdownEl) {
-              launchBoostCountdownEl.textContent = "⏳ Window: Limited";
+              launchBoostCountdownEl.textContent = "Starter bonus: places remaining";
             }
             return;
           }
@@ -6228,7 +6105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <b>First 1,000 players</b> lock the early allocation window (+<b>5,000</b> starter coins).<br>
       <span class="fomo-spots">Spots left: <b id="fomoSpotsLeft">—</b></span>
       <br>
-      <span class="fomo-spots">Ends in: <b id="fomoCountdown">—</b></span>
+      <span class="fomo-spots">Availability: <b id="fomoCountdown">—</b></span>
     </p>
     <ul class="fomo-bullets">
       <li><span class="dot">🔥</span><span><b>Invite bonuses LIVE:</b> +<b id="fomoInviteBonus">800</b> coins per friend.</span></li>
