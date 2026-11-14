@@ -2822,8 +2822,8 @@ async function completeOnboarding() {
 
 
 function saveStateLocal(s) {
-  // Store last-seen balance for instant first paint on next open.
-  // This is UI-only: backend remains the source of truth.
+  // Retain the local UI cache; a fresh server response controls the balance
+  // on each open, so cached optimistic taps cannot become saved coins.
   if (Number.isFinite(s.bal)) {
     localStorage.setItem(BALANCE_KEY, String(s.bal));
   }
@@ -2838,13 +2838,9 @@ function saveStateLocal(s) {
 function loadStateLocal() {
   const todayStr = getTodayString();
 
-  // Backend is now the source of truth.
-  // Do NOT trust balance/energy/today from localStorage for gameplay.
-  // HOWEVER, we *do* use the last seen balance for instant UI paint so users
-  // never see a temporary “0” flash before the backend responds.
-  const cachedBalRaw = localStorage.getItem(BALANCE_KEY);
-  const cachedBal = cachedBalRaw == null ? null : Number(cachedBalRaw);
-  state.bal = Number.isFinite(cachedBal) ? cachedBal : null;
+  // A cached value may include taps the server rejected. Show the loading
+  // placeholder until the first server response confirms the saved balance.
+  state.bal = null;
   state.energy = maxEnergy;
   state.today = 0;
   state.lastDay = todayStr;
@@ -2953,6 +2949,7 @@ function render() {
   const balDisplay = Number.isFinite(state.bal) ? formatNumber(state.bal) : "…";
 
   balanceText.textContent = balDisplay;
+  tapBtn.disabled = !Number.isFinite(state.bal) || window.__lastState?.recovery_test === true;
   todayText.textContent = formatNumber(state.today);
 
   // Points per tap (x2 when boost active)
@@ -3519,12 +3516,19 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // Render deployments can "cold start" which makes the first few requests slow.
 // If the first state fetch fails or times out, retry automatically so the user
 // doesn't have to close/re-open the mini app.
+let __stateRequestVersion = 0;
 async function refreshState(attempt = 0) {
+  const requestVersion = ++__stateRequestVersion;
+  const stateRevision = window.__backendStateRevision || 0;
   const res = await apiPost("/api/state", {});
 
+  // A slow poll must not overwrite a newer refresh or a confirmed mutation.
+  if (requestVersion !== __stateRequestVersion ||
+      stateRevision !== (window.__backendStateRevision || 0)) return res;
+
   if (res && res.ok) {
-    window.__lastState = res;
     applyBackendState(res);
+    render();
     return res;
   }
 
@@ -3627,9 +3631,10 @@ function __startEnergyAnimator() {
 }
 // --- end energy smoothing ---
 function applyBackendState(data) {
-  // Keep a reference for UI helpers that need to peek at current server state.
-  window.__lastState = data;
   if (!data || !data.ok) return;
+  // Keep the last successful server state and invalidate older in-flight polls.
+  window.__lastState = data;
+  window.__backendStateRevision = (window.__backendStateRevision || 0) + 1;
 
   if (typeof data.max_energy === "number" && data.max_energy > 0) {
     maxEnergy = data.max_energy;
@@ -3642,6 +3647,9 @@ function applyBackendState(data) {
   const now = Date.now();
   const activeTapping = now - (window.__lastTapAt || 0) < 1200;
   const pending = (typeof getPendingTaps === "function") ? getPendingTaps() : 0;
+  const queuedPackets = (typeof getTapQueue === "function") ? getTapQueue().length : 0;
+  const tapWorkPending = activeTapping || pending > 0 || queuedPackets > 0 || __tapFlushing;
+  const recoveryTest = data.recovery_test === true;
   const allowDecrease = !!window.__allowBalanceDecreaseOnce; // e.g. refill spend
   if (allowDecrease) window.__allowBalanceDecreaseOnce = false;
 
@@ -3652,19 +3660,17 @@ function applyBackendState(data) {
   const balanceCeilOnce = (typeof window.__balanceCeilOnce === "number") ? window.__balanceCeilOnce : null;
   if (balanceCeilOnce !== null) window.__balanceCeilOnce = null;
 
-  if (typeof data.balance === "number") {
+  if (Number.isFinite(data.balance)) {
   let incoming = data.balance;
   const current = (typeof state.bal === "number") ? state.bal : 0;
 
-  if (balanceCeilOnce !== null && incoming > balanceCeilOnce) {
+  if (!recoveryTest && balanceCeilOnce !== null && incoming > balanceCeilOnce) {
     incoming = balanceCeilOnce;
   }
 
-  // **Monotonic balance rule (industrial tap games):**
-  // Never allow balance to go DOWN unless we explicitly performed a spend action.
-  if (incoming < current && !allowDecrease) {
-    // ignore
-  } else {
+  // Preserve optimistic taps only while real tap work is outstanding. At rest,
+  // and throughout the read-only recovery session, the server wins both ways.
+  if (incoming >= current || allowDecrease || recoveryTest || !tapWorkPending) {
     state.bal = incoming;
   }
 }
@@ -3908,6 +3914,8 @@ function scheduleTapRetry(delayMs = 800) {
 }
 
 async function flushPendingTaps(opts = {}) {
+  // Preserve old packets for later review; do not submit them during this test.
+  if (window.__lastState?.recovery_test === true) return;
   if (__tapFlushing) {
     scheduleTapFlush(220);
     return;
@@ -4007,6 +4015,14 @@ if (rejected > 0) {
 }
 
 function onTapPress(ev) {
+  if (!Number.isFinite(state.bal)) {
+    showToast("Loading your saved balance…");
+    return;
+  }
+  if (window.__lastState?.recovery_test === true) {
+    showToast("Only the ad quest is available during this test.");
+    return;
+  }
   // Prevent ghost clicks / double-fire on iOS.
   const now = Date.now();
   if (ev && ev.type === "click" && now - __lastPointerTapAt < 450) return;
@@ -4057,6 +4073,7 @@ tapBtn.addEventListener("click", (ev) => {
 // iOS Telegram WebView may kill timers/fetch quickly on background/close.
 // We use sendBeacon for a *best-effort* final flush, then fall back to keepalive fetch.
 function beaconFlushPendingTaps(maxChunks = 6) {
+  if (window.__lastState?.recovery_test === true) return true;
   try {
     if (!navigator.sendBeacon) return false;
     let pending = getPendingTaps();
