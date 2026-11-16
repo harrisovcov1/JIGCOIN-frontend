@@ -1717,6 +1717,39 @@ button:disabled {cursor:default;}
 #coinShopSheet .hub-order small {display:block;overflow-wrap:anywhere;margin-top:8px;color:#94a3b8;}
 #coinShopSheet [hidden] {display:none!important;}
 
+/* Boosts, sponsored coins and paid packs have separate destinations. */
+.bottom-nav {gap:2px;padding-inline:6px;}
+.nav-btn {min-width:0;min-height:44px;}
+#tabShop .nav-icon {color:#fbbf24;}
+#boostSheet .sheet-header {flex-shrink:0;align-items:flex-start;padding:18px 16px 14px;}
+#boostSheet .sheet-title {font-size:22px;font-weight:800;}
+#boostSheet .sheet-subtitle {font-size:13px;line-height:1.5;}
+#boostSheet .sheet-close {flex-shrink:0;width:36px;height:36px;}
+#boostSheet .sheet-body {min-height:0;overscroll-behavior:contain;padding:16px;padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+#boostSheet [hidden] {display:none!important;}
+.boost-intro {font-size:13px;line-height:1.5;color:#cbd5e1;margin:0 0 16px;}
+.boost-card {padding:18px;margin-bottom:14px;border:1px solid #354762;border-radius:20px;background:linear-gradient(135deg,#17253d,#0d1628);}
+.boost-card.boost-recommended {border-color:#e2ad39;}
+.boost-card-top {display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.boost-icon {display:grid;place-items:center;flex-shrink:0;width:44px;height:44px;border-radius:14px;background:#3b321d;font-size:23px;color:#fcd34d;}
+.boost-double .boost-icon {background:#26365c;color:#93c5fd;font-size:20px;font-weight:800;}
+.boost-card h3 {font-size:18px;line-height:1.3;margin:0 0 4px;}
+.boost-card p {font-size:13px;line-height:1.5;color:#bfcce0;margin:0;}
+.boost-state {font-size:12px;color:#c3d3eb;min-height:20px;margin-bottom:10px;line-height:1.45;}
+.boost-action {width:100%;min-height:48px;padding:12px 14px;border:0;border-radius:13px;background:#fbbf24;color:#142036;font:inherit;font-size:14px;font-weight:800;}
+.boost-double .boost-action {background:#d9e8ff;}
+.boost-action:disabled {opacity:1;background:#25354e;color:#cbd5e1;-webkit-text-fill-color:#cbd5e1;}
+.boost-footnote {font-size:12px;line-height:1.5;color:#94a3b8;margin:8px 0 18px;}
+.boost-links {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+.boost-links button {min-height:56px;padding:12px 8px;border:1px solid #425573;border-radius:14px;background:#17243a;color:#e2e8f0;font:inherit;font-size:13px;font-weight:700;}
+#boostSheet .hub-daily {padding:16px;border:1px solid #334155;border-radius:16px;margin-top:16px;font-size:13px;line-height:1.5;}
+#boostSheet .hub-section-title {font-size:16px;font-weight:800;margin-bottom:8px;}
+#boostSheet .shop-retry {min-height:44px;margin-top:12px;border:1px solid #526783;border-radius:12px;padding:10px 14px;background:#21314b;color:#f1f5f9;font:inherit;font-size:13px;font-weight:700;}
+#boostSheet .shop-retry:disabled {opacity:1;color:#b9c7db;}
+.home-boost-shortcuts {display:flex;gap:8px;margin:14px 0;}
+.home-boost-shortcuts button {flex:1;min-width:0;min-height:44px;padding:8px;border:1px solid #435573;border-radius:12px;background:#15233a;color:#e2e8f0;font:inherit;font-size:12px;font-weight:600;}
+button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
+
 </style>
 
 <style>
@@ -1938,6 +1971,11 @@ button:disabled {cursor:default;}
           </div>
         </div>
 
+        <div class="home-boost-shortcuts">
+          <button type="button" id="homeEnergyBoost">⚡ Refill energy</button>
+          <button type="button" id="homeDoubleBoost">2× Tap boost</button>
+        </div>
+
         <div class="streak-row">
           <div class="streak-label">
             <span>🔥</span>
@@ -2013,11 +2051,11 @@ button:disabled {cursor:default;}
 
           <div class="task-card" data-code="boost_hub" data-reward="0">
             <div class="task-top">
-              <div class="task-title">Boost Hub</div>
+              <div class="task-title">Boosts</div>
               <div class="task-reward">⚡</div>
             </div>
             <div class="task-desc">
-              Secure your rank: activate boosts, refill energy, or top up fuel packs.
+              Watch an ad for full energy or double tap points for 10 minutes.
             </div>
           </div>
 
@@ -2063,10 +2101,10 @@ button:disabled {cursor:default;}
         </div>
       </div>
 
-      <!-- Floating Boost Hub button (always available) -->
-      <button class="fab-shop" id="fabShop" aria-label="Open Boost Hub">
-        <span class="fab-icon">⚡</span>
-        <span class="fab-label">Boost</span>
+      <!-- Optional floating shop shortcut (currently hidden). -->
+      <button class="fab-shop" id="fabShop" aria-label="Open Coin Shop">
+        <span class="fab-icon">🪙</span>
+        <span class="fab-label">Shop</span>
       </button>
 
     </div>
@@ -2078,7 +2116,11 @@ button:disabled {cursor:default;}
         </button>
         <button class="nav-btn" id="tabTasks">
           <div class="nav-icon">⚡️</div>
-          <span>Boost</span>
+          <span>Boosts</span>
+        </button>
+        <button class="nav-btn" id="tabShop">
+          <div class="nav-icon">🪙</div>
+          <span>Shop</span>
         </button>
         <button class="nav-btn" id="tabFriends">
           <div class="nav-icon">👥</div>
@@ -2350,50 +2392,36 @@ button:disabled {cursor:default;}
       </div>
 
       <button class="friends-share-btn" id="vipBuyBtn">Activate VIP (30 days)</button>
-      <button class="withdraw-bottom-btn" id="vipPacksBtn">Open Boost Hub</button>
+      <button class="withdraw-bottom-btn" id="vipPacksBtn">Open Coin Shop</button>
     </div>
   </div>
 
-  <!-- Boost Hub (private Telegram Stars pilot) -->
-  <div class="sheet" id="coinShopSheet">
+  <div class="sheet" id="boostSheet" role="dialog" aria-modal="true" aria-labelledby="boostSheetTitle">
     <div class="sheet-header">
       <div>
-        <div class="sheet-title">Boost Hub</div>
-        <div class="sheet-subtitle">A boost for now. A goal for tomorrow.</div>
+        <div class="sheet-title" id="boostSheetTitle">Boosts</div>
+        <div class="sheet-subtitle">More energy. More from every tap.</div>
       </div>
-      <button class="sheet-close" id="coinShopClose">×</button>
+      <button class="sheet-close" id="boostClose" aria-label="Close boosts">×</button>
     </div>
     <div class="sheet-body">
-      <div class="hub-recommend" id="hubRecommendation" aria-live="polite">Checking available boosts…</div>
-      <div class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Momentum boosts</div>
-        <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
-          Watch an eligible ad, then claim your confirmed boost.
-        </div>
-
-        <div class="tasks-grid" style="gap:10px;">
-          <div class="task-card" data-code="double_boost" data-reward="0" style="padding:10px 11px;">
-            <div class="task-top">
-              <div class="task-title">Double points</div>
-              <div class="task-reward" id="doubleBoostRewardText">x2 · 10 mins</div>
-            </div>
-            <div class="task-desc">Watch an ad for x2 taps for 10 minutes.</div>
-          </div>
-
-          <div class="task-card" data-code="boost_energy" data-reward="0" style="padding:10px 11px;">
-            <div class="task-top">
-              <div class="task-title">Energy refill</div>
-              <div class="task-reward" id="energyRefillRewardText">⚡ Full bar</div>
-            </div>
-            <div class="task-desc">Watch an ad to refill your energy bar.</div>
-          </div>
-        </div>
-      </div>
-
-      <div id="hubStarter" hidden></div>
-      <div class="hub-section-title">Choose your coin pack</div>
-      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop. Energy and streak protection are separate.</p>
-      <div id="coinPackList" aria-live="polite"><div class="shop-status">Loading packs…</div></div>
+      <p class="boost-intro" id="boostRecommendation">Choose a boost for your next tapping session.</p>
+      <article class="boost-card" data-boost-code="sp_emergency_energy">
+        <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">⚡</span><div>
+          <h3>Energy refill</h3><p>Fill your energy bar and get back to tapping.</p>
+        </div></div>
+        <div class="boost-state" id="energyBoostStatus" role="status">Checking availability…</div>
+        <button type="button" class="boost-action" id="energyBoostAction" disabled>Checking…</button>
+      </article>
+      <article class="boost-card boost-double" data-boost-code="sp_double_points">
+        <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">2×</span><div>
+          <h3>Double tap points</h3><p>Earn twice the tap points for 10 minutes.</p>
+        </div></div>
+        <div class="boost-state" id="doubleBoostStatus" role="status">Checking availability…</div>
+        <button type="button" class="boost-action" id="doubleBoostAction" disabled>Checking…</button>
+      </article>
+      <p class="boost-footnote">One eligible advert per boost. Each boost returns 24 hours after claiming.</p>
+      <button type="button" class="shop-retry" id="boostRefresh" hidden>Check availability again</button>
       <div class="vip-box hub-daily">
         <div class="hub-section-title">Your daily progress</div>
         <div id="hubDailyProgress"></div>
@@ -2409,6 +2437,27 @@ button:disabled {cursor:default;}
         <div id="momentumShieldList" hidden></div>
       </div>
 
+      <div class="boost-links">
+        <button type="button" id="boostSponsoredLink">Earn coins · Tasks →</button>
+        <button type="button" id="boostShopLink">Buy coins · Shop →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coin Shop (private Telegram Stars pilot) -->
+  <div class="sheet" id="coinShopSheet">
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title">Coin Shop</div>
+        <div class="sheet-subtitle">Choose a pack. Pay with Telegram Stars.</div>
+      </div>
+      <button class="sheet-close" id="coinShopClose">×</button>
+    </div>
+    <div class="sheet-body">
+      <div id="hubStarter" hidden></div>
+      <div class="hub-section-title">Choose your coin pack</div>
+      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop. Energy and streak protection are separate.</p>
+      <div id="coinPackList" aria-live="polite"><div class="shop-status">Loading packs…</div></div>
       <details class="hub-history"><summary>Orders &amp; payment help</summary><div id="hubOrderHistory"></div><p id="hubSupport" class="hub-small"></p></details>
       <p id="hubShopNotice" class="hub-small" role="status">Checking shop availability…</p>
     </div>
@@ -2424,8 +2473,8 @@ button:disabled {cursor:default;}
   <div class="sheet" id="sponsorSheet">
     <div class="sheet-header">
       <div>
-        <div class="sheet-title">Sponsor quests</div>
-        <div class="sheet-subtitle">High value partner quests. Complete them early to earn big points, unlock boosts, and stay ahead of other players.</div>
+        <div class="sheet-title">Sponsored Tasks</div>
+        <div class="sheet-subtitle">Watch eligible adverts and claim coin rewards. Each task has its own cooldown.</div>
       </div>
       <button class="sheet-close" id="sponsorClose">✕</button>
     </div>
@@ -2709,6 +2758,8 @@ const streakMeterFill = document.getElementById("streakMeterFill");
 
 const tabFarm = document.getElementById("tabFarm");
 const tabTasks = document.getElementById("tabTasks");
+const tabShop = document.getElementById("tabShop");
+const boostSheet = document.getElementById("boostSheet");
 const tabFriends = document.getElementById("tabFriends");
 const tabWithdraw = document.getElementById("tabWithdraw");
 
@@ -3036,7 +3087,7 @@ function setAccountPhase(phase) {
     (confirmed && phase !== "ready" ? " Figures shown are from the last successful sync." : "");
   if (retry) retry.hidden = phase === "ready" || phase === "loading";
   if (content) content.inert = phase !== "ready";
-  for (const id of ["tabTasks", "tabFriends", "tabWithdraw"]) {
+  for (const id of ["tabTasks", "tabShop", "tabFriends", "tabWithdraw"]) {
     const button = document.getElementById(id);
     if (button) button.disabled = phase !== "ready";
   }
@@ -3270,7 +3321,11 @@ function updateTaskCardStates() {
 }
 
 // keep task timers fresh
-setInterval(() => { updateTaskCardStates(); if (coinShopSheet?.classList.contains("show")) updateBoostHub(); }, 1000);
+setInterval(() => {
+  updateTaskCardStates();
+  if (coinShopSheet?.classList.contains("show")) updateBoostHub();
+  if (boostSheet?.classList.contains("show")) { updateBoostHub(); renderBoostCards(); pollBoostStatus(); }
+}, 1000);
 
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
@@ -4461,15 +4516,17 @@ function closeVipSheet() {
   }
 }
 
-// 🛒 Coin shop (Stripe packs)
+function showAppSheet(sheet, tab) {
+  document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
+  if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
+  sheetBackdrop.classList.add('show'); sheet.classList.add('show'); setActiveTab(tab);
+  sheet.querySelector('.sheet-body').scrollTop=0;
+}
+
+// Coin Shop: Telegram Stars packs and order history.
 function openCoinShopSheet() {
-  sheetBackdrop.classList.add("show");
-  coinShopSheet.classList.add("show");
-  setActiveTab(tabTasks);
-  coinShopSheet.querySelector(".sheet-body").scrollTop = 0;
-  updateTaskCardStates();
+  showAppSheet(coinShopSheet, tabShop);
   loadCoinPacks();
-  refreshHubMissions();
 }
 
 function closeCoinShopSheet() {
@@ -4571,37 +4628,7 @@ async function buyStarsPack(sku) {
   } catch(_){showToast('Could not open checkout. Check your orders before trying again.');}
   finally{hubPurchaseBusy=false;renderStarsCatalog();}
 }
-async function refreshHubMissions() {
-  const r=await apiPost('/api/mission/list',{kind:'sponsor',include_boost_sponsor_missions:true});
-  hubMissions=r?.ok&&Array.isArray(r.missions)?r.missions:[];
-  hubMissionLoadedAt=Date.now();updateBoostHub();
-}
 function updateBoostHub() {
-  const rec=document.getElementById('hubRecommendation');if(!rec)return;
-  const elapsed=(Date.now()-hubMissionLoadedAt)/1000;
-  const energy=Number(state.energy||0),cap=Number(maxEnergy||50);
-  const candidates=[{code:'sp_emergency_energy',kind:'boost_energy',name:'Energy refill',blocked:energy>=cap},
-    {code:'sp_double_points',kind:'double_boost',name:'Double points',blocked:state.doubleBoostActive}];
-  const enabled=[];
-  for(const c of candidates){
-    const m=hubMissions.find(m=>m.code===c.code);
-    const remaining=Math.max(0,Number(m?.cooldown_remaining_seconds||0)-elapsed);
-    const card=coinShopSheet.querySelector(`[data-code="${c.kind}"]`);
-    if(!card)continue;
-    card.classList.toggle('hub-recommended',false);
-    delete card.dataset.disabledReason;
-    if(m&&remaining>0&&!c.blocked){
-      card.classList.add('task-disabled');card.querySelector('.task-reward').textContent=`In ${msToCountdown(remaining*1000)}`;
-      card.dataset.disabledReason=`This boost is available in ${msToCountdown(remaining*1000)}.`;
-    }
-    if(m && !c.blocked && remaining<=0 && ['available','claimable','cooldown'].includes(m.status)){
-      if(m.status==='claimable')card.querySelector('.task-reward').textContent='Ready to claim';
-      enabled.push({...c,claimable:m.status==='claimable'});
-    }
-  }
-  const choice=energy<=cap/4?enabled[0]:enabled.find(c=>c.kind==='double_boost')||enabled[0];
-  if(choice){rec.textContent=choice.claimable?`${choice.name} is ready to claim.`:choice.kind==='boost_energy'?'Low on energy? Refill and keep tapping.':'Ready to tap? Double your tap points for 10 minutes.';coinShopSheet.querySelector(`[data-code="${choice.kind}"]`)?.classList.add('hub-recommended');}
-  else rec.textContent=hubMissions.length?'Your boosts are active, full or on cooldown. Come back when available.':'Choose an ad boost below to check availability.';
   const today=new Date(hubNow()).toISOString().slice(0,10);
   const claimed=state.lastCheckin===today;
   const days=Number(state.streakDays||0);
@@ -4665,9 +4692,7 @@ async function loadMomentumShields() {
 
 
 function openSponsorSheet() {
-  sheetBackdrop.classList.add("show");
-  sponsorSheet.classList.add("show");
-  setActiveTab(tabTasks);
+  showAppSheet(sponsorSheet, tabTasks);
 }
 
 function closeSponsorSheet() {
@@ -4729,6 +4754,118 @@ async function runMonetagQuest(code) {
   showToast("Checking your ad reward…");
 }
 
+// Direct boost flow. The same backend placements still verify and grant rewards.
+const BOOST_PLACEMENTS = Object.freeze({
+  sp_emergency_energy: {button:'energyBoostAction',status:'energyBoostStatus',name:'Energy refill'},
+  sp_double_points: {button:'doubleBoostAction',status:'doubleBoostStatus',name:'Double tap points'},
+});
+let boostLoadError=false, boostBusyCode=null, boostRefreshInFlight=null, boostNextPoll=0;
+function getBoostView(code, mission, now=Date.now()) {
+  const blocked = text => ({action:'none',disabled:true,label:text,detail:text});
+  if (!BOOST_PLACEMENTS[code]) return blocked('Unavailable');
+  if (window.__rewardActionBusy) return blocked(boostBusyCode===code?'Please wait…':'Another reward is in progress');
+  if (code==='sp_emergency_energy' && Number(state.energy||0)>=Number(maxEnergy||50))
+    return {...blocked('Energy is full'),detail:'Use some energy before watching a refill advert.'};
+  const until=Date.parse(state.doubleBoostUntil||'');
+  if (code==='sp_double_points' && (until>now || (state.doubleBoostActive && !Number.isFinite(until))))
+    return {...blocked('Double points active'),detail:Number.isFinite(until)?`2× taps · ${msToCountdown(until-now)} remaining`:'2× tap points are active.'};
+  if (boostLoadError) return {...blocked('Temporarily unavailable'),detail:'Check availability again below.'};
+  if (!mission) return blocked('Checking availability…');
+  const age=Math.max(0,(now-Number(mission.countdown_as_of_ms||hubMissionLoadedAt||now))/1000);
+  const cooldown=Math.max(0,Number(mission.cooldown_remaining_seconds||0)-age);
+  if (mission.status==='cooldown' || cooldown>0)
+    return {...blocked(cooldown>0?`Available in ${msToCountdown(cooldown*1000)}`:'Checking availability…'),detail:'Available once every 24 hours after claiming.'};
+  if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
+  if (mission.status==='claimable' && mission.attempt_id)
+    return {action:'claim',disabled:false,label:'Claim boost',detail:'Your advert is confirmed. Your boost is ready.'};
+  if (['pending','waiting','started'].includes(mission.status))
+    return {...blocked('Confirming advert…'),detail:'Your reward will appear here once confirmed.'};
+  if (mission.status!=='available') return blocked('Temporarily unavailable');
+  return {action:'start',disabled:false,label:'Watch ad',detail:code==='sp_emergency_energy'?'Reward: full energy bar':'Reward: 2× tap points for 10 minutes'};
+}
+function renderBoostCards() {
+  const views=[];
+  for (const [code,placement] of Object.entries(BOOST_PLACEMENTS)) {
+    const mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
+    const button=document.getElementById(placement.button),status=document.getElementById(placement.status);
+    button.textContent=view.label; button.disabled=view.disabled; button.dataset.action=view.action;
+    button.setAttribute('aria-label',`${view.label}: ${placement.name}`); status.textContent=view.detail;
+    boostSheet.querySelector(`[data-boost-code="${code}"]`)?.classList.remove('boost-recommended');
+    if (!view.disabled) views.push({code,view});
+  }
+  const lowEnergy=Number(state.energy||0)<=Number(maxEnergy||50)/4;
+  const preferred=views.find(v=>v.view.action==='claim') || views.find(v=>v.code===(lowEnergy?'sp_emergency_energy':'sp_double_points'));
+  if (preferred) boostSheet.querySelector(`[data-boost-code="${preferred.code}"]`)?.classList.add('boost-recommended');
+  document.getElementById('boostRecommendation').textContent=preferred?.view.action==='claim'?'A confirmed boost is ready for you.':lowEnergy?'Low on energy? Refill before your next tapping session.':'Choose a boost for your next tapping session.';
+  document.getElementById('boostRefresh').hidden=!boostLoadError && hubMissions.some(m=>BOOST_PLACEMENTS[m.code]);
+}
+function refreshBoostMissions() {
+  if (boostRefreshInFlight) return boostRefreshInFlight;
+  boostRefreshInFlight=loadSponsorMissions(true).then(missions=>{boostLoadError=false;return missions;})
+    .catch(error=>{boostLoadError=true;throw error;})
+    .finally(()=>{boostRefreshInFlight=null;boostNextPoll=Date.now()+5000;renderBoostCards();});
+  return boostRefreshInFlight;
+}
+async function openBoostSheet(focusCode) {
+  showAppSheet(boostSheet,tabTasks); renderBoostCards(); updateBoostHub();
+  await Promise.allSettled([refreshBoostMissions(),syncStateIfIdle()]);
+  renderBoostCards(); updateBoostHub();
+  if (boostSheet.classList.contains('show') && BOOST_PLACEMENTS[focusCode])
+    boostSheet.querySelector(`[data-boost-code="${focusCode}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function pollBoostStatus() {
+  if (document.hidden || !boostSheet.classList.contains('show') || window.__rewardActionBusy || boostRefreshInFlight || Date.now()<boostNextPoll) return;
+  const needsCheck=hubMissions.some(m=>BOOST_PLACEMENTS[m.code] &&
+    (['pending','waiting','started'].includes(m.status) || (m.status==='cooldown' &&
+      Number(m.countdown_as_of_ms||hubMissionLoadedAt)+Number(m.cooldown_remaining_seconds||0)*1000<=Date.now())));
+  if (needsCheck) { boostNextPoll=Date.now()+5000; void refreshBoostMissions().catch(()=>{}); }
+}
+async function claimBoostReward(code, mission) {
+  if (mission?.status!=='claimable' || !mission.attempt_id) throw new Error('AD_CONFIRMATION_PENDING');
+  const result=await apiPost('/api/mission/complete',{code,attempt_id:mission.attempt_id});
+  if (!result?.ok) throw new Error(result?.error||'REWARD_SERVICE_UNAVAILABLE');
+  await refreshBalance();
+  showToast(result.already_claimed?'This boost has already been applied.':`${result.reward_label||BOOST_PLACEMENTS[code].name} activated!`);
+}
+async function performBoostAction(code) {
+  const mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
+  if (view.disabled || window.__rewardActionBusy) return;
+  window.__rewardActionBusy=true; boostBusyCode=code; renderBoostCards();
+  try {
+    if (view.action==='claim') await claimBoostReward(code,mission);
+    else {
+      await runMonetagQuest(code);
+      const missions=await refreshBoostMissions();
+      const confirmed=missions.find(m=>m.code===code);
+      // Apply only a server-confirmed reward. Late confirmation keeps Claim available.
+      if (confirmed?.status==='claimable') await claimBoostReward(code,confirmed);
+    }
+  } catch (error) {
+    showToast({
+      ENERGY_FULL:'Your energy is already full. Your confirmed refill can be claimed after tapping.',
+      DOUBLE_ACTIVE:'Double points is already active. Your confirmed boost stays available.',
+      AD_CONFIRMATION_PENDING:'Your advert is still being confirmed. Check this boost shortly.',
+      AD_RETRY_LATER:'Please wait briefly before trying another advert.',
+      MISSION_COOLDOWN:'This boost is cooling down.',
+      REWARD_ALREADY_READY:'Your boost is ready to claim.',
+      AD_REWARDS_UNAVAILABLE:'Rewarded adverts are temporarily unavailable.',
+    }[error.message]||'The advert or reward could not be confirmed. Check the boost status before retrying.');
+  } finally {
+    try { await refreshBoostMissions(); } catch (_) {}
+    window.__rewardActionBusy=false; boostBusyCode=null; renderBoostCards();
+  }
+}
+for (const [code,placement] of Object.entries(BOOST_PLACEMENTS))
+  document.getElementById(placement.button).addEventListener('click',()=>performBoostAction(code));
+document.getElementById('boostClose').addEventListener('click',()=>{
+  boostSheet.classList.remove('show'); sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);
+});
+document.getElementById('boostRefresh').addEventListener('click',()=>{void refreshBoostMissions().catch(()=>{});});
+document.getElementById('boostShopLink').addEventListener('click',openCoinShopSheet);
+document.getElementById('boostSponsoredLink').addEventListener('click',handleSponsorQuests);
+document.getElementById('homeEnergyBoost').addEventListener('click',handleEnergyBoostTask);
+document.getElementById('homeDoubleBoost').addEventListener('click',handleDoubleBoostTask);
+
 function sponsorHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -4736,6 +4873,7 @@ function sponsorHtml(value) {
 }
 
 function renderSponsorMissions(missions) {
+  missions = Array.isArray(missions) ? missions.filter(m => !BOOST_PLACEMENTS[m.code]) : [];
   // clear any existing countdown tick
   if (window.__sponsorCountdownTick) {
     clearInterval(window.__sponsorCountdownTick);
@@ -5079,7 +5217,7 @@ async function loadSponsorMissions(forceRefresh = false) {
 
   window.__sponsorMissions = missions;
   hubMissions = missions; hubMissionLoadedAt = receivedAt;
-  if (coinShopSheet.classList.contains('show')) updateBoostHub();
+  if (boostSheet.classList.contains('show')) renderBoostCards();
   // A response arriving after Close must not restart a hidden countdown.
   if (sponsorSheet.classList.contains("show")) renderSponsorMissions(missions);
   return missions;
@@ -5188,18 +5326,8 @@ function openFriendsSheet() {
 }
 
 
-// Both boost cards open the same server-verified ad/claim flow as daily quests.
-async function openRewardPlacement(code) {
-  openSponsorSheet();
-  try {
-    await loadSponsorMissions(true);
-    const row = sponsorList.querySelector(`[data-quest-code="${code}"]`);
-    row?.scrollIntoView({block:"nearest",behavior:"smooth"});
-    row?.classList.add("reward-focus");
-  } catch (_) { showToast("Could not load ad rewards. Please try again."); }
-}
-async function handleEnergyBoostTask() { await openRewardPlacement("sp_emergency_energy"); }
-async function handleDoubleBoostTask() { await openRewardPlacement("sp_double_points"); }
+async function handleEnergyBoostTask() { await openBoostSheet('sp_emergency_energy'); }
+async function handleDoubleBoostTask() { await openBoostSheet('sp_double_points'); }
 
 // Task click router (includes double_boost)
 document.querySelectorAll(".task-card").forEach((card) => {
@@ -5243,7 +5371,7 @@ document.querySelectorAll(".task-card").forEach((card) => {
     } else if (code === "coin_shop") {
       handleCoinShop();
     } else if (code === "boost_hub") {
-      handleCoinShop();
+      openBoostSheet();
     } else if (code === "leaderboard") {
       setActiveTab(tabFriends);
       openLeaderboard("friends");
@@ -5266,7 +5394,7 @@ document.querySelectorAll(".task-card").forEach((card) => {
 });
 
 function setActiveTab(activeBtn) {
-  [tabFarm, tabTasks, tabFriends, tabWithdraw].forEach((btn) => {
+  [tabFarm, tabTasks, tabShop, tabFriends, tabWithdraw].forEach((btn) => {
     if (!btn) return;
     if (btn === activeBtn) {
       btn.classList.add("active");
@@ -5428,14 +5556,15 @@ if (starterStepCoinbaseBtn) {
 tabFarm.addEventListener("click", () => {
   setActiveTab(tabFarm);
   sheetBackdrop.classList.remove("show");
-  friendsSheet.classList.remove("show");
-  withdrawSheet.classList.remove("show");
+  document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
+  if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
 });
 
 tabTasks.addEventListener("click", () => {
   setActiveTab(tabTasks);
-  openCoinShopSheet(); // Boost Hub / Fuel Packs
+  openBoostSheet();
 });
+tabShop.addEventListener('click', openCoinShopSheet);
 
 tabFriends.addEventListener("click", () => {
   setActiveTab(tabFriends);
@@ -5471,11 +5600,7 @@ vipClose.addEventListener("click", () => {
   setActiveTab(tabFarm);
 });
 
-sponsorClose.addEventListener("click", () => {
-  sponsorSheet.classList.remove("show");
-  sheetBackdrop.classList.remove("show");
-  setActiveTab(tabFarm);
-});
+sponsorClose.addEventListener("click", closeSponsorSheet);
 
 
 vipBuyBtn.addEventListener("click", () => {
@@ -5510,6 +5635,8 @@ sheetBackdrop.addEventListener("click", () => {
   vipSheet.classList.remove("show");
   sponsorSheet.classList.remove("show");
   coinShopSheet.classList.remove("show");
+  boostSheet.classList.remove("show");
+  if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
   sheetBackdrop.classList.remove("show");
   setActiveTab(tabFarm);
 });
