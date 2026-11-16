@@ -1887,17 +1887,50 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 }
 
 </style>
+<style>
+/* Home edition: immediate play, confirmed progress, one navigation bar. */
+.main{padding-top:10px!important;padding-bottom:4px!important}
+.header .home-balance-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:4px 12px;padding:10px 13px!important}
+.balance-heading{grid-column:1/-1}.balance-heading .card-balance-token{min-height:32px;font:600 11px system-ui;color:#d8e3f3;cursor:pointer}
+.home-balance-card .card-balance-value{grid-column:1;grid-row:2;font-size:34px;line-height:1.1;margin:0;align-self:center;font-variant-numeric:tabular-nums}
+.home-balance-card .card-balance-value.long-balance{font-size:21px!important;overflow-wrap:anywhere}
+.home-balance-card .global-rank-block{grid-column:2;grid-row:2;padding:6px 8px!important;min-height:44px;box-shadow:none!important}
+.global-rank-label{font-size:9px}.global-rank-tier{font-size:10px}.global-rank-top-row{gap:5px}
+.home-race{grid-column:1/-1;font-size:11px;font-weight:600;color:#f9d985;margin:5px 0 0;line-height:1.4;min-height:16px}
+.home-balance-card .rank-bar{grid-column:1/-1;margin:3px 0 0;min-height:16px;height:16px}.rank-points{font-size:9px}.rank-fill{background:#e7b747;opacity:.28}
+.tap-card{padding:10px 12px!important;margin:8px 0!important;background:radial-gradient(ellipse at 50% 40%,#f8c85b0c,transparent 58%),#101a2d}
+.tap-card-header .tap-card-left{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;width:100%;flex-wrap:wrap}.tap-title{font-size:13px}.tap-hint{margin:0;padding:0;font-size:11px}.tap-card-header{min-height:20px}
+#onboardingCoach{flex-basis:100%}
+.tap-btn-wrap{--coin-size:clamp(140px,25dvh,200px);--coin-light:#fff3bb;--coin-mid:#e2a52c;--coin-dark:#ad6c13;--coin-ink:#704909;--coin-edge:#edbd50;--ring-color:#f5cc69;width:calc(var(--coin-size) + 26px);height:calc(var(--coin-size) + 26px);margin:8px auto 4px;display:grid;place-items:center;isolation:isolate;touch-action:none}
+[data-coin-tier="0"]{--coin-light:#ffdfae;--coin-mid:#ca8c54;--coin-dark:#865031;--coin-ink:#64371e;--coin-edge:#d49b64;--ring-color:#dfa06c}
+[data-coin-tier="2"]{--coin-light:#f3fbff;--coin-mid:#a9c4da;--coin-dark:#5c7d98;--coin-ink:#284d69;--coin-edge:#cbe4f2;--ring-color:#a0d6ff}
+[data-coin-tier="3"]{--coin-light:#c3fff0;--coin-mid:#4eb9ab;--coin-dark:#246c70;--coin-ink:#165453;--coin-edge:#a6efdf;--ring-color:#70e7cf}
+[data-coin-tier="4"]{--coin-light:#f2dcff;--coin-mid:#b292dc;--coin-dark:#695095;--coin-ink:#4a286b;--coin-edge:#d7b3f7;--ring-color:#cfb0ff}
+[data-coin-tier="5"]{--coin-light:#e2c880;--coin-mid:#403a31;--coin-dark:#171e28;--coin-ink:#ffe2a1;--coin-edge:#edc56e;--ring-color:#ffe0a0}
+.tap-btn-main{width:var(--coin-size);height:var(--coin-size);background:linear-gradient(135deg,var(--coin-light),var(--coin-mid) 53%,var(--coin-dark) 82%,var(--coin-light));border-color:var(--coin-edge);color:var(--coin-ink);box-shadow:inset 0 0 0 3px #70440988,inset 0 0 24px #fff3be44,0 6px 0 var(--coin-dark),0 12px 32px #e4aa2318;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer;transition:filter .1s}
+.tap-btn-main:active{transform:translateY(2px) scale(.985);filter:brightness(1.1);box-shadow:inset 0 0 0 3px #70440988,0 3px 0 var(--coin-dark)}
+.coin-emblem{font-size:calc(var(--coin-size) * .45);color:var(--coin-ink);text-shadow:1px 2px 0 #ffffff45,-1px -1px 0 #0003}.coin-wordmark{font-size:8px}.tap-btn-label{font-size:8px;margin-top:5px}.coin-progress{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;transform:rotate(-90deg)}.coin-progress circle{fill:none;stroke:#26364c;stroke-width:2}.coin-progress #homeGoalRing{stroke:var(--ring-color);stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 3px #f6c55a55);transition:stroke-dashoffset .15s ease}
+.coin-feedback{position:absolute;inset:0;pointer-events:none;z-index:4}.coin-particle{position:absolute;left:50%;top:34%;font-size:23px;font-weight:800;color:#ffdf88;text-shadow:0 2px 8px #000;animation:coin-rise .65s ease-out forwards;pointer-events:none}
+@keyframes coin-rise{from{opacity:1;transform:translate(var(--drift),0) scale(.9)}to{opacity:0;transform:translate(var(--drift),-52px) scale(1.15)}}
+.home-goal{text-align:center;font-size:13px;font-weight:750;line-height:1.4;color:#f6d98e;font-variant-numeric:tabular-nums}.home-goal-caption{text-align:center;font-size:10px;color:#9eafc8;line-height:1.4;margin-top:1px}
+.home-celebration{position:absolute;z-index:5;top:32%;left:50%;transform:translateX(-50%);min-width:210px;max-width:280px;padding:10px 12px;background:#15233cf2;border:1px solid #e8c369;border-radius:13px;box-shadow:0 8px 24px #0006;text-align:center;pointer-events:none;font-size:13px;font-weight:800;color:#ffe3a1;line-height:1.4}.home-celebration small{display:block;font-weight:500;font-size:11px;color:#d7e3f4;margin-top:2px}
+.home-session-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;margin-top:2px}.quiet-button,.home-boost-action{font:600 10px/1.35 system-ui;border:0;min-height:40px;background:transparent;color:#a6bad4;cursor:pointer;padding:4px 2px}.home-boost-action{color:#b9d9ff;border-radius:10px;padding:4px 9px;background:#1b2e48}.home-boost-action[data-active=true]{color:#ffda85;background:#44361d}.home-session-row .quiet-button[data-state=error]{color:#ffbf9b}
+.tap-metrics{margin-top:2px;gap:8px}.tap-metric{padding:6px 9px;min-width:0}.metric-label,.metric-sub{font-size:10px}.metric-value{font-size:17px}.energy-bar{margin:4px 0;height:4px}
+.home-daily{display:grid;grid-template-columns:minmax(0,1fr) 84px;gap:8px;align-items:start;padding:8px 12px}.home-daily .shop-retry{width:84px;max-width:84px;min-height:44px;font-size:11px;align-self:start}.home-daily .streak-details{margin:0;min-width:0}.home-daily .streak-details summary{min-height:44px;gap:6px;list-style:none;justify-content:space-between;align-items:center}.home-daily .streak-details summary::-webkit-details-marker{display:none}.home-daily .streak-details summary::before{display:none}.home-daily .streak-details summary>span{margin:0}.home-daily strong{font-size:12px;color:#eef3fc;display:block}#hubDailyProgress{display:block;margin-top:3px;font-size:10px;font-weight:400;color:#aabdd6}.daily-chevron{font-size:15px}.home-daily .streak-details[open]{grid-column:1/-1;grid-row:1}.home-daily .streak-details[open] summary{padding-right:95px}.home-daily .shop-retry{grid-column:2;grid-row:1}
+.coin-tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.coin-tier{border:1px solid #33445c;background:#101c30;border-radius:14px;padding:12px;display:grid;grid-template-columns:36px 1fr;gap:3px 8px;align-items:center}.coin-tier[data-current=true]{border-color:#e4bf68;background:#2c2a27}.coin-tier .mini-coin{grid-row:1/3;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--coin-light,#fff3bb),var(--coin-mid,#e2a52c),var(--coin-dark,#ad6c13));color:var(--coin-ink,#704909);border:2px solid var(--coin-edge,#edbd50);font:900 23px Georgia}.coin-tier strong{font-size:12px}.coin-tier small{font-size:10px;color:#b8c8df}.journey-next{font-size:14px;color:#f1d18c;margin:0 0 14px}.journey-footnote{font-size:11px;line-height:1.5;color:#9fb3d0}.journey-record{font-size:12px;padding:12px;background:#15253c;border-radius:12px}.haptic-setting{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;font-size:13px}.haptic-setting small{display:block;font-size:10px;color:#a7b8cf;margin-top:3px}.haptic-setting input{width:22px;height:22px;accent-color:#f5c76b}.home-sync-details{font-size:12px;color:#b8c8dd}.home-sync-details summary{min-height:44px;display:flex;align-items:center;cursor:pointer}.home-sync-details .tap-sync-status{font-size:12px;line-height:1.5;margin:4px 0}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid #d8b977;outline-offset:3px}
+@media(max-height:680px){.tap-btn-wrap{--coin-size:140px;margin-block:2px}.home-goal-caption{display:none}.main{padding-top:6px!important}.header .home-balance-card{padding:8px 11px!important;gap:2px 8px}.home-balance-card .card-balance-value{font-size:29px}.tap-card{padding:8px 10px!important}.home-daily{padding:6px 10px}.home-race{margin-top:3px;font-size:10px}}
+@media(max-width:350px){.home-balance-card .card-balance-value{font-size:27px}.global-rank-tier{font-size:9px}.home-goal{font-size:12px}.coin-tier{grid-template-columns:30px 1fr;padding:9px;gap:3px 6px}.coin-tier .mini-coin{width:28px;height:28px;font-size:20px}}
+@media(prefers-reduced-motion:reduce){.coin-particle{animation:none;display:none}.coin-progress #homeGoalRing{transition:none}.tap-btn-main:active{transform:none}}
+
+</style>
 </head>
 <body>
   <div class="app-shell">
     <div class="main" id="mainScroll">
-    <div class="top-bar">
-      <div class="brand-lockup"><span class="brand-coin" aria-hidden="true">J</span><strong>JigCoin</strong></div>
-      <span class="season-label">Season 1 · Early Access</span>
-    </div>
     <div class="header">
       <div class="card home-balance-card">
-        <div class="balance-heading"><span class="card-balance-label">Your coins</span><span class="card-balance-token" id="rankName">—</span></div>
+        <div class="balance-heading"><span class="card-balance-label">Your coins</span><button class="card-balance-token" id="homeJourneyOpen" type="button" aria-label="View your coin evolution"><span id="rankName">—</span><span aria-hidden="true"> ›</span></button></div>
         <div class="card-balance-value" id="balanceText">…</div>
         <button class="global-rank-block" id="homeLeaderboard" type="button" aria-label="Open global leaderboard">
           <span class="global-rank-top-row"><span class="global-rank-label">Leaderboard</span><strong class="global-rank-value" id="globalRankValue">—</strong><span aria-hidden="true">›</span></span>
@@ -1905,7 +1938,8 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
           <span class="global-rank-bar"><span class="global-rank-fill" id="globalRankFill"></span></span>
           <span class="sr-only" id="globalRankNextText">Rank is confirmed by the server.</span>
         </button>
-        <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points">Next level <span id="nextRankPointsText">—</span></span></div>
+        <p class="home-race" id="homeRace">Your next rival appears after sync.</p>
+        <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points"><span id="homeRankGoalLabel">Next level</span> <span id="nextRankPointsText">—</span></span></div>
       </div>
       <div class="event-banner" id="eventBanner"><div class="event-row"><div><div class="event-title" id="eventTitle">Live event</div><div class="event-sub" id="eventSub"></div></div><div class="pill" id="seasonPill">Season</div></div></div>
     </div>
@@ -1923,7 +1957,7 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
               Tap the JigCoin. Build your score.
             </div>
             <div class="tap-hint">
-              <span id="perTap">+1</span> coin per tap
+              <span id="perTap">+1</span> per tap
             </div>
 
             <div id="onboardingCoach" class="onboarding-coach" style="display:none;">
@@ -1942,14 +1976,19 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
           </div>
         </div>
 
-        <div class="tap-btn-wrap">
+        <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1">
+          <svg class="coin-progress" viewBox="0 0 220 220" aria-hidden="true"><circle cx="110" cy="110" r="106"/><circle id="homeGoalRing" cx="110" cy="110" r="106" pathLength="100"/></svg>
+          <div class="coin-feedback" id="homeTapFeedback" aria-hidden="true"></div>
+          <div class="home-celebration" id="homeCelebration" role="status" aria-live="polite" hidden></div>
           <button class="tap-btn-main" id="tapBtn" disabled>
             <div class="tap-btn-ring"></div><span class="coin-emblem" aria-hidden="true">J</span><span class="coin-wordmark" aria-hidden="true">JIGCOIN</span>
             <div class="tap-btn-label" id="tapButtonLabel">Loading</div>
           </button>
         </div>
 
-        <div id="tapSyncStatus" class="tap-sync-status" role="status" aria-live="polite" hidden></div>
+        <div class="home-goal" id="homeGoal">Your next coin milestone is loading…</div>
+        <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div>
+        <div class="home-session-row"><button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button><button id="homeBoostAction" class="home-boost-action" type="button">2× tap boost ›</button></div>
         <div class="tap-metrics">
           <div class="tap-metric">
             <div class="metric-label">Energy</div>
@@ -1976,8 +2015,8 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
       </div>
       <section class="home-daily" aria-label="Daily check-in">
-        <div class="daily-overview"><div><strong>Daily check-in</strong><p id="hubDailyProgress">Loading your streak…</p></div><button type="button" class="shop-retry" id="hubDailyClaim" disabled>Checking…</button></div>
-        <details class="streak-details"><summary>Streak benefits <span id="streakDaysText">—</span></summary><div class="streak-meter"><div class="streak-meter-fill" id="streakMeterFill"></div></div><p id="streakSubText"></p></details>
+        <details class="streak-details" id="homeDailyDetails"><summary><span><strong id="homeDailyTitle">Daily check-in</strong><span id="hubDailyProgress">Loading your streak…</span></span><span class="daily-chevron" aria-hidden="true">⌄</span></summary><div class="streak-meter"><div class="streak-meter-fill" id="streakMeterFill"></div></div><p><span id="streakDaysText">—</span> · <span id="homeDailyMilestone"></span></p><p id="streakSubText"></p></details>
+        <button type="button" class="shop-retry" id="hubDailyClaim" disabled>Checking…</button>
       </section>
     </div>
     </div>
@@ -2006,6 +2045,11 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
   </div>
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+  <div class="sheet" id="homeJourneySheet" role="dialog" aria-labelledby="homeJourneyTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Your coin journey</div><div class="sheet-subtitle">Season 1 · Early Access · Appearance follows your confirmed coin balance.</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body"><p class="journey-next" id="homeJourneyNext"></p><div class="coin-tier-grid" id="homeTierGrid"></div><p class="journey-footnote">Coin styles celebrate your rank. They do not add coins or change tap rewards.</p><p class="journey-record" id="homeMilestoneRecord"></p><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></div>
+  </div>
 
   <div class="sheet" id="friendsSheet">
     <div class="sheet-header"><div><div class="sheet-title">Invite</div><div class="sheet-subtitle">Play together. Earn referral rewards.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
@@ -2764,6 +2808,165 @@ function findRank(bal) {
   return current;
 }
 
+// Home progress: cosmetic milestones never create rewards or alter tap accounting.
+const HOME_SEASON_KEY = 'season-1';
+const HOME_TIERS = [
+  {name:'Recruit',min:0}, {name:'Grinder',min:10000}, {name:'Operator',min:50000},
+  {name:'Commander',min:150000}, {name:'General',min:500000}, {name:'Empire OG',min:1500000}
+];
+function homeTierIndex(balance) {
+  if (!Number.isSafeInteger(balance) || balance < 0) return 0;
+  return HOME_TIERS.reduce((index,tier,i)=>balance>=tier.min?i:index,0);
+}
+function homeMajorMilestones() {
+  const values=[1000,5000,10000,25000,50000,100000,250000,500000];
+  for(let scale=1000000;scale<=1e15;scale*=10)for(const n of [1,2,5])if(Number.isSafeInteger(n*scale))values.push(n*scale);
+  return values;
+}
+function homeGoalModel(balance) {
+  if(!Number.isSafeInteger(balance)||balance<0)return null;
+  const step=balance<50000?1000:balance<150000?5000:balance<500000?10000:balance<1500000?25000:balance<10000000?100000:10**Math.max(5,Math.floor(Math.log10(balance))-1);
+  const nextMajor=homeMajorMilestones().find(n=>n>balance);
+  const next=Math.min((Math.floor(balance/step)+1)*step,nextMajor??Number.MAX_SAFE_INTEGER);
+  if(!Number.isSafeInteger(next)||next<=balance)return null;
+  const previousMajor=homeMajorMilestones().filter(n=>n<=balance).at(-1)||0;
+  const start=Math.max(Math.floor(balance/step)*step,previousMajor);
+  return{next,remaining:next-balance,progress:Math.max(0,Math.min(1,(balance-start)/(next-start))),major:next===nextMajor};
+}
+function advanceHomeMilestone(previous,balance,bootstrap=false) {
+  if(!Number.isSafeInteger(balance)||balance<0)return{record:previous,milestone:null};
+  const old=Number.isSafeInteger(previous?.highWater)&&previous.highWater>=0?previous.highWater:null;
+  const highWater=Math.max(old??balance,balance);
+  const crossed=old===null||bootstrap?[]:homeMajorMilestones().filter(n=>n>old&&n<=balance);
+  return{record:{highWater},milestone:crossed.at(-1)??null};
+}
+function homeRaceModel(snapshot,identity) {
+  const me=snapshot?.me,rows=snapshot?.window;
+  if(!snapshot?.ok||!me||me.telegram_id!==identity||!Array.isArray(rows)||!Number.isSafeInteger(me.balance)||me.balance<0||!Number.isSafeInteger(me.global_rank)||me.global_rank<1||!Number.isSafeInteger(me.global_total)||me.global_total<me.global_rank)return null;
+  const valid=row=>row&&Number.isSafeInteger(row.balance)&&row.balance>=0&&Number.isSafeInteger(row.telegram_id)&&row.telegram_id>0&&row.telegram_id!==identity;
+  if(me.global_rank===1){
+    if(me.global_total===1)return{rank:1,text:'First on the leaderboard · No rival yet'};
+    const below=rows.find(row=>row.global_rank===2);
+    if(!valid(below)||below.balance>me.balance)return null;
+    const lead=me.balance-below.balance;
+    return{rank:1,text:lead>0?`${lead.toLocaleString('en-GB')} coins ahead of #2`:'#1 by ranking order · Tied on coins'};
+  }
+  const above=rows.find(row=>row.global_rank===me.global_rank-1);
+  if(!valid(above)||above.balance<me.balance)return null;
+  const needed=above.balance-me.balance+1;
+  if(!Number.isSafeInteger(needed))return null;
+  return{rank:me.global_rank,text:`${needed.toLocaleString('en-GB')} coin${needed===1?'':'s'} to pass #${above.global_rank.toLocaleString('en-GB')}`};
+}
+function homeBoostRemaining(active,until,now=Date.now()) {
+  const expires=Date.parse(until||'');return active&&Number.isFinite(expires)?Math.max(0,expires-now):0;
+}
+// End of pure Home models.
+let homeIdentity=null,homeMilestoneState=null,homeConfirmedBalance=null,homeCelebrationTimer=null;
+let homeRaceSnapshot=null,homeRaceSyncedAt=0,homeRaceAttemptAt=0,homeRaceBusy=false,homeLastHaptic=0;
+function homeUserId(){const id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;return Number.isSafeInteger(id)&&id>0?id:null;}
+function homeMilestoneKey(id){return `jigcoin_home_milestones_v1:${HOME_SEASON_KEY}:${id}`;}
+function observeHomeConfirmedState(data) {
+  const id=homeUserId();
+  if(!id||!data?.ok||!Number.isSafeInteger(data.balance)||data.balance<0)return;
+  const first=homeIdentity!==id;
+  if(first){
+    homeIdentity=id;homeMilestoneState=safeParseJSON(appStorage.getItem(homeMilestoneKey(id)),null);
+    homeRaceSnapshot=null;homeRaceSyncedAt=0;homeRaceAttemptAt=0;
+    clearTimeout(homeCelebrationTimer);document.getElementById('homeCelebration').hidden=true;
+  }
+  homeConfirmedBalance=data.balance;
+  const updated=advanceHomeMilestone(homeMilestoneState,data.balance,first);
+  homeMilestoneState=updated.record;
+  appStorage.setItem(homeMilestoneKey(id),JSON.stringify(homeMilestoneState));
+  if(updated.milestone && !document.hidden && !document.getElementById('mainScroll').inert)showHomeCelebration(updated.milestone);
+}
+function showHomeCelebration(value) {
+  const el=document.getElementById('homeCelebration');
+  el.replaceChildren(document.createTextNode(`${formatNumber(value)} coins reached!`));
+  const sub=document.createElement('small');sub.textContent='Milestone confirmed · Keep climbing';el.append(sub);el.hidden=false;
+  clearTimeout(homeCelebrationTimer);homeCelebrationTimer=setTimeout(()=>{el.hidden=true;},3500);
+  try{if(appStorage.getItem('jigcoin_home_haptics')!=='off')window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success');}catch(_){}
+}
+function animateHomeTap(points) {
+  // A visual effect must never stop a queued tap rendering or flushing.
+  try {
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const coin=document.getElementById('tapBtn'),layer=document.getElementById('homeTapFeedback');
+  if(!reduced){
+    if(coin.animate){(coin.getAnimations?.()||[]).forEach(a=>a.cancel());coin.animate([{transform:'translateY(3px) scale(.97)',filter:'brightness(1.15)'},{transform:'translateY(0) scale(1)',filter:'brightness(1)'}],{duration:160,easing:'ease-out'});}
+    while(layer.children.length>=8)layer.firstElementChild.remove();
+    const particle=document.createElement('span');particle.className='coin-particle';particle.textContent=`+${points}`;particle.style.setProperty('--drift',`${Math.round(Math.random()*64-44)}px`);layer.append(particle);setTimeout(()=>particle.remove(),700);
+  }
+  if(Date.now()-homeLastHaptic>=60&&appStorage.getItem('jigcoin_home_haptics')!=='off'){
+    homeLastHaptic=Date.now();try{window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');}catch(_){}
+  }
+  } catch (_) { /* Feedback is optional; tap accounting continues. */ }
+}
+function renderHomeProgress(view) {
+  balanceText.classList.toggle('long-balance',balanceText.textContent.length>9);
+  const goal=homeGoalModel(Number.isFinite(view?.bal)?Math.floor(view.bal):null);
+  document.getElementById('homeGoal').textContent=goal?`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${formatNumber(goal.next)}`:'Your next milestone appears after sync.';
+  document.getElementById('homeGoalCaption').textContent=goal?(goal.major?'Next major milestone':'Next coin milestone'):'Build your score, one tap at a time.';
+  document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
+  document.getElementById('homeCoinWrap').dataset.coinTier=String(homeTierIndex(homeConfirmedBalance));
+  const topTier=Number.isFinite(homeConfirmedBalance)&&homeTierIndex(homeConfirmedBalance)===HOME_TIERS.length-1;
+  document.getElementById('homeRankGoalLabel').textContent=topTier?'Top rank':'Next level';
+  if(topTier){nextRankPointsTextEl.textContent='unlocked';rankProgressFill.style.transform='scaleX(1)';}
+  renderHomeRace();renderHomeSession();
+}
+function renderHomeSession() {
+  const status=document.getElementById('homeSaveStatus'),action=document.getElementById('homeBoostAction');if(!status||!action)return;
+  let pending=0,message='';
+  if(window.__lastState?.recovery_gameplay){const q=readRecoveryQueue();pending=q.pending+(q.packet?.count||0);message=recoveryTapMessage;}
+  else{pending=getPendingTaps()+getTapQueue().reduce((sum,p)=>sum+Number(p.count||0),0);}
+  status.textContent=!accountIsReady()?'Sync paused':message?'Save details ›':pending?'Saving…':'Saved ✓';
+  status.dataset.state=message?'error':pending?'pending':'saved';
+  document.getElementById('homeNormalSyncStatus').textContent=message||(!accountIsReady()?'Reconnect to refresh your saved balance.':pending?'Your taps are stored on this device while confirmation is pending.':'All queued taps have been confirmed.');
+  const remaining=homeBoostRemaining(state.doubleBoostActive,state.doubleBoostUntil);
+  const projected=recoveryTapView(state);
+  const low=Number.isFinite(projected.energy)&&projected.energy<=maxEnergy*.2;
+  action.dataset.focus=low?'sp_emergency_energy':'sp_double_points';action.dataset.active=String(remaining>0);
+  action.textContent=low?(remaining>0?`⚡ Refill · 2× ${msToCountdown(remaining)}`:'⚡ Refill energy ›'):remaining>0?`2× active · ${msToCountdown(remaining)}`:'2× tap boost ›';
+  action.disabled=!accountIsReady();
+}
+function renderHomeRace(){
+  const el=document.getElementById('homeRace');if(!el)return;
+  const race=homeRaceModel(homeRaceSnapshot,homeUserId());
+  const fresh=Date.now()-homeRaceSyncedAt<90000;
+  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text+' · Last sync';el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
+  else{el.textContent=accountIsReady()?'View the leaderboard to see your rivals':'Race updates when your account reconnects';el.title='';}
+}
+async function refreshHomeRace(){
+  if(homeRaceBusy||!accountIsReady()||document.hidden||navigator.onLine===false||document.getElementById('mainScroll').inert||Date.now()-homeRaceAttemptAt<60000)return;
+  const id=homeUserId();if(!id)return;
+  homeRaceBusy=true;homeRaceAttemptAt=Date.now();
+  try{const res=await apiPost('/api/leaderboard/window',{},{silent:true,timeoutMs:8000});
+    if(id!==homeUserId()||!accountIsReady())return;
+    if(homeRaceModel(res,id)){homeRaceSnapshot=res;homeRaceSyncedAt=Date.now();}else homeRaceSnapshot=null;
+  }catch(_){homeRaceSnapshot=null;}finally{homeRaceBusy=false;renderHomeRace();}
+}
+function openHomeJourney(showSync=false){
+  if(!accountIsReady())return;
+  const tier=homeTierIndex(homeConfirmedBalance),next=HOME_TIERS[tier+1];
+  document.getElementById('homeJourneyNext').textContent=next?`${formatNumber(Math.max(0,next.min-homeConfirmedBalance))} coins to ${next.name} · ${formatNumber(next.min)} total`:'Empire OG unlocked · Your milestone journey continues.';
+  const grid=document.getElementById('homeTierGrid');grid.replaceChildren();
+  HOME_TIERS.forEach((t,i)=>{const item=document.createElement('div');item.className='coin-tier';item.dataset.coinTier=String(i);item.dataset.current=String(i===tier);const coin=document.createElement('span');coin.className='mini-coin';coin.textContent='J';coin.setAttribute('aria-hidden','true');const name=document.createElement('strong');name.textContent=t.name;const detail=document.createElement('small');detail.textContent=`${formatNumber(t.min)} coins${i===tier?' · Current':''}`;item.append(coin,name,detail);grid.append(item);});
+  const milestone=homeMajorMilestones().filter(n=>n<=(homeMilestoneState?.highWater||0)).at(-1);
+  document.getElementById('homeMilestoneRecord').textContent=milestone?`Highest milestone recorded here: ${formatNumber(milestone)} coins`:'Your first major milestone: 1,000 coins';
+  document.getElementById('homeHaptics').checked=appStorage.getItem('jigcoin_home_haptics')!=='off';
+  document.getElementById('homeSyncDetails').open=showSync;
+  showAppSheet(document.getElementById('homeJourneySheet'),tabFarm);document.getElementById('mainScroll').inert=true;
+  document.getElementById('homeJourneyClose').focus();
+}
+document.getElementById('homeJourneyOpen').addEventListener('click',()=>openHomeJourney());
+document.getElementById('homeSaveStatus').addEventListener('click',()=>openHomeJourney(true));
+document.getElementById('homeJourneyClose').addEventListener('click',()=>{document.getElementById('homeJourneySheet').classList.remove('show');sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);document.getElementById('homeJourneyOpen').focus();});
+document.getElementById('homeBoostAction').addEventListener('click',()=>openBoostSheet(document.getElementById('homeBoostAction').dataset.focus));
+document.getElementById('homeHaptics').addEventListener('change',e=>appStorage.setItem('jigcoin_home_haptics',e.target.checked?'on':'off'));
+window.addEventListener('jigcoin:account-ready',()=>setTimeout(refreshHomeRace,0));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderHomeRace();refreshHomeRace();}});
+// End Home progress.
+
 // Global position must come from the server; a balance cannot estimate it.
 function updateGlobalRankVisuals() {
   if (!globalRankValueEl || !globalRankFillEl || !globalRankNextTextEl) return;
@@ -2949,6 +3152,8 @@ if (starterBanner && starterBannerFill) {
 
   updateGlobalRankVisuals();
   updateTaskCardStates();
+  renderHomeProgress(view);
+  if (accountIsReady()) updateBoostHub();
 }
 
 
@@ -3046,13 +3251,15 @@ function updateTaskCardStates() {
 setInterval(() => {
   updateTaskCardStates();
   updateBoostHub();
+  renderHomeSession();
+  refreshHomeRace();
   if (boostSheet?.classList.contains("show")) { renderBoostCards(); pollBoostStatus(); }
 }, 1000);
 
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends))$/.test(path);
+  const readOnly = /^\/api\/(state|config|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -3627,6 +3834,7 @@ function applyBackendState(data) {
     state.inviteLink = data.invite_link;
   }
 
+  observeHomeConfirmedState(data);
   saveStateLocal(state);
 }
 
@@ -3879,6 +4087,7 @@ function updateRecoveryTapFeedback() {
   if (el.hidden) return;
   const q = readRecoveryQueue();
   const pending = q.pending + (q.packet?.count || 0);
+  if (typeof renderHomeSession === "function") renderHomeSession();
   el.textContent = `${q.received} registered · ${q.confirmed} confirmed · ${pending} pending` +
     (q.limited ? ` · ${q.limited} limited by energy/daily cap` : "") +
     (recoveryTapMessage ? ` — ${recoveryTapMessage}` : pending ? " — Saving displayed taps…" : " — Balance saved");
@@ -3900,6 +4109,7 @@ async function runRecoveryTap(addTap = true) {
     ++__stateRequestVersion; // Discard state polls begun before this input.
     window.__lastTapAt = Date.now();
     recoveryTapMessage = "";
+    if (typeof animateHomeTap === "function") animateHomeTap(state.doubleBoostActive ? perTapBase * 2 : perTapBase);
     render(); // Immediate projected balance, points and energy; no server round trip.
     scheduleRecoveryFlush(); return;
   }
@@ -3997,6 +4207,7 @@ function onTapPress(ev) {
   state.energy = Math.max(0, (state.energy || 0) - 1);
   state.bal = (state.bal || 0) + perTap;
   state.today = (state.today || 0) + perTap;
+  if (typeof animateHomeTap === "function") animateHomeTap(perTap);
   render();
 
   if (typeof handleOnboardingTap === "function") {
@@ -4359,8 +4570,10 @@ function updateBoostHub() {
   const claimed=state.lastCheckin===today;
   const days=Number(state.streakDays||0);
   const next=(hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
-  document.getElementById('hubDailyProgress').textContent=`${days} day${days===1?'':'s'} · ${claimed?'Today’s check-in saved.':'Daily check-in available.'}${next?` Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:''}`;
-  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed || !accountIsReady();daily.textContent=claimed?'Claimed today':'Claim reward';
+  document.getElementById('homeDailyTitle').textContent=claimed?'Checked in ✓':'Daily check-in';
+  document.getElementById('hubDailyProgress').textContent=`Day ${days}${claimed?' · Streak saved':' · Your reward is ready'}`;
+  document.getElementById('homeDailyMilestone').textContent=next?`Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:'Check in daily to build your streak.';
+  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed || !accountIsReady();daily.textContent=claimed?'Claimed':'Claim reward';
   document.getElementById('hubOwnedShield').hidden=Number(state.momentumShieldQty||0)<=0;
   if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
   const expires=Date.parse(hubCatalog?.offer_expires_at||'');
@@ -5279,6 +5492,7 @@ if (starterStepCoinbaseBtn) {
 tabFarm.addEventListener("click", () => {
   closeLeaderboard();
   setActiveTab(tabFarm);
+  refreshHomeRace();
   sheetBackdrop.classList.remove("show");
   document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
   if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
@@ -5351,6 +5565,7 @@ if (coinShopClose) {
 }
 
 sheetBackdrop.addEventListener("click", () => {
+  document.getElementById('homeJourneySheet').classList.remove('show');
   friendsSheet.classList.remove("show");
   withdrawSheet.classList.remove("show");
   vipSheet.classList.remove("show");
