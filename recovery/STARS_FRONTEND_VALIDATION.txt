@@ -1,0 +1,41 @@
+✔ daily success uses server reward including milestone (24.297146ms)
+✔ maintenance is not presented as an already-used reward (1.104307ms)
+✔ already-claimed response reconciles state without announcing credit (1.146579ms)
+✔ missed day retries start-new and uses resulting server state (1.732584ms)
+✔ rapid repeat claim clicks send one request while first is unresolved (1.675087ms)
+✔ daily card follows UTC day, ignoring obsolete browser claim timer (3.559057ms)
+✔ all inline scripts parse (4.886497ms)
+✔ ten rapid physical touches count ten; compatibility events never count twice (4.955239ms)
+✔ multi-finger touchdown counts each finger once (2.274702ms)
+✔ touches during server latency survive read-modify-write (2.665755ms)
+✔ response lost after commit retries identical ID and never doubles credit (4.088597ms)
+✔ transient failure retries automatically without another touch (2.477496ms)
+✔ reload preserves pending packet and received counter (3.437637ms)
+✔ energy capacity excludes queued taps; no invisible over-credit (2.261332ms)
+✔ server partial acceptance is explicitly counted as limited (2.122625ms)
+✔ mouse pointer clicks count once and keyboard remains usable (1.752112ms)
+✔ disabled countdown has explicit foreground and WebKit text colour (0.242792ms)
+✔ account poll waits for queued mutations but startup can still authenticate (1.726724ms)
+✔ unknown Telegram identity cannot save to a shared anonymous queue (1.038349ms)
+✔ eight taps immediately project energy 8 to 0 and balance +8 before server response (1.810389ms)
+✔ partial receipt removes only settled projection; remaining taps stay visible (2.659857ms)
+✔ server rejection corrects projected balance instead of persisting fake points (3.278589ms)
+✔ disabled shop never requests an invoice (3.79576ms)
+✔ Telegram invoice capability required before creating an order (1.91161ms)
+✔ unknown and expired starter offers cannot start checkout (1.62962ms)
+✔ double press creates one invoice while Telegram checkout is open (1.833824ms)
+✔ Telegram paid callback alone never credits or announces delivery (2.067913ms)
+✔ server-confirmed paid order refreshes saved state (1.943638ms)
+✔ cancelled checkout still checks server for a payment race (1.605054ms)
+✔ refunded order refreshes balance and is not called a purchase success (1.592254ms)
+✔ network errors keep balance untouched and allow a later retry (3.314673ms)
+✔ catalogue validates quantities and escapes product labels (24.317992ms)
+✔ Hub shows actual cooldown and claimable state, preserving active boost countdown (1.950498ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 203.722081

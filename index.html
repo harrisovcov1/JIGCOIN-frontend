@@ -1698,6 +1698,25 @@ button:disabled {cursor:default;}
 #coinShopSheet .shop-status {padding:16px;font-size:14px;line-height:1.5;color:#cbd5e1;}
 #coinShopSheet .shop-retry {margin-top:12px;min-height:44px;padding:10px 16px;border-radius:12px;background:#e2e8f0;color:#0f172a;border:0;font-weight:700;}
 
+
+#coinShopSheet .hub-recommend {padding:12px 14px;margin-bottom:12px;border-radius:12px;background:#192b46;color:#dbeafe;font-size:13px;line-height:1.45;}
+#coinShopSheet .hub-recommended {border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf2444;}
+#coinShopSheet .hub-section-title {font-size:17px;font-weight:800;margin:8px 0;}
+#coinShopSheet .hub-small {font-size:12px;line-height:1.5;color:#aebcd0;margin:8px 0 14px;}
+#coinShopSheet .hub-product {border:1px solid #3b4964;border-radius:16px;background:linear-gradient(125deg,#152039,#0e1627);padding:16px;margin-bottom:10px;}
+#coinShopSheet .hub-product-label {font-size:13px;color:#cbd5e1;font-weight:700;}
+#coinShopSheet .hub-product-coins {font-size:28px;font-weight:800;margin:8px 0 12px;}
+#coinShopSheet .hub-product-coins span {font-size:14px;font-weight:500;color:#cbd5e1;}
+#coinShopSheet .hub-buy {min-height:46px;width:100%;border:0;border-radius:12px;background:#fbbf24;color:#172033;font-size:15px;font-weight:800;}
+#coinShopSheet .hub-starter {border-color:#eab308;background:linear-gradient(125deg,#3b2c18,#171c31);}
+#coinShopSheet .hub-offer-clock {font-size:12px;color:#fde68a;margin:0 0 12px;}
+#coinShopSheet .hub-daily {margin-top:18px;font-size:13px;line-height:1.5;}
+#coinShopSheet .hub-history {font-size:13px;margin:16px 0;}
+#coinShopSheet .hub-history summary {min-height:44px;cursor:pointer;}
+#coinShopSheet .hub-order {padding:12px 0;border-top:1px solid #334155;}
+#coinShopSheet .hub-order small {display:block;overflow-wrap:anywhere;margin-top:8px;color:#94a3b8;}
+#coinShopSheet [hidden] {display:none!important;}
+
 </style>
 
 <style>
@@ -2335,24 +2354,17 @@ button:disabled {cursor:default;}
     </div>
   </div>
 
-  <!-- Coin shop (Stripe packs) -->
+  <!-- Boost Hub (private Telegram Stars pilot) -->
   <div class="sheet" id="coinShopSheet">
     <div class="sheet-header">
       <div>
         <div class="sheet-title">Boost Hub</div>
-        <div class="sheet-subtitle">Earn ad boosts and explore coin packs. See exactly what each reward includes.</div>
+        <div class="sheet-subtitle">A boost for now. A goal for tomorrow.</div>
       </div>
       <button class="sheet-close" id="coinShopClose">×</button>
     </div>
     <div class="sheet-body">
-      <div class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Choose your next boost</div>
-        <div style="opacity:.85; font-size:12px; line-height:1.35;">
-          Start with a free ad boost: refill your energy or earn double tap points for 10 minutes. Your reward is applied after confirmation.
-        </div>
-      </div>
-
-      
+      <div class="hub-recommend" id="hubRecommendation" aria-live="polite">Checking available boosts…</div>
       <div class="vip-box" style="margin-bottom:12px;">
         <div style="font-weight:800; margin-bottom:6px;">Momentum boosts</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
@@ -2378,32 +2390,27 @@ button:disabled {cursor:default;}
         </div>
       </div>
 
-      <div class="vip-box" style="margin-bottom:12px;">
+      <div id="hubStarter" hidden></div>
+      <div class="hub-section-title">Choose your coin pack</div>
+      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop. Energy and streak protection are separate.</p>
+      <div id="coinPackList" aria-live="polite"><div class="shop-status">Loading packs…</div></div>
+      <div class="vip-box hub-daily">
+        <div class="hub-section-title">Your daily progress</div>
+        <div id="hubDailyProgress"></div>
+        <button type="button" class="shop-retry" id="hubDailyClaim">Daily check-in</button>
+      </div>
+      <div id="hubOwnedShield" hidden class="vip-box" style="margin-bottom:12px;">
         <div style="font-weight:800; margin-bottom:6px;">Momentum Shield</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
           Streak protection is separate from coin packs. One eligible shield covers one missed day and is consumed when used.
         </div>
 
         <div id="momentumShieldStatus" style="opacity:.85; font-size:12px; margin-bottom:10px;">Loading…</div>
-        <div id="momentumShieldList" class="vip-box" style="padding:0; overflow:hidden; background:rgba(2,6,23,0.35);">
-          <div style="padding:14px; opacity:.8;">Loading Momentum Shield packs…</div>
-        </div>
+        <div id="momentumShieldList" hidden></div>
       </div>
 
-      <div class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Coin packs</div>
-        <div style="opacity:.85; font-size:12px; line-height:1.35;">
-          Coins add to your in-game balance. They do not include energy, streak protection or a guaranteed leaderboard position.
-        </div>
-      </div>
-
-      <div id="coinPackList" class="vip-box" style="padding:0; overflow:hidden;">
-        <div style="padding:14px; opacity:.8;">Loading packs…</div>
-      </div>
-
-      <div class="vip-box" style="opacity:.85; margin-top:12px;">
-        Paid packs are not open for purchase yet. Ad boosts remain available when you are eligible.
-      </div>
+      <details class="hub-history"><summary>Orders &amp; payment help</summary><div id="hubOrderHistory"></div><p id="hubSupport" class="hub-small"></p></details>
+      <p id="hubShopNotice" class="hub-small" role="status">Checking shop availability…</p>
     </div>
   </div>
 
@@ -3263,12 +3270,12 @@ function updateTaskCardStates() {
 }
 
 // keep task timers fresh
-setInterval(updateTaskCardStates, 1000);
+setInterval(() => { updateTaskCardStates(); if (coinShopSheet?.classList.contains("show")) updateBoostHub(); }, 1000);
 
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends))$/.test(path);
+  const readOnly = /^\/api\/(state|config|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -3282,7 +3289,7 @@ async function apiPost(path, body, opts = {}) {
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || path === "/api/tapPacket") ? new AbortController() : null;
+  const controller = (readOnly || path === "/api/tapPacket" || path === "/api/stars/invoice") ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -4462,7 +4469,7 @@ function openCoinShopSheet() {
   coinShopSheet.querySelector(".sheet-body").scrollTop = 0;
   updateTaskCardStates();
   loadCoinPacks();
-  loadMomentumShields();
+  refreshHubMissions();
 }
 
 function closeCoinShopSheet() {
@@ -4470,58 +4477,146 @@ function closeCoinShopSheet() {
   sheetBackdrop.classList.remove("show");
 }
 
-// Display only products returned by the server. Never substitute test checkout links.
-function getPackNumbers(p) {
-  const base = Number(p.coins ?? p.base_coins ?? p.coin_amount ?? 0);
-  const bonus = Number(p.bonus_coins ?? p.bonus ?? 0);
-  const total = base + bonus;
-  const price = Number(p.price_gbp ?? p.price ?? 0);
-  return { base, bonus, total, price };
-}
-
-function formatGBP(amount) {
-  // keep it simple and familiar for UK users
-  return "£" + Number(amount).toLocaleString("en-GB");
-}
-
-function validCoinPack(p) {
-  if (!p || typeof p !== "object" || !String(p.sku || p.pack_sku || "").trim()) return false;
-  const n = getPackNumbers(p);
-  return Number.isSafeInteger(n.base) && n.base > 0 && Number.isSafeInteger(n.bonus) && n.bonus >= 0 && Number.isSafeInteger(n.total);
-}
-function formatPackRow(p) {
-  const { base, bonus, total } = getPackNumbers(p);
-  return `<div class="packRow"><div class="packLeft">
-    <div class="packTitle">🪙 ${formatNumber(total)} coins</div>
-    <div class="packSub">${formatNumber(base)} base coins${bonus ? ` + ${formatNumber(bonus)} bonus coins` : ""}</div>
-    <div class="packMeta">In-game coins · Added after confirmed payment</div>
-    </div><div class="packRight"><button type="button" disabled>Purchases coming soon</button></div></div>`;
-}
-function renderCoinPacks(packs) {
-  if (!coinPackList) return;
-  const sorted = (Array.isArray(packs) ? packs : []).filter(validCoinPack).sort((a,b)=>getPackNumbers(a).total-getPackNumbers(b).total);
-  coinPackList.innerHTML = sorted.length ? sorted.map(formatPackRow).join("")
-    : '<div class="shop-status">Coin packs are being prepared. You can still earn coins through tasks and daily check-in.</div>';
-}
+// Stars catalogue and verified-order delivery. Browser invoice callbacks never credit coins.
+let hubCatalog = null, hubClockOffset = 0, hubPurchaseBusy = false, hubMissions = [], hubMissionLoadedAt = 0;
+let hubMorePacks = false, hubLoadVersion = 0;
+const hubNow = () => Date.now() + hubClockOffset;
 function shopLoadError(element, result, retry) {
-  const maintenance = (result?.reason || result?.error) === "MAINTENANCE_MODE";
-  element.innerHTML = `<div class="shop-status">${maintenance ? "The shop is currently closed for maintenance." : "We couldn’t load these products. Please try again."}<br><button class="shop-retry" type="button">Try again</button></div>`;
-  element.querySelector("button").addEventListener("click", retry);
+  element.innerHTML = '<div class="shop-status">The shop is temporarily unavailable. Your saved coins are safe.<br><button class="shop-retry" type="button">Try again</button></div>';
+  element.querySelector('button').addEventListener('click',retry);
 }
-
+function validStarsProduct(p) {
+  return p && /^JC_[A-Z0-9_]{1,40}$/.test(p.sku) && Number.isSafeInteger(p.coins) && p.coins>0 && Number.isSafeInteger(p.stars) && p.stars>0;
+}
+function starsProductCard(p,starter=false) {
+  const label = starter ? 'One-time starter offer' : p.title;
+  const disabled = !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
+  return `<article class="hub-product ${starter?'hub-starter':''}">
+    <div class="hub-product-label">${escapeHtml(label)}</div>
+    <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
+    ${starter?'<div class="hub-offer-clock" aria-live="off"></div>':''}
+    <button type="button" class="hub-buy" data-stars-sku="${p.sku}" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`Buy for ⭐ ${p.stars.toLocaleString('en-GB')}`}</button>
+  </article>`;
+}
+function renderStarsCatalog() {
+  if(!hubCatalog)return;
+  const products=(hubCatalog.products||[]).filter(validStarsProduct);
+  const offer=products.find(p=>p.starter);
+  const starterEl=document.getElementById('hubStarter');
+  starterEl.hidden=!offer;
+  starterEl.innerHTML=offer?starsProductCard(offer,true):'';
+  const packs=products.filter(p=>!p.starter);
+  const featured=packs.filter(p=>p.featured).slice(0,3);
+  const first=featured.length?featured:packs.slice(0,3);
+  const more=packs.filter(p=>!first.includes(p));
+  coinPackList.innerHTML=first.map(p=>starsProductCard(p)).join('')+
+    (more.length?`<button class="shop-retry" id="hubMorePacks">${hubMorePacks?'Show fewer':'View all packs'}</button><div ${hubMorePacks?'':'hidden'}>${more.map(p=>starsProductCard(p)).join('')}</div>`:'');
+  if(!packs.length)coinPackList.innerHTML='<p class="hub-small">Coin packs are being prepared.</p>';
+  document.getElementById('hubMorePacks')?.addEventListener('click',()=>{hubMorePacks=!hubMorePacks;renderStarsCatalog();});
+  coinShopSheet.querySelectorAll('[data-stars-sku]').forEach(btn=>btn.addEventListener('click',()=>buyStarsPack(btn.dataset.starsSku)));
+  document.getElementById('hubShopNotice').textContent=hubCatalog.enabled?'Purchases use Telegram Stars. Coins arrive after payment confirmation.':'Preview only — purchases are not enabled. Prices are initial test offers.';
+  document.getElementById('hubSupport').textContent=hubCatalog.support_contact?`Payment help: ${hubCatalog.support_contact}. You can also send /paysupport to the bot.`:'Payment support will be shown here before purchases open.';
+  renderHubOrders();updateBoostHub();
+}
 async function loadCoinPacks() {
-  if (!coinPackList) return;
-  coinPackList.innerHTML = '<div style="padding:14px; opacity:.8;">Loading packs…</div>';
-
-  // 1) Try backend (will read from Supabase)
-  const res = await apiPost("/api/shop/coin-packs", {});
-  if (res && res.ok && Array.isArray(res.packs)) {
-    renderCoinPacks(res.packs);
-    return;
-  }
-
-  shopLoadError(coinPackList, res, loadCoinPacks);
+  const version=++hubLoadVersion;
+  coinPackList.innerHTML='<div class="shop-status">Loading packs…</div>';
+  const res=await apiPost('/api/stars/catalog',{});
+  if(version!==hubLoadVersion)return;
+  if(!res?.ok){hubCatalog=null;document.getElementById('hubStarter').hidden=true;shopLoadError(coinPackList,res,loadCoinPacks);document.getElementById('hubShopNotice').textContent='Purchases unavailable until the shop reconnects.';return;}
+  hubCatalog=res;
+  if(Number.isFinite(Date.parse(res.server_now)))hubClockOffset=Date.parse(res.server_now)-Date.now();
+  renderStarsCatalog();
 }
+function renderHubOrders() {
+  const box=document.getElementById('hubOrderHistory');
+  const orders=hubCatalog?.recent_orders||[];
+  const labels={created:'Checkout started',invoiced:'Checkout started',approved:'Confirming payment',paid:'Delivered',expired:'Checkout expired',refunded:'Refunded'};
+  box.innerHTML=orders.length?orders.map(o=>`<div class="hub-order"><strong>${Number(o.coins).toLocaleString('en-GB')} coins · ${escapeHtml(labels[o.status]||'Check status')}</strong><small>Reference: ${escapeHtml(o.payload)}</small><button class="shop-retry" data-order-id="${escapeHtml(o.payload)}">Check order</button></div>`).join(''):'<p class="hub-small">No purchases yet.</p>';
+  box.querySelectorAll('[data-order-id]').forEach(btn=>btn.addEventListener('click',()=>checkStarsOrder(btn.dataset.orderId,false)));
+}
+async function checkStarsOrder(id,poll=true) {
+  for(let n=0;n<(poll?10:1);n++) {
+    const r=await apiPost('/api/stars/status',{order_id:id});
+    if(r?.ok && ['paid','refunded'].includes(r.order?.status)) {
+      await syncStateIfIdle();
+      showToast(r.order.status==='paid'?'Payment confirmed — your coins are saved.':'This payment was refunded.');
+      await loadCoinPacks();return true;
+    }
+    if(r?.ok && (r.order?.status==='expired' || (!poll && ['created','invoiced'].includes(r.order?.status)))) {
+      showToast(r.order.status==='expired'?'Checkout expired. Choose a pack to start again.':'Checkout has not completed. Reopen this pack when ready.');
+      await loadCoinPacks();return false;
+    }
+    if(!poll || document.hidden)break;
+    await new Promise(resolve=>setTimeout(resolve,1500));
+  }
+  showToast('Payment not yet confirmed. Check Orders & payment help; do not pay again.');
+  await loadCoinPacks();return false;
+}
+async function buyStarsPack(sku) {
+  if(hubPurchaseBusy||!hubCatalog?.enabled)return;
+  const product=(hubCatalog.products||[]).find(p=>p.sku===sku && validStarsProduct(p));
+  if(!product)return;
+  if(product.starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow())){showToast('This starter offer has ended.');return;}
+  const tg=window.Telegram?.WebApp;
+  if(typeof tg?.openInvoice!=='function'){showToast('Open JigCoin in an up-to-date Telegram app to purchase.');return;}
+  hubPurchaseBusy=true;renderStarsCatalog();
+  try {
+    const r=await apiPost('/api/stars/invoice',{sku});
+    if(!r?.ok || !r.url || !r.order_id){showToast((r?.reason||r?.error)==='OFFER_EXPIRED'?'This starter offer has ended.':'Checkout is not ready. Please try again or contact payment support.');return;}
+    // Once created, the order is recoverable from the server even if the app closes.
+    const outcome=await new Promise(resolve=>tg.openInvoice(r.url,resolve));
+    if(outcome==='cancelled')showToast('Checkout closed. Checking your order…');
+    await checkStarsOrder(r.order_id,outcome!=='cancelled');
+  } catch(_){showToast('Could not open checkout. Check your orders before trying again.');}
+  finally{hubPurchaseBusy=false;renderStarsCatalog();}
+}
+async function refreshHubMissions() {
+  const r=await apiPost('/api/mission/list',{kind:'sponsor',include_boost_sponsor_missions:true});
+  hubMissions=r?.ok&&Array.isArray(r.missions)?r.missions:[];
+  hubMissionLoadedAt=Date.now();updateBoostHub();
+}
+function updateBoostHub() {
+  const rec=document.getElementById('hubRecommendation');if(!rec)return;
+  const elapsed=(Date.now()-hubMissionLoadedAt)/1000;
+  const energy=Number(state.energy||0),cap=Number(maxEnergy||50);
+  const candidates=[{code:'sp_emergency_energy',kind:'boost_energy',name:'Energy refill',blocked:energy>=cap},
+    {code:'sp_double_points',kind:'double_boost',name:'Double points',blocked:state.doubleBoostActive}];
+  const enabled=[];
+  for(const c of candidates){
+    const m=hubMissions.find(m=>m.code===c.code);
+    const remaining=Math.max(0,Number(m?.cooldown_remaining_seconds||0)-elapsed);
+    const card=coinShopSheet.querySelector(`[data-code="${c.kind}"]`);
+    if(!card)continue;
+    card.classList.toggle('hub-recommended',false);
+    delete card.dataset.disabledReason;
+    if(m&&remaining>0&&!c.blocked){
+      card.classList.add('task-disabled');card.querySelector('.task-reward').textContent=`In ${msToCountdown(remaining*1000)}`;
+      card.dataset.disabledReason=`This boost is available in ${msToCountdown(remaining*1000)}.`;
+    }
+    if(m && !c.blocked && remaining<=0 && ['available','claimable','cooldown'].includes(m.status)){
+      if(m.status==='claimable')card.querySelector('.task-reward').textContent='Ready to claim';
+      enabled.push({...c,claimable:m.status==='claimable'});
+    }
+  }
+  const choice=energy<=cap/4?enabled[0]:enabled.find(c=>c.kind==='double_boost')||enabled[0];
+  if(choice){rec.textContent=choice.claimable?`${choice.name} is ready to claim.`:choice.kind==='boost_energy'?'Low on energy? Refill and keep tapping.':'Ready to tap? Double your tap points for 10 minutes.';coinShopSheet.querySelector(`[data-code="${choice.kind}"]`)?.classList.add('hub-recommended');}
+  else rec.textContent=hubMissions.length?'Your boosts are active, full or on cooldown. Come back when available.':'Choose an ad boost below to check availability.';
+  const today=new Date(hubNow()).toISOString().slice(0,10);
+  const claimed=state.lastCheckin===today;
+  const days=Number(state.streakDays||0);
+  const next=(hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
+  document.getElementById('hubDailyProgress').textContent=`${days} day${days===1?'':'s'} · ${claimed?'Today’s check-in saved.':'Daily check-in available.'}${next?` Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:''}`;
+  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed;daily.textContent=claimed?'Today’s reward claimed':'Claim daily check-in';
+  document.getElementById('hubOwnedShield').hidden=Number(state.momentumShieldQty||0)<=0;
+  if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
+  const expires=Date.parse(hubCatalog?.offer_expires_at||'');
+  coinShopSheet.querySelectorAll('.hub-offer-clock').forEach(el=>{
+    el.textContent=Number.isFinite(expires)?(expires>hubNow()?`Ends in ${msToCountdown(expires-hubNow())}`:'Offer ended'):'48 hours from your first shop visit once purchases open.';
+    if(Number.isFinite(expires)&&expires<=hubNow())el.parentElement.querySelector('button').disabled=true;
+  });
+}
+document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{await handleDailyTask();updateBoostHub();});
 
 // ------------ Momentum Shield UI ------------
 function formatShieldStatus() {
@@ -4983,6 +5078,8 @@ async function loadSponsorMissions(forceRefresh = false) {
   }));
 
   window.__sponsorMissions = missions;
+  hubMissions = missions; hubMissionLoadedAt = receivedAt;
+  if (coinShopSheet.classList.contains('show')) updateBoostHub();
   // A response arriving after Close must not restart a hidden countdown.
   if (sponsorSheet.classList.contains("show")) renderSponsorMissions(missions);
   return missions;
@@ -5107,6 +5204,9 @@ async function handleDoubleBoostTask() { await openRewardPlacement("sp_double_po
 // Task click router (includes double_boost)
 document.querySelectorAll(".task-card").forEach((card) => {
   card.addEventListener("click", () => {
+    if (card.dataset.disabledReason && card.classList.contains('task-disabled')) {
+      showToast(card.dataset.disabledReason);return;
+    }
     if (card.classList.contains("task-disabled")) {
       const codeDisabled = card.getAttribute("data-code");
       if (codeDisabled === "daily") {
