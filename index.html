@@ -3025,17 +3025,18 @@ function setAccountPhase(phase) {
 
 
 function render() {
-  const confirmed = Number.isFinite(state.bal);
-  const balSafe = confirmed ? Number(state.bal) : 0;
+  const view = recoveryTapView(state);
+  const confirmed = Number.isFinite(view.bal);
+  const balSafe = confirmed ? Number(view.bal) : 0;
   const loading = !window.__accountPhase || ["loading", "connecting"].includes(window.__accountPhase);
-  const balDisplay = confirmed ? formatNumber(state.bal) : loading ? "…" : "—";
+  const balDisplay = confirmed ? formatNumber(view.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
   updateRecoveryTapFeedback();
   tapBtn.disabled = !accountIsReady() || !confirmed || (window.__lastState?.recovery_test === true && !window.__lastState?.recovery_gameplay);
   const tapLabel = document.getElementById("tapButtonLabel");
   if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Test tap" : "Tap";
-  todayText.textContent = confirmed ? formatNumber(state.today) : "—";
+  todayText.textContent = confirmed ? formatNumber(view.today) : "—";
 
   // Points per tap (x2 when boost active)
   const effectivePerTap = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
@@ -3043,18 +3044,18 @@ function render() {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
   }
 
-  const energyPct = confirmed ? Math.max(0, Math.min(1, state.energy / maxEnergy)) : 0;
+  const energyPct = confirmed ? Math.max(0, Math.min(1, view.energy / maxEnergy)) : 0;
   const energyFill = document.getElementById("energyFill");
   if (energyFill) {
     energyFill.style.transform = `scaleX(${energyPct})`;
   }
-  energyText.textContent = confirmed ? `${state.energy} / ${maxEnergy}` : "—";
+  energyText.textContent = confirmed ? `${view.energy} / ${maxEnergy}` : "—";
   if (energySubText) {
     if (!confirmed) {
       energySubText.textContent = "Waiting for your account.";
-    } else if ((state.energy || 0) >= maxEnergy) {
+    } else if ((view.energy || 0) >= maxEnergy) {
       energySubText.textContent = "Full — now is the time to push.";
-    } else if ((state.energy || 0) <= 0) {
+    } else if ((view.energy || 0) <= 0) {
       energySubText.textContent = "Empty — energy refills while you rest or via Boost Hub.";
     } else {
       energySubText.textContent = "Regenerating — energy refills automatically over time.";
@@ -3115,7 +3116,7 @@ function render() {
   referralPointsText.textContent = confirmed ? formatNumber(state.referralPoints || 0) : "—";
   inviteLinkText.textContent = state.inviteLink || FALLBACK_REF_LINK;
 
-  withdrawBalanceText.textContent = balDisplay;
+  withdrawBalanceText.textContent = confirmed ? formatNumber(state.bal) : "—";
 
   // Global rank block
   
@@ -3123,7 +3124,7 @@ function render() {
 if (starterBanner && starterBannerFill) {
   const todayStr = getTodayString();
   const hasClaimedToday = state.lastCheckin === todayStr;
-  const balSafe = Number.isFinite(state.bal) ? Number(state.bal) : 0;
+  const balSafe = Number.isFinite(view.bal) ? Number(view.bal) : 0;
 
   if (accountIsReady() && confirmed && !hasClaimedToday && balSafe < 10000) {
     starterBanner.style.display = "flex";
@@ -4034,6 +4035,16 @@ if (rejected > 0) {
 }
 
 // Durable owner queue, separate from the suspended historical public queue.
+// Project queued input for immediate game feedback; saved state stays authoritative.
+function recoveryTapView(saved) {
+  if (!window.__lastState?.recovery_gameplay) return saved;
+  const q = readRecoveryQueue();
+  const pending = q.pending + (q.packet?.count || 0);
+  const multiplier = saved.doubleBoostActive ? 2 : 1;
+  const points = pending * perTapBase * multiplier;
+  return {...saved, bal:saved.bal + points, today:saved.today + points,
+    energy:Math.max(0, saved.energy - pending)};
+}
 function recoveryQueueKey() {
   const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || tg?.initDataUnsafe?.user?.id;
   return Number.isSafeInteger(id) && id > 0 ? "jigcoin_owner_taps_v2_" + id : null;
@@ -4061,7 +4072,7 @@ function updateRecoveryTapFeedback() {
   const pending = q.pending + (q.packet?.count || 0);
   el.textContent = `${q.received} registered · ${q.confirmed} confirmed · ${pending} pending` +
     (q.limited ? ` · ${q.limited} limited by energy/daily cap` : "") +
-    (recoveryTapMessage ? ` — ${recoveryTapMessage}` : pending ? " — Saving…" : " — Balance saved");
+    (recoveryTapMessage ? ` — ${recoveryTapMessage}` : pending ? " — Saving displayed taps…" : " — Balance saved");
 }
 function scheduleRecoveryFlush(delay = 100) {
   if (recoveryFlushTimer !== null) return;
@@ -4080,7 +4091,7 @@ async function runRecoveryTap(addTap = true) {
     ++__stateRequestVersion; // Discard state polls begun before this input.
     window.__lastTapAt = Date.now();
     recoveryTapMessage = "";
-    updateRecoveryTapFeedback(); // Immediate acknowledgement, independent of server latency.
+    render(); // Immediate projected balance, points and energy; no server round trip.
     scheduleRecoveryFlush(); return;
   }
   if (window.__recoveryTapBusy || navigator.onLine === false || document.hidden) return;
@@ -4127,6 +4138,13 @@ async function runRecoveryTap(addTap = true) {
     } else if (!recoveryTapMessage && (remaining.pending || remaining.packet)) scheduleRecoveryFlush(180);
   }
 }
+setInterval(() => {
+  if (!document.hidden && navigator.onLine !== false && accountIsReady() &&
+      window.__lastState?.recovery_gameplay && state.energy < maxEnergy) {
+    const q = readRecoveryQueue();
+    if (!window.__recoveryTapBusy && !q.pending && !q.packet) void syncStateIfIdle();
+  }
+}, 3000);
 function resumeRecoveryTaps() {
   if (!window.__lastState?.recovery_gameplay) return;
   updateRecoveryTapFeedback();
