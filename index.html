@@ -2044,6 +2044,48 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 .daily-more{border-top:1px solid #2a3d55;margin:0;color:#b9cade;font-size:12px}.daily-more>summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;padding:8px 0!important}.daily-more>summary::after{content:'+';font-size:18px}.daily-more[open]>summary::after{content:'−'}.daily-more>summary::-webkit-details-marker{display:none}
 #homeDailySheet .daily-reminder{padding:12px 0;font-size:12px}#homeDailySheet .daily-reminder small{font-size:10px}
 @media(max-width:350px){#boostSheet .boost-card{grid-template-columns:minmax(0,1fr) 110px;padding:10px;gap:4px 8px}#boostSheet .boost-card h3{font-size:13px}#boostSheet .boost-icon{width:22px;height:22px;flex-basis:22px;font-size:15px}#boostSheet .boost-state{font-size:10px}#boostSheet .boost-action{font-size:11px}#homeDailySheet .daily-calendar .daily-marker{font-size:9px}#homeDailySheet .daily-calendar b{font-size:10px}}
+
+/* v5.2: spend the available height on readable content and the main coin. */
+#mainScroll.home-roomy .header .home-balance-card{padding:10px 14px!important;gap:5px 12px}
+#mainScroll.home-roomy .card-balance-label{font-size:12px}
+#mainScroll.home-roomy .card-balance-value{font-size:38px}
+#mainScroll.home-roomy .balance-heading .card-balance-token{min-height:32px;font-size:13px}
+#mainScroll.home-roomy .global-rank-tier{font-size:11px}
+#mainScroll.home-roomy .global-rank-label{font-size:10px}
+#mainScroll.home-roomy .home-race{font-size:12px;margin-top:6px}
+#mainScroll.home-roomy .tap-title{font-size:15px}
+#mainScroll.home-roomy .tap-hint{font-size:12px}
+#mainScroll.home-roomy .home-goal{font-size:15px}
+#mainScroll.home-roomy .home-goal-caption{font-size:11px;display:block}
+#mainScroll.home-roomy .home-session-row{margin-top:6px;min-height:46px}
+#mainScroll.home-roomy .home-boost-action{min-height:46px;font-size:12px;padding:7px 12px}
+#mainScroll.home-roomy .quiet-button{font-size:11px}
+#mainScroll.home-roomy .tap-metric{min-height:42px;padding:7px 10px}
+#mainScroll.home-roomy .metric-label,#mainScroll.home-roomy .metric-sub{font-size:11px}
+#mainScroll.home-roomy .metric-value{font-size:20px}
+#mainScroll.home-roomy .home-streak-strip{padding:5px 11px;border-radius:16px}
+#mainScroll.home-roomy .home-streak-strip strong{font-size:13px}
+#mainScroll.home-roomy .home-streak-strip #hubDailyProgress{font-size:12px}
+#mainScroll .tap-btn-wrap,#mainScroll.home-compact .tap-btn-wrap{margin-top:calc(3px + var(--home-coin-air,0px));margin-bottom:calc(3px + var(--home-coin-air,0px))}
+#boostSheet .sheet-body{flex:1;display:grid;grid-template-rows:repeat(4,minmax(max-content,1fr)) auto;gap:10px;padding:12px}
+#boostSheet .boost-card{margin:0;align-content:center;grid-template-columns:minmax(0,1fr) 118px;padding:12px;gap:6px 10px;border-radius:17px}
+#boostSheet .boost-card h3{font-size:15px}
+#boostSheet .boost-icon{width:30px;height:30px;flex-basis:30px;font-size:19px}
+#boostSheet .boost-state{font-size:12px;line-height:1.4}
+#boostSheet .boost-action{min-height:48px;font-size:13px;padding:9px}
+#boostSheet #coinRewardAmount,#boostSheet #rewardsDailyAmount{font-size:13px}
+#boostSheet .boost-footnote{font-size:11px;line-height:1.45;margin:0 2px}
+#boostSheet.rewards-roomy .sheet-header{padding:16px 16px 12px}
+#boostSheet.rewards-roomy .sheet-title{font-size:25px}
+#boostSheet.rewards-roomy .sheet-subtitle{font-size:13px}
+#boostSheet.rewards-roomy .sheet-body{padding:14px;gap:12px}
+#boostSheet.rewards-roomy .boost-card{grid-template-columns:minmax(0,1fr) 130px;padding:14px 16px;gap:8px 12px;border-radius:19px}
+#boostSheet.rewards-roomy .boost-card h3{font-size:18px}
+#boostSheet.rewards-roomy .boost-icon{width:36px;height:36px;flex-basis:36px;font-size:23px}
+#boostSheet.rewards-roomy .boost-state{font-size:13px}
+#boostSheet.rewards-roomy .boost-action{min-height:56px;font-size:14px;padding:11px}
+#boostSheet.rewards-roomy #coinRewardAmount,#boostSheet.rewards-roomy #rewardsDailyAmount{font-size:15px}
+@media(max-width:350px){#boostSheet .boost-card{grid-template-columns:minmax(0,1fr) 106px;padding:11px;gap:5px 8px}#boostSheet .boost-card h3{font-size:14px}#boostSheet .boost-icon{width:26px;height:26px;flex-basis:26px;font-size:18px}#boostSheet .boost-state{font-size:11px}#boostSheet .boost-action{font-size:12px}}
 </style>
 </head>
 <body>
@@ -5988,30 +6030,41 @@ setInterval(()=>{if(referralPromotionDeadline && Date.now()>=referralPromotionDe
 
 
 <script>
-// Home fit v4.1: measure available space rather than assuming dvh equals Telegram height.
+// Home and Rewards fit v5.2: use measured usable height, including Telegram chrome.
 (() => {
   const main=document.getElementById('mainScroll');
   const wrap=document.getElementById('homeCoinWrap');
   const coin=document.getElementById('tapBtn');
+  const rewards=document.getElementById('boostSheet');
   if(!main||!wrap||!coin)return;
   let pending=0;
   function fitHome(){
     pending=0;
     if(main.clientHeight<1||main.clientWidth<1)return;
-    main.classList.toggle('home-compact',main.clientHeight<700);
+    // Keep the one-line metrics and a single rank indicator at every height.
+    main.classList.add('home-compact');
+    main.classList.toggle('home-roomy',main.clientHeight>=620&&main.clientWidth>=350);
+    if(rewards?.clientHeight)rewards.classList.toggle('rewards-roomy',rewards.clientHeight>=640&&rewards.clientWidth>=350);
     const top=main.getBoundingClientRect().top;
     const bottom=Math.max(...Array.from(main.children).filter(el=>el.getClientRects().length)
       .map(el=>el.getBoundingClientRect().bottom));
     const contentHeight=bottom-top+main.scrollTop+(parseFloat(getComputedStyle(main).paddingBottom)||0);
     const coinSize=parseFloat(getComputedStyle(coin).width);
     if(!Number.isFinite(contentHeight)||!Number.isFinite(coinSize))return;
-    const next=Math.max(96,Math.min(200,Math.floor(coinSize+main.clientHeight-contentHeight-4)));
+    const cardStyle=getComputedStyle(wrap.parentElement);
+    const widthLimit=wrap.parentElement.clientWidth-(parseFloat(cardStyle.paddingLeft)||0)-(parseFloat(cardStyle.paddingRight)||0)-26;
+    const oldAir=parseFloat(getComputedStyle(wrap).getPropertyValue('--home-coin-air'))||0;
+    const available=coinSize+2*oldAir+main.clientHeight-contentHeight-8;
+    const next=Math.max(96,Math.min(300,widthLimit,Math.floor(available)));
+    const air=Math.max(0,Math.min(48,Math.floor((available-next)/2)));
     if(Math.abs(next-coinSize)>=1)wrap.style.setProperty('--coin-size',next+'px');
+    if(air!==oldAir)wrap.style.setProperty('--home-coin-air',air+'px');
   }
   function scheduleFit(){if(!pending)pending=requestAnimationFrame(fitHome);}
   if(typeof ResizeObserver==='function'){
     const observer=new ResizeObserver(scheduleFit);
     observer.observe(main);
+    if(rewards)observer.observe(rewards);
     for(const el of main.children)observer.observe(el);
   }
   window.addEventListener('resize',scheduleFit);
