@@ -6,7 +6,7 @@
   <title>JigCoin</title>
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   />
 
   <!-- Telegram WebApp JS – needed so window.Telegram exists -->
@@ -1826,85 +1826,88 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
 </style>
 
+<style>
+
+/* Compact, shared navigation layout — Home / Earn / Shop / Invite / Vault. */
+:root{--nav-space:76px;--nav-safe:calc(var(--app-safe-bottom) + var(--tg-content-safe-area-inset-bottom,0px));}
+.main{padding-bottom:0!important}
+[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.bottom-nav{z-index:40;margin:4px 10px 8px;padding:5px 6px;min-height:60px;border-radius:20px;background:#101a2e;box-shadow:0 0 0 1px #293a55,0 -8px 24px #03081780;}
+.nav-btn{border-radius:14px;min-height:48px;font-weight:650;gap:3px}.nav-btn span{font-size:11px}.nav-btn .nav-icon{font-size:19px;line-height:22px}
+#tabShop{background:linear-gradient(135deg,#ffe693,#f5b82e);color:#31230a;box-shadow:0 3px 14px #e5ab1c30}
+#tabShop.active{background:#ffcf49;box-shadow:inset 0 0 0 2px #fff0ae,0 3px 14px #e5ab1c30}#tabShop .nav-icon{color:inherit}
+.sheet{top:calc(var(--app-safe-top) + var(--tg-content-safe-area-inset-top,0px) + 6px);bottom:calc(var(--nav-space) + var(--nav-safe));max-height:none;max-width:600px;border-radius:20px;padding:0;background:#080f20;box-shadow:0 0 0 1px #26344b,0 16px 60px #0008}
+.sheet .sheet-header,#boostSheet .sheet-header,#coinShopSheet .sheet-header{padding:16px 16px 12px;align-items:flex-start;flex-shrink:0;border-bottom:1px solid #223149}
+.sheet .sheet-title,#boostSheet .sheet-title,#coinShopSheet .sheet-title{font-size:23px;line-height:1.2;font-weight:800}
+.sheet .sheet-subtitle,#boostSheet .sheet-subtitle,#coinShopSheet .sheet-subtitle{font-size:12px;line-height:1.45;max-width:none;margin-top:4px;color:#aebed5}
+.sheet .sheet-close,#boostSheet .sheet-close,#coinShopSheet .sheet-close{width:44px;height:44px;flex-shrink:0;font-size:23px;border-color:#3a4b65}
+.sheet .sheet-body,#boostSheet .sheet-body,#coinShopSheet .sheet-body{padding:14px 16px 18px;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;}
+.sheet-backdrop{background:#030816ed}.toast{z-index:70;bottom:calc(85px + var(--nav-safe));font-size:13px;pointer-events:none}
+.brand-lockup{display:flex;align-items:center;gap:8px;font-size:17px}.brand-coin{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(130deg,#fff0b0,#e8a91f);color:#704a08;font-weight:900;border:2px solid #f9d879;box-shadow:inset 0 0 0 2px #b47d19;font-family:Georgia,serif}
+.season-label{font-size:10px;color:#96a8c3}.top-bar{padding:12px 16px 5px;flex-wrap:nowrap}.top-dot-menu{display:none}
+.header{padding:0 14px!important}.header .home-balance-card{display:block;padding:12px 14px!important;background:linear-gradient(125deg,#202b45,#111b31);border:1px solid #31425b;border-radius:18px!important;box-shadow:none}
+.home-balance-card::before,.home-balance-card::after{display:none}.balance-heading{display:flex;align-items:center;justify-content:space-between}.balance-heading .card-balance-token{padding:3px 8px;font-size:11px;line-height:1.4;background:#0d172b;border:1px solid #34435d;border-radius:20px}
+.home-balance-card .card-balance-value{display:block;font-size:34px;letter-spacing:-1px;line-height:1.2;margin:2px 0 8px}
+.home-balance-card .global-rank-block{display:block;width:100%;padding:8px 10px!important;margin:0!important;text-align:left;background:#0c1629;border:1px solid #2e405c;border-radius:12px;color:#e2e8f0;font:inherit;cursor:pointer;min-height:44px}
+.global-rank-top-row{display:flex;align-items:center;gap:8px}.global-rank-label{margin-right:auto;font-size:10px}.global-rank-value{font-size:13px}.global-rank-tier{display:block;font-size:11px;line-height:1.35}.global-rank-bar{display:none}.home-balance-card .rank-bar{display:flex;min-height:20px;height:20px;margin:8px 0 0;box-shadow:none;background:#0a1324;padding:0 6px}.rank-label{display:none}.rank-points{font-size:10px;color:#bdcce1;margin-left:auto}.rank-fill{opacity:.4}
+.account-content{padding:0 14px 8px}.tap-card{padding:10px 12px!important;margin:8px 0!important;background:radial-gradient(ellipse at 50% 42%,#31304b00,#111b2f),#101a2d;border:1px solid #263752;border-radius:18px;box-shadow:none}.tap-card::before{display:none}
+.tap-card-header{display:block;text-align:center;margin:0}.tap-title{font-size:15px}.tap-subtitle{display:none}.tap-hint{font-size:11px;display:inline-block;padding:3px 10px;margin-top:3px;background:transparent;border:0;box-shadow:none}
+.tap-btn-wrap{margin:8px auto 6px;position:relative}.tap-btn-main{width:clamp(136px,25vh,180px);height:clamp(136px,25vh,180px);background:linear-gradient(135deg,#fff3bb 0%,#ffdc74 24%,#e2a52c 55%,#ad6c13 79%,#ffd36c 100%);border:4px solid #edbd50;box-shadow:inset 0 0 0 3px #895914,inset 0 0 24px #fff0b777,0 9px 0 #805019,0 15px 36px #e4aa2320;color:#704909;flex-direction:column;overflow:hidden;}
+.tap-btn-main::before{inset:10px;border:2px solid #895d1d;opacity:.65}.tap-btn-ring{inset:16px;border:1px solid #fff0a677;box-shadow:none}.coin-emblem{font:900 clamp(58px,12vh,84px)/1 Georgia,serif;text-shadow:1px 2px 0 #ffe7a4,-1px -1px 0 #89540a;z-index:1}.coin-wordmark{font-size:9px;letter-spacing:.24em;margin-top:0;z-index:1}.tap-btn-label{font-size:9px;margin-top:6px;letter-spacing:.12em}.tap-btn-main:active{transform:none;filter:brightness(1.08);box-shadow:inset 0 0 0 3px #895914,inset 0 0 30px #75480b66,0 9px 0 #805019,0 15px 36px #e4aa2320}
+.tap-metrics{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;margin-top:12px}.tap-metric{padding:8px 10px;box-shadow:none;background:#0b1528;border:1px solid #293a53;gap:3px}.metric-label,.metric-sub{font-size:11px}.metric-value{font-size:16px}.metric-subtext{font-size:10px;line-height:1.35}#energySubText{display:none}.tap-sync-status{font-size:10px;min-height:0;margin:12px 0 0;color:#91a5c1;line-height:1.35}
+.home-daily{background:#101b2f;border:1px solid #30415c;padding:12px;border-radius:16px}.daily-overview{display:flex;align-items:center;gap:8px}.daily-overview>div{flex:1;min-width:0}.daily-overview strong{font-size:13px}.daily-overview p{font-size:11px;line-height:1.4;color:#adbed6;margin:4px 0 0}.home-daily .shop-retry{max-width:115px;min-height:44px;border:1px solid #b58b31;border-radius:11px;padding:7px 10px;background:#f9cc62;color:#362a10;font:700 11px/1.35 system-ui}.home-daily .shop-retry:disabled{background:#1d2e43;color:#c2d0e0;border-color:#38506b}.streak-details{font-size:11px;color:#a8bad3;margin-top:6px}.streak-details summary{cursor:pointer;min-height:32px;display:flex;align-items:center;justify-content:space-between}.streak-details summary::before{content:'›';margin-right:6px}.streak-details summary span{margin-left:auto}.streak-details p{font-size:11px;line-height:1.5}.streak-details .streak-meter{width:100%}
+.earn-tabs{display:flex;margin:12px 16px 0;padding:4px;gap:4px;border:1px solid #293d58;background:#0c1628;border-radius:14px;flex-shrink:0}.earn-tabs button{flex:1;min-height:44px;border:0;border-radius:10px;color:#a9b9d0;background:transparent;font:700 13px system-ui}.earn-tabs button[aria-pressed=true]{background:#263c59;color:#f1f5fc}.earn-explainer{font-size:12px;line-height:1.45;color:#a9bad2;margin:0 0 12px}
+#sponsorList{padding:0;border:0;background:none;box-shadow:none}#sponsorList .ad-quest-row{display:grid;grid-template-columns:minmax(0,1fr) 118px;align-items:center;gap:10px;padding:12px 0;margin:0;border-bottom:1px solid #273951;flex-wrap:nowrap}#sponsorList .quest-copy{min-width:0;display:flex;flex-direction:column;gap:4px}#sponsorList .quest-copy strong{font-size:13px;line-height:1.35}#sponsorList .quest-reward{font-size:12px;color:#f6d37b}#sponsorList .quest-copy p{font-size:11px;line-height:1.4;margin:0;color:#b6c5da}#sponsorList .ad-quest-row button{width:118px;min-height:44px;padding:8px;font:700 11px/1.35 system-ui;border-radius:11px;background:#d6e6fc;border:1px solid #8ca7cc}#sponsorSheet .sheet-body>.vip-box:last-child{padding:8px 0;background:none;border:0;font-size:11px;line-height:1.5;color:#9eb0c9}
+.boost-intro{font-size:12px;margin-bottom:12px}.boost-card{padding:14px;border-radius:16px;margin-bottom:12px}.boost-card-top{gap:10px;margin-bottom:10px}.boost-icon{width:38px;height:38px;border-radius:12px;font-size:21px}.boost-card h3{font-size:16px}.boost-card p{font-size:12px}.boost-state{font-size:11px;margin-bottom:9px;min-height:0}.boost-action{min-height:44px;padding:10px;font-size:13px}.boost-footnote{font-size:11px;margin:10px 0}
+#coinShopSheet .hub-section-title{font-size:15px;margin:0 0 5px}#coinShopSheet .hub-small{font-size:11px;margin:6px 0 14px;line-height:1.45}#coinShopSheet .hub-product{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:4px 10px;padding:13px;border-radius:15px;margin-bottom:10px;align-items:center;background:linear-gradient(120deg,#17253c,#0f1a2d);position:relative}#coinShopSheet .hub-product-label{grid-column:1;font-size:11px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}#coinShopSheet .hub-product-coins{grid-column:1;font-size:25px;line-height:1.2;margin:0}#coinShopSheet .hub-product-coins span{font-size:12px}#coinShopSheet .hub-unit-value{grid-column:1;font-size:10px;color:#a8bbd5}#coinShopSheet .hub-buy{grid-column:2;grid-row:1 / span 3;width:112px;min-height:48px;font-size:12px;line-height:1.4;padding:8px;border-radius:11px}#coinShopSheet .hub-best{border-color:#d3a540;background:linear-gradient(125deg,#2e2c24,#142139)}.value-badge{font-size:9px;font-weight:750;background:#e6bd57;color:#31240e;border-radius:5px;padding:2px 5px;white-space:nowrap}#coinShopSheet .hub-offer-clock{grid-column:1 / -1;margin:5px 0 0;font-size:11px}#coinShopSheet .hub-history{margin:12px 0;font-size:12px}#coinShopSheet .hub-history summary{display:flex;align-items:center;min-height:44px;border-top:1px solid #2d3c54;cursor:pointer}#coinShopSheet .hub-history summary::before{content:'›';margin-right:8px}
+.invite-hero{padding:12px 14px 14px;border:1px solid #34476a;border-radius:18px;background:radial-gradient(ellipse at 100% 0,#334b70,#15223b 70%);text-align:center}.invite-art{display:inline-grid;place-items:center;width:44px;height:44px;background:#294469;border-radius:14px;font-size:28px;color:#f9d174}.invite-hero h2{font-size:21px;margin:8px 0 4px}.invite-hero p{font-size:12px;line-height:1.5;color:#c2d0e3;margin:0 0 14px}.friends-share-btn{min-height:48px;font-size:14px;background:#f7c758;color:#2d230d;border:0;border-radius:12px}.friends-link-row{margin:10px 0 0;display:flex;align-items:center;gap:8px}.friends-link{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;padding:10px;border-radius:10px}.friends-copy-btn{min-height:44px;flex-shrink:0;font-size:11px;padding:8px 12px;border-radius:10px}.friends-summary{gap:10px;margin:12px 0}.friends-summary-col{font-size:11px;padding:12px;border-radius:13px}.friends-summary-col strong,.friends-summary-col span:last-child{font-size:21px}.app-details{border-top:1px solid #2b3d58;font-size:12px}.app-details>summary{min-height:48px;display:flex;align-items:center;cursor:pointer;color:#d5e1f2}.app-details>summary::after{content:'›';margin-left:auto}.app-details[open]>summary::after{content:'⌄'}.app-details .tier-card,.app-details .share-card{margin-top:0;padding:12px}.app-details .tier-title{font-size:15px}.app-details .tier-meta{font-size:11px}.share-card-actions{display:flex;gap:8px}.share-card-actions button{min-height:44px;font-size:11px;border-radius:10px;padding:8px;border:1px solid #4e678b;background:#1a2d49;color:#edf4ff}.share-card-hint{font-size:10px;line-height:1.4}.launch-boost{padding:10px 12px;margin:12px 0 0;border:1px solid #93722d;border-radius:12px;background:#302b1d;font-size:12px}.launch-boost div{font-size:11px;line-height:1.5;margin-top:4px;color:#f5d88f}
+.vault-balance{padding:18px;border:1px solid #3a4b62;border-radius:18px;background:linear-gradient(125deg,#173148,#121d32);text-align:center}.vault-balance .brand-coin{width:42px;height:42px;font-size:25px}.vault-balance p{font-size:12px;color:#bccce0;margin:10px 0 4px}.vault-balance strong{font-size:34px}.vault-status{padding:16px;margin:14px 0;border:1px solid #2d405b;border-radius:16px;background:#101a2d}.vault-status h2{font-size:18px;margin:10px 0 6px}.vault-status p{font-size:12px;color:#acbfd8;line-height:1.55;margin:6px 0}.status-badge{font-size:10px;border-radius:6px;background:#263850;color:#c0d0e5;padding:4px 7px}.vault-membership{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;border:1px solid #314663;border-radius:12px;background:#14243b;color:#e0eafb;padding:12px;font-size:13px}.vault-membership span{font-size:11px;color:#9cb4d3}.vault-help{font-size:11px;line-height:1.5;color:#9cb0cb;margin:14px 0}.vault-help strong{color:#d1def0}
+#withdrawSheet .vip-box{padding:12px;font-size:12px;line-height:1.4;border:1px solid #334155;border-radius:14px}
+@media(max-width:350px){.sheet .sheet-body,#boostSheet .sheet-body,#coinShopSheet .sheet-body{padding:12px}.sheet .sheet-header,#boostSheet .sheet-header,#coinShopSheet .sheet-header{padding:12px}.sheet .sheet-title,#boostSheet .sheet-title,#coinShopSheet .sheet-title{font-size:21px}.earn-tabs{margin:10px 12px 0}#coinShopSheet .hub-product{grid-template-columns:minmax(0,1fr) 100px;padding:11px}#coinShopSheet .hub-buy{width:100px}.daily-overview strong{font-size:12px}.home-daily .shop-retry{max-width:100px}.top-bar{padding-inline:14px}}
+@media(max-height:700px){.tap-btn-main{width:130px;height:130px}.coin-emblem{font-size:59px}.top-bar{padding-top:7px}.home-balance-card .card-balance-value{font-size:30px}.tap-sync-status{margin-top:10px}.tap-card{padding:8px 10px!important}.home-daily{padding:10px}}
+
+.sheet:not(.show),.toast:not(.show){visibility:hidden}.sheet.show,.toast.show{visibility:visible}
+.nav-icon svg{display:block;width:21px;height:21px}.nav-btn .nav-icon{display:grid;place-items:center}
+.streak-details summary{min-height:44px}
+.leaderboard-screen{position:fixed;z-index:20;top:calc(var(--app-safe-top) + var(--tg-content-safe-area-inset-top,0px) + 6px);bottom:calc(var(--nav-space) + var(--nav-safe));left:50%;transform:translateX(-50%);width:100%;max-width:600px;flex-direction:column;background:#080f20;border:1px solid #26344b;border-radius:20px;padding:16px;color:#e5e7eb}
+.leaderboard-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.leaderboard-heading h2{font-size:23px;margin:0}.leaderboard-heading p{font-size:12px;color:#aebed5;margin:4px 0 0}#lbCloseBtn{width:44px;height:44px;border:1px solid #3a4b65;background:#101a2e;color:#eee;font-size:23px;border-radius:50%}
+.leaderboard-tabs{display:flex;gap:6px;margin-bottom:12px}.lb-tab-btn{flex:1;min-height:44px;border:0;border-radius:12px;font-size:13px;font-weight:700}#lbMySummary{padding:12px;border:1px solid #354664;border-radius:12px;background:#152641;font-size:13px;margin-bottom:12px}#lbContent{flex:1;min-height:0;overflow-y:auto}#lbFooterInvite{font-size:11px;color:#a6bad4;margin:10px 0 0}#lbOvertakeBanner{font-size:12px;margin-bottom:10px}
+
+.home-daily .shop-retry{margin:0;flex-shrink:0;width:96px}.daily-overview{min-height:44px}.streak-details{margin-top:2px}.daily-overview p{margin:2px 0 0}
+@media(max-height:740px){
+ .header .home-balance-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:4px 8px;padding:9px 12px!important}
+ .balance-heading{grid-column:1 / -1}.home-balance-card .card-balance-value{grid-column:1;grid-row:2;font-size:28px;margin:0;align-self:center}
+ .home-balance-card .global-rank-block{grid-column:2;grid-row:2;padding:5px 7px!important;border:0;box-shadow:none}.global-rank-top-row{gap:5px}.global-rank-label{font-size:9px}.global-rank-tier{font-size:10px}
+ .home-balance-card .rank-bar{grid-column:1 / -1;margin:4px 0 0;height:18px;min-height:18px}
+ .tap-card-header .tap-card-left{display:flex;flex-direction:row;gap:8px;align-items:center;justify-content:space-between;width:100%}.tap-title{font-size:13px}.tap-hint{margin:0;padding:0;font-size:10px}.tap-card-header{min-height:20px}
+ .tap-metrics{margin-top:8px}.tap-metric{padding:5px 8px}.tap-btn-wrap{margin-top:6px}.tap-sync-status{font-size:9px}.home-daily{padding:8px 10px}.main{padding-bottom:6px!important}
+ #coinShopSheet .hub-small{margin-bottom:10px}
+ #sponsorList .ad-quest-row{padding:8px 0}
+ .boost-card{padding:12px}.boost-card-top{margin-bottom:8px}.boost-intro{margin-bottom:8px}
+}
+
+</style>
 </head>
 <body>
   <div class="app-shell">
     <div class="main" id="mainScroll">
     <div class="top-bar">
-      <div class="top-bar-left">
-        <div class="top-dot-menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <span class="mini-app-label">JigCoin · Mini app</span>
-      </div>
-      <div class="top-bar-right">
-        <span style="font-size: 11px; color: rgba(148,163,184,0.9)">Season 1 · Early Access</span>
-      </div>
+      <div class="brand-lockup"><span class="brand-coin" aria-hidden="true">J</span><strong>JigCoin</strong></div>
+      <span class="season-label">Season 1 · Early Access</span>
     </div>
-
     <div class="header">
-      <div class="card">
-        <div class="card-badge">
-          <span>🪙</span>
-        </div>
-        <div class="card-main">
-          <div class="card-title">JigCoin</div>
-          <div class="card-subtitle">Earn early: tap + complete quests. Invite friends for bonus coins and climb the ranks.</div>
-<div class="card-pill">
-            <span>Live testnet farm</span>
-            <span>Rank → token allocation</span>
-          </div>
-        </div>
-        <div class="card-balance-col">
-          <span class="card-balance-label">Your balance</span>
-          <span class="card-balance-value" id="balanceText">…</span>
-          <span class="card-balance-token">
-            <span>🌕</span>
-            <span id="rankName">—</span>
-          </span>
-
-        </div>
-          <!-- Global Rank block -->
-          <div class="global-rank-block">
-            <div class="global-rank-top-row">
-              <span class="global-rank-label">Global rank</span>
-              <span class="global-rank-value" id="globalRankValue">—</span>
-            </div>
-            <div class="global-rank-bar">
-              <div class="global-rank-fill" id="globalRankFill"></div>
-            </div>
-            <div class="global-rank-tier" id="globalRankTierText">
-              Waiting for your account…
-            </div>
-            <div class="global-rank-next" id="globalRankNextText">
-              Rank is confirmed by the server.
-            </div>
-          </div>
-          <!-- END Global Rank block -->
+      <div class="card home-balance-card">
+        <div class="balance-heading"><span class="card-balance-label">Your coins</span><span class="card-balance-token" id="rankName">—</span></div>
+        <div class="card-balance-value" id="balanceText">…</div>
+        <button class="global-rank-block" id="homeLeaderboard" type="button" aria-label="Open global leaderboard">
+          <span class="global-rank-top-row"><span class="global-rank-label">Leaderboard</span><strong class="global-rank-value" id="globalRankValue">—</strong><span aria-hidden="true">›</span></span>
+          <span class="global-rank-tier" id="globalRankTierText">Waiting for your account…</span>
+          <span class="global-rank-bar"><span class="global-rank-fill" id="globalRankFill"></span></span>
+          <span class="sr-only" id="globalRankNextText">Rank is confirmed by the server.</span>
+        </button>
+        <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points">Next level <span id="nextRankPointsText">—</span></span></div>
       </div>
-
-
-      <div class="event-banner" id="eventBanner">
-        <div class="event-row">
-          <div>
-            <div class="event-title" id="eventTitle">Live event</div>
-            <div class="event-sub" id="eventSub">Boosted rewards are active.</div>
-          </div>
-          <div class="pill cooldown" id="seasonPill">Season</div>
-        </div>
-      </div>
-
-      <div class="rank-bar">
-        <div class="rank-fill" id="rankProgressFill"></div>
-        <div class="rank-label">
-          <span id="rankPointsText">…</span>
-        </div>
-        <div class="rank-points">
-          Next rank at <span id="nextRankPointsText">—</span> pts
-        </div>
-      </div>
+      <div class="event-banner" id="eventBanner"><div class="event-row"><div><div class="event-title" id="eventTitle">Live event</div><div class="event-sub" id="eventSub"></div></div><div class="pill" id="seasonPill">Season</div></div></div>
     </div>
 
     <div class="account-status" id="accountStatus" role="status" aria-live="polite">
@@ -1915,12 +1918,12 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
       <div class="tap-card">
         <div class="tap-card-header">
           <div class="tap-card-left">
-            <div class="tap-title">Tap to farm points</div>
+            <div class="tap-title">Tap to earn coins</div>
             <div class="tap-subtitle">
-              Your energy refills over time. Use it to farm your allocation before the token goes live.
+              Tap the JigCoin. Build your score.
             </div>
             <div class="tap-hint">
-              Each tap currently gives <span id="perTap">+1</span> 🌕.
+              <span id="perTap">+1</span> coin per tap
             </div>
 
             <div id="onboardingCoach" class="onboarding-coach" style="display:none;">
@@ -1941,7 +1944,7 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
         <div class="tap-btn-wrap">
           <button class="tap-btn-main" id="tapBtn" disabled>
-            <div class="tap-btn-ring"></div>
+            <div class="tap-btn-ring"></div><span class="coin-emblem" aria-hidden="true">J</span><span class="coin-wordmark" aria-hidden="true">JIGCOIN</span>
             <div class="tap-btn-label" id="tapButtonLabel">Loading</div>
           </button>
         </div>
@@ -1962,7 +1965,7 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
             <div class="metric-label">Today</div>
             <div class="metric-value" id="todayText">0</div>
           </div>
-          <div class="tap-metric">
+          <div class="tap-metric tap-rank-redundant" hidden>
             <div class="metric-label">Rank points</div>
             <div class="metric-value" id="rankMetricPointsText">…</div>
             <div class="metric-sub">
@@ -1971,204 +1974,53 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
           </div>
         </div>
 
-        <div class="home-boost-shortcuts">
-          <button type="button" id="homeEnergyBoost">⚡ Refill energy</button>
-          <button type="button" id="homeDoubleBoost">2× Tap boost</button>
-        </div>
-
-        <div class="streak-row">
-          <div class="streak-label">
-            <span>🔥</span>
-            <span>Daily streak</span>
-          </div>
-          <div class="streak-detail">
-            <div class="streak-meter">
-              <div class="streak-meter-fill" id="streakMeterFill"></div>
-            </div>
-            <span id="streakDaysText">0 days</span>
-            <div id="streakSubText" class="metric-subtext"></div>
-          </div>
-        </div>
       </div>
-
-      <div class="tasks">
-        <div class="tasks-title-row">
-          <div class="tasks-title">Control center</div>
-        </div>
-        <div class="tasks-subtitle">
-          You’re early. Protect momentum, climb the rankings, and unlock perks.
-        </div>
-
-<div class="starter-banner" id="starterBanner" style="display:none">
-  <div class="starter-banner-title">Your next points milestone</div>
-  <div class="starter-banner-sub">
-    Complete eligible quests to earn points and move toward your next milestone.
-  </div>
-  <div class="starter-banner-progress">
-    <div class="starter-banner-fill" id="starterBannerFill"></div>
-  </div>
-  <button class="starter-banner-btn" id="starterBannerBtn">
-    Do one quick quest
-  </button>
-</div>
-
-
-        
-<div class="starter-step-card" id="starterStep3Card" style="display:none;">
-  <div class="starter-step-header-row">
-    <div class="starter-step-pill">One-time +25,000</div>
-    <div class="starter-step-label">Step 3 of 3</div>
-  </div>
-  <div class="starter-step-title">Unlock Starter Bundle</div>
-  <div class="starter-step-body">
-    Get <strong>+25,000 bonus JigCoins</strong> in one hit. One-time offer for new players to lock in your rank and early advantage.
-  </div>
-  <div class="starter-step-meta" id="starterStep3Meta" style="display:none;">
-    <div class="starter-step-meta-dot"></div>
-    <div class="starter-step-timer" id="starterStep3TimerText"></div>
-  </div>
-  <div class="starter-step-buttons">
-    <button class="starter-step-btn starter-step-btn-primary" id="starterStepStripeBtn">
-      Pay with card
-    </button>
-    <button class="starter-step-btn starter-step-btn-secondary" id="starterStepCoinbaseBtn">
-      Pay with crypto
-    </button>
-  </div>
-</div>
-
-        <!-- Boost quests grid with Double Points + Energy refill -->
-        <div class="tasks-grid tasks-grid-6">
-          <div class="task-card task-vip" data-code="vip_pass" data-reward="0">
-            <div class="task-top">
-              <div class="task-title">VIP Advantage</div>
-              <div class="task-reward">⭐</div>
-            </div>
-            <div class="task-desc">
-              Built for serious farmers. VIP badge, priority perks, and momentum protection.
-            </div>
-          </div>
-
-          <div class="task-card" data-code="boost_hub" data-reward="0">
-            <div class="task-top">
-              <div class="task-title">Boosts</div>
-              <div class="task-reward">⚡</div>
-            </div>
-            <div class="task-desc">
-              Watch an ad for full energy or double tap points for 10 minutes.
-            </div>
-          </div>
-
-          <div class="task-card" data-code="invite_friend" data-reward="800">
-            <div class="task-top">
-              <div class="task-title">Invite</div>
-              <div class="task-reward">+800 🌕</div>
-            </div>
-            <div class="task-desc">
-              Bring friends in. Earn when they join and start farming. Growth = advantage.
-            </div>
-          </div>
-
-          <div class="task-card" data-code="open_tasks" data-reward="0">
-            <div class="task-top">
-              <div class="task-title">Tasks</div>
-              <div class="task-reward">✅</div>
-            </div>
-            <div class="task-desc">
-              Daily missions, sponsor quests, and progress rewards. Stay consistent to climb.
-            </div>
-          </div>
-
-          <div class="task-card" data-code="leaderboard" data-reward="0">
-            <div class="task-top">
-              <div class="task-title">Leaderboard</div>
-              <div class="task-reward">🏆</div>
-            </div>
-            <div class="task-desc">
-              Track your position and the distance to the next rank. Don’t let others pass you.
-            </div>
-          </div>
-
-          <div class="task-card" data-code="daily" data-reward="500">
-            <div class="task-top">
-              <div class="task-title">Daily check-in</div>
-              <div class="task-reward" id="dailyRewardText">+500 🌕</div>
-            </div>
-            <div class="task-desc">
-              Claim once per day to keep your streak alive and protect momentum.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Optional floating shop shortcut (currently hidden). -->
-      <button class="fab-shop" id="fabShop" aria-label="Open Coin Shop">
-        <span class="fab-icon">🪙</span>
-        <span class="fab-label">Shop</span>
-      </button>
-
+      <section class="home-daily" aria-label="Daily check-in">
+        <div class="daily-overview"><div><strong>Daily check-in</strong><p id="hubDailyProgress">Loading your streak…</p></div><button type="button" class="shop-retry" id="hubDailyClaim" disabled>Checking…</button></div>
+        <details class="streak-details"><summary>Streak benefits <span id="streakDaysText">—</span></summary><div class="streak-meter"><div class="streak-meter-fill" id="streakMeterFill"></div></div><p id="streakSubText"></p></details>
+      </section>
     </div>
     </div>
-      <div class="bottom-nav">
-        <button class="nav-btn active" id="tabFarm">
-          <div class="nav-icon">🏠</div>
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button class="nav-btn active" id="tabFarm" aria-current="page">
+          <div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg></div>
           <span>Home</span>
         </button>
         <button class="nav-btn" id="tabTasks">
-          <div class="nav-icon">⚡️</div>
-          <span>Boosts</span>
+          <div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L2.2 9.4l6.1-.9Z"/></svg></div>
+          <span>Earn</span>
         </button>
         <button class="nav-btn" id="tabShop">
-          <div class="nav-icon">🪙</div>
+          <div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l1 14H3L4 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></div>
           <span>Shop</span>
         </button>
         <button class="nav-btn" id="tabFriends">
-          <div class="nav-icon">👥</div>
+          <div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></svg></div>
           <span>Invite</span>
         </button>
         <button class="nav-btn" id="tabWithdraw">
-          <div class="nav-icon">🏦</div>
+          <div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8V5H5a2 2 0 0 0 0 4h16v12H5a2 2 0 0 1-2-2V7"/><path d="M21 13h-5v4h5"/></svg></div>
           <span>Vault</span>
         </button>
-      </div>
+      </nav>
   </div>
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
 
   <div class="sheet" id="friendsSheet">
-    <div class="sheet-header">
-      <div>
-        <div class="sheet-title">Invite friends · earn permanently</div>
-        <div class="sheet-subtitle">
-          You earn every time someone you invite joins and starts farming. Early users lock higher referral rewards before rates reduce.
-        </div>
-<div class="launch-boost" id="launchBoostInvite">
-  <div class="lb-badge">🚀 Launch Phase Boost</div>
-  <div class="lb-text">🚀 Invite friends. Earn more — permanently. Early Access rewards are highest now. As more users join, referral rates reduce automatically — early advantage cannot be recovered.</div>
-  <div class="launch-boost-pill" id="launchBoostCountdown" title="Launch Phase window">⏳ Loading…</div>
-</div>
-
-      </div>
-      <button class="sheet-close" id="friendsClose">×</button>
-    </div>
-
+    <div class="sheet-header"><div><div class="sheet-title">Invite</div><div class="sheet-subtitle">Play together. Earn referral rewards.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body">
-      <div class="friends-summary">
-        <div class="friends-summary-col">
-          <span>Friends joined</span>
-          <span id="friendsJoinedText">0</span>
-        </div>
-        <div class="friends-summary-col">
-          <span>Referral points</span>
-          <span id="referralPointsText">…</span>
-        </div>
-      </div>
-
-      <section class="tier-card" id="teamCard">
+      <section class="invite-hero"><span class="invite-art" aria-hidden="true">↗</span><h2>Build your team</h2><p>Share your link. Earn coins when a friend joins and meets the reward requirements.</p>
+        <button class="friends-share-btn" id="shareTelegramBtn">Invite a friend</button>
+        <div class="friends-link-row"><div class="friends-link" id="inviteLinkText">Loading your link…</div><button class="friends-copy-btn" id="copyInviteBtn">Copy link</button></div>
+      </section>
+      <div class="launch-boost" id="launchBoostInvite" hidden><strong>Early access bonus</strong><div id="launchBoostCountdown"></div></div>
+      <div class="friends-summary"><div class="friends-summary-col"><span>Friends joined</span><strong id="friendsJoinedText">0</strong></div><div class="friends-summary-col"><span>Referral coins</span><strong id="referralPointsText">…</strong></div></div>
+      <details class="app-details"><summary>Your team &amp; referral progress</summary>      <section class="tier-card" id="teamCard">
         <div class="tier-top">
           <div>
             <div class="tier-title">Your team</div>
-            <div class="tier-meta" id="teamMeta">Building your empire…</div>
+            <div class="tier-meta" id="teamMeta">Loading your team…</div>
           </div>
           <div class="pill" id="teamPill">Team</div>
         </div>
@@ -2185,7 +2037,7 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
           </div>
         </div>
         <div class="tier-meta" id="teamNext">
-          Grow your team early – top teams earn much faster.
+          Track your friends and earned referral coins here.
         </div>
       </section>
 
@@ -2215,153 +2067,36 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
         </div>
       </div>
 
-      <div class="share-card" id="shareCard">
+</details>
+      <details class="app-details" id="sharePreviewDetails"><summary>Create a progress card</summary>      <div class="share-card" id="shareCard">
         <div class="share-card-header">Share your progress</div>
         <canvas id="shareCardCanvas" width="960" height="540"></canvas>
         <div class="share-card-actions">
           <button class="btn" id="copyShareTextBtn">Copy share text</button>
           <button class="btn" id="downloadShareCardBtn">Download card</button>
         </div>
-        <div class="share-card-hint">Tip: share this card and pin your invite link. Your rank + streak drives FOMO.</div>
+        <div class="share-card-hint">Your saved balance and invite link, ready to share.</div>
       </div>
 
-<div class="friends-link-row">
-        <div class="friends-link" id="inviteLinkText">
-          https://resilient-kheer-041b8c.netlify.app
-        </div>
-        <button class="friends-copy-btn" id="copyInviteBtn">Copy</button>
-      </div>
-
-      <button class="friends-share-btn" id="shareTelegramBtn">
-        Share
-      </button>
-
-      <div class="friends-boost-pill">
-        <span>Invite now to secure your edge:</span>
-        <span>+800 🌕</span>
-      </div>
+</details>
     </div>
   </div>
 
   <div class="sheet" id="withdrawSheet">
-    <div class="sheet-header">
-      <div>
-        <div class="sheet-title">Withdraw · coming soon</div>
-        <div class="sheet-subtitle">
-          Withdrawals open after the JigCoin token launches publicly.
-        </div>
-      </div>
-      <button class="sheet-close" id="withdrawClose">×</button>
-    </div>
+    <div class="sheet-header"><div><div class="sheet-title">Vault</div><div class="sheet-subtitle">Your coins and account benefits.</div></div><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body">
-      <div class="withdraw-card">
-        <div class="withdraw-row">
-          <div>
-            <div
-              style="font-size: 11px; color: rgba(148, 163, 184, 0.95)"
-            >
-              Your current balance
-            </div>
-            <div class="withdraw-amount" id="withdrawBalanceText">…</div>
-          </div>
-          <div class="balance-token-icon">
-            <span>🪙</span>
-          </div>
+      <section class="vault-balance"><span class="brand-coin" aria-hidden="true">J</span><p>Saved in-game coins</p><strong id="withdrawBalanceText">…</strong></section>
+      <section class="vault-status"><span class="status-badge">Not available yet</span><h2>Withdrawals</h2><p>Withdrawals are not live. There is currently no cash-out option or guaranteed token conversion.</p><p>Any future launch and eligibility details will be announced separately.</p></section>
+      <div id="hubOwnedShield" hidden class="vip-box" style="margin-bottom:12px;">
+        <div style="font-weight:800; margin-bottom:6px;">Momentum Shield</div>
+        <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
+          Streak protection is separate from coin packs. One eligible shield covers one missed day and is consumed when used.
         </div>
-        <div class="withdraw-sub">
-          Withdrawals are not live yet. Your points will convert into token
-          allocation when the JigCoin token launches.
-        </div>
-      
+        <div id="momentumShieldStatus" style="opacity:.85; font-size:12px; margin-bottom:10px;">Loading…</div>
+        <div id="momentumShieldList" hidden></div>
       </div>
-
-      <div class="withdraw-steps" id="withdrawSteps">
-        <div style="font-weight:900;">Withdraw readiness</div>
-        <div style="opacity:.85; font-size:11px; margin-top:4px;">
-          Complete every item in the checklist. Active players who stay consistent unlock smoother withdraw reviews.
-        </div>
-        <div class="withdraw-progress">
-          <div class="withdraw-progress-inner" id="withdrawProgressInner"></div>
-        </div>
-        <div class="withdraw-progress-label" id="withdrawProgressLabel">Checklist loading…</div>
-
-        <div class="checklist" id="withdrawChecklist">
-          <div class="check-item warn" id="wlMinBalance">
-            <div class="check-dot">•</div>
-            <div>
-              <div class="check-title">Minimum balance</div>
-              <div class="check-sub" id="wlMinBalanceSub">Checking…</div>
-            </div>
-          </div>
-
-          <div class="check-item warn" id="wlSponsorReq">
-            <div class="check-dot">•</div>
-            <div>
-              <div class="check-title">Sponsor activity (last 7 days)</div>
-              <div class="check-sub" id="wlSponsorReqSub">Checking…</div>
-            </div>
-          </div>
-
-          <div class="check-item warn" id="wlAccountAge">
-            <div class="check-dot">•</div>
-            <div>
-              <div class="check-title">Account age</div>
-              <div class="check-sub" id="wlAccountAgeSub">Checking…</div>
-            </div>
-          </div>
-
-          <div class="check-item warn" id="wlRisk">
-            <div class="check-dot">•</div>
-            <div>
-              <div class="check-title">Security check</div>
-              <div class="check-sub" id="wlRiskSub">Checking…</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:10px; font-weight:900;">Recent payouts</div>
-        <div class="payout-muted">Proof-of-payment will appear here once withdrawals are enabled.</div>
-        <div class="payout-feed" id="recentPayouts">
-          <div class="payout-row"><span>—</span><span class="payout-muted">Waiting for launch</span></div>
-        </div>
-      </div>
-
-      <div class="withdraw-form" id="withdrawForm">
-
-        <div style="font-weight:800;">Early withdraw request</div>
-        <div style="opacity:.9; font-size:12px; margin-top:4px;">
-          If withdrawals are enabled on the backend, you can submit a request for review.
-        </div>
-
-        <div class="field">
-          <label>Amount (points)</label>
-          <input id="withdrawAmount" type="number" inputmode="numeric" placeholder="e.g. 5000" />
-        </div>
-
-        <div class="field">
-          <label>Wallet / Address</label>
-          <input id="withdrawAddress" type="text" placeholder="Paste your wallet address" />
-        </div>
-
-        <button class="btn full" id="withdrawRequestBtn" style="margin-top:12px;">Request withdraw</button>
-        <div style="opacity:.8; font-size:11px; margin-top:8px;" id="withdrawRequestHint">
-          Minimums, limits and review time are controlled by the backend.
-        </div>
-      </div>
-
-<div class="coming-soon-pill">
-        <div class="coming-soon-dot"></div>
-        <span>On-chain withdraws &amp; quests are under construction.</span>
-      </div>
-
-      <div class="withdraw-help">
-        Stay tuned in the official JigCoin Telegram and Instagram for
-        launch announcements and premium quests.
-      </div>
-
-      <button class="withdraw-bottom-btn" disabled>
-        Withdrawals opening soon
-      </button>
+      <button type="button" class="vault-membership" id="vaultVip">VIP membership <span>View status ›</span></button>
+      <p class="vault-help">Need payment help? Send <strong>/paysupport</strong> to the bot. Purchase history is in Shop.</p>
     </div>
   </div>
 
@@ -2396,51 +2131,35 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
     </div>
   </div>
 
-  <div class="sheet" id="boostSheet" role="dialog" aria-modal="true" aria-labelledby="boostSheetTitle">
+  <div class="sheet" id="boostSheet" role="region" aria-labelledby="boostSheetTitle">
     <div class="sheet-header">
       <div>
-        <div class="sheet-title" id="boostSheetTitle">Boosts</div>
-        <div class="sheet-subtitle">More energy. More from every tap.</div>
+        <div class="sheet-title" id="boostSheetTitle">Earn</div>
+        <div class="sheet-subtitle">Watch an advert. Choose your reward.</div>
       </div>
-      <button class="sheet-close" id="boostClose" aria-label="Close boosts">×</button>
+      <button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
     </div>
+    <div class="earn-tabs" role="group" aria-label="Reward type"><button type="button" data-earn-target="tasks" aria-pressed="false">Coin tasks</button><button type="button" data-earn-target="boosts" aria-pressed="true">Boosts</button></div>
     <div class="sheet-body">
       <p class="boost-intro" id="boostRecommendation">Choose a boost for your next tapping session.</p>
       <article class="boost-card" data-boost-code="sp_emergency_energy">
         <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">⚡</span><div>
-          <h3>Energy refill</h3><p>Fill your energy bar and get back to tapping.</p>
+          <h3>Energy refill</h3>
         </div></div>
         <div class="boost-state" id="energyBoostStatus" role="status">Checking availability…</div>
         <button type="button" class="boost-action" id="energyBoostAction" disabled>Checking…</button>
       </article>
       <article class="boost-card boost-double" data-boost-code="sp_double_points">
         <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">2×</span><div>
-          <h3>Double tap points</h3><p>Earn twice the tap points for 10 minutes.</p>
+          <h3>Double tap points</h3>
         </div></div>
         <div class="boost-state" id="doubleBoostStatus" role="status">Checking availability…</div>
         <button type="button" class="boost-action" id="doubleBoostAction" disabled>Checking…</button>
       </article>
       <p class="boost-footnote">One eligible advert per boost. Each boost returns 24 hours after claiming.</p>
       <button type="button" class="shop-retry" id="boostRefresh" hidden>Check availability again</button>
-      <div class="vip-box hub-daily">
-        <div class="hub-section-title">Your daily progress</div>
-        <div id="hubDailyProgress"></div>
-        <button type="button" class="shop-retry" id="hubDailyClaim">Daily check-in</button>
-      </div>
-      <div id="hubOwnedShield" hidden class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Momentum Shield</div>
-        <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
-          Streak protection is separate from coin packs. One eligible shield covers one missed day and is consumed when used.
-        </div>
 
-        <div id="momentumShieldStatus" style="opacity:.85; font-size:12px; margin-bottom:10px;">Loading…</div>
-        <div id="momentumShieldList" hidden></div>
-      </div>
 
-      <div class="boost-links">
-        <button type="button" id="boostSponsoredLink">Earn coins · Tasks →</button>
-        <button type="button" id="boostShopLink">Buy coins · Shop →</button>
-      </div>
     </div>
   </div>
 
@@ -2455,8 +2174,8 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
     </div>
     <div class="sheet-body">
       <div id="hubStarter" hidden></div>
-      <div class="hub-section-title">Choose your coin pack</div>
-      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop. Energy and streak protection are separate.</p>
+      <div class="hub-section-title">Choose your pack</div>
+      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop.</p>
       <div id="coinPackList" aria-live="polite"><div class="shop-status">Loading packs…</div></div>
       <details class="hub-history"><summary>Orders &amp; payment help</summary><div id="hubOrderHistory"></div><p id="hubSupport" class="hub-small"></p></details>
       <p id="hubShopNotice" class="hub-small" role="status">Checking shop availability…</p>
@@ -2473,19 +2192,20 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
   <div class="sheet" id="sponsorSheet">
     <div class="sheet-header">
       <div>
-        <div class="sheet-title">Sponsored Tasks</div>
-        <div class="sheet-subtitle">Watch eligible adverts and claim coin rewards. Each task has its own cooldown.</div>
+        <div class="sheet-title">Earn</div>
+        <div class="sheet-subtitle">Watch an advert. Choose your reward.</div>
       </div>
       <button class="sheet-close" id="sponsorClose">✕</button>
     </div>
 
+    <div class="earn-tabs" role="group" aria-label="Reward type"><button type="button" data-earn-target="tasks" aria-pressed="true">Coin tasks</button><button type="button" data-earn-target="boosts" aria-pressed="false">Boosts</button></div>
     <div class="sheet-body">
-      <div id="sponsorList" class="vip-box" style="margin-bottom:12px;">
+      <p class="earn-explainer">Choose a task. Claim your coins after the advert is confirmed.</p><div id="sponsorList" class="vip-box" style="margin-bottom:12px;">
         <div style="opacity:.8;">Loading sponsor quests…</div>
       </div>
 
       <div class="vip-box" style="opacity:.8;">
-        Claim becomes available after your ad reward is confirmed. Each claimed quest returns in 24 hours.
+        Each claimed task returns after 24 hours.
       </div>
     </div>
   </div>
@@ -3093,6 +2813,8 @@ function setAccountPhase(phase) {
   }
   // An old open overlay must not hide a connection/maintenance message.
   if (phase !== "ready") {
+    const main=document.getElementById("mainScroll");if(main)main.inert=false;
+    const leaderboard=document.getElementById("leaderboardScreen");if(leaderboard)leaderboard.style.display="none";
     for (const sheet of document.querySelectorAll?.(".sheet.show") || []) sheet.classList.remove("show");
     document.getElementById("sheetBackdrop")?.classList?.remove("show");
     if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick = null; }
@@ -3323,8 +3045,8 @@ function updateTaskCardStates() {
 // keep task timers fresh
 setInterval(() => {
   updateTaskCardStates();
-  if (coinShopSheet?.classList.contains("show")) updateBoostHub();
-  if (boostSheet?.classList.contains("show")) { updateBoostHub(); renderBoostCards(); pollBoostStatus(); }
+  updateBoostHub();
+  if (boostSheet?.classList.contains("show")) { renderBoostCards(); pollBoostStatus(); }
 }, 1000);
 
 
@@ -3410,7 +3132,7 @@ async function loadTeamSummary() {
       } else if (teamSize < 20) {
         nextEl.textContent = "Keep scaling – teams above 20 players climb the ladder much faster.";
       } else {
-        nextEl.textContent = "Top teams grow exponentially – don’t let yours slow down.";
+        nextEl.textContent = "Invite friends and track your team’s saved progress here.";
       }
     }
   } catch (err) {
@@ -3450,7 +3172,7 @@ async function loadReferralStatus() {
 }
 
 function buildShareText() {
-  const bal = Number(state.balance || 0);
+  const bal = Number(state.bal || 0);
   const streak = Number(state.streakDays || 0);
   const rank = (document.getElementById("rankName") && document.getElementById("rankName").textContent) ? document.getElementById("rankName").textContent : "Recruit";
   const link = (inviteLinkText && inviteLinkText.textContent) ? inviteLinkText.textContent.trim() : FALLBACK_REF_LINK;
@@ -3487,7 +3209,7 @@ function renderShareCardCanvas() {
   ctx.font = "600 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
   ctx.fillText("Tap · Quests · Invite friends", 52, 132);
 
-  const bal = Number(state.balance || 0);
+  const bal = Number(state.bal || 0);
   const today = Number(state.today || 0);
   const streak = Number(state.streakDays || 0);
   const rank = (document.getElementById("rankName") && document.getElementById("rankName").textContent) ? document.getElementById("rankName").textContent : "Recruit";
@@ -3562,7 +3284,7 @@ async function loadWithdrawReadiness() {
   const risk = document.getElementById("wlRisk");
   const riskSub = document.getElementById("wlRiskSub");
 
-  const curBal = Number(state.balance || 0);
+  const curBal = Number(state.bal || 0);
   const baselineMin = 5000;
 
   const passBal = curBal >= baselineMin;
@@ -4496,9 +4218,7 @@ async function getVipProduct(force = false) {
 }
 
 function openVipSheet() {
-  sheetBackdrop.classList.add("show");
-  vipSheet.classList.add("show");
-  setActiveTab(tabTasks);
+  showAppSheet(vipSheet, tabWithdraw);
 }
 
 function closeVipSheet() {
@@ -4517,6 +4237,8 @@ function closeVipSheet() {
 }
 
 function showAppSheet(sheet, tab) {
+  if (!accountIsReady()) return;
+  const leaderboard=document.getElementById('leaderboardScreen');if(leaderboard)leaderboard.style.display='none';document.body.style.overflow='';
   document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
   if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
   sheetBackdrop.classList.add('show'); sheet.classList.add('show'); setActiveTab(tab);
@@ -4548,11 +4270,15 @@ function validStarsProduct(p) {
 function starsProductCard(p,starter=false) {
   const label = starter ? 'One-time starter offer' : p.title;
   const disabled = !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
-  return `<article class="hub-product ${starter?'hub-starter':''}">
-    <div class="hub-product-label">${escapeHtml(label)}</div>
+  const packs=(hubCatalog?.products||[]).filter(validStarsProduct).filter(x=>!x.starter);
+  const rate=p.coins/p.stars;
+  const best=!starter && packs.length>1 && rate===Math.max(...packs.map(x=>x.coins/x.stars)) && packs.some(x=>x.coins/x.stars<rate);
+  return `<article class="hub-product ${starter?'hub-starter':''} ${best?'hub-best':''}">
+    <div class="hub-product-label">${escapeHtml(label)}${best?'<span class="value-badge">Best value</span>':''}</div>
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
+    <div class="hub-unit-value">${rate.toLocaleString('en-GB',{maximumFractionDigits:2})} coins per Star</div>
     ${starter?'<div class="hub-offer-clock" aria-live="off"></div>':''}
-    <button type="button" class="hub-buy" data-stars-sku="${p.sku}" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`Buy for ⭐ ${p.stars.toLocaleString('en-GB')}`}</button>
+    <button type="button" class="hub-buy" data-stars-sku="${p.sku}" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`Buy for ★ ${p.stars.toLocaleString('en-GB')}`}</button>
   </article>`;
 }
 function renderStarsCatalog() {
@@ -4634,7 +4360,7 @@ function updateBoostHub() {
   const days=Number(state.streakDays||0);
   const next=(hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
   document.getElementById('hubDailyProgress').textContent=`${days} day${days===1?'':'s'} · ${claimed?'Today’s check-in saved.':'Daily check-in available.'}${next?` Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:''}`;
-  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed;daily.textContent=claimed?'Today’s reward claimed':'Claim daily check-in';
+  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed || !accountIsReady();daily.textContent=claimed?'Claimed today':'Claim reward';
   document.getElementById('hubOwnedShield').hidden=Number(state.momentumShieldQty||0)<=0;
   if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
   const expires=Date.parse(hubCatalog?.offer_expires_at||'');
@@ -4643,6 +4369,13 @@ function updateBoostHub() {
     if(Number.isFinite(expires)&&expires<=hubNow())el.parentElement.querySelector('button').disabled=true;
   });
 }
+document.querySelectorAll('[data-earn-target]').forEach(button=>button.addEventListener('click',()=>{
+  if(!accountIsReady())return;
+  if(button.dataset.earnTarget==='boosts')openBoostSheet();else handleSponsorQuests();
+}));
+document.getElementById('homeLeaderboard')?.addEventListener('click',()=>{if(accountIsReady())openLeaderboard('global');});
+document.getElementById('vaultVip')?.addEventListener('click',()=>{if(accountIsReady())handleVipPass();});
+document.getElementById('sharePreviewDetails')?.addEventListener('toggle',renderShareCardCanvas);
 document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{await handleDailyTask();updateBoostHub();});
 
 // ------------ Momentum Shield UI ------------
@@ -4861,10 +4594,6 @@ document.getElementById('boostClose').addEventListener('click',()=>{
   boostSheet.classList.remove('show'); sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);
 });
 document.getElementById('boostRefresh').addEventListener('click',()=>{void refreshBoostMissions().catch(()=>{});});
-document.getElementById('boostShopLink').addEventListener('click',openCoinShopSheet);
-document.getElementById('boostSponsoredLink').addEventListener('click',handleSponsorQuests);
-document.getElementById('homeEnergyBoost').addEventListener('click',handleEnergyBoostTask);
-document.getElementById('homeDoubleBoost').addEventListener('click',handleDoubleBoostTask);
 
 function sponsorHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -4918,7 +4647,7 @@ function renderSponsorMissions(missions) {
         return d;
       })();
 
-      let btnText = "Start";
+      let btnText = m.provider === "monetag" ? "Watch ad" : "Start";
       let btnDisabled = "";
       let btnAction = "start";
       let remaining = 0; // used by countdown ticker
@@ -4959,13 +4688,8 @@ function renderSponsorMissions(missions) {
       }
 
       return `
-        <div class="withdraw-row ad-quest-row" data-quest-code="${sponsorHtml(m.code)}" style="align-items:flex-start; gap:12px;">
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px;"><div style="font-weight:700;">${sponsorHtml(m.title || m.code)}</div><div class="pill ${status==="claimable" ? "good" : (status==="waiting" ? "warn" : (status==="cooldown" ? "cooldown" : "dim"))}">${status==="unavailable" ? "Unavailable" : status==="pending" ? "Confirming" : status==="claimable" ? "Claimable" : (status==="waiting" ? "Waiting" : (status==="cooldown" ? "Cooldown" : "Available"))}</div></div>
-            <div style="font-size:11px; margin-bottom:2px; color:rgba(250,204,21,0.92);">${tierLabel}</div>
-            <div style="opacity:.85; font-size:12px; line-height:1.3;">${sponsorHtml(cleanDesc)}</div>
-            <div style="margin-top:6px; font-size:12px; opacity:.85;">${payout ? payout : ""}</div>
-          </div>
+        <div class="withdraw-row ad-quest-row" data-quest-code="${sponsorHtml(m.code)}">
+          <div class="quest-copy"><strong>${sponsorHtml(m.title || m.code)}</strong><span class="quest-reward">${payout || ''}${m.payout_type === "points" ? "" : " coins"}</span>${m.provider==='monetag'?'':`<p>${sponsorHtml(cleanDesc)}</p>`}</div>
           <button class="btn small" data-mcode="${sponsorHtml(m.code)}" data-provider="${sponsorHtml(m.provider || "")}" data-attempt="${sponsorHtml(m.attempt_id || "")}" data-url="${sponsorHtml(m.url || "")}" data-action="${btnAction}" data-status="${status || ""}" data-deadline="${btnAction === "none" && status !== "unavailable" ? Number(m.countdown_as_of_ms ?? Date.now()) + remaining * 1000 : 0}" data-mode="${status==="pending" ? "pending" : (cdRemaining>0 || status==="cooldown") ? "cooldown" : "claim"}" ${btnDisabled}>
             ${btnText}
           </button>
@@ -5307,9 +5031,7 @@ async function buyVipPass() {
 }
 
 async function handleInviteTask() {
-  sheetBackdrop.classList.add("show");
-  friendsSheet.classList.add("show");
-  setActiveTab(tabFriends);
+  showAppSheet(friendsSheet, tabFriends);
   renderShareCardCanvas();
   loadReferralStatus();
   loadTeamSummary();
@@ -5317,9 +5039,7 @@ async function handleInviteTask() {
 }
 
 function openFriendsSheet() {
-  sheetBackdrop.classList.add("show");
-  friendsSheet.classList.add("show");
-  setActiveTab(tabFriends);
+  showAppSheet(friendsSheet, tabFriends);
   renderShareCardCanvas();
   loadReferralStatus();
   loadTeamSummary();
@@ -5394,12 +5114,15 @@ document.querySelectorAll(".task-card").forEach((card) => {
 });
 
 function setActiveTab(activeBtn) {
+  const main=document.getElementById("mainScroll");if(main)main.inert=activeBtn!==tabFarm;
   [tabFarm, tabTasks, tabShop, tabFriends, tabWithdraw].forEach((btn) => {
     if (!btn) return;
     if (btn === activeBtn) {
       btn.classList.add("active");
+      btn.setAttribute("aria-current", "page");
     } else {
       btn.classList.remove("active");
+      btn.removeAttribute("aria-current");
     }
   });
 }
@@ -5554,6 +5277,7 @@ if (starterStepCoinbaseBtn) {
   });
 }
 tabFarm.addEventListener("click", () => {
+  closeLeaderboard();
   setActiveTab(tabFarm);
   sheetBackdrop.classList.remove("show");
   document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
@@ -5561,8 +5285,7 @@ tabFarm.addEventListener("click", () => {
 });
 
 tabTasks.addEventListener("click", () => {
-  setActiveTab(tabTasks);
-  openBoostSheet();
+  handleSponsorQuests();
 });
 tabShop.addEventListener('click', openCoinShopSheet);
 
@@ -5572,9 +5295,7 @@ tabFriends.addEventListener("click", () => {
 });
 
 tabWithdraw.addEventListener("click", async () => {
-  setActiveTab(tabWithdraw);
-  sheetBackdrop.classList.add("show");
-  withdrawSheet.classList.add("show");
+  showAppSheet(withdrawSheet, tabWithdraw);
   const res = await apiPost("/api/withdraw/info", {});
   if (res && res.ok && typeof res.balance === "number") {
     withdrawBalanceText.textContent = formatNumber(res.balance);
@@ -5654,7 +5375,7 @@ copyInviteBtn.addEventListener("click", async () => {
 shareTelegramBtn.addEventListener("click", () => {
   const link = state.inviteLink || FALLBACK_REF_LINK;
   const text = encodeURIComponent(
-    `🔥 Join me in JigCoin and farm the airdrop:\n${link}`
+    `Join me in JigCoin. Tap, complete tasks and build your score.`
   );
   window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, "_blank");
 });
@@ -5695,124 +5416,14 @@ setTimeout(() => renderShareCardCanvas(), 0);
 
 // ---------------- LEADERBOARD OVERLAY ----------------
 const leaderboardHTML = `
-  <div id="leaderboardScreen" style="
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    flex-direction: column;
-    background: radial-gradient(circle at top left, rgba(251,191,36,0.15), transparent 55%),
-                radial-gradient(circle at bottom right, rgba(59,130,246,0.25), #020617 65%);
-    color: #e5e7eb;
-    /* Telegram mini-app header + iOS safe areas can overlap fixed overlays.
-       Add breathing room so the close button and bottom tip are always visible. */
-    padding: calc(16px + env(safe-area-inset-top, 0px) + 48px) 16px calc(24px + env(safe-area-inset-bottom, 0px) + 88px) 16px;
-    box-sizing: border-box;
-  ">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-      <div style="display:flex; flex-direction:column;">
-        <span style="font-size:14px; opacity:0.7;">Season 0 · You’re early</span>
-        <span style="font-size:20px; font-weight:700;">Leaderboard</span>
-        <span style="font-size:12px; opacity:0.7; margin-top:2px;">Rankings update daily · Protect momentum</span>
-      </div>
-      <button id="lbCloseBtn" style="
-        width:32px;
-        height:32px;
-        border-radius:999px;
-        border:none;
-        background:rgba(15,23,42,0.9);
-        color:#e5e7eb;
-        font-size:18px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        position: fixed;
-        top: calc(env(safe-area-inset-top, 0px) + 56px);
-        right: 16px;
-        z-index: 10001;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-      ">
-        ×
-      </button>
-    </div>
-
-    <div style="display:flex; gap:8px; margin-bottom:16px;">
-      <button id="lbTabGlobal" class="lb-tab-btn" style="
-        flex:1;
-        border-radius:999px;
-        border:none;
-        padding:8px 0;
-        font-size:14px;
-        font-weight:600;
-        background:rgba(15,23,42,0.9);
-        color:#e5e7eb;
-      ">Global</button>
-      <button id="lbTabDaily" class="lb-tab-btn" style="
-        flex:1;
-        border-radius:999px;
-        border:none;
-        padding:8px 0;
-        font-size:14px;
-        font-weight:600;
-        background:rgba(15,23,42,0.5);
-        color:#9ca3af;
-      ">Daily</button>
-      <button id="lbTabFriends" class="lb-tab-btn" style="
-        flex:1;
-        border-radius:999px;
-        border:none;
-        padding:8px 0;
-        font-size:14px;
-        font-weight:600;
-        background:rgba(15,23,42,0.5);
-        color:#9ca3af;
-      ">Friends</button>
-    </div>
-
-    <div id="lbMySummary" style="
-      border-radius:16px;
-      padding:10px 12px;
-      background:linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,64,175,0.9));
-      margin-bottom:12px;
-      font-size:12px;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-    ">
-      <div id="lbMySummaryText">Your rank info will appear here.</div>
-    </div>
-
-    <div id="lbOvertakeBanner" style="display:none; margin-bottom:12px;"></div>
-
-    <div id="lbContent" style="
-      flex:1;
-      overflow-y:auto;
-      padding-right:4px;
-      /* keep list readable above the fixed footer tip */
-      padding-bottom:80px;
-    ">
-    </div>
-
-    <div id="lbFooterInvite" style="
-      position: fixed;
-      left: 16px;
-      right: 16px;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
-      font-size: 12px;
-      opacity: 0.92;
-      text-align: center;
-      z-index: 10002;
-      pointer-events: none;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(10, 12, 18, 0.55);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-    ">
-      Invite friends from the Friends tab to climb the leaderboard faster.
-    </div>
-  </div>
+  <section id="leaderboardScreen" class="leaderboard-screen" style="display:none" aria-labelledby="lbTitle">
+    <div class="leaderboard-heading"><div><h2 id="lbTitle">Leaderboard</h2><p>Compare your saved score.</p></div><button id="lbCloseBtn" aria-label="Back to Home">×</button></div>
+    <div class="leaderboard-tabs" role="group" aria-label="Leaderboard period"><button id="lbTabGlobal" class="lb-tab-btn">Global</button><button id="lbTabDaily" class="lb-tab-btn">Daily</button><button id="lbTabFriends" class="lb-tab-btn">Friends</button></div>
+    <div id="lbMySummary"><div id="lbMySummaryText">Loading your rank…</div></div>
+    <div id="lbOvertakeBanner" style="display:none"></div>
+    <div id="lbContent"></div>
+    <p id="lbFooterInvite">Find your referral link in Invite.</p>
+  </section>
 `;
 
 document.body.insertAdjacentHTML("beforeend", leaderboardHTML);
@@ -5846,8 +5457,9 @@ function setLeaderboardTabActive(activeKey) {
 }
 
 function openLeaderboard(initialTab) {
-  if (!leaderboardScreen) return;
+  if (!leaderboardScreen || !accountIsReady()) return;
   leaderboardScreen.style.display = "flex";
+  const main=document.getElementById("mainScroll");if(main)main.inert=true;
   document.body.style.overflow = "hidden";
   const tab = initialTab || "global";
   if (tab === "friends") {
@@ -5865,6 +5477,7 @@ function openLeaderboard(initialTab) {
 function closeLeaderboard() {
   if (!leaderboardScreen) return;
   leaderboardScreen.style.display = "none";
+  const main=document.getElementById("mainScroll");if(main)main.inert=false;
   document.body.style.overflow = "";
 }
 
@@ -6045,6 +5658,20 @@ initFromBackend();
 
   </script>
 
+  <!-- Streak Restore Modal (paid restore window) -->
+  <div id="streakBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1100;"></div>
+  <div class="fomo-modal" id="streakRestoreModal" style="display:none;z-index:1101;" role="dialog" aria-modal="true" aria-labelledby="streakRestoreTitle">
+    <div class="fomo-title" id="streakRestoreTitle">Your streak has broken</div>
+    <div class="fomo-sub" id="streakRestoreBody">
+      Restore your streak to keep your multipliers and rank momentum.
+    </div>
+    <div class="metric-subtext" id="streakRestoreCountdown" style="margin-top:10px;"></div>
+    <button class="btn btn-primary" id="btnRestoreCard">Restore with Card</button>
+    <button class="btn" id="btnRestoreCrypto" style="margin-top:10px;">Restore with Crypto</button>
+    <button class="btn" id="btnStartNewStreak" style="margin-top:10px;opacity:.9;">Start new streak (lose bonuses)</button>
+  </div>
+
+
 <script>
 
 // -------- Streak Restore Modal (paid) --------
@@ -6180,182 +5807,32 @@ if (btnStartNewStreak) btnStartNewStreak.addEventListener("click", () => startNe
 if (streakBackdrop) streakBackdrop.addEventListener("click", () => hideStreakRestoreModal());
 
 
-// Startup FOMO modal (blocking until acknowledged)
-// Shows on every app open (per app load) until the first 1,000 users are reached.
-document.addEventListener("DOMContentLoaded", () => {
-  const backdrop = document.getElementById("fomoBackdrop");
-  const modal = document.getElementById("fomoModal");
-  if (!backdrop || !modal) return;
-
-  const show = () => { if (!accountIsReady()) return; backdrop.style.display = "block"; modal.style.display = "block"; };
-  const hide = () => { backdrop.style.display = "none"; modal.style.display = "none"; };
-
-  // Decide whether Early Access announcement is active (server-side user count)
-  const spotsEl = document.getElementById("fomoSpotsLeft");
-  const inviteBonusEl = document.getElementById("fomoInviteBonus");
-  const inviteBtnAmtEl = document.getElementById("fomoInviteBtnAmt");
-  const countdownEl = document.getElementById("fomoCountdown");
-  const launchBoostCountdownEl = document.getElementById("launchBoostCountdown");
-  const LIMIT = 1000;
-  const fallbackInviteBonus = 800;
-
-  function fmtCountdown(sec) {
-    if (sec == null) return "Limited";
-    const s = Math.max(0, Number(sec) || 0);
-    const hh = Math.floor(s / 3600);
-    const mm = Math.floor((s % 3600) / 60);
-    const ss = Math.floor(s % 60);
-    const pad = (n) => String(n).padStart(2, "0");
-    if (hh <= 0) return `${pad(mm)}:${pad(ss)}`;
-    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
-  }
-
-  let countdownSeconds = null;
-  let countdownTimer = null;
-  let acknowledgedThisSession = false;
-
-  async function refreshAndMaybeShow(options) {
-    if (!accountIsReady()) return;
-    const onlyUpdate = options && options.onlyUpdate;
-    try {
-      const r = await fetch(API_BASE + "/api/stats", { method: "GET" });
-      const data = await r.json().catch(() => null);
-      if (!r.ok || !data?.ok || !accountIsReady()) return;
-      const total = Number(data.total_users ?? data.totalUsers);
-      if (!Number.isFinite(total)) return;
-      const remaining = Number(
-        data?.early_bonus_remaining ?? Math.max(0, LIMIT - total)
-      );
-      const backendActive = (data && data.ok)
-        ? Boolean(data.early_bonus_active)
-        : (total < LIMIT);
-      // We still compute backendActive for the future, but we always
-      // gate visibility with acknowledgedThisSession.
-      const active = true;
-
-      const inviteBonus = Number(data?.invite_bonus ?? fallbackInviteBonus);
-      const endsIn = (data && data.ok) ? (data.early_bonus_ends_in ?? null) : null;
-
-      if (inviteBonusEl) inviteBonusEl.textContent = inviteBonus.toLocaleString("en-GB");
-      if (inviteBtnAmtEl) inviteBtnAmtEl.textContent = inviteBonus.toLocaleString("en-GB");
-      if (spotsEl) spotsEl.textContent = remaining.toLocaleString("en-GB");
-
-      countdownSeconds = (endsIn == null || endsIn === "") ? null : Number(endsIn);
-      if (countdownEl) countdownEl.textContent = fmtCountdown(countdownSeconds);
-      if (launchBoostCountdownEl) {
-        launchBoostCountdownEl.textContent = `⏳ Window: ${fmtCountdown(countdownSeconds)} left`;
-      }
-
-      if (!countdownTimer) {
-        countdownTimer = setInterval(() => {
-          if (countdownSeconds == null) {
-            if (countdownEl) countdownEl.textContent = "Until all bonus places are claimed";
-            if (launchBoostCountdownEl) {
-              launchBoostCountdownEl.textContent = "Starter bonus: places remaining";
-            }
-            return;
-          }
-          countdownSeconds = Math.max(0, countdownSeconds - 1);
-          if (countdownEl) countdownEl.textContent = fmtCountdown(countdownSeconds);
-          if (launchBoostCountdownEl) {
-            launchBoostCountdownEl.textContent = `⏳ Window: ${fmtCountdown(countdownSeconds)} left`;
-          }
-        }, 1000);
-      }
-
-      // Keep the modal visible on first app open until user acknowledges.
-      if (!onlyUpdate && !acknowledgedThisSession) {
-        if (active && backendActive) {
-          show();
-        } else if (!active) {
-          hide();
-        } else {
-          // active === true but backendActive is false -> keep current visibility
-        }
-      }
-    } catch (_e) {
-      // Optional promotion stays hidden if its server data is unavailable.
-    }
-  }
-  const showWhenReady = () => refreshAndMaybeShow({ onlyUpdate: false });
-  window.addEventListener("jigcoin:account-ready", showWhenReady);
-  if (accountIsReady()) showWhenReady();
-
-
-
-  // On visibility change, just refresh numbers & state; do NOT re-open the modal mid-session.
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      refreshAndMaybeShow({ onlyUpdate: true });
-      syncStateIfIdle();
-    }
-  });
-
-  const okBtn = document.getElementById("fomoOkBtn");
-  const inviteBtn = document.getElementById("fomoInviteBtn");
-
-  const acknowledge = () => {
-    // Must acknowledge to continue.
-    hide();
-    acknowledgedThisSession = true;
-
-    // When the user closes the modal, immediately refresh backend state
-    // so the balance/energy are 100% correct when they start tapping.
-    syncStateIfIdle();
-  };
-
-  okBtn && okBtn.addEventListener("click", acknowledge);
-
-  inviteBtn && inviteBtn.addEventListener("click", () => {
-    acknowledge();
-    const tab = document.getElementById("tabFriends");
-    tab && tab.click();
-  });
-
-  // Prevent closing by clicking backdrop
-  backdrop.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  });
-});
+// Optional referral promotion: display only confirmed live limits/deadlines.
+let referralPromotionDeadline=null;
+async function refreshReferralPromotion() {
+  const box=document.getElementById('launchBoostInvite'),label=document.getElementById('launchBoostCountdown');
+  if(!box || !label || !accountIsReady())return;
+  try {
+    const response=await fetch(API_BASE+'/api/stats');const data=await response.json();
+    if(!response.ok || !data?.ok || !accountIsReady()){box.hidden=true;return;}
+    const remaining=Number(data.early_bonus_remaining);
+    const active=data.early_bonus_active===true && data.early_bonus_remaining!=null && Number.isSafeInteger(remaining) && remaining>0;
+    box.hidden=!active;if(!active)return;
+    const bonus=Number(data.invite_bonus);
+    label.textContent=`Starter bonus: ${remaining.toLocaleString('en-GB')} places remaining${Number.isFinite(bonus)&&bonus>0?` · ${bonus.toLocaleString('en-GB')} coins per eligible referral`:''}`;
+    const seconds=data.early_bonus_ends_in;
+    referralPromotionDeadline=seconds!=null && Number.isFinite(Number(seconds))?Date.now()+Number(seconds)*1000:null;
+    if(referralPromotionDeadline && referralPromotionDeadline<=Date.now())box.hidden=true;
+  } catch(_){box.hidden=true;}
+}
+window.addEventListener('jigcoin:account-ready',refreshReferralPromotion);
+if(accountIsReady())void refreshReferralPromotion();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshReferralPromotion();syncStateIfIdle();}});
+setInterval(()=>{if(referralPromotionDeadline && Date.now()>=referralPromotionDeadline)document.getElementById('launchBoostInvite').hidden=true;},1000);
 </script>
 
 
 
-  <!-- Startup FOMO Modal -->
-  <div class="fomo-backdrop" id="fomoBackdrop" style="display:none;"></div>
-  <div class="fomo-modal" id="fomoModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="fomoTitle">
-    <div class="fomo-title" id="fomoTitle">🚀 Launch Phase: Early Access</div>
-    <p class="fomo-copy">
-      <b>First 1,000 players</b> lock the early allocation window (+<b>5,000</b> starter coins).<br>
-      <span class="fomo-spots">Spots left: <b id="fomoSpotsLeft">—</b></span>
-      <br>
-      <span class="fomo-spots">Availability: <b id="fomoCountdown">—</b></span>
-    </p>
-    <ul class="fomo-bullets">
-      <li><span class="dot">🔥</span><span><b>Invite bonuses LIVE:</b> +<b id="fomoInviteBonus">800</b> coins per friend.</span></li>
-      <li><span class="dot">🏆</span><span>Climb <b>Global Rank</b> to unlock perks and stronger allocation.</span></li>
-    </ul>
-    <div class="fomo-actions">
-      <button class="ghost" id="fomoInviteBtn">Invite & earn +<span id="fomoInviteBtnAmt">800</span></button>
-      <button id="fomoOkBtn">Start farming</button>
-    </div>
-    <div class="fomo-fine">You must acknowledge this message to continue.</div>
-  </div>
-
-
-  <!-- Streak Restore Modal (paid restore window) -->
-  <div id="streakBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1100;"></div>
-  <div class="fomo-modal" id="streakRestoreModal" style="display:none;z-index:1101;" role="dialog" aria-modal="true" aria-labelledby="streakRestoreTitle">
-    <div class="fomo-title" id="streakRestoreTitle">Your streak has broken</div>
-    <div class="fomo-sub" id="streakRestoreBody">
-      Restore your streak to keep your multipliers and rank momentum.
-    </div>
-    <div class="metric-subtext" id="streakRestoreCountdown" style="margin-top:10px;"></div>
-    <button class="btn btn-primary" id="btnRestoreCard">Restore with Card</button>
-    <button class="btn" id="btnRestoreCrypto" style="margin-top:10px;">Restore with Crypto</button>
-    <button class="btn" id="btnStartNewStreak" style="margin-top:10px;opacity:.9;">Start new streak (lose bonuses)</button>
-  </div>
 
 </body>
 </html>
