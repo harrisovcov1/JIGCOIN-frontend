@@ -3177,9 +3177,10 @@ function updateTaskCardStates() {
     if (dc) dc.classList.remove('task-disabled');
   }
   // Daily check-in cooldown (UI only; backend will enforce once/day too)
-  const lastDaily = getStoredMs(DAILY_CLAIM_AT_KEY);
   const now = Date.now();
-  const remaining = lastDaily ? Math.max(0, DAILY_COOLDOWN_MS - (now - lastDaily)) : 0;
+  const today = new Date(now).toISOString().slice(0,10);
+  const remaining = state.lastCheckin === today
+    ? Date.parse(today + "T00:00:00Z") + DAILY_COOLDOWN_MS - now : 0;
   const dailyCard = document.querySelector('.task-card[data-code="daily"]');
 
   if (dailyRewardTextEl && dailyCard) {
@@ -4300,99 +4301,37 @@ document.addEventListener("visibilitychange", () => {
 });
 
 
-async function handleDailyTask(reward) {
-  // UI cooldown guard (backend should enforce too)
-  const lastDaily = getStoredMs(DAILY_CLAIM_AT_KEY);
-  const now = Date.now();
-  if (lastDaily && now - lastDaily < DAILY_COOLDOWN_MS) {
-    const remaining = DAILY_COOLDOWN_MS - (now - lastDaily);
-    showToast(`Daily already claimed. Try again in ${msToCountdown(remaining)}.`);
-    updateTaskCardStates();
-    return;
-  }
-
-  // Daily check-in uses a dedicated backend action so streak/reward logic remains server-authoritative.
-  const res = await apiPost("/api/task", { action: "daily_checkin", taskName: "daily", reward });
-
-  if (!res) return;
-
-  if (!res.ok) {
-    if (res.reason === "STREAK_BROKEN") {
-      // Streak is broken. Automatically start a new streak so the button always has a visible effect.
+let dailyClaimInFlight = false;
+async function handleDailyTask() {
+  if (dailyClaimInFlight) return;
+  dailyClaimInFlight = true;
+  try {
+    let result = await apiPost("/api/task", {action:"daily_checkin",taskName:"daily"});
+    if (result && !result.ok && result.reason === "STREAK_BROKEN") {
       showToast("Streak was broken — starting a new streak.");
-      // Use apiPost so we include initData and the correct telegram_id automatically.
-      const res2 = await apiPost("/api/task", { action: "start_new", taskName: "daily", reward });
-      if (!res2) return;
-
-      if (!res2.ok) {
-        // If a restore window exists, the user can still restore via the modal.
-        if (res2.streak_meta && res2.streak_meta.restore_available) {
-          showStreakRestoreModal(res2.streak_meta);
-        }
-        showToast(res2.error || res2.reason || "Could not start a new streak.");
-        return;
-      }
-
-      applyBackendState(res2);
+      result = await apiPost("/api/task", {action:"start_new",taskName:"daily"});
+    }
+    if (!result) { showToast("Check-in could not be confirmed. Please try again."); return; }
+    if (result.ok || result.reason === "ALREADY_CLAIMED") {
+      applyBackendState(result);
       render();
-      // Cooldown is now active for the next 24h
-      setStoredMs(DAILY_CLAIM_AT_KEY, Date.now());
       updateTaskCardStates();
       updateDashboardUI();
+      if (result.reason === "ALREADY_CLAIMED" || result.already_claimed) {
+        showToast("Daily check-in already saved. Available again at 00:00 UTC.");
+      } else {
+        if (typeof handleOnboardingDailyClaimed === "function") handleOnboardingDailyClaimed();
+        showToast(`+${Number(result.reward || 0).toLocaleString("en-GB")} daily bonus added`);
+      }
       return;
     }
-    if (res.reason !== "NO_TELEGRAM_ID") {
-      // If backend sends cooldown info, sync UI cooldown to match
-      const remainingSec = Number(res.next_claim_in_seconds || 0);
-      const nextAtIso = res.next_claim_at || null;
-
-      if (Number.isFinite(remainingSec) && remainingSec > 0) {
-        const remainingMs = remainingSec * 1000;
-        // Back-calculate an accurate "claimed at" so the local 24h timer matches the server
-        const claimedAt = Date.now() - (DAILY_COOLDOWN_MS - remainingMs);
-        setStoredMs(DAILY_CLAIM_AT_KEY, claimedAt);
-        showToast(`Daily already claimed. Try again in ${msToCountdown(remainingMs)}.`);
-        updateTaskCardStates();
-        return;
-      }
-
-      if (nextAtIso) {
-        const nextAtMs = Date.parse(nextAtIso);
-        if (!isNaN(nextAtMs)) {
-          const remainingMs2 = Math.max(0, nextAtMs - Date.now());
-          const claimedAt2 = Date.now() - (DAILY_COOLDOWN_MS - remainingMs2);
-          setStoredMs(DAILY_CLAIM_AT_KEY, claimedAt2);
-          showToast(`Daily already claimed. Try again in ${msToCountdown(remainingMs2)}.`);
-          updateTaskCardStates();
-          return;
-        }
-      }
-      showToast("Daily task already claimed or error.");
-    }
-    return;
-  }
-
-  // Align local cooldown with server UTC reset
-  if (res.next_claim_at) {
-    const nextAtMs = Date.parse(res.next_claim_at);
-    if (!isNaN(nextAtMs)) {
-      setStoredMs(DAILY_CLAIM_AT_KEY, nextAtMs - DAILY_COOLDOWN_MS);
-    } else {
-      setStoredMs(DAILY_CLAIM_AT_KEY, Date.now());
-    }
-  } else {
-    setStoredMs(DAILY_CLAIM_AT_KEY, Date.now());
-  }
-
-  applyBackendState(res);
-  render();
-  updateTaskCardStates();
-
-  if (typeof handleOnboardingDailyClaimed === "function") {
-    handleOnboardingDailyClaimed();
-  }
-
-  showToast(`+${reward.toLocaleString("en-GB")} daily bonus added`);
+    const reason = result.reason || result.error;
+    showToast(reason === "MAINTENANCE_MODE"
+      ? "Daily check-in is unavailable during maintenance for this account."
+      : "Daily check-in could not be confirmed. Please retry; a saved claim cannot be credited twice.");
+  } catch (_) {
+    showToast("Check-in could not be confirmed. Please try again.");
+  } finally { dailyClaimInFlight = false; }
 }
 
 
