@@ -1920,8 +1920,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 </style>
 <style>
 /* One compact Rewards destination; overflow remains available for large text. */
-#boostSheet .sheet-body{padding:12px 14px 14px;}
-#boostSheet .boost-card{padding:10px 12px;margin-bottom:10px;border-radius:16px;}
+#boostSheet .sheet-body{padding:12px 14px 8px;}
+#boostSheet .boost-card{padding:8px 12px;margin-bottom:8px;border-radius:16px;}
 #boostSheet .boost-card-top{align-items:center;gap:9px;margin-bottom:5px;}
 #boostSheet .boost-icon{width:28px;height:28px;border-radius:9px;font-size:18px;}
 #boostSheet .boost-coins .boost-icon{font-family:Georgia,serif;font-weight:900;background:#efc153;color:#50360a;}
@@ -1992,6 +1992,11 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #mainScroll.home-compact .account-content{padding-bottom:2px}
 </style>
 
+<style>
+.jig-flight{position:fixed;z-index:800;pointer-events:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#fff4bd,#f4c34c 55%,#b77612);border:2px solid #ffdc76;color:#765006;font:700 15px Georgia,serif;box-shadow:0 0 10px #f7cc5855;will-change:transform,opacity}
+.daily-restore{border:1px solid #d7b25b;background:#201e21;border-radius:16px;padding:14px;margin:14px 0}.daily-restore h3{margin:0 0 8px}.daily-restore p,.daily-continuity{font-size:12px;line-height:1.5}.daily-continuity{color:#bccbe0;padding:10px 0}#dailyRestoreReceipt{overflow-wrap:anywhere}#dailyRestoreBuy{width:100%;min-height:44px}#rewardsDailyAmount{color:#f6d37b;font-size:14px}#boostSheet .boost-streak .boost-icon{background:#254238;color:#a4e2c2}
+@media(prefers-reduced-motion:reduce){.jig-flight{display:none}}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -2123,6 +2128,15 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
     <div class="sheet-body">
       <div id="dailyRewardsError" hidden><p class="quest-info">Daily rewards could not be refreshed. Your saved coins and unlocks are safe.</p><button class="quest-action" id="dailyRewardsRetry">Refresh rewards</button></div>
       <section class="daily-reward-hero"><div class="quest-kicker" id="dailyRewardEyebrow">Your next check-in</div><h3 id="dailyRewardAmount">Checking…</h3><p id="dailyRewardNext"></p><button class="quest-action" id="dailyRewardClaim" disabled>Checking…</button><p class="quest-info" id="dailyRewardReset"></p></section>
+      <section class="daily-restore" id="dailyRestoreCard" hidden>
+        <h3>Restore your streak</h3><p id="dailyRestoreBenefits"></p>
+        <p class="quest-info" id="dailyRestoreDeadline"></p>
+        <p class="quest-info">Restores continuity after one missed day. No coins for the missed day, and no repeated milestones. Your saved coins and cosmetics stay yours whichever option you choose.</p>
+        <button class="quest-action" id="dailyRestoreBuy" disabled>Restore · ★ 250</button>
+      </section>
+      <p class="quest-info" id="dailyRestoreReceipt" role="status" hidden></p>
+      <button class="shop-retry" id="dailyRestoreCheck" hidden>Check restore payment</button>
+      <p class="daily-continuity">Day 30 onward: <b>2,000 daily coins</b> while your streak continues. Day 30 also includes a one-time 5,000-coin milestone bonus.</p>
       <div class="daily-calendar" id="dailyRewardCalendar" aria-label="Seven-day reward calendar"></div>
       <p class="daily-perks" id="dailyRewardPerks"></p><p class="quest-info" id="dailyRewardNextPerk"></p>
       <section class="daily-cosmetics"><h3>Unlock once. Keep forever.</h3><div id="dailyCosmeticList"></div></section>
@@ -2277,7 +2291,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
   <div class="sheet" id="boostSheet" role="region" aria-labelledby="boostSheetTitle">
     <div class="sheet-header">
       <div><div class="sheet-title" id="boostSheetTitle">Rewards</div>
-        <div class="sheet-subtitle">Choose a reward. Watch an advert.</div></div>
+        <div class="sheet-subtitle">Daily coins, energy and tap boosts.</div></div>
       <button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
     </div>
     <div class="sheet-body">
@@ -2297,7 +2311,12 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
         <div class="boost-state" id="doubleBoostStatus" role="status">Checking availability…</div>
         <button type="button" class="boost-action" id="doubleBoostAction" disabled>Checking…</button>
       </article>
-      <p class="boost-footnote" id="boostCooldownNote">Rewards arrive after confirmation. Timers start after claiming.</p>
+      <article class="boost-card boost-streak" id="rewardsDailyCard">
+        <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">✓</span><h3>Daily streak <span id="rewardsDailyAmount"></span></h3></div>
+        <div class="boost-state" id="rewardsDailyStatus" role="status">Checking your daily reward…</div>
+        <button type="button" class="boost-action" id="rewardsDailyAction" disabled>Checking…</button>
+      </article>
+      <p class="boost-footnote" id="boostCooldownNote">Ad rewards arrive after confirmation. Daily streak is free, with no advert. Timers start after claiming.</p>
       <button type="button" class="shop-retry" id="boostRefresh" hidden>Check availability again</button>
     </div>
   </div>
@@ -2949,6 +2968,13 @@ function observeHomeConfirmedState(data) {
     homeRaceSnapshot=null;homeRaceSyncedAt=0;homeRaceAttemptAt=0;homeBestRaceRank=null;homeRefillCheckedAt=0;
     clearTimeout(homeCelebrationTimer);document.getElementById('homeCelebration').hidden=true;
   }
+  if(!first&&data.balance>homeConfirmedBalance&&!document.hidden){
+    try{if(!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+      const balance=document.getElementById('balanceText');
+      balance.getAnimations?.().forEach(a=>a.cancel());
+      balance.animate?.([{color:'#ffe099',textShadow:'0 0 18px #f5c45a99'},{color:'#fff',textShadow:'none'}],{duration:450,easing:'ease-out'});
+    }}catch(_){}
+  }
   homeConfirmedBalance=data.balance;
   const updated=advanceHomeMilestone(homeMilestoneState,data.balance,first);
   homeMilestoneState=updated.record;
@@ -2978,6 +3004,18 @@ function observeHomeRace(snapshot,id,now=Date.now()) {
   clearTimeout(homeCelebrationTimer);homeCelebrationTimer=setTimeout(()=>{el.hidden=true;},3500);
   try{if(appStorage.getItem('jigcoin_home_haptics')!=='off')window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success');}catch(_){}
 }
+let lastCoinFlightAt=0;
+function flyJigCoin(){
+  if(Date.now()-lastCoinFlightAt<120)return;lastCoinFlightAt=Date.now();
+  const target=document.getElementById('balanceText').getBoundingClientRect(),start=document.getElementById('tapBtn').getBoundingClientRect();
+  if(!target.width||!start.width||document.querySelectorAll('.jig-flight').length>=6)return;
+  const p=document.createElement('span');p.className='jig-flight';p.textContent='J';p.setAttribute('aria-hidden','true');
+  const x=start.left+start.width*.5,y=start.top+start.height*.42;
+  p.style.left=x+'px';p.style.top=y+'px';document.body.append(p);
+  const dx=target.left+target.width*.5-x,dy=target.top+target.height*.5-y;
+  p.animate?.([{transform:'translate(-50%,-50%) scale(.6)',opacity:0},{transform:`translate(${dx*.3}px,${dy*.35}px) scale(1)`,opacity:1,offset:.35},{transform:`translate(${dx}px,${dy}px) scale(.3)`,opacity:0}],{duration:650,easing:'ease-in'});
+  setTimeout(()=>p.remove(),700);
+}
 function animateHomeTap(points) {
   // A visual effect must never stop a queued tap rendering or flushing.
   try {
@@ -2985,6 +3023,7 @@ function animateHomeTap(points) {
   const coin=document.getElementById('tapBtn'),layer=document.getElementById('homeTapFeedback');
   if(!reduced){
     if(coin.animate){(coin.getAnimations?.()||[]).forEach(a=>a.cancel());coin.animate([{transform:'translateY(3px) scale(.97)',filter:'brightness(1.15)'},{transform:'translateY(0) scale(1)',filter:'brightness(1)'}],{duration:160,easing:'ease-out'});}
+    flyJigCoin();
     while(layer.children.length>=8)layer.firstElementChild.remove();
     const particle=document.createElement('span');particle.className='coin-particle';particle.textContent=`+${points}`;particle.style.setProperty('--drift',`${Math.round(Math.random()*64-44)}px`);layer.append(particle);setTimeout(()=>particle.remove(),700);
   }
@@ -3175,6 +3214,60 @@ document.getElementById('launchQuestAction').addEventListener('click',()=>{const
 
 // Daily rewards v4. Rewards and cosmetics always come from the current account snapshot.
 let dailyRewardsBusy=false;
+let restorePurchaseBusy=false,dailyRewardsOrigin='home',restorePendingAccount=null;
+function renderRestoreOption(c,fresh,now){
+  const r=c?.restore,eligible=fresh&&c.broken&&r?.eligible&&Date.parse(r.expires_at)>now;
+  const el=id=>document.getElementById(id);
+  el('dailyRestoreCard').hidden=!eligible;
+  el('dailyRestoreBenefits').textContent=eligible?`${r.days}-day streak · ${formatNumber(r.daily_reward)} daily coins · +${r.tap_bonus_percent}% tap coins · +${r.energy_bonus} energy capacity. Claim today's reward separately after restoring.`:'';
+  el('dailyRestoreDeadline').textContent=eligible?`Available until 00:00 UTC · ${msToCountdown(Date.parse(r.expires_at)-now)} left`:'';
+  el('dailyRestoreBuy').disabled=!eligible||!r.enabled||restorePurchaseBusy||dailyRewardsBusy||restorePendingAccount===homeUserId();
+  el('dailyRestoreBuy').textContent=restorePurchaseBusy?'Checking payment…':restorePendingAccount===homeUserId()?'Payment confirmation pending':!r?.enabled?'Restore purchases are unavailable':'Restore · ★ 250';
+  el('rewardsDailyAmount').textContent=fresh&&!c.broken?`+${formatNumber(c.claimed?c.next_reward:c.today_reward)}`:'';
+  el('rewardsDailyStatus').textContent=!fresh?'Refresh to check your streak':c.broken?`${c.days}-day streak paused · Free restart${eligible?' or restore':''}`:c.claimed?`Day ${c.days} collected · Tomorrow ${formatNumber(c.next_reward)} coins`:`Day ${c.next_day} · ${formatNumber(c.today_reward)} coins · No advert`;
+  el('rewardsDailyAction').disabled=!accountIsReady()||dailyRewardsBusy;
+  el('rewardsDailyAction').textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh daily rewards':c.broken?'View streak options':c.claimed?'View calendar & perks':`Collect ${formatNumber(c.today_reward)} coins`;
+}
+function restoreReceipt(message){const el=document.getElementById('dailyRestoreReceipt');el.hidden=!message;el.textContent=message;}
+async function checkRestorePayment(poll=false){
+  const id=homeUserId();let terminal=false;
+  for(let i=0;i<(poll?8:1);i++){
+    const r=await apiPost('/api/streak/restore/status',{});if(id!==homeUserId())return;
+    if(!r?.ok){restoreReceipt('Could not check the payment. Retry below or send /paysupport to the bot.');break;}
+    const o=r.order;restorePendingAccount=['approved','refund_pending'].includes(o?.status)?id:null;renderDailyRewards();if(!o){restoreReceipt('');terminal=true;break;}
+    document.getElementById('dailyRestoreCheck').hidden=false;
+    const reference=`Order ${o.payload}.`;
+    if(o.status==='restored'){
+      restoreReceipt(`Your ${o.prior_streak}-day streak was restored. ${reference}`);
+      await refreshBalance();await refreshProgression(true);terminal=true;break;
+    }
+    if(o.status==='refunded'){restoreReceipt(`Restore payment refunded. ${reference}`);terminal=true;break;}
+    if(o.status==='refund_pending'){restoreReceipt(`This streak could not be restored. Your refund is being processed. ${reference} Send /paysupport if needed.`);break;}
+    if(o.status!=='approved'){
+      restoreReceipt(Date.parse(o.expires_at)<=progressionNow()?`Restore checkout expired. ${reference}`:`Checkout has not completed. No streak change confirmed. ${reference}`);terminal=true;break;
+    }
+    restoreReceipt(`Payment is awaiting confirmation. Do not pay again. ${reference}`);
+    if(!poll||document.hidden)break;
+    await new Promise(resolve=>setTimeout(resolve,1500));
+  }
+  document.getElementById('dailyRestoreCheck').hidden=terminal;
+}
+async function buyStreakRestore(){
+  const c=dailyCheckinModel(),r=c?.restore,id=homeUserId();
+  if(restorePurchaseBusy||restorePendingAccount===id||dailyRewardsBusy||!accountIsReady()||progressionError||!c?.broken||!r?.eligible||!r.enabled||Date.parse(r.expires_at)<=progressionNow())return;
+  const tg=window.Telegram?.WebApp;
+  if(typeof tg?.openInvoice!=='function'){showToast('Open JigCoin in Telegram to purchase with Stars.');return;}
+  restorePurchaseBusy=true;renderDailyRewards();
+  try{
+    const invoice=await apiPost('/api/streak/restore/create-checkout',{});if(id!==homeUserId())return;
+    if(!invoice?.ok){restoreReceipt(invoice?.error==='PAYMENT_PENDING'?'Your payment is pending. Check it below before trying again.':'Restore checkout is unavailable. Refresh your streak or use the free restart.');document.getElementById('dailyRestoreCheck').hidden=false;return;}
+    if(!/^sr_[a-f0-9]{48}$/.test(invoice.order_id)||!/^https:\/\/t\.me\/\$/.test(invoice.url))throw Error('INVALID_INVOICE');
+    const outcome=await new Promise(resolve=>tg.openInvoice(invoice.url,resolve));if(id!==homeUserId())return;
+    await checkRestorePayment(outcome!=='cancelled');
+  }catch(_){if(id===homeUserId()){restoreReceipt('Checkout could not be confirmed. Check your payment below; do not pay again.');document.getElementById('dailyRestoreCheck').hidden=false;}}
+  finally{restorePurchaseBusy=false;if(id===homeUserId())await refreshProgression(true);renderDailyRewards();}
+}
+
 function dailyCheckinModel(){
   const c=progressionCurrent()?.checkin;
   return c&&Array.isArray(c.calendar)&&Array.isArray(c.cosmetics)&&Number.isFinite(c.today_reward)&&Number.isFinite(Date.parse(c.resets_at))?c:null;
@@ -3193,13 +3286,13 @@ function renderDailyRewards(){
   el('hubDailyProgress').textContent=!fresh?'Refresh to check your reward':c.claimed?`Tomorrow: ${num(c.next_reward)} coins`:`Collect ${num(c.today_reward)} coins · Day ${c.next_day}`;
   el('homeDailyMarkers').innerHTML=c?dailyMarkerMarkup(c):'';
   const next=c?.next_milestone;
-  el('homeDailyMilestone').textContent=c?.broken?'Start again. Your coins and unlocks stay.':next?`Day ${next.day}: ${num(next.reward)} coins${next.day===7?' + permanent aura':''}`:c?'View your perks & permanent unlocks ›':'';
-  const home=el('hubDailyClaim');home.disabled=!accountIsReady();home.dataset.claimed=String(!!c?.claimed);home.textContent=!fresh?'Refresh ›':c.claimed?'Calendar ›':c.broken?'Restart ›':`Claim ${num(c.today_reward)}`;
+  el('homeDailyMilestone').textContent=c?.broken?'View streak options · Coins and unlocks stay.':next?`Day ${next.day}: ${num(next.reward)} coins${next.day===7?' + permanent aura':''}`:c?'View your perks & permanent unlocks ›':'';
+  const home=el('hubDailyClaim');home.disabled=!accountIsReady();home.dataset.claimed=String(!!c?.claimed);home.textContent=!fresh?'Refresh ›':c.claimed?'Calendar ›':c.broken?'Options ›':`Claim ${num(c.today_reward)}`;
   el('dailyRewardsError').hidden=fresh;
   el('dailyRewardEyebrow').textContent=c?.claimed?`Day ${c.days} · collected`:`Day ${c?.next_day||1} · check-in reward`;
   el('dailyRewardAmount').textContent=c?`${num(c.today_reward)} coins`:'Checking…';
   el('dailyRewardNext').textContent=c?.broken?'You missed a check-in. Start a new streak and keep every coin and cosmetic already earned.':c?.claimed?`Tomorrow: ${num(c.next_reward)} coins${c.next_day===7?' + Momentum aura':c.next_day===30?' + Veteran frame':''}`:'Collect today’s reward to advance your streak.';
-  const claim=el('dailyRewardClaim');claim.disabled=!fresh||dailyRewardsBusy;claim.textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh rewards above':c.claimed?'Back to tapping':`${c.broken?'Start new streak · ': 'Claim '}${num(c.today_reward)} coins`;
+  const claim=el('dailyRewardClaim');claim.disabled=!fresh||dailyRewardsBusy||restorePurchaseBusy;claim.textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh rewards above':c.claimed?'Back to tapping':`${c.broken?'Start new streak free · ': 'Claim '}${num(c.today_reward)} coins`;
   el('dailyRewardReset').textContent=c?`Next UTC day in ${msToCountdown(Math.max(0,Date.parse(c.resets_at)-now))} · Resets 00:00 UTC`:'';
   el('dailyRewardCalendar').innerHTML=c?dailyMarkerMarkup(c,true):'';
   el('dailyRewardPerks').textContent=c?`${c.tier.name}: +${c.tier.tap_bonus_percent}% tap coins · +${c.tier.energy_bonus} energy capacity`:'Your perks appear after a successful refresh.';
@@ -3207,6 +3300,7 @@ function renderDailyRewards(){
   el('dailyRewardNextPerk').textContent=t?`Day ${t.day}: ${t.name} unlocks +${t.tap_bonus_percent}% tap coins and +${t.energy_bonus} energy capacity. Fractional tap coins accumulate until they make a whole coin.`:'Keep checking in for daily coins. Your unlocked cosmetics stay yours.';
   el('dailyCosmeticList').innerHTML=c?c.cosmetics.map(x=>`<div class="daily-cosmetic"><span class="cosmetic-avatar ${x.key==='veteran_frame'?'veteran':'aura'}" aria-hidden="true">J</span><div><b>${escapeHtml(x.name)}${x.owned?' · Owned ✓':''}</b><p>${x.owned?'Permanently unlocked':`Reach ${Number(x.days)} consecutive check-ins`} · ${x.key==='veteran_frame'?'Profile frame on leaderboards':'Coin glow & leaderboard badge'}</p></div></div>`).join(''):'';
   el('dailyRewardMilestones').textContent=c?c.milestones.map(m=>`Day ${m.day}: ${num(m.reward)} coins`).join(' · ')+'. Includes the daily reward; each milestone bonus is awarded once per streak.':'';
+  renderRestoreOption(c,fresh,now);
   el('dailyReminder').checked=appStorage.getItem('jigcoin_daily_reminder:'+id)==='on';
   const event=progressionCurrent()?.event,live=event?.status==='live'&&Date.parse(event.ends_at)>now;
   el('homeLaunchStrip').hidden=!live;
@@ -3216,15 +3310,18 @@ function renderDailyRewards(){
     if(appStorage.getItem(key)!=='yes'){appStorage.setItem(key,'yes');showToast(`Your daily ${num(c.today_reward)} coins are ready. Open Daily rewards to collect.`);}
   }
 }
-async function openDailyRewards(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeDailySheet'),tabFarm);document.getElementById('mainScroll').inert=true;renderDailyRewards();document.getElementById('dailyRewardsClose').focus();await refreshProgression(true);}
+async function openDailyRewards(origin='home'){if(!accountIsReady())return;dailyRewardsOrigin=origin==='rewards'?'rewards':'home';restoreReceipt('');document.getElementById('dailyRestoreCheck').hidden=true;showAppSheet(document.getElementById('homeDailySheet'),dailyRewardsOrigin==='rewards'?tabTasks:tabFarm);document.getElementById('mainScroll').inert=true;renderDailyRewards();document.getElementById('dailyRewardsClose').setAttribute('aria-label',dailyRewardsOrigin==='rewards'?'Back to Rewards':'Back to Home');document.getElementById('dailyRewardsClose').focus();await refreshProgression(true);await checkRestorePayment(false);}
 async function claimDailyReward(){
-  const c=dailyCheckinModel();if(dailyRewardsBusy||!c||progressionError||Date.parse(c.resets_at)<=progressionNow()||!accountIsReady())return;
+  const c=dailyCheckinModel();if(dailyRewardsBusy||restorePurchaseBusy||!c||progressionError||Date.parse(c.resets_at)<=progressionNow()||!accountIsReady())return;
   if(c.claimed){backToHome();return;}
   dailyRewardsBusy=true;renderDailyRewards();
-  try{await handleDailyTask();}finally{dailyRewardsBusy=false;await refreshProgression(true);renderDailyRewards();const after=dailyCheckinModel();const unlocked=after?.claimed?after.cosmetics.filter(x=>x.owned&&!c.cosmetics.some(old=>old.key===x.key&&old.owned)):[];if(unlocked.length)showToast(`${formatNumber(after.today_reward)} coins collected · ${unlocked.map(x=>x.name).join(' + ')} unlocked!`);}
+  try{await handleDailyTask(c.broken);}finally{dailyRewardsBusy=false;await refreshProgression(true);renderDailyRewards();const after=dailyCheckinModel();const unlocked=after?.claimed?after.cosmetics.filter(x=>x.owned&&!c.cosmetics.some(old=>old.key===x.key&&old.owned)):[];if(unlocked.length)showToast(`${formatNumber(after.today_reward)} coins collected · ${unlocked.map(x=>x.name).join(' + ')} unlocked!`);}
 }
 document.getElementById('homeDailyOpen').addEventListener('click',openDailyRewards);
-document.getElementById('dailyRewardsClose').addEventListener('click',backToHome);
+document.getElementById('dailyRewardsClose').addEventListener('click',()=>{document.getElementById('mainScroll').inert=false;if(dailyRewardsOrigin==='rewards')openBoostSheet();else backToHome();});
+document.getElementById('rewardsDailyAction').addEventListener('click',()=>{const c=dailyCheckinModel();if(!c||c.claimed||c.broken||progressionError||Date.parse(c.resets_at)<=progressionNow())return openDailyRewards('rewards');return claimDailyReward();});
+document.getElementById('dailyRestoreBuy').addEventListener('click',buyStreakRestore);
+document.getElementById('dailyRestoreCheck').addEventListener('click',()=>checkRestorePayment(true));
 document.getElementById('dailyRewardsRetry').addEventListener('click',()=>refreshProgression(true));
 document.getElementById('dailyRewardClaim').addEventListener('click',claimDailyReward);
 document.getElementById('dailyPlayCollect').addEventListener('click',openHomeQuests);
@@ -4041,12 +4138,7 @@ function applyBackendState(data) {
     if (state.streakMeta && state.streakMeta.active === false && state.streakMeta.broken_at) {
       state.streakDays = 0;
     }
-    // Auto-prompt restore if applicable (do not interrupt during onboarding screens)
-    try {
-      if (accountIsReady() && state.streakMeta && state.streakMeta.restore_available) {
-        showStreakRestoreModal(state.streakMeta);
-      }
-    } catch (e) {}
+
   }
 
   // Double boost flags from backend
@@ -4582,16 +4674,18 @@ document.addEventListener("visibilitychange", () => {
 
 
 let dailyClaimInFlight = false;
-async function handleDailyTask() {
+async function handleDailyTask(startNew=false) {
   if (dailyClaimInFlight) return;
   dailyClaimInFlight = true;
   const claimAccount=homeUserId();
   try {
-    let result = await apiPost("/api/task", {action:"daily_checkin",taskName:"daily"});
+    let result = await apiPost("/api/task", {action:startNew?"start_new":"daily_checkin",taskName:"daily"});
     if(claimAccount!==homeUserId())return;
     if (result && !result.ok && result.reason === "STREAK_BROKEN") {
-      showToast("Streak was broken — starting a new streak.");
-      result = await apiPost("/api/task", {action:"start_new",taskName:"daily"});
+      applyBackendState(result);
+      await openDailyRewards();
+      showToast("Your streak paused. Choose a free restart or view restore options.");
+      return;
     }
     if(claimAccount!==homeUserId())return;
     if (!result) { showToast("Check-in could not be confirmed. Please try again."); return; }
@@ -4992,7 +5086,7 @@ function refreshBoostMissions() {
 }
 async function openBoostSheet(focusCode) {
   showAppSheet(boostSheet,tabTasks); renderBoostCards(); updateBoostHub();
-  await Promise.allSettled([refreshBoostMissions(),syncStateIfIdle()]);
+  await Promise.allSettled([refreshBoostMissions(),syncStateIfIdle(),refreshProgression(true)]);
   renderBoostCards(); updateBoostHub();
   if (boostSheet.classList.contains('show') && BOOST_PLACEMENTS[focusCode])
     boostSheet.querySelector(`[data-boost-code="${focusCode}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
@@ -5777,155 +5871,7 @@ initFromBackend();
 
   </script>
 
-  <!-- Streak Restore Modal (paid restore window) -->
-  <div id="streakBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1100;"></div>
-  <div class="fomo-modal" id="streakRestoreModal" style="display:none;z-index:1101;" role="dialog" aria-modal="true" aria-labelledby="streakRestoreTitle">
-    <div class="fomo-title" id="streakRestoreTitle">Your streak has broken</div>
-    <div class="fomo-sub" id="streakRestoreBody">
-      Restore your streak to keep your multipliers and rank momentum.
-    </div>
-    <div class="metric-subtext" id="streakRestoreCountdown" style="margin-top:10px;"></div>
-    <button class="btn btn-primary" id="btnRestoreCard">Restore with Card</button>
-    <button class="btn" id="btnRestoreCrypto" style="margin-top:10px;">Restore with Crypto</button>
-    <button class="btn" id="btnStartNewStreak" style="margin-top:10px;opacity:.9;">Start new streak (lose bonuses)</button>
-  </div>
-
-
 <script>
-
-// -------- Streak Restore Modal (paid) --------
-const streakBackdrop = document.getElementById("streakBackdrop");
-const streakModal = document.getElementById("streakRestoreModal");
-const streakBody = document.getElementById("streakRestoreBody");
-const streakCountdown = document.getElementById("streakRestoreCountdown");
-const btnRestoreCard = document.getElementById("btnRestoreCard");
-const btnRestoreCrypto = document.getElementById("btnRestoreCrypto");
-const btnStartNewStreak = document.getElementById("btnStartNewStreak");
-
-let streakRestoreTimer = null;
-let lastStreakRestoreContext = null; // { tierKey, restoreEndsAtIso }
-
-function openLinkSafe(url) {
-  if (!url) return;
-  try {
-    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === "function") {
-      Telegram.WebApp.openLink(url);
-      return;
-    }
-  } catch (e) {}
-  window.open(url, "_blank");
-}
-
-function showStreakRestoreModal(ctx) {
-  if (!streakBackdrop || !streakModal) return;
-  lastStreakRestoreContext = ctx || null;
-
-  const tierKey = ctx && ctx.tier_key ? String(ctx.tier_key) : null;
-  const tierName = ctx && ctx.tier_name ? String(ctx.tier_name) : null;
-  const streakCount = ctx && ctx.streak_count != null ? Number(ctx.streak_count) : null;
-  const restoreTier = ctx && ctx.restore_tier ? String(ctx.restore_tier) : null;
-  const tapMult = ctx && ctx.tap_multiplier != null ? Number(ctx.tap_multiplier) : null;
-  const energyBonus = ctx && ctx.energy_bonus != null ? Number(ctx.energy_bonus) : null;
-  const restoreEndsAt = ctx && ctx.restore_ends_at ? String(ctx.restore_ends_at) : null;
-
-  const deriveRestoreTier = () => {
-    if (restoreTier) return restoreTier;
-    const n = Math.max(0, Math.floor(Number(streakCount || 0)));
-    if (n >= 61) return 'T6';
-    if (n >= 31) return 'T5';
-    if (n >= 15) return 'T4';
-    if (n >= 8) return 'T3';
-    if (n >= 4) return 'T2';
-    if (n >= 1) return 'T1';
-    return null;
-  };
-  const restoreTierKey = deriveRestoreTier();
-  const restorePriceByTier = { T1: 2, T2: 3, T3: 5, T4: 8, T5: 12, T6: 18 };
-  const restorePrice = restoreTierKey && restorePriceByTier[restoreTierKey] ? restorePriceByTier[restoreTierKey] : null;
-
-  const benefitLine = (tierName || tierKey)
-    ? `${restoreTierKey ? `Streak Restore ${restoreTierKey}${restorePrice ? ` · £${restorePrice.toFixed(2)}` : ""} · ` : ""}Tier: ${tierName || tierKey}${tapMult ? ` · Tap x${tapMult.toFixed(2)}` : ""}${energyBonus ? ` · +${energyBonus} max energy` : ""}`
-    : `${restoreTierKey ? `Streak Restore ${restoreTierKey}${restorePrice ? ` · £${restorePrice.toFixed(2)}` : ""}. ` : ""}Restore your streak to keep your multipliers and rank momentum.`;
-
-  if (streakBody) streakBody.textContent = benefitLine;
-
-  const tick = () => {
-    if (!streakCountdown) return;
-    if (!restoreEndsAt) {
-      streakCountdown.textContent = "";
-      return;
-    }
-    const endMs = Date.parse(restoreEndsAt);
-    if (isNaN(endMs)) {
-      streakCountdown.textContent = "";
-      return;
-    }
-    const left = Math.max(0, endMs - Date.now());
-    const h = Math.floor(left / 3600000);
-    const m = Math.floor((left % 3600000) / 60000);
-    const s = Math.floor((left % 60000) / 1000);
-    streakCountdown.textContent = left > 0
-      ? `Restore window ends in ${h}h ${m}m ${s}s`
-      : "Restore window expired.";
-  };
-
-  if (streakRestoreTimer) clearInterval(streakRestoreTimer);
-  tick();
-  streakRestoreTimer = setInterval(tick, 1000);
-
-  streakBackdrop.style.display = "block";
-  streakModal.style.display = "block";
-}
-
-function hideStreakRestoreModal() {
-  if (!streakBackdrop || !streakModal) return;
-  streakBackdrop.style.display = "none";
-  streakModal.style.display = "none";
-  if (streakRestoreTimer) clearInterval(streakRestoreTimer);
-  streakRestoreTimer = null;
-}
-
-async function beginStreakRestore(provider) {
-  const res = await apiPost("/api/streak/restore/create-checkout", { provider: provider || "auto" });
-  if (!res || !res.ok) {
-    showToast("Restore unavailable right now.");
-    return;
-  }
-  const url = provider === "coinbase" ? res.coinbaseCheckoutUrl : res.stripeCheckoutUrl;
-  if (!url) {
-    showToast("No checkout link configured for that payment method.");
-    return;
-  }
-  openLinkSafe(url);
-}
-
-async function startNewStreakNow() {
-  // Force a new streak (forfeit old streak)
-  const res = await apiPost("/api/task", { taskName: "daily", action: "start_new" });
-  if (!res) return;
-  hideStreakRestoreModal();
-  if (res.ok) {
-    // Align local cooldown with server UTC reset
-    if (res.next_claim_at) {
-      const nextAtMs = Date.parse(res.next_claim_at);
-      if (!isNaN(nextAtMs)) {
-        setStoredMs(DAILY_CLAIM_AT_KEY, nextAtMs - DAILY_COOLDOWN_MS);
-      }
-    }
-    applyBackendState(res);
-    render();
-    showToast("New streak started.");
-  } else {
-    showToast("Could not start a new streak yet.");
-  }
-}
-
-if (btnRestoreCard) btnRestoreCard.addEventListener("click", () => beginStreakRestore("stripe"));
-if (btnRestoreCrypto) btnRestoreCrypto.addEventListener("click", () => beginStreakRestore("coinbase"));
-if (btnStartNewStreak) btnStartNewStreak.addEventListener("click", () => startNewStreakNow());
-if (streakBackdrop) streakBackdrop.addEventListener("click", () => hideStreakRestoreModal());
-
-
 // Optional referral promotion: display only confirmed live limits/deadlines.
 let referralPromotionDeadline=null;
 async function refreshReferralPromotion() {
