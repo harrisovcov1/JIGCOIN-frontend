@@ -1931,6 +1931,32 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #boostSheet .boost-action{min-height:44px;padding:8px 12px;font-size:13px;}
 #boostSheet .boost-footnote{margin:6px 2px 0;font-size:11px;line-height:1.45;}
 </style>
+<style>
+/* Collection details live in sheets so Home remains a single compact view. */
+.tap-btn-wrap{--coin-size:clamp(112px,calc(100dvh - 570px),200px)}
+#homeRace{background:none;border:0;text-align:left;padding:3px 0;cursor:pointer;font-family:inherit;width:100%;min-height:28px}
+#homeCoinArtwork{position:absolute;inset:0;pointer-events:none;border-radius:50%;overflow:hidden}
+#homeCoinArtwork svg{width:100%;height:100%;display:block}
+.tap-btn-main{position:relative}.tap-btn-main>.coin-emblem,.tap-btn-main>.coin-wordmark,.tap-btn-main>.tap-btn-ring{display:none}
+.tap-btn-main .tap-btn-label{position:absolute;bottom:11%;left:0;right:0;margin:0;font-size:6px;letter-spacing:1px;opacity:.7}
+#homeCoinWrap[data-double=true]{filter:drop-shadow(0 0 12px #f9c55566)}
+#homeCoinWrap[data-double=true] .coin-progress #homeGoalRing{stroke-width:4;filter:drop-shadow(0 0 5px #ffe387)}
+.home-next-preview{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 auto;border:0;background:none;color:inherit;cursor:pointer;min-height:42px;padding:0;width:100%}
+#homeNextCoin{width:36px;height:36px;flex-shrink:0}.home-next-preview svg{width:100%;height:100%}.home-next-preview .home-goal{text-align:left}.home-next-preview .home-goal-caption{text-align:left}
+.coin-tier .mini-coin{background:none!important;border:0!important;width:40px;height:40px}.coin-tier .mini-coin svg{width:100%;height:100%}.coin-tier{grid-template-columns:40px 1fr}
+#homeQuestSheet .quest-card{padding:15px;margin-bottom:12px;border:1px solid #344963;border-radius:18px;background:#111e32}
+.quest-kicker{font-size:10px;letter-spacing:1.3px;color:#e5c67f;text-transform:uppercase;font-weight:700}.quest-card h3{font-size:19px;margin:6px 0}.quest-card p{font-size:12px;color:#b4c7df;line-height:1.5;margin:7px 0}
+.quest-progress-bar{height:5px;background:#23334b;border-radius:4px;overflow:hidden;margin:12px 0}.quest-progress-bar span{height:100%;display:block;background:#f1ca70}
+.quest-action{width:100%;padding:12px 10px;min-height:44px;background:#f5cd68;color:#251b09;font:700 12px system-ui;border:0;border-radius:12px;margin-top:8px;cursor:pointer}.quest-action:disabled{background:#263951;color:#adc0d8;cursor:default}
+.launch-card{background:radial-gradient(ellipse at 80% 0,#9e743828,transparent 65%),#111e32!important;border-color:#8e7137!important}.launch-title-row{display:flex;gap:16px;align-items:center}#launchCoinPreview{display:block;flex:0 0 90px;width:90px;height:90px}#launchCoinPreview svg{width:100%;height:100%}
+.quest-info{font-size:11px;line-height:1.5;color:#a8bbd3}.quest-info summary{cursor:pointer;min-height:44px;padding:14px 0}.quest-info p{margin-top:0}.rival-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:16px 12px;margin-bottom:10px;border:1px solid #324864;border-radius:13px;font-size:13px;background:#101d31}.rival-row[data-me=true]{border-color:#e3be63;background:#302c24}.rival-row span{overflow-wrap:anywhere}.rival-row b{font-size:12px;font-variant-numeric:tabular-nums}.rival-row strong{color:#f4d380}
+#homeRivalsStatus{font-size:13px;color:#f3d17e;line-height:1.6;margin:0 0 15px}.rivals-actions{display:flex;gap:10px}.rivals-actions button{flex:1;min-height:44px}
+#boostSheet .boost-card:not(.boost-recommended) .boost-action:not(:disabled){background:#1c304a;color:#d8e7ff;border:1px solid #627c9e}
+#boostSheet .boost-card.boost-recommended .boost-action:not(:disabled){background:#f8cb54;color:#251a05}
+@media(max-height:680px){.tap-btn-wrap{--coin-size:112px}.home-next-preview{min-height:36px}#homeNextCoin{width:30px;height:30px}#homeRace{min-height:24px}}
+@media(prefers-reduced-motion:reduce){#homeCoinWrap{filter:none!important}}
+</style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -1945,7 +1971,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
           <span class="global-rank-bar"><span class="global-rank-fill" id="globalRankFill"></span></span>
           <span class="sr-only" id="globalRankNextText">Rank is confirmed by the server.</span>
         </button>
-        <p class="home-race" id="homeRace">Your next rival appears after sync.</p>
+        <button class="home-race" id="homeRace" type="button" aria-label="View your nearest rivals">Your next rival appears after sync.</button>
         <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points"><span id="homeRankGoalLabel">Next level</span> <span id="nextRankPointsText">—</span></span></div>
       </div>
       <div class="event-banner" id="eventBanner"><div class="event-row"><div><div class="event-title" id="eventTitle">Live event</div><div class="event-sub" id="eventSub"></div></div><div class="pill" id="seasonPill">Season</div></div></div>
@@ -1988,13 +2014,13 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
           <div class="coin-feedback" id="homeTapFeedback" aria-hidden="true"></div>
           <div class="home-celebration" id="homeCelebration" role="status" aria-live="polite" hidden></div>
           <button class="tap-btn-main" id="tapBtn" disabled>
-            <div class="tap-btn-ring"></div><span class="coin-emblem" aria-hidden="true">J</span><span class="coin-wordmark" aria-hidden="true">JIGCOIN</span>
+            <span id="homeCoinArtwork" aria-hidden="true"></span><div class="tap-btn-ring"></div><span class="coin-emblem" aria-hidden="true">J</span><span class="coin-wordmark" aria-hidden="true">JIGCOIN</span>
             <div class="tap-btn-label" id="tapButtonLabel">Loading</div>
           </button>
         </div>
 
-        <div class="home-goal" id="homeGoal">Your next rank is loading…</div>
-        <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div>
+        <button id="homeNextPreview" class="home-next-preview" type="button"><span id="homeNextCoin" aria-hidden="true"></span><span><div class="home-goal" id="homeGoal">Your next rank is loading…</div>
+        <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
         <div class="home-session-row"><button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button><button id="homeBoostAction" class="home-boost-action" type="button">2× tap boost ›</button></div>
         <div class="tap-metrics">
           <div class="tap-metric">
@@ -2053,9 +2079,23 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
 
+  <div class="sheet" id="homeQuestSheet" role="dialog" aria-labelledby="homeQuestTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="homeQuestTitle">Play &amp; collect</div><div class="sheet-subtitle">Small goals. Coins worth collecting.</div></div><button class="sheet-close" id="homeQuestClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body">
+      <section class="quest-card"><div class="quest-kicker">Daily challenge</div><h3>Make 100 taps</h3><p id="dailyQuestProgress">Connecting to your saved progress…</p><div class="quest-progress-bar" aria-hidden="true"><span id="dailyQuestFill"></span></div><p id="dailyQuestReset"></p><button class="quest-action" id="dailyQuestAction" disabled>Checking…</button></section>
+      <section class="quest-card launch-card"><div class="launch-title-row"><span id="launchCoinPreview" aria-hidden="true"></span><div><div class="quest-kicker">Seven-day collectible event</div><h3>Launch Edition</h3><p id="launchQuestStatus">Checking event status…</p></div></div><p>Make 250 taps during the event to unlock this coin design permanently. No purchase required.</p><p id="launchQuestProgress"></p><p id="launchQuestDates"></p><button class="quest-action" id="launchQuestAction" disabled>Checking…</button><p class="quest-info">Cosmetic only. Your rank and tap rewards stay the same. If you earn it before closing, you can collect it afterwards.</p></section>
+      <div id="progressionError" hidden><p class="quest-info">Progress is temporarily unavailable. Your confirmed taps remain saved.</p><button class="quest-action" id="progressionRetry">Refresh progress</button></div>
+      <details class="quest-info"><summary>Airdrop &amp; coin information</summary><p>No JigCoin airdrop allocation or conversion rate has been announced. In-game coins and collectibles have no cash-out value or guaranteed token conversion. Buying packs or watching adverts does not guarantee an airdrop.</p></details>
+    </div>
+  </div>
+  <div class="sheet" id="homeRivalsSheet" role="dialog" aria-labelledby="homeRivalsTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="homeRivalsTitle">Your rivals</div><div class="sheet-subtitle">The players closest to your position.</div></div><button class="sheet-close" id="homeRivalsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body"><p id="homeRivalsStatus">Checking the latest standings…</p><div id="homeRivalsList"></div><div class="rivals-actions"><button class="shop-retry" id="homeRivalsRefresh">Refresh</button><button class="shop-retry" id="homeRivalsGlobal">Full leaderboard ›</button></div><p class="quest-info">Ranks use saved coin balances, including purchased coins. Equal balances follow the leaderboard’s tie order.</p></div>
+  </div>
+
   <div class="sheet" id="homeJourneySheet" role="dialog" aria-labelledby="homeJourneyTitle">
     <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Your rank journey</div><div class="sheet-subtitle">Climb to JigCoin Legend · 10,000,000 coins. Ranks follow your saved balance.</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
-    <div class="sheet-body"><p class="journey-next" id="homeJourneyNext"></p><div class="coin-tier-grid" id="homeTierGrid"></div><p class="journey-footnote">Coin styles celebrate your rank. They do not add coins or change tap rewards.</p><p class="journey-record" id="homeMilestoneRecord"></p><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></div>
+    <div class="sheet-body"><p class="journey-next" id="homeJourneyNext"></p><div class="coin-tier-grid" id="homeTierGrid"></div><p class="journey-footnote">Coin styles celebrate your rank. They do not add coins or change tap rewards.</p><p class="journey-record" id="homeMilestoneRecord"></p><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></div>
   </div>
 
   <div class="sheet" id="friendsSheet">
@@ -2907,7 +2947,7 @@ function renderHomeProgress(view) {
   // animate the total but cannot unlock a rank before the server confirms it.
   const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null);
   document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
-  document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':`Next rank · ${formatNumber(goal.next)} total coins`):'Build your score, one tap at a time.';
+  document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':`Next coin · ${formatNumber(goal.next)} total · Preview ›`):'Build your score, one tap at a time.';
   document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
   document.getElementById('homeCoinWrap').dataset.coinTier=String(goal?.tier??0);
   rankNameEl.textContent=goal?goal.current.name:'—';
@@ -2915,7 +2955,7 @@ function renderHomeProgress(view) {
   document.getElementById('homeRankGoalLabel').textContent=goal?.complete?'Top rank':'Next rank';
   nextRankPointsTextEl.textContent=goal?(goal.complete?'unlocked':formatNumber(goal.next)):'—';
   rankProgressFill.style.transform=`scaleX(${goal?.progress??0})`;
-  renderHomeRace();renderHomeSession();
+  renderHomeRace();renderHomeSession();renderCollectibleCoin(goal);
 }
 function renderHomeSession() {
   const status=document.getElementById('homeSaveStatus'),action=document.getElementById('homeBoostAction');if(!status||!action)return;
@@ -2926,6 +2966,7 @@ function renderHomeSession() {
   status.dataset.state=message?'error':pending?'pending':'saved';
   document.getElementById('homeNormalSyncStatus').textContent=message||(!accountIsReady()?'Reconnect to refresh your saved balance.':pending?'Your taps are stored on this device while confirmation is pending.':'All queued taps have been confirmed.');
   const remaining=homeBoostRemaining(state.doubleBoostActive,state.doubleBoostUntil);
+  document.getElementById("homeCoinWrap").dataset.double=String(remaining>0);
   const projected=recoveryTapView(state);
   const low=homeEnergyLow(projected.energy,maxEnergy);
   action.dataset.focus=low?'sp_emergency_energy':'sp_double_points';action.dataset.active=String(remaining>0);
@@ -2955,12 +2996,12 @@ function renderHomeRace(){
   const el=document.getElementById('homeRace');if(!el)return;
   const race=homeRaceModel(homeRaceSnapshot,homeUserId());
   const fresh=Date.now()-homeRaceSyncedAt<90000;
-  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text+' · Last sync';el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
-  else{el.textContent=accountIsReady()?'View the leaderboard to see your rivals':'Race updates when your account reconnects';el.title='';}
+  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text+' · Rivals ›';el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
+  else{el.textContent=accountIsReady()?'View your nearest rivals ›':'Race updates when your account reconnects';el.title='';}
 }
-async function refreshHomeRace(){
+async function refreshHomeRace(force=false){
   const delay=homeRaceSnapshot&&homeRaceSnapshot.me.global_rank!==state.globalRank?8000:60000;
-  if(homeRaceBusy||!accountIsReady()||document.hidden||navigator.onLine===false||document.getElementById('mainScroll').inert||Date.now()-homeRaceAttemptAt<delay)return;
+  if(homeRaceBusy||!accountIsReady()||document.hidden||navigator.onLine===false||(!force&&document.getElementById('mainScroll').inert)||Date.now()-homeRaceAttemptAt<(force?3000:delay))return;
   const id=homeUserId();if(!id)return;
   homeRaceBusy=true;homeRaceAttemptAt=Date.now();
   try{const res=await apiPost('/api/leaderboard/window',{},{silent:true,timeoutMs:8000});
@@ -2973,7 +3014,7 @@ function openHomeJourney(showSync=false){
   const tier=homeTierIndex(homeConfirmedBalance),next=HOME_TIERS[tier+1];
   document.getElementById('homeJourneyNext').textContent=next?`${formatNumber(Math.max(0,next.min-homeConfirmedBalance))} coins to ${next.name} · ${formatNumber(next.min)} total`:'JigCoin Legend unlocked · Keep climbing the leaderboard.';
   const grid=document.getElementById('homeTierGrid');grid.replaceChildren();
-  HOME_TIERS.forEach((t,i)=>{const item=document.createElement('div');item.className='coin-tier';item.dataset.coinTier=String(i);item.dataset.current=String(i===tier);const coin=document.createElement('span');coin.className='mini-coin';coin.textContent='J';coin.setAttribute('aria-hidden','true');const name=document.createElement('strong');name.textContent=t.name;const detail=document.createElement('small');detail.textContent=`${formatNumber(t.min)} coins${i===tier?' · Current':''}`;item.append(coin,name,detail);grid.append(item);});
+  HOME_TIERS.forEach((t,i)=>{const item=document.createElement('div');item.className='coin-tier';item.dataset.coinTier=String(i);item.dataset.current=String(i===tier);const coin=document.createElement('span');coin.className='mini-coin';coin.innerHTML=coinArtwork(i);coin.setAttribute('aria-hidden','true');const name=document.createElement('strong');name.textContent=t.name;const detail=document.createElement('small');detail.textContent=`${formatNumber(t.min)} coins${i===tier?' · Current':''}`;item.append(coin,name,detail);grid.append(item);});
   const milestone=homeMajorMilestones().filter(n=>n<=(homeMilestoneState?.highWater||0)).at(-1);
   const highest=HOME_TIERS.find(tier=>tier.min===milestone);
   document.getElementById('homeMilestoneRecord').textContent=highest?`Highest rank recorded here: ${highest.name} · ${formatNumber(milestone)} coins`:'First rank unlock: Grinder · 10,000 coins';
@@ -2990,6 +3031,94 @@ document.getElementById('homeHaptics').addEventListener('change',e=>appStorage.s
 window.addEventListener('jigcoin:account-ready',()=>setTimeout(refreshHomeRace,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderHomeRace();refreshHomeRace();}});
 // End Home progress.
+
+// Collectible edition: fixed rewards and server-authoritative progress.
+let coinArtworkSerial=0,progressionState=null,progressionCheckedAt=0,progressionBusy=false,progressionClaimBusy=false,progressionClock=0,progressionSnapshotAt=0,progressionError=false;
+function coinArtwork(tier=0,launch=false){
+  tier=Math.max(0,Math.min(7,Math.floor(Number(tier)||0)));
+  const palettes=[['#ffe7c2','#cb8e55','#693e25'],['#fff2ae','#eeb944','#775016'],['#f4fbff','#a8c7de','#385e7c'],['#caffec','#55c7b6','#176665'],['#f7e1ff','#bd92e4','#55377d'],['#f2d998','#38372f','#e9c374'],['#ffe2c2','#d9718f','#ffe7b2'],['#ffffff','#b7d6e7','#b17b24']];
+  const [light,mid,ink]=launch?['#ffe8a0','#172d4b','#ffe2a0']:palettes[tier],id='jc-art-'+(++coinArtworkSerial);
+  const rays=Array.from({length:32},(_,i)=>`<path d="M100 13v${i%4===0?9:4}" transform="rotate(${i*11.25} 100 100)"/>`).join('');
+  const laurel=`<g fill="${ink}" opacity=".55">${[0,1,2,3,4].map(i=>`<ellipse cx="${49-i*3}" cy="${116-i*11}" rx="3" ry="7" transform="rotate(${-43-i*9} ${49-i*3} ${116-i*11})"/><ellipse cx="${151+i*3}" cy="${116-i*11}" rx="3" ry="7" transform="rotate(${43+i*9} ${151+i*3} ${116-i*11})"/>`).join('')}</g>`;
+  const wings=`<g fill="${ink}" opacity=".42"><path d="M65 81 30 62l7 24 22 13-17-5 8 17 16 7z"/><path d="m135 81 35-19-7 24-22 13 17-5-8 17-16 7z"/></g>`;
+  const crown=`<path d="m76 48-4-19 17 10 11-18 11 18 17-10-4 19z" fill="${ink}" opacity=".9"/><path d="M77 52h46" stroke="${ink}" stroke-width="3"/>`;
+  const crest=tier>=2?`<path d="m100 48 40 24v45l-40 27-40-27V72z" fill="none" stroke="${ink}" opacity=".35" stroke-width="${tier>=5?2:1}"/>`:'';
+  return `<svg viewBox="0 0 200 200" aria-hidden="true" focusable="false"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${light}"/><stop offset=".45" stop-color="${mid}"/><stop offset="1" stop-color="${light}"/></linearGradient></defs><circle cx="100" cy="100" r="97" fill="url(#${id})" stroke="${ink}" stroke-width="2"/><circle cx="100" cy="100" r="91" fill="none" stroke="${light}" stroke-width="2"/><g stroke="${ink}" opacity=".55">${rays}</g><circle cx="100" cy="100" r="77" fill="none" stroke="${ink}" stroke-width="1" opacity=".5"/>${tier===7?`<g fill="${ink}">${[0,90,180,270].map(a=>`<path d="m100 6 4 7-4 7-4-7z" transform="rotate(${a} 100 100)"/>`).join('')}</g>`:''}${crest}${tier>=1?laurel:''}${tier>=3||launch?wings:''}${tier>=5||launch?crown:`<path d="m100 32 5 8-5 8-5-8z" fill="${ink}" opacity=".7"/>`}${tier===4?`<path d="m100 31 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="${ink}"/>`:''}<text x="101" y="122" fill="${light}" opacity=".6" text-anchor="middle" font-family="Georgia,serif" font-size="82" font-weight="bold">J</text><text x="100" y="120" fill="${ink}" text-anchor="middle" font-family="Georgia,serif" font-size="82" font-weight="bold">J</text><text x="100" y="149" fill="${ink}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${launch?7:8}" letter-spacing="2" font-weight="700">${launch?'LAUNCH EDITION':'JIGCOIN'}</text>${tier>=6?`<path d="m62 157 12 5 26 7 26-7 12-5" fill="none" stroke="${ink}" stroke-width="3"/>`:''}</svg>`;
+}
+function setCoinArtwork(el,tier,launch=false){if(!el)return;const key=String(tier)+':'+launch;if(el.dataset.artwork===key)return;el.dataset.artwork=key;el.innerHTML=coinArtwork(tier,launch);}
+function progressionCurrent(){return progressionState?.telegram_id===homeUserId()?progressionState:null;}
+function collectibleCountdown(ms){const days=Math.floor(Math.max(0,ms)/86400000);return days?`${days}d ${Math.floor(ms%86400000/3600000)}h`:msToCountdown(Math.max(0,ms));}
+function progressionNow(){return progressionClock?progressionClock+(performance.now()-progressionSnapshotAt):Date.now();}
+function launchEquipped(){return !!progressionCurrent()?.event?.owned&&appStorage.getItem('jigcoin_launch_skin:'+homeUserId())==='on';}
+function renderCollectibleCoin(goal){
+  setCoinArtwork(document.getElementById('homeCoinArtwork'),goal?.tier??0,launchEquipped());
+  const preview=document.getElementById('homeNextCoin');setCoinArtwork(preview,goal?.complete?7:(goal?.tier??0)+1);
+  document.getElementById('homeNextPreview').setAttribute('aria-label',goal?.complete?'View your unlocked rank collection':`Preview ${goal?.nextName||'your next rank'} coin`);
+}
+async function refreshProgression(force=false){
+  const visible=!document.getElementById('mainScroll').inert||document.getElementById('homeQuestSheet').classList.contains('show');
+  if(progressionBusy||progressionClaimBusy||!accountIsReady()||document.hidden||navigator.onLine===false||(!force&&!visible)||(!force&&progressionCheckedAt>0&&performance.now()-progressionCheckedAt<15000))return;
+  progressionBusy=true;const id=homeUserId();
+  try{const res=await apiPost('/api/progression',{},{silent:true,timeoutMs:8000});if(id!==homeUserId())return;
+    if(!res?.ok||res.telegram_id!==id||!res.daily||!res.event||!Number.isFinite(Date.parse(res.server_now)))throw Error('PROGRESSION_UNAVAILABLE');
+    progressionState=res;progressionClock=Date.parse(res.server_now);progressionSnapshotAt=performance.now();progressionError=false;
+  }catch(_){progressionError=true;}finally{progressionCheckedAt=performance.now();progressionBusy=false;renderProgression();renderCollectibleCoin(homeGoalModel(homeConfirmedBalance));updateBoostHub();}
+}
+function renderProgression(){
+  const s=progressionCurrent(),d=s?.daily,e=s?.event?{...s.event}:null;
+  if(e?.status==='live'&&Date.parse(e.ends_at)<=progressionNow())e.status='ended';
+  const dayChanged=d&&Date.parse(d.resets_at)<=progressionNow();
+  const dailyButton=document.getElementById('dailyQuestAction'),launchButton=document.getElementById('launchQuestAction');
+  document.getElementById('dailyQuestProgress').textContent=d?`${d.progress} / ${d.target} confirmed taps · +${d.reward} coins`:'Connect to load your challenge.';
+  document.getElementById('dailyQuestFill').style.width=(d?100*d.progress/d.target:0)+'%';
+  document.getElementById('dailyQuestReset').textContent=d?`New challenge at 00:00 UTC · ${dayChanged?'Refreshing…':msToCountdown(Date.parse(d.resets_at)-progressionNow())}`:'Progress comes from saved taps.';
+  dailyButton.disabled=progressionClaimBusy||progressionError||!s||dayChanged;
+  dailyButton.textContent=progressionClaimBusy?'Please wait…':d?.claimed?'Back to tapping · Goal completed':d?.eligible?`Claim ${d.reward} coins`:'Back to tapping';
+  document.getElementById('launchQuestStatus').textContent=e?.owned?'In your collection':e?.status==='live'?`Earning closes in ${collectibleCountdown(Math.max(0,Date.parse(e.ends_at)-progressionNow()))}`:e?.status==='ended'?'Earning window closed':'Event not started';
+  document.getElementById('launchQuestProgress').textContent=e?`${e.progress} / ${e.target} confirmed event taps`:'Connect to load the event.';
+  document.getElementById('launchQuestDates').textContent=e?.starts_at?`${new Date(e.starts_at).toLocaleString('en-GB',{timeZone:'UTC',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} → ${new Date(e.ends_at).toLocaleString('en-GB',{timeZone:'UTC',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} UTC`:'A seven-day earning window starts when the event opens.';
+  launchButton.disabled=progressionClaimBusy||progressionError||!e||(!e.owned&&!e.eligible&&e.status!=='live');
+  launchButton.textContent=e?.owned?(launchEquipped()?'Use my rank coin':'Equip Launch Edition'):e?.eligible?'Collect Launch Edition':e?.status==='live'?'Tap to unlock':e?.status==='ended'?'Collection closed':'Not started';
+  document.getElementById('progressionError').hidden=!progressionError;
+  setCoinArtwork(document.getElementById('launchCoinPreview'),7,true);
+}
+function backToHome(){document.querySelectorAll('.sheet.show').forEach(el=>el.classList.remove('show'));sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);tapBtn.focus();}
+async function openHomeQuests(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeQuestSheet'),tabFarm);document.getElementById('mainScroll').inert=true;renderProgression();document.getElementById('homeQuestClose').focus();await refreshProgression(true);}
+async function claimProgression(kind){
+  const s=progressionCurrent();if(progressionClaimBusy||progressionError||!s)return;
+  const item=kind==='daily'?s.daily:s.event;
+  if(!item.eligible)return;
+  const id=homeUserId();progressionClaimBusy=true;renderProgression();
+  try{const result=await apiPost('/api/progression/claim',{kind,period:kind==='daily'?item.day:item.key});
+    if(id!==homeUserId())return;
+    if(!result?.ok||result.telegram_id!==id)throw Error(result?.error||'CLAIM_FAILED');
+    progressionState=result;progressionClock=Date.parse(result.server_now);progressionSnapshotAt=performance.now();progressionCheckedAt=performance.now();
+    if(kind==='launch')appStorage.setItem('jigcoin_launch_skin:'+id,'on');
+    await refreshBalance();showToast(result.already_claimed?'Already saved to your account.':kind==='launch'?'Launch Edition collected. Your new coin is equipped!':`${result.reward} challenge coins saved!`);
+  }catch(_){showToast('Could not confirm this claim. Refresh to check before trying again.');}
+  finally{progressionClaimBusy=false;await refreshProgression(true);renderProgression();}
+}
+function renderRivals(){
+  const box=document.getElementById('homeRivalsList');box.replaceChildren();
+  const s=homeRaceSnapshot,valid=homeRaceModel(s,homeUserId()),fresh=Date.now()-homeRaceSyncedAt<90000;
+  if(!valid||!fresh){document.getElementById('homeRivalsStatus').textContent='Rival positions are temporarily unavailable. Refresh to check.';return;}
+  document.getElementById('homeRivalsStatus').textContent=valid.text+' · Latest saved standings';
+  const rows=s.window.filter(r=>Number.isSafeInteger(r.global_rank)&&Math.abs(r.global_rank-s.me.global_rank)<=1&&Number.isSafeInteger(r.balance)&&r.balance>=0);
+  if(!rows.some(r=>r.telegram_id===homeUserId()))rows.push(s.me);
+  rows.sort((a,b)=>a.global_rank-b.global_rank).forEach(row=>{const me=row.telegram_id===homeUserId(),el=document.createElement('div');el.className='rival-row';el.dataset.me=String(me);const rank=document.createElement('strong');rank.textContent='#'+row.global_rank;const name=document.createElement('span');name.textContent=me?'You':row.first_name||row.username||'Player #'+row.global_rank;const coins=document.createElement('b');coins.textContent=formatNumber(row.balance)+' coins';el.append(rank,name,coins);box.append(el);});
+}
+async function openHomeRivals(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeRivalsSheet'),tabFarm);document.getElementById('mainScroll').inert=true;document.getElementById('homeRivalsClose').focus();renderRivals();await refreshHomeRace(true);renderRivals();}
+document.getElementById('homeNextPreview').addEventListener('click',()=>openHomeJourney());
+document.getElementById('homeRace').addEventListener('click',openHomeRivals);
+document.getElementById('homeQuestClose').addEventListener('click',backToHome);
+document.getElementById('homeRivalsClose').addEventListener('click',backToHome);
+document.getElementById('homeRivalsRefresh').addEventListener('click',async()=>{await refreshHomeRace(true);renderRivals();});
+document.getElementById('homeRivalsGlobal').addEventListener('click',()=>{backToHome();openLeaderboard('global');});
+document.getElementById('journeyQuestOpen').addEventListener('click',openHomeQuests);
+document.getElementById('progressionRetry').addEventListener('click',()=>refreshProgression(true));
+document.getElementById('dailyQuestAction').addEventListener('click',()=>progressionCurrent()?.daily.eligible?claimProgression('daily'):backToHome());
+document.getElementById('launchQuestAction').addEventListener('click',()=>{const e=progressionCurrent()?.event;if(!e)return;if(e.owned){appStorage.setItem('jigcoin_launch_skin:'+homeUserId(),launchEquipped()?'off':'on');renderCollectibleCoin(homeGoalModel(homeConfirmedBalance));renderProgression();showToast(launchEquipped()?'Launch Edition equipped.':'Rank coin equipped.');}else if(e.eligible)void claimProgression('launch');else if(e.status==='live')backToHome();});
+// End collectible edition.
 
 // Global position must come from the server; a balance cannot estimate it.
 function updateGlobalRankVisuals() {
@@ -3269,13 +3398,15 @@ setInterval(() => {
   renderHomeSession();
   refreshHomeRace();
   refreshHomeRefillStatus();
+  refreshProgression();
+  if(document.getElementById("homeQuestSheet").classList.contains("show"))renderProgression();
   if (boostSheet?.classList.contains("show")) { renderBoostCards(); pollBoostStatus(); }
 }, 1000);
 
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -4581,11 +4712,11 @@ function updateBoostHub() {
   const today=new Date(hubNow()).toISOString().slice(0,10);
   const claimed=state.lastCheckin===today;
   const days=Number(state.streakDays||0);
-  const next=(hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
+  const next=(progressionCurrent()?.streak_milestones||hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
   document.getElementById('homeDailyTitle').textContent=claimed?'Checked in ✓':'Daily check-in';
-  document.getElementById('hubDailyProgress').textContent=`Day ${days}${claimed?' · Streak saved':' · Your reward is ready'}`;
+  document.getElementById('hubDailyProgress').textContent=claimed&&next?`Day ${days} · Day ${next.days}: +${Number(next.bonus).toLocaleString('en-GB')} coins`:`Day ${days}${claimed?' · Streak saved':' · Your reward is ready'}`;
   document.getElementById('homeDailyMilestone').textContent=next?`Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:'Check in daily to build your streak.';
-  const daily=document.getElementById('hubDailyClaim');daily.disabled=claimed || !accountIsReady();daily.textContent=claimed?'Claimed':'Claim reward';
+  const daily=document.getElementById('hubDailyClaim');daily.disabled=!accountIsReady();daily.textContent=claimed?'Play & collect ›':'Claim reward';daily.dataset.claimed=String(claimed);
   document.getElementById('hubOwnedShield').hidden=Number(state.momentumShieldQty||0)<=0;
   if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
   const expires=Date.parse(hubCatalog?.offer_expires_at||'');
@@ -4597,7 +4728,7 @@ function updateBoostHub() {
 document.getElementById('homeLeaderboard')?.addEventListener('click',()=>{if(accountIsReady())openLeaderboard('global');});
 document.getElementById('vaultVip')?.addEventListener('click',()=>{if(accountIsReady())handleVipPass();});
 document.getElementById('sharePreviewDetails')?.addEventListener('toggle',renderShareCardCanvas);
-document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{await handleDailyTask();updateBoostHub();});
+document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{if(document.getElementById('hubDailyClaim').dataset.claimed==='true'){await openHomeQuests();return;}await handleDailyTask();updateBoostHub();});
 
 // ------------ Momentum Shield UI ------------
 function formatShieldStatus() {
@@ -4707,13 +4838,13 @@ function getBoostView(code, mission, now=Date.now()) {
     return {...blocked('Energy is full'),detail:'Use some energy before watching a refill advert.'};
   const until=Date.parse(state.doubleBoostUntil||'');
   if (code==='sp_double_points' && (until>now || (state.doubleBoostActive && !Number.isFinite(until))))
-    return {...blocked('2× tap coins active'),detail:Number.isFinite(until)?`2× taps · ${msToCountdown(until-now)} remaining`:'2× tap coins are active.'};
+    return {action:'play',disabled:false,label:'Back to tapping · 2× active',detail:Number.isFinite(until)?`2× taps · ${msToCountdown(until-now)} remaining`:'2× tap coins are active.'};
   if (boostLoadError) return {...blocked('Temporarily unavailable'),detail:'Check availability again below.'};
   if (!mission) return blocked('Checking availability…');
   const age=Math.max(0,(now-Number(mission.countdown_as_of_ms||hubMissionLoadedAt||now))/1000);
   const cooldown=Math.max(0,Number(mission.cooldown_remaining_seconds||0)-age);
   if (mission.provider==='monetag' && mission.status==='claimable' && mission.attempt_id)
-    return {action:'claim',disabled:false,label:code==='sp_visit_partner'?`Claim ${Number(mission.payout_amount)||200} coins`:'Claim reward',detail:'Advert confirmed. Your reward is ready.'};
+    return {action:'claim',disabled:false,label:code==='sp_visit_partner'?`Claim ${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Claim full energy':'Activate 2×',detail:'Advert confirmed. Your reward is ready.'};
   if (mission.status==='cooldown' || cooldown>0)
     return {...blocked(cooldown>0?`Available in ${msToCountdown(cooldown*1000)}`:'Checking availability…'),detail:rewardCooldownLabel(mission)?`Available again ${rewardCooldownLabel(mission)} after claiming.`:'Available again when this cooldown ends.'};
   if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
@@ -4722,7 +4853,7 @@ function getBoostView(code, mission, now=Date.now()) {
   if (mission.status!=='available') return blocked('Temporarily unavailable');
   const benefit=code==='sp_visit_partner'?`${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Full energy':'2× taps for 10 minutes';
   const policy=rewardCooldownLabel(mission);
-  return {action:'start',disabled:false,label:'Watch ad',detail:`${benefit}${policy?` · Every ${policy}`:''}`};
+  return {action:'start',disabled:false,label:code==='sp_visit_partner'?`Watch ad · Get ${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Watch ad · Refill energy':'Watch ad · Activate 2×',detail:`${benefit}${policy?` · Every ${policy}`:''}`};
 }
 function renderBoostCards() {
   const views=[];
@@ -4775,6 +4906,7 @@ async function claimBoostReward(code, mission) {
 async function performBoostAction(code) {
   const mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
   if (view.disabled || window.__rewardActionBusy) return;
+  if(view.action==='play'){backToHome();return;}
   window.__rewardActionBusy=true; boostBusyCode=code; renderBoostCards();
   try {
     if (view.action==='claim') await claimBoostReward(code,mission);
@@ -5228,7 +5360,7 @@ if (coinShopClose) {
 }
 
 sheetBackdrop.addEventListener("click", () => {
-  document.getElementById('homeJourneySheet').classList.remove('show');
+  document.querySelectorAll('.sheet.show').forEach(el=>el.classList.remove('show'));
   friendsSheet.classList.remove("show");
   withdrawSheet.classList.remove("show");
   vipSheet.classList.remove("show");
