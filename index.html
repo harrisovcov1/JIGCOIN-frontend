@@ -1974,6 +1974,24 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 @media(max-height:680px){.tap-btn-wrap{--coin-size:96px}.home-daily.daily-journey{padding:6px 10px;gap:3px 7px}.home-launch-strip{min-height:36px}.daily-journey #hubDailyClaim{min-height:36px}.home-next-preview{min-height:33px}}
 </style>
 
+
+<style>
+/* Fit the coin to the measured Home panel, including Telegram chrome and safe areas. */
+#mainScroll.home-compact .home-balance-card .rank-bar{display:none}
+#mainScroll.home-compact .header .home-balance-card{padding:6px 12px!important}
+#mainScroll.home-compact .balance-heading .card-balance-token{min-height:28px}
+#mainScroll.home-compact .tap-card{margin:6px 0!important}
+#mainScroll.home-compact .tap-btn-wrap{margin-block:3px}
+#mainScroll.home-compact .tap-metric{padding:6px 9px;min-height:38px}
+#mainScroll.home-compact .tap-metric:first-child{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px;align-items:center}
+#mainScroll.home-compact .tap-metric:first-child .metric-label{grid-column:1;grid-row:1}
+#mainScroll.home-compact .tap-metric:first-child .metric-sub{grid-column:2;grid-row:1}
+#mainScroll.home-compact .tap-metric:first-child .energy-bar{grid-column:1/-1;grid-row:2;margin:2px 0}
+#mainScroll.home-compact .tap-metric:nth-child(2){display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:6px}
+#mainScroll.home-compact .home-daily.daily-journey{padding:6px 10px;gap:3px 8px;margin-top:6px}
+#mainScroll.home-compact .account-content{padding-bottom:2px}
+</style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -5934,6 +5952,45 @@ setInterval(()=>{if(referralPromotionDeadline && Date.now()>=referralPromotionDe
 
 
 
+
+
+<script>
+// Home fit v4.1: measure available space rather than assuming dvh equals Telegram height.
+(() => {
+  const main=document.getElementById('mainScroll');
+  const wrap=document.getElementById('homeCoinWrap');
+  const coin=document.getElementById('tapBtn');
+  if(!main||!wrap||!coin)return;
+  let pending=0;
+  function fitHome(){
+    pending=0;
+    if(main.clientHeight<1||main.clientWidth<1)return;
+    main.classList.toggle('home-compact',main.clientHeight<700);
+    const top=main.getBoundingClientRect().top;
+    const bottom=Math.max(...Array.from(main.children).filter(el=>el.getClientRects().length)
+      .map(el=>el.getBoundingClientRect().bottom));
+    const contentHeight=bottom-top+main.scrollTop+(parseFloat(getComputedStyle(main).paddingBottom)||0);
+    const coinSize=parseFloat(getComputedStyle(coin).width);
+    if(!Number.isFinite(contentHeight)||!Number.isFinite(coinSize))return;
+    const next=Math.max(96,Math.min(200,Math.floor(coinSize+main.clientHeight-contentHeight-4)));
+    if(Math.abs(next-coinSize)>=1)wrap.style.setProperty('--coin-size',next+'px');
+  }
+  function scheduleFit(){if(!pending)pending=requestAnimationFrame(fitHome);}
+  if(typeof ResizeObserver==='function'){
+    const observer=new ResizeObserver(scheduleFit);
+    observer.observe(main);
+    for(const el of main.children)observer.observe(el);
+  }
+  window.addEventListener('resize',scheduleFit);
+  window.addEventListener('orientationchange',scheduleFit);
+  window.visualViewport?.addEventListener('resize',scheduleFit);
+  document.fonts?.ready.then(scheduleFit);
+  // Telegram's CSS variables resize main; this also handles older WebViews.
+  const bindTelegramFit=()=>{try{window.Telegram?.WebApp?.onEvent?.('viewportChanged',scheduleFit);}catch(_){}};
+  window.addEventListener('jigcoin:telegram-ready',bindTelegramFit);
+  bindTelegramFit();scheduleFit();
+})();
+</script>
 
 </body>
 </html>
