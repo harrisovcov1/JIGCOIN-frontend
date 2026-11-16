@@ -1957,6 +1957,23 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 @media(prefers-reduced-motion:reduce){#homeCoinWrap{filter:none!important}}
 </style>
 
+<style>
+/* Daily rewards v4: one compact journey, with full details on demand. */
+.header .home-balance-card{gap:2px 10px;padding:8px 12px!important}
+.tap-card{padding:8px 12px!important}
+.daily-marker{white-space:nowrap}
+.tap-btn-wrap{--coin-size:clamp(96px,calc(100dvh - 660px),200px)}
+.home-daily.daily-journey{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:5px 8px;padding:8px 12px;margin-top:8px}
+.daily-summary{padding:0;background:none;border:0;color:inherit;text-align:left;cursor:pointer;min-height:36px;font-family:inherit}.daily-summary strong{display:block;font-size:13px}.daily-summary span{display:block;font-size:10px;color:#b5c6dc;line-height:1.5;margin-top:2px}
+.daily-journey #hubDailyClaim{padding:7px;min-height:40px;font-size:11px}.daily-markers{grid-column:1/-1;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.daily-marker{text-align:center;border:1px solid #34485f;background:#132238;border-radius:6px;font-size:9px;padding:3px 1px;color:#b8cbe1}.daily-marker[data-claimed=true]{color:#82ddcd;border-color:#356b68}.daily-marker[data-focus=true]{color:#ffe28a;background:#433820;border-color:#eac365}.daily-next{grid-column:1/-1;font-size:10px;color:#f0cc7c;line-height:1.35;margin:0}
+.home-launch-strip{display:flex;width:100%;align-items:center;gap:8px;text-align:left;border:1px solid #6a5936;border-radius:12px;background:#172333;color:#f7df9b;padding:5px 10px;margin-top:7px;font-family:inherit;cursor:pointer;min-height:40px}.home-launch-strip[hidden]{display:none}.home-launch-strip>span:nth-child(2){flex:1}.home-launch-strip strong{display:block;font-size:11px}.home-launch-strip small{display:block;font-size:10px;color:#bbcadb}.home-launch-strip svg{width:28px;height:28px}.home-launch-strip>span:first-child{width:28px;height:28px}
+.daily-reward-hero{padding:16px;border:1px solid #ad8940;border-radius:18px;background:radial-gradient(at top right,#755b2944,transparent),#142136}.daily-reward-hero h3{font-size:32px;color:#ffdb80;margin:10px 0}.daily-reward-hero p{font-size:12px;color:#bfcee0;line-height:1.5;margin:8px 0}
+.daily-calendar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0}.daily-calendar .daily-marker{padding:12px 3px;font-size:11px;min-height:72px;display:flex;flex-direction:column;justify-content:center;gap:5px}.daily-calendar b{font-size:15px}.daily-calendar small{font-size:9px}
+.daily-perks{font-size:13px;color:#a8ebd4;padding:12px;border:1px solid #34635f;border-radius:12px;background:#132b33;line-height:1.5}.daily-cosmetics h3{font-size:17px;margin-top:22px}.daily-cosmetic{display:flex;align-items:center;gap:14px;padding:14px 10px;border:1px solid #34475f;border-radius:14px;margin:8px 0}.daily-cosmetic b{font-size:13px}.daily-cosmetic p{font-size:11px;color:#adc0d8;margin:5px 0;line-height:1.4}.cosmetic-avatar{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;width:38px;height:38px;background:#172a43;color:#f8d37c;font:700 25px Georgia;border:1px solid #7191ae}.cosmetic-avatar.aura{box-shadow:0 0 0 3px #61cbb480,0 0 14px #61cbb46b}.cosmetic-avatar.veteran{border:3px double #ffda76;outline:2px solid #8a703e;outline-offset:3px;border-radius:10px}
+#homeCoinWrap[data-aura=true]{box-shadow:0 0 20px 5px #67d3b847;border-radius:50%}.daily-reminder{display:flex;align-items:flex-start;gap:12px;padding:16px 0;font-size:13px;cursor:pointer}.daily-reminder input{width:20px;height:20px;accent-color:#f5cb65}.daily-reminder small{display:block;font-size:11px;color:#a9bbd2;line-height:1.5;margin-top:5px}.player-cosmetic{display:inline-flex;gap:10px;align-items:center}.player-cosmetic .cosmetic-avatar{width:25px;height:25px;font-size:16px}.player-cosmetic small{display:block;font-size:9px;color:#d9c081;margin-top:3px}
+@media(max-height:680px){.tap-btn-wrap{--coin-size:96px}.home-daily.daily-journey{padding:6px 10px;gap:3px 7px}.home-launch-strip{min-height:36px}.daily-journey #hubDailyClaim{min-height:36px}.home-next-preview{min-height:33px}}
+</style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -2047,10 +2064,14 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
         </div>
 
       </div>
-      <section class="home-daily" aria-label="Daily check-in">
-        <details class="streak-details" id="homeDailyDetails"><summary><span><strong id="homeDailyTitle">Daily check-in</strong><span id="hubDailyProgress">Loading your streak…</span></span><span class="daily-chevron" aria-hidden="true">⌄</span></summary><div class="streak-meter"><div class="streak-meter-fill" id="streakMeterFill"></div></div><p><span id="streakDaysText">—</span> · <span id="homeDailyMilestone"></span></p><p id="streakSubText"></p></details>
+      <section class="home-daily daily-journey" aria-label="Daily rewards">
+        <button class="daily-summary" id="homeDailyOpen"><strong id="homeDailyTitle">Daily rewards</strong><span id="hubDailyProgress">Loading rewards…</span></button>
         <button type="button" class="shop-retry" id="hubDailyClaim" disabled>Checking…</button>
+        <div class="daily-markers" id="homeDailyMarkers" aria-label="Your seven-day reward journey"></div>
+        <p id="homeDailyMilestone" class="daily-next"></p>
+        <div hidden><span id="streakDaysText"></span><div id="streakMeterFill"></div><span id="streakSubText"></span></div>
       </section>
+      <button id="homeLaunchStrip" class="home-launch-strip" hidden><span id="homeLaunchArt" aria-hidden="true"></span><span><strong>Launch Edition</strong><small id="homeLaunchDeadline"></small></span><span aria-hidden="true">›</span></button>
     </div>
     </div>
       <nav class="bottom-nav" aria-label="Main navigation">
@@ -2079,6 +2100,19 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
 
+  <div class="sheet" id="homeDailySheet" role="dialog" aria-labelledby="dailyRewardsTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="dailyRewardsTitle">Daily rewards</div><div class="sheet-subtitle">Collect coins. Build momentum. Keep your unlocks.</div></div><button class="sheet-close" id="dailyRewardsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body">
+      <div id="dailyRewardsError" hidden><p class="quest-info">Daily rewards could not be refreshed. Your saved coins and unlocks are safe.</p><button class="quest-action" id="dailyRewardsRetry">Refresh rewards</button></div>
+      <section class="daily-reward-hero"><div class="quest-kicker" id="dailyRewardEyebrow">Your next check-in</div><h3 id="dailyRewardAmount">Checking…</h3><p id="dailyRewardNext"></p><button class="quest-action" id="dailyRewardClaim" disabled>Checking…</button><p class="quest-info" id="dailyRewardReset"></p></section>
+      <div class="daily-calendar" id="dailyRewardCalendar" aria-label="Seven-day reward calendar"></div>
+      <p class="daily-perks" id="dailyRewardPerks"></p><p class="quest-info" id="dailyRewardNextPerk"></p>
+      <section class="daily-cosmetics"><h3>Unlock once. Keep forever.</h3><div id="dailyCosmeticList"></div></section>
+      <details class="quest-info"><summary>Coin milestones &amp; missed days</summary><p id="dailyRewardMilestones"></p><p>Check in once per UTC day. After a missed day, starting again resets your streak benefits, but keeps your coins, ranks and unlocked cosmetics. Eligible Momentum Shields still work automatically.</p></details>
+      <label class="daily-reminder"><input type="checkbox" id="dailyReminder"><span>Remind me in the app<small>One reminder in the final two hours of an unclaimed day, while this app is open. No Telegram messages.</small></span></label>
+      <button class="quest-action" id="dailyPlayCollect">Daily challenge &amp; Launch Edition ›</button>
+    </div>
+  </div>
   <div class="sheet" id="homeQuestSheet" role="dialog" aria-labelledby="homeQuestTitle">
     <div class="sheet-header"><div><div class="sheet-title" id="homeQuestTitle">Play &amp; collect</div><div class="sheet-subtitle">Small goals. Coins worth collecting.</div></div><button class="sheet-close" id="homeQuestClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body">
@@ -3052,11 +3086,12 @@ function progressionNow(){return progressionClock?progressionClock+(performance.
 function launchEquipped(){return !!progressionCurrent()?.event?.owned&&appStorage.getItem('jigcoin_launch_skin:'+homeUserId())==='on';}
 function renderCollectibleCoin(goal){
   setCoinArtwork(document.getElementById('homeCoinArtwork'),goal?.tier??0,launchEquipped());
+  document.getElementById('homeCoinWrap').dataset.aura=String(!!progressionCurrent()?.checkin?.cosmetics?.some(c=>c.key==='momentum_aura'&&c.owned));
   const preview=document.getElementById('homeNextCoin');setCoinArtwork(preview,goal?.complete?7:(goal?.tier??0)+1);
   document.getElementById('homeNextPreview').setAttribute('aria-label',goal?.complete?'View your unlocked rank collection':`Preview ${goal?.nextName||'your next rank'} coin`);
 }
 async function refreshProgression(force=false){
-  const visible=!document.getElementById('mainScroll').inert||document.getElementById('homeQuestSheet').classList.contains('show');
+  const visible=!document.getElementById('mainScroll').inert||document.getElementById('homeQuestSheet').classList.contains('show')||document.getElementById('homeDailySheet').classList.contains('show');
   if(progressionBusy||progressionClaimBusy||!accountIsReady()||document.hidden||navigator.onLine===false||(!force&&!visible)||(!force&&progressionCheckedAt>0&&performance.now()-progressionCheckedAt<15000))return;
   progressionBusy=true;const id=homeUserId();
   try{const res=await apiPost('/api/progression',{},{silent:true,timeoutMs:8000});if(id!==homeUserId())return;
@@ -3105,7 +3140,7 @@ function renderRivals(){
   document.getElementById('homeRivalsStatus').textContent=valid.text+' · Latest saved standings';
   const rows=s.window.filter(r=>Number.isSafeInteger(r.global_rank)&&Math.abs(r.global_rank-s.me.global_rank)<=1&&Number.isSafeInteger(r.balance)&&r.balance>=0);
   if(!rows.some(r=>r.telegram_id===homeUserId()))rows.push(s.me);
-  rows.sort((a,b)=>a.global_rank-b.global_rank).forEach(row=>{const me=row.telegram_id===homeUserId(),el=document.createElement('div');el.className='rival-row';el.dataset.me=String(me);const rank=document.createElement('strong');rank.textContent='#'+row.global_rank;const name=document.createElement('span');name.textContent=me?'You':row.first_name||row.username||'Player #'+row.global_rank;const coins=document.createElement('b');coins.textContent=formatNumber(row.balance)+' coins';el.append(rank,name,coins);box.append(el);});
+  rows.sort((a,b)=>a.global_rank-b.global_rank).forEach(row=>{const me=row.telegram_id===homeUserId(),el=document.createElement('div');el.className='rival-row';el.dataset.me=String(me);const rank=document.createElement('strong');rank.textContent='#'+row.global_rank;const name=document.createElement('span');name.innerHTML=dailyCosmeticMarkup(row.cosmetics||[],me?'You':row.first_name||row.username||'Player #'+row.global_rank);const coins=document.createElement('b');coins.textContent=formatNumber(row.balance)+' coins';el.append(rank,name,coins);box.append(el);});
 }
 async function openHomeRivals(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeRivalsSheet'),tabFarm);document.getElementById('mainScroll').inert=true;document.getElementById('homeRivalsClose').focus();renderRivals();await refreshHomeRace(true);renderRivals();}
 document.getElementById('homeNextPreview').addEventListener('click',()=>openHomeJourney());
@@ -3119,6 +3154,66 @@ document.getElementById('progressionRetry').addEventListener('click',()=>refresh
 document.getElementById('dailyQuestAction').addEventListener('click',()=>progressionCurrent()?.daily.eligible?claimProgression('daily'):backToHome());
 document.getElementById('launchQuestAction').addEventListener('click',()=>{const e=progressionCurrent()?.event;if(!e)return;if(e.owned){appStorage.setItem('jigcoin_launch_skin:'+homeUserId(),launchEquipped()?'off':'on');renderCollectibleCoin(homeGoalModel(homeConfirmedBalance));renderProgression();showToast(launchEquipped()?'Launch Edition equipped.':'Rank coin equipped.');}else if(e.eligible)void claimProgression('launch');else if(e.status==='live')backToHome();});
 // End collectible edition.
+
+// Daily rewards v4. Rewards and cosmetics always come from the current account snapshot.
+let dailyRewardsBusy=false;
+function dailyCheckinModel(){
+  const c=progressionCurrent()?.checkin;
+  return c&&Array.isArray(c.calendar)&&Array.isArray(c.cosmetics)&&Number.isFinite(c.today_reward)&&Number.isFinite(Date.parse(c.resets_at))?c:null;
+}
+function dailyMarkerMarkup(c,full=false){return c.calendar.map(d=>`<span class="daily-marker" data-claimed="${!!d.claimed}" data-focus="${!!d.focus}"><span aria-label="Day ${Number(d.day)}${d.claimed?', collected':''}">${d.claimed?'✓ ':''}${full?'Day ':''}${Number(d.day)}</span>${full?`<b>${formatNumber(d.reward)}</b><small>${d.cosmetic==='momentum_aura'?'Aura unlock':d.cosmetic==='veteran_frame'?'Frame unlock':'coins'}</small>`:''}</span>`).join('');}
+function dailyCosmeticMarkup(keys,name){
+  const veteran=keys.includes('veteran_frame'),aura=keys.includes('momentum_aura');
+  if(!veteran&&!aura)return escapeHtml(name);
+  return `<span class="player-cosmetic"><span aria-hidden="true" class="cosmetic-avatar ${veteran?'veteran':'aura'}">J</span><span>${escapeHtml(name)}<small>${veteran?'Veteran': 'Momentum'}${veteran&&aura?' · Momentum':''}</small></span></span>`;
+}
+function renderDailyRewards(){
+  const c=dailyCheckinModel(),id=homeUserId(),now=progressionNow();
+  const fresh=!!c&&!progressionError&&Date.parse(c.resets_at)>now&&accountIsReady();
+  const el=id=>document.getElementById(id),num=formatNumber;
+  el('homeDailyTitle').textContent=c?(c.claimed?`Day ${c.days} collected ✓`:'Daily coins are ready'):'Daily rewards';
+  el('hubDailyProgress').textContent=!fresh?'Refresh to check your reward':c.claimed?`Tomorrow: ${num(c.next_reward)} coins`:`Collect ${num(c.today_reward)} coins · Day ${c.next_day}`;
+  el('homeDailyMarkers').innerHTML=c?dailyMarkerMarkup(c):'';
+  const next=c?.next_milestone;
+  el('homeDailyMilestone').textContent=c?.broken?'Start again. Your coins and unlocks stay.':next?`Day ${next.day}: ${num(next.reward)} coins${next.day===7?' + permanent aura':''}`:c?'View your perks & permanent unlocks ›':'';
+  const home=el('hubDailyClaim');home.disabled=!accountIsReady();home.dataset.claimed=String(!!c?.claimed);home.textContent=!fresh?'Refresh ›':c.claimed?'Calendar ›':c.broken?'Restart ›':`Claim ${num(c.today_reward)}`;
+  el('dailyRewardsError').hidden=fresh;
+  el('dailyRewardEyebrow').textContent=c?.claimed?`Day ${c.days} · collected`:`Day ${c?.next_day||1} · check-in reward`;
+  el('dailyRewardAmount').textContent=c?`${num(c.today_reward)} coins`:'Checking…';
+  el('dailyRewardNext').textContent=c?.broken?'You missed a check-in. Start a new streak and keep every coin and cosmetic already earned.':c?.claimed?`Tomorrow: ${num(c.next_reward)} coins${c.next_day===7?' + Momentum aura':c.next_day===30?' + Veteran frame':''}`:'Collect today’s reward to advance your streak.';
+  const claim=el('dailyRewardClaim');claim.disabled=!fresh||dailyRewardsBusy;claim.textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh rewards above':c.claimed?'Back to tapping':`${c.broken?'Start new streak · ': 'Claim '}${num(c.today_reward)} coins`;
+  el('dailyRewardReset').textContent=c?`Next UTC day in ${msToCountdown(Math.max(0,Date.parse(c.resets_at)-now))} · Resets 00:00 UTC`:'';
+  el('dailyRewardCalendar').innerHTML=c?dailyMarkerMarkup(c,true):'';
+  el('dailyRewardPerks').textContent=c?`${c.tier.name}: +${c.tier.tap_bonus_percent}% tap coins · +${c.tier.energy_bonus} energy capacity`:'Your perks appear after a successful refresh.';
+  const t=c?.next_tier;
+  el('dailyRewardNextPerk').textContent=t?`Day ${t.day}: ${t.name} unlocks +${t.tap_bonus_percent}% tap coins and +${t.energy_bonus} energy capacity. Fractional tap coins accumulate until they make a whole coin.`:'Keep checking in for daily coins. Your unlocked cosmetics stay yours.';
+  el('dailyCosmeticList').innerHTML=c?c.cosmetics.map(x=>`<div class="daily-cosmetic"><span class="cosmetic-avatar ${x.key==='veteran_frame'?'veteran':'aura'}" aria-hidden="true">J</span><div><b>${escapeHtml(x.name)}${x.owned?' · Owned ✓':''}</b><p>${x.owned?'Permanently unlocked':`Reach ${Number(x.days)} consecutive check-ins`} · ${x.key==='veteran_frame'?'Profile frame on leaderboards':'Coin glow & leaderboard badge'}</p></div></div>`).join(''):'';
+  el('dailyRewardMilestones').textContent=c?c.milestones.map(m=>`Day ${m.day}: ${num(m.reward)} coins`).join(' · ')+'. Includes the daily reward; each milestone bonus is awarded once per streak.':'';
+  el('dailyReminder').checked=appStorage.getItem('jigcoin_daily_reminder:'+id)==='on';
+  const event=progressionCurrent()?.event,live=event?.status==='live'&&Date.parse(event.ends_at)>now;
+  el('homeLaunchStrip').hidden=!live;
+  if(live){setCoinArtwork(el('homeLaunchArt'),7,true);el('homeLaunchDeadline').textContent=event.owned?'In your collection · View ›':`${event.progress}/${event.target} taps · ${collectibleCountdown(Date.parse(event.ends_at)-now)} left`;}
+  if(fresh&&!c.claimed&&!document.hidden&&el('dailyReminder').checked&&Date.parse(c.resets_at)-now<=7200000){
+    const key='jigcoin_daily_reminded:'+id+':'+c.day;
+    if(appStorage.getItem(key)!=='yes'){appStorage.setItem(key,'yes');showToast(`Your daily ${num(c.today_reward)} coins are ready. Open Daily rewards to collect.`);}
+  }
+}
+async function openDailyRewards(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeDailySheet'),tabFarm);document.getElementById('mainScroll').inert=true;renderDailyRewards();document.getElementById('dailyRewardsClose').focus();await refreshProgression(true);}
+async function claimDailyReward(){
+  const c=dailyCheckinModel();if(dailyRewardsBusy||!c||progressionError||Date.parse(c.resets_at)<=progressionNow()||!accountIsReady())return;
+  if(c.claimed){backToHome();return;}
+  dailyRewardsBusy=true;renderDailyRewards();
+  try{await handleDailyTask();}finally{dailyRewardsBusy=false;await refreshProgression(true);renderDailyRewards();const after=dailyCheckinModel();const unlocked=after?.claimed?after.cosmetics.filter(x=>x.owned&&!c.cosmetics.some(old=>old.key===x.key&&old.owned)):[];if(unlocked.length)showToast(`${formatNumber(after.today_reward)} coins collected · ${unlocked.map(x=>x.name).join(' + ')} unlocked!`);}
+}
+document.getElementById('homeDailyOpen').addEventListener('click',openDailyRewards);
+document.getElementById('dailyRewardsClose').addEventListener('click',backToHome);
+document.getElementById('dailyRewardsRetry').addEventListener('click',()=>refreshProgression(true));
+document.getElementById('dailyRewardClaim').addEventListener('click',claimDailyReward);
+document.getElementById('dailyPlayCollect').addEventListener('click',openHomeQuests);
+document.getElementById('homeLaunchStrip').addEventListener('click',openHomeQuests);
+document.getElementById('dailyReminder').addEventListener('change',e=>appStorage.setItem('jigcoin_daily_reminder:'+homeUserId(),e.target.checked?'on':'off'));
+// End daily rewards v4.
+
 
 // Global position must come from the server; a balance cannot estimate it.
 function updateGlobalRankVisuals() {
@@ -3199,7 +3294,8 @@ function render() {
   todayText.textContent = confirmed ? formatNumber(view.today) : "—";
 
   // Points per tap (x2 when boost active)
-  const effectivePerTap = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
+  const streakTapMultiplier=state.streakMeta?.active?Number(state.streakMeta.tap_multiplier)||1:1;
+  const effectivePerTap = Number(((state.doubleBoostActive ? perTapBase * 2 : perTapBase)*streakTapMultiplier).toFixed(2));
   if (perTapText) {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
   }
@@ -4471,18 +4567,21 @@ let dailyClaimInFlight = false;
 async function handleDailyTask() {
   if (dailyClaimInFlight) return;
   dailyClaimInFlight = true;
+  const claimAccount=homeUserId();
   try {
     let result = await apiPost("/api/task", {action:"daily_checkin",taskName:"daily"});
+    if(claimAccount!==homeUserId())return;
     if (result && !result.ok && result.reason === "STREAK_BROKEN") {
       showToast("Streak was broken — starting a new streak.");
       result = await apiPost("/api/task", {action:"start_new",taskName:"daily"});
     }
+    if(claimAccount!==homeUserId())return;
     if (!result) { showToast("Check-in could not be confirmed. Please try again."); return; }
     if (result.ok || result.reason === "ALREADY_CLAIMED") {
       applyBackendState(result);
       render();
       updateTaskCardStates();
-      updateDashboardUI();
+      updateBoostHub();
       if (result.reason === "ALREADY_CLAIMED" || result.already_claimed) {
         showToast("Daily check-in already saved. Available again at 00:00 UTC.");
       } else {
@@ -4709,14 +4808,7 @@ async function buyStarsPack(sku) {
   finally{hubPurchaseBusy=false;renderStarsCatalog();}
 }
 function updateBoostHub() {
-  const today=new Date(hubNow()).toISOString().slice(0,10);
-  const claimed=state.lastCheckin===today;
-  const days=Number(state.streakDays||0);
-  const next=(progressionCurrent()?.streak_milestones||hubCatalog?.streak_milestones||[]).find(m=>m.days>days);
-  document.getElementById('homeDailyTitle').textContent=claimed?'Checked in ✓':'Daily check-in';
-  document.getElementById('hubDailyProgress').textContent=claimed&&next?`Day ${days} · Day ${next.days}: +${Number(next.bonus).toLocaleString('en-GB')} coins`:`Day ${days}${claimed?' · Streak saved':' · Your reward is ready'}`;
-  document.getElementById('homeDailyMilestone').textContent=next?`Reach day ${next.days} for +${Number(next.bonus).toLocaleString('en-GB')} milestone coins.`:'Check in daily to build your streak.';
-  const daily=document.getElementById('hubDailyClaim');daily.disabled=!accountIsReady();daily.textContent=claimed?'Play & collect ›':'Claim reward';daily.dataset.claimed=String(claimed);
+  renderDailyRewards();
   document.getElementById('hubOwnedShield').hidden=Number(state.momentumShieldQty||0)<=0;
   if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
   const expires=Date.parse(hubCatalog?.offer_expires_at||'');
@@ -4728,7 +4820,7 @@ function updateBoostHub() {
 document.getElementById('homeLeaderboard')?.addEventListener('click',()=>{if(accountIsReady())openLeaderboard('global');});
 document.getElementById('vaultVip')?.addEventListener('click',()=>{if(accountIsReady())handleVipPass();});
 document.getElementById('sharePreviewDetails')?.addEventListener('toggle',renderShareCardCanvas);
-document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{if(document.getElementById('hubDailyClaim').dataset.claimed==='true'){await openHomeQuests();return;}await handleDailyTask();updateBoostHub();});
+document.getElementById('hubDailyClaim')?.addEventListener('click',async()=>{const c=dailyCheckinModel();if(!c||c.claimed||c.broken||progressionError||Date.parse(c.resets_at)<=progressionNow()){await openDailyRewards();return;}await claimDailyReward();});
 
 // ------------ Momentum Shield UI ------------
 function formatShieldStatus() {
@@ -4844,14 +4936,14 @@ function getBoostView(code, mission, now=Date.now()) {
   const age=Math.max(0,(now-Number(mission.countdown_as_of_ms||hubMissionLoadedAt||now))/1000);
   const cooldown=Math.max(0,Number(mission.cooldown_remaining_seconds||0)-age);
   if (mission.provider==='monetag' && mission.status==='claimable' && mission.attempt_id)
-    return {action:'claim',disabled:false,label:code==='sp_visit_partner'?`Claim ${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Claim full energy':'Activate 2×',detail:'Advert confirmed. Your reward is ready.'};
+    return {action:'claim',disabled:false,label:code==='sp_visit_partner'?`Claim ${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Claim full energy':'Activate 2×',detail:code==='sp_emergency_energy'?`Advert confirmed · +${Math.max(0,Math.floor(maxEnergy)-Math.floor(state.energy||0))} energy now (up to ${Math.floor(maxEnergy)})`:'Advert confirmed. Your reward is ready.'};
   if (mission.status==='cooldown' || cooldown>0)
     return {...blocked(cooldown>0?`Available in ${msToCountdown(cooldown*1000)}`:'Checking availability…'),detail:rewardCooldownLabel(mission)?`Available again ${rewardCooldownLabel(mission)} after claiming.`:'Available again when this cooldown ends.'};
   if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
   if (['pending','waiting','started'].includes(mission.status))
     return {...blocked('Confirming advert…'),detail:'Your reward will appear here once confirmed.'};
   if (mission.status!=='available') return blocked('Temporarily unavailable');
-  const benefit=code==='sp_visit_partner'?`${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Full energy':'2× taps for 10 minutes';
+  const benefit=code==='sp_visit_partner'?`${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?`+${Math.max(0,Math.floor(maxEnergy)-Math.floor(state.energy||0))} energy now · Fill to ${Math.floor(maxEnergy)}`:'2× taps for 10 minutes';
   const policy=rewardCooldownLabel(mission);
   return {action:'start',disabled:false,label:code==='sp_visit_partner'?`Watch ad · Get ${Number(mission.payout_amount)||200} coins`:code==='sp_emergency_energy'?'Watch ad · Refill energy':'Watch ad · Activate 2×',detail:`${benefit}${policy?` · Every ${policy}`:''}`};
 }
@@ -5540,7 +5632,7 @@ function renderList(items, getRank, getName, getValue, highlightTid) {
         font-size:13px;
       ">
         <div>
-          <div style="font-weight:600;">#${formatNumber(rank)} · ${name}</div>
+          <div style="font-weight:600;">#${formatNumber(rank)} · ${dailyCosmeticMarkup(row.cosmetics||[],nameRaw)}</div>
         </div>
         <div style="text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;">
           <div style="font-size:13px; font-weight:600; letter-spacing:0.01em;">${formatNumber(value)} pts</div>
