@@ -1674,6 +1674,30 @@ button:disabled {cursor:default;}
 #sponsorList .ad-quest-row button:disabled {opacity:1;background:#17243b;color:#f1f5f9;
  -webkit-text-fill-color:#f1f5f9;border-color:#64748b;cursor:default;}
 .ad-quest-row.reward-focus{outline:1px solid rgba(250,204,21,.65);outline-offset:4px;border-radius:12px;}
+
+/* Boost Hub: compact cards, fixed header and readable disabled states. */
+#coinShopSheet .sheet-header {flex-shrink:0;align-items:flex-start;padding:18px 16px 14px;}
+#coinShopSheet .sheet-title {font-size:21px;font-weight:800;}
+#coinShopSheet .sheet-subtitle {max-width:100%;font-size:13px;line-height:1.45;}
+#coinShopSheet .sheet-close {flex-shrink:0;width:36px;height:36px;}
+#coinShopSheet .sheet-body {min-height:0;overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+#coinShopSheet .vip-box {padding:14px;border:1px solid #334155;border-radius:16px;background:rgba(15,23,42,.75);}
+#coinShopSheet .tasks-grid {grid-template-columns:1fr;}
+#coinShopSheet .task-top {flex-wrap:wrap;gap:8px;}
+#coinShopSheet .task-disabled {opacity:1;background:#172238;}
+#coinShopSheet .task-disabled .task-desc {color:#b7c5d8;}
+#coinShopSheet .packRow {display:flex;flex-direction:column;gap:12px;padding:16px;border-bottom:1px solid #334155;}
+#coinShopSheet .packRow:last-child {border-bottom:0;}
+#coinShopSheet .packLeft {min-width:0;}
+#coinShopSheet .packTitle {font-size:19px;line-height:1.3;font-weight:800;overflow-wrap:anywhere;}
+#coinShopSheet .packSub {font-size:13px;line-height:1.5;color:#cbd5e1;margin-top:6px;}
+#coinShopSheet .packMeta {font-size:12px;line-height:1.45;color:#94a3b8;margin-top:8px;}
+#coinShopSheet .packRight {display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+#coinShopSheet .packRight button {width:100%;min-height:46px;border-radius:12px;border:1px solid #64748b;font:inherit;font-size:14px;font-weight:700;}
+#coinShopSheet button:disabled {background:#1b293f;color:#cbd5e1;-webkit-text-fill-color:#cbd5e1;opacity:1;}
+#coinShopSheet .shop-status {padding:16px;font-size:14px;line-height:1.5;color:#cbd5e1;}
+#coinShopSheet .shop-retry {margin-top:12px;min-height:44px;padding:10px 16px;border-radius:12px;background:#e2e8f0;color:#0f172a;border:0;font-weight:700;}
+
 </style>
 
 <style>
@@ -2316,15 +2340,15 @@ button:disabled {cursor:default;}
     <div class="sheet-header">
       <div>
         <div class="sheet-title">Boost Hub</div>
-        <div class="sheet-subtitle">Protect your momentum. Activate boosts or secure protection packs instantly via Stripe.</div>
+        <div class="sheet-subtitle">Earn ad boosts and explore coin packs. See exactly what each reward includes.</div>
       </div>
       <button class="sheet-close" id="coinShopClose">×</button>
     </div>
     <div class="sheet-body">
       <div class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Recommended</div>
+        <div style="font-weight:800; margin-bottom:6px;">Choose your next boost</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35;">
-          Use boosts to secure your rank. Security packs open in Stripe; return here after activation and your coins are credited the moment the backend confirms.
+          Start with a free ad boost: refill your energy or earn double tap points for 10 minutes. Your reward is applied after confirmation.
         </div>
       </div>
 
@@ -2357,7 +2381,7 @@ button:disabled {cursor:default;}
       <div class="vip-box" style="margin-bottom:12px;">
         <div style="font-weight:800; margin-bottom:6px;">Momentum Shield</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
-          Insurance for missed days. If you forget one day, a shield auto-saves your streak (consumes 1).
+          Streak protection is separate from coin packs. One eligible shield covers one missed day and is consumed when used.
         </div>
 
         <div id="momentumShieldStatus" style="opacity:.85; font-size:12px; margin-bottom:10px;">Loading…</div>
@@ -2367,9 +2391,9 @@ button:disabled {cursor:default;}
       </div>
 
       <div class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Security packs</div>
+        <div style="font-weight:800; margin-bottom:6px;">Coin packs</div>
         <div style="opacity:.85; font-size:12px; line-height:1.35;">
-          Activate protection to lock in momentum. Bigger bundles = stronger protection.
+          Coins add to your in-game balance. They do not include energy, streak protection or a guaranteed leaderboard position.
         </div>
       </div>
 
@@ -2378,7 +2402,7 @@ button:disabled {cursor:default;}
       </div>
 
       <div class="vip-box" style="opacity:.85; margin-top:12px;">
-        Tip: If a link doesn’t open inside Telegram, update Telegram and allow external links.
+        Paid packs are not open for purchase yet. Ad boosts remain available when you are eligible.
       </div>
     </div>
   </div>
@@ -4435,6 +4459,8 @@ function openCoinShopSheet() {
   sheetBackdrop.classList.add("show");
   coinShopSheet.classList.add("show");
   setActiveTab(tabTasks);
+  coinShopSheet.querySelector(".sheet-body").scrollTop = 0;
+  updateTaskCardStates();
   loadCoinPacks();
   loadMomentumShields();
 }
@@ -4444,18 +4470,7 @@ function closeCoinShopSheet() {
   sheetBackdrop.classList.remove("show");
 }
 
-// Packs: backend-driven (Supabase) with safe frontend fallback
-const FALLBACK_COIN_PACKS = [
-  { coins: 5000, bonus_coins: 0, price_gbp: 5, stripe_payment_link: "https://buy.stripe.com/test_14AfZi4xjdbg4Uc8nP6wE01" },
-  { coins: 10000, bonus_coins: 1000, price_gbp: 10, stripe_payment_link: "https://buy.stripe.com/test_7sY5kE3tf2wC5Yg47z6wE02" },
-  { coins: 25000, bonus_coins: 5000, price_gbp: 25, stripe_payment_link: "https://buy.stripe.com/test_14A9AUaVH6MS0DW7jL6wE03" },
-  { coins: 50000, bonus_coins: 15000, price_gbp: 50, stripe_payment_link: "https://buy.stripe.com/test_aFa9AU3tf4EK3Q80Vn6wE04" },
-  { coins: 100000, bonus_coins: 40000, price_gbp: 100, stripe_payment_link: "https://buy.stripe.com/test_cNi28s5Bnc7c9as1Zr6wE05" },
-  { coins: 250000, bonus_coins: 130000, price_gbp: 250, stripe_payment_link: "https://buy.stripe.com/test_5kQ28s7Jv1sydqIgUl6wE06" },
-  { coins: 500000, bonus_coins: 350000, price_gbp: 500, stripe_payment_link: "https://buy.stripe.com/test_00w9AU9RD5IO2M40Vn6wE07" },
-  { coins: 1000000, bonus_coins: 1000000, price_gbp: 1000, stripe_payment_link: "https://buy.stripe.com/test_7sYbJ2aVH6MS9ascE56wE08" },
-];
-
+// Display only products returned by the server. Never substitute test checkout links.
 function getPackNumbers(p) {
   const base = Number(p.coins ?? p.base_coins ?? p.coin_amount ?? 0);
   const bonus = Number(p.bonus_coins ?? p.bonus ?? 0);
@@ -4469,90 +4484,30 @@ function formatGBP(amount) {
   return "£" + Number(amount).toLocaleString("en-GB");
 }
 
-function packMicrocopy(total, price) {
-  // Unique, defensive, status-driven copy per tier (no “buy/pay/purchase”).
-  if (price >= 1000) return { name: "Apex Insurance", sub: "You don’t compete — you control the season.", hook: "Lock the top spots before everyone wakes up." };
-  if (price >= 500)  return { name: "Dominance Engine", sub: "Build an unbreakable lead in one move.", hook: "This is how whales stay untouchable." };
-  if (price >= 250)  return { name: "Leader Guard", sub: "Stop rank snipers and protect your momentum.", hook: "Secure the climb before the next wave hits." };
-  if (price >= 100)  return { name: "Streak Armor", sub: "Keep your streak alive and your rank defended.", hook: "One shield now beats a grind later." };
-  if (price >= 50)   return { name: "Momentum Lock", sub: "Hold your position when the leaderboard spikes.", hook: "Don’t let one slow hour cost you." };
-  if (price >= 25)   return { name: "Rank Shield", sub: "Stay ahead of the pack while they hesitate.", hook: "Activate protection and keep farming." };
-  if (price >= 10)   return { name: "Quick Patch", sub: "Instant fuel to keep your run alive right now.", hook: "Small move. Big difference." };
-  return               { name: "Starter Boost", sub: "Top up and keep your momentum moving.", hook: "Activate and stay in the fight." };
+function validCoinPack(p) {
+  if (!p || typeof p !== "object" || !String(p.sku || p.pack_sku || "").trim()) return false;
+  const n = getPackNumbers(p);
+  return Number.isSafeInteger(n.base) && n.base > 0 && Number.isSafeInteger(n.bonus) && n.bonus >= 0 && Number.isSafeInteger(n.total);
 }
-
 function formatPackRow(p) {
-  const { base, bonus, total, price } = getPackNumbers(p);
-  const mc = packMicrocopy(total, price);
-
-  const totalLine = bonus > 0
-    ? `Total ${formatNumber(total)} • Bonus +${formatNumber(bonus)}`
-    : `Total ${formatNumber(total)} • No bonus`;
-
-  return `
-    <div class="packRow">
-      <div class="packLeft">
-        <div class="packTitle">${formatNumber(total)} coins · ${mc.name}</div>
-        <div class="packSub">${mc.sub}</div>
-        <div class="packMeta">${totalLine} · ${mc.hook}</div>
-      </div>
-      <div class="packRight">
-        <div class="pill">${formatGBP(price)}</div>
-        <button class="btn packBtn" data-pack="${encodeURIComponent(JSON.stringify(p))}">Activate</button>
-      </div>
-    </div>
-  `;
+  const { base, bonus, total } = getPackNumbers(p);
+  return `<div class="packRow"><div class="packLeft">
+    <div class="packTitle">🪙 ${formatNumber(total)} coins</div>
+    <div class="packSub">${formatNumber(base)} base coins${bonus ? ` + ${formatNumber(bonus)} bonus coins` : ""}</div>
+    <div class="packMeta">In-game coins · Added after confirmed payment</div>
+    </div><div class="packRight"><button type="button" disabled>Purchases coming soon</button></div></div>`;
 }
-
 function renderCoinPacks(packs) {
   if (!coinPackList) return;
-
-  const safe = Array.isArray(packs) ? packs : [];
-
-  // Sort by total coins so the ladder feels “bigger = stronger protection”.
-  const sorted = [...safe].sort((a, b) => {
-    const at = getPackNumbers(a).total;
-    const bt = getPackNumbers(b).total;
-    return at - bt;
-  });
-
-  coinPackList.innerHTML = sorted.map(formatPackRow).join("");
-
-  // Bind buttons (data-pack contains encoded JSON of the pack object).
-  coinPackList.querySelectorAll(".packBtn").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      try {
-        const p = JSON.parse(decodeURIComponent(btn.dataset.pack || "{}"));
-        const sku = (p.sku || p.pack_sku || "").toString().trim();
-        if (!sku) {
-          showToast("Pack SKU missing. Check Supabase payment_products.");
-          return;
-        }
-
-        // Choose payment method (Card/Stripe vs Crypto/Coinbase)
-        const payWithCard = window.confirm(
-          "Choose payment method:\n\nOK = Card (Stripe)\nCancel = Crypto (Coinbase)"
-        );
-
-        const provider = payWithCard ? "stripe" : "coinbase";
-        showToast(payWithCard ? "Opening card checkout…" : "Opening crypto checkout…");
-
-        const r = await apiPost("/api/payments/create-checkout", { sku, provider });
-
-        if (r && r.ok && r.url) {
-          const opened = openExternalLink(r.url);
-          if (!opened) showToast("Couldn't open checkout. Please allow external links.");
-          return;
-        }
-
-        console.warn("Checkout failed:", r);
-        showToast(`Checkout failed: ${(r && (r.error || r.reason)) ? (r.error || r.reason) : "unknown error"}`);
-      } catch (e) {
-        console.error("Pack checkout error:", e);
-        showToast("Could not open this pack. Try again.");
-      }
-    });
-  });}
+  const sorted = (Array.isArray(packs) ? packs : []).filter(validCoinPack).sort((a,b)=>getPackNumbers(a).total-getPackNumbers(b).total);
+  coinPackList.innerHTML = sorted.length ? sorted.map(formatPackRow).join("")
+    : '<div class="shop-status">Coin packs are being prepared. You can still earn coins through tasks and daily check-in.</div>';
+}
+function shopLoadError(element, result, retry) {
+  const maintenance = (result?.reason || result?.error) === "MAINTENANCE_MODE";
+  element.innerHTML = `<div class="shop-status">${maintenance ? "The shop is currently closed for maintenance." : "We couldn’t load these products. Please try again."}<br><button class="shop-retry" type="button">Try again</button></div>`;
+  element.querySelector("button").addEventListener("click", retry);
+}
 
 async function loadCoinPacks() {
   if (!coinPackList) return;
@@ -4560,13 +4515,12 @@ async function loadCoinPacks() {
 
   // 1) Try backend (will read from Supabase)
   const res = await apiPost("/api/shop/coin-packs", {});
-  if (res && res.ok && Array.isArray(res.packs) && res.packs.length) {
+  if (res && res.ok && Array.isArray(res.packs)) {
     renderCoinPacks(res.packs);
     return;
   }
 
-  // 2) Fallback to hardcoded list so the app never breaks during rollout
-  renderCoinPacks(FALLBACK_COIN_PACKS);
+  shopLoadError(coinPackList, res, loadCoinPacks);
 }
 
 // ------------ Momentum Shield UI ------------
@@ -4587,62 +4541,17 @@ function formatShieldStatus() {
 }
 
 function formatShieldRow(p) {
-  const sku = (p && (p.sku || p.pack_sku) ? String(p.sku || p.pack_sku) : "").trim();
-  const price = p && p.price_gbp != null ? Number(p.price_gbp) : null;
-  const title = p && p.title ? String(p.title) : "Momentum Shield";
-  const desc = p && p.description ? String(p.description) : "";
-  return `
-    <div class="packRow">
-      <div class="packLeft">
-        <div class="packTitle">🛡 ${title}</div>
-        <div class="packSub">${desc}</div>
-        <div class="packMeta">SKU: ${sku}</div>
-      </div>
-      <div class="packRight">
-        <div class="pill">${price != null ? formatGBP(price) : ""}</div>
-        <button class="btn shieldBtn" data-sku="${encodeURIComponent(sku)}">Activate</button>
-      </div>
-    </div>
-  `;
+  return `<div class="packRow"><div class="packLeft"><div class="packTitle">🛡 ${escapeHtml(p.title || "Momentum Shield")}</div>
+    <div class="packSub">Streak protection for an eligible missed day.</div>
+    <div class="packMeta">Separate from coin packs</div></div>
+    <div class="packRight"><button type="button" disabled>Purchases coming soon</button></div></div>`;
 }
-
 function renderMomentumShields(packs) {
   if (!momentumShieldList) return;
   formatShieldStatus();
-  const safe = Array.isArray(packs) ? packs.filter((p) => p && (p.sku || p.pack_sku)) : [];
-  if (!safe.length) {
-    momentumShieldList.innerHTML = '<div style="padding:14px; opacity:.8;">No Momentum Shield packs available yet.</div>';
-    return;
-  }
-
-  const sorted = [...safe].sort((a, b) => Number(a.price_gbp || 0) - Number(b.price_gbp || 0));
-  momentumShieldList.innerHTML = sorted.map(formatShieldRow).join("");
-
-  momentumShieldList.querySelectorAll(".shieldBtn").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      try {
-        const sku = decodeURIComponent(btn.dataset.sku || "").trim();
-        if (!sku) return;
-
-        const payWithCard = window.confirm(
-          "Choose payment method:\n\nOK = Card (Stripe)\nCancel = Crypto (Coinbase)"
-        );
-        const provider = payWithCard ? "stripe" : "coinbase";
-        showToast(payWithCard ? "Opening card checkout…" : "Opening crypto checkout…");
-
-        const r = await apiPost("/api/payments/create-checkout", { sku, provider });
-        if (r && r.ok && r.url) {
-          const opened = openExternalLink(r.url);
-          if (!opened) showToast("Couldn't open checkout. Please allow external links.");
-          return;
-        }
-        showToast(`Checkout failed: ${(r && (r.error || r.reason)) ? (r.error || r.reason) : "unknown error"}`);
-      } catch (e) {
-        console.error("Momentum Shield checkout error:", e);
-        showToast("Could not open this pack. Try again.");
-      }
-    });
-  });
+  const safe = Array.isArray(packs) ? packs.filter(p=>p && (p.sku || p.pack_sku)) : [];
+  momentumShieldList.innerHTML = safe.length ? safe.map(formatShieldRow).join("")
+    : '<div class="shop-status">No shield packs are on sale yet. Daily check-in keeps your streak going.</div>';
 }
 
 async function loadMomentumShields() {
@@ -4656,7 +4565,7 @@ async function loadMomentumShields() {
     return;
   }
 
-  renderMomentumShields([]);
+  shopLoadError(momentumShieldList, res, loadMomentumShields);
 }
 
 
