@@ -9,7 +9,7 @@ function harness({touch=true,storage=new Map(),energy=50}={}) {
  const timers = new Map(), handlers = {},calls=[],receipts=new Map(),el={}; let timerId=0,total=0;
  const ctx = {window:{__lastState:{recovery_test:true,recovery_gameplay:true},Telegram:{WebApp:{initDataUnsafe:{user:{id:123}}}},PointerEvent: function(){},addEventListener(){}},
  perTapBase:1,maxEnergy:50,setInterval(){},navigator:{maxTouchPoints:touch?5:0,get onLine(){return online;}},document:{hidden:false,addEventListener(){},getElementById:()=>el},
- tg:null,state:{energy,bal:100,today:0},Date:{now:()=>clock},__lastPointerTapAt:0,__stateRequestVersion:0,
+ tg:null,state:{energy,bal:100,today:0},Date:{now:()=>clock,parse:Date.parse},vaultNow:()=>clock,__lastPointerTapAt:0,__stateRequestVersion:0,
  accountIsReady:()=>true,safeParseJSON:(v,f)=>v?JSON.parse(v):f,
  appStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>(storage.set(k,v),true)},
  setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},
@@ -25,7 +25,7 @@ function harness({touch=true,storage=new Map(),energy=50}={}) {
  return{ok:true,applied:receipt.applied,balance:100+total,energy:energy-total};}
  };
  if(touch)ctx.window.ontouchstart=null;
- vm.createContext(ctx);vm.runInContext(queueCode,ctx);
+ vm.createContext(ctx);vm.runInContext(html.slice(html.indexOf('function effectiveTapRate('),html.indexOf('function vaultSnapshot(')),ctx);vm.runInContext(queueCode,ctx);
  const event=(over={})=>({cancelable:true,preventDefault(){},stopPropagation(){},...over});
  return {ctx,el,storage,timers,calls,receipts,handlers,
  touch(n=1){clock+=30;handlers.touchstart(event({type:'touchstart',changedTouches:Array.from({length:n},(_,i)=>({identifier:i}))}));},

@@ -1789,6 +1789,7 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
 #friendsSheet #inviteWelcome{margin:8px 0 4px;color:#ffe08a;font-size:clamp(13px,3.6vw,16px);line-height:1.35}
 #friendsSheet #inviteQualification{margin:4px 0 12px}
+
 </style>
 
 <style>
@@ -2177,6 +2178,33 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 .hub-skeleton .skeleton-rate{grid-column:1;width:52%;height:14px}
 .hub-skeleton .skeleton-buy{grid-column:2;grid-row:1 / span 3;width:112px;height:48px;border-radius:11px}
 @media(max-width:350px){#coinShopSheet .sheet-body{padding:12px}#coinShopSheet .hub-catalog-dense .hub-product,#coinShopSheet .hub-product{grid-template-columns:minmax(0,1fr) 94px;padding:9px;gap:3px 7px}#coinShopSheet .hub-buy,.hub-skeleton .skeleton-buy{width:94px}#coinShopSheet .hub-product-label{font-size:11px}#coinShopSheet .hub-catalog-dense .hub-product-coins{font-size:22px}#coinShopSheet .hub-buy strong{font-size:14px}}
+/* Vault v11: generous cards on tall phones; ordinary scrolling for small screens/large text. */
+#withdrawSheet .vault-content{display:flex;flex-direction:column;gap:10px;flex:1;padding:12px 14px 10px}
+#withdrawSheet .vault-summary{padding:12px;text-align:left;margin:0;flex:0 0 auto}
+.vault-balance-top,.vault-goal,.vault-vip-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.vault-balance-top{font-size:12px;color:#b9c8dd}.vault-balance-top #vaultRank{color:#f9d775;font-weight:700}
+.vault-total{display:flex;align-items:center;gap:12px;margin:8px 0}.vault-summary .vault-total strong{font-size:clamp(32px,9vw,44px);line-height:1.1;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.vault-goal{font-size:11px;color:#c5d3e5;line-height:1.4}.vault-goal #vaultProgressLabel{color:#f7d67b;flex-shrink:0}
+.vault-progress{height:6px;background:#263a54;border-radius:9px;overflow:hidden;margin-top:10px}.vault-progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#ffdf84,#f8bc32);border-radius:inherit}
+.vault-vip{border:1px solid #a98633;border-radius:19px;padding:13px;background:radial-gradient(ellipse at 95% 0%,#6751264d,transparent 65%),linear-gradient(135deg,#1d2d46,#111b2e);flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.vault-eyebrow{font-size:10px;letter-spacing:.1em;font-weight:800;color:#f9d775}.vault-duration{font-size:10px;border:1px solid #766339;border-radius:20px;padding:4px 8px;color:#ffe39a;white-space:nowrap}
+.vault-vip h2{font-size:24px;line-height:1.15;margin:0;color:#fff}.vault-vip .vault-vip-sub{margin:-4px 0 2px;font-size:15px;color:#bfcee2}
+.vault-benefits{display:grid;grid-template-columns:1fr 1fr;gap:9px}.vault-benefits>div{padding:9px;border:1px solid #3e4c60;border-radius:12px;background:#101b2db3;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.vault-benefit-icon{font-size:20px;line-height:1;font-weight:850;color:#ffdb75}.vault-benefits strong{font-size:12px;color:#f5f7fc}.vault-benefits>div>span:last-child{font-size:11px;color:#c0d0e5;line-height:1.35}
+.vault-vip-note,.vault-vip-earned,.vault-expiry{font-size:11px;line-height:1.45;margin:0;color:#c5d4e8}.vault-vip-earned{font-size:13px;color:#a6e0cf;font-weight:700}.vault-expiry{color:#f9dc97}
+.vault-terms-consent{display:flex;align-items:center;gap:7px;color:#c5d4e8;font-size:11px;min-height:20px}.vault-terms-consent input{width:17px;height:17px;accent-color:#ffcf4b;margin:0;flex-shrink:0}
+.vault-text-button{background:none;border:0;color:#f8da88;font:inherit;padding:3px 0;text-decoration:underline;cursor:pointer}
+.vault-buy{border:1px solid #ffe99d;border-radius:13px;min-height:48px;background:linear-gradient(110deg,#ffe394,#ffcc41);color:#2f2306;font-size:16px;font-weight:800;padding:12px;width:100%;cursor:pointer;box-shadow:0 4px 20px #f2bb2610}
+.vault-buy:disabled{background:#33445d;border-color:#52657f;color:#c3ccdc;box-shadow:none;cursor:default}
+.vault-payment-note{font-size:10px;line-height:1.3;text-align:center;color:#b2c1d6;margin:0}.vault-live-status{font-size:11px;line-height:1.4;color:#f0d09c;display:flex;gap:8px;align-items:center}.vault-live-status:has(#vipFeedback:empty):has(#vipRetry[hidden]){display:none}
+.vault-utility{flex:0 0 auto}.vault-utility>button,.vault-utility summary{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:0;color:#c2d0e4;font:inherit;font-size:12px;padding:11px 2px;cursor:pointer;list-style:none}.vault-utility summary{border-top:1px solid #2c3c52;font-size:10px;color:#9eb1cb}.vault-utility summary::-webkit-details-marker{display:none}.vault-utility p{font-size:12px;line-height:1.5;color:#b6c7dc;margin:0 0 8px}
+.vault-details{font-size:13px;line-height:1.6;color:#bfcee2}.vault-details h2{font-size:17px;color:#fff;margin:8px 0}.vault-details ul{padding-left:20px}.vault-details li{margin:9px 0}.vault-details section+section{border-top:1px solid #334155;margin-top:20px}.vault-details-link{display:block;background:transparent;border:0;border-top:1px solid #334155;padding:15px 0;color:#f6d686;font:inherit;text-align:left;width:100%;cursor:pointer}.vault-order{padding:12px 0;border-top:1px solid #293950}.vault-order strong{color:#fff}.vault-order small{display:block;overflow-wrap:anywhere;color:#a5b8d0;font-size:10px}
+@media(min-height:850px){#withdrawSheet .vault-content{gap:14px;padding:16px}#withdrawSheet .vault-summary{padding:20px}.vault-vip{padding:21px;gap:13px}.vault-vip h2{font-size:28px}.vault-benefits>div{padding:16px 12px}.vault-benefits strong{font-size:14px}.vault-buy{min-height:55px}.vault-payment-note{font-size:11px}}
+@media(max-width:350px){#withdrawSheet .vault-content{padding:12px;gap:10px}.vault-vip{padding:13px}.vault-vip h2{font-size:23px}.vault-duration{font-size:9px}.vault-benefits>div{padding:10px 7px}.vault-buy{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.vault-progress i{transition:none}}
+
+
+.vault-vip-result:has(p[hidden]+p[hidden]){display:none}.vault-vip[data-active="true"] .vault-vip-sub{display:none}.vault-vip-result p+p{margin-top:3px}.vault-order span{display:block;font-size:12px}
 </style>
 </head>
 <body>
@@ -2388,52 +2416,44 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
     </div>
   </div>
 
-  <div class="sheet" id="withdrawSheet">
-    <div class="sheet-header"><div><div class="sheet-title">Vault</div><div class="sheet-subtitle">Your coins and account benefits.</div></div><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
-    <div class="sheet-body">
-      <section class="vault-balance"><span class="brand-coin" aria-hidden="true">J</span><p>Saved in-game coins</p><strong id="withdrawBalanceText">…</strong></section>
-      <section class="vault-status"><span class="status-badge">Not available yet</span><h2>Withdrawals</h2><p>Withdrawals are not live. There is currently no cash-out option or guaranteed token conversion.</p><p>Any future launch and eligibility details will be announced separately.</p></section>
-      <div id="hubOwnedShield" hidden class="vip-box" style="margin-bottom:12px;">
-        <div style="font-weight:800; margin-bottom:6px;">Momentum Shield</div>
-        <div style="opacity:.85; font-size:12px; line-height:1.35; margin-bottom:10px;">
-          Streak protection is separate from coin packs. One eligible shield covers one missed day and is consumed when used.
+  <div class="sheet" id="withdrawSheet" role="region" aria-labelledby="vaultTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="vaultTitle">Vault</div><div class="sheet-subtitle">Your balance. Your next advantage.</div></div><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body vault-content">
+      <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
+        <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
+        <div class="vault-total"><span class="brand-coin" aria-hidden="true">J</span><strong id="withdrawBalanceText">…</strong></div>
+        <div class="vault-goal"><span id="vaultGoal">Your next rank appears after sync.</span><span id="vaultProgressLabel"></span></div>
+        <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
+      </section>
+      <section class="vault-vip" aria-labelledby="vaultVipTitle">
+        <div class="vault-vip-heading"><span class="vault-eyebrow">YOUR VIP ADVANTAGE</span><span class="vault-duration" id="vipStatusText">30-day pass</span></div>
+        <h2 id="vaultVipTitle">Double your tap coins.</h2><p class="vault-vip-sub">Keep tapping longer.</p>
+        <div class="vault-benefits">
+          <div><span class="vault-benefit-icon" aria-hidden="true">2×</span><strong>Tap coins</strong><span id="vipTapValue">2× your usual tap rate</span></div>
+          <div><span class="vault-benefit-icon" aria-hidden="true">ϟ</span><strong>Energy capacity</strong><span id="vipEnergyValue">2× your usual capacity</span></div>
         </div>
-        <div id="momentumShieldStatus" style="opacity:.85; font-size:12px; margin-bottom:10px;">Loading…</div>
-        <div id="momentumShieldList" hidden></div>
+        <p class="vault-vip-note" id="vipPerksText">Streak perks included · Ad boost stacks</p>
+        <div class="vault-vip-result"><p class="vault-vip-earned" id="vipBonusText" hidden></p><p class="vault-expiry" id="vipExpiryText" hidden></p></div>
+        <label class="vault-terms-consent"><input type="checkbox" id="vipTermsAccepted"><span>I agree to the <button type="button" class="vault-text-button" id="vipTermsOpen">VIP terms</button></span></label>
+        <button type="button" class="vault-buy" id="vipBuyBtn" disabled>Loading VIP offer…</button>
+        <p class="vault-payment-note">30 days · One payment · No automatic renewal</p>
+        <div class="vault-live-status" role="status" aria-live="polite"><span id="vipFeedback"></span><button type="button" class="vault-text-button" id="vipRetry" hidden>Retry</button></div>
+      </section>
+      <div class="vault-utility">
+        <button type="button" id="vaultHistoryOpen">Purchases &amp; help <span aria-hidden="true">›</span></button>
+        <details id="vaultWithdrawalDetails"><summary>Withdrawals aren't available yet <span aria-hidden="true">+</span></summary><p>There is currently no cash-out option or guaranteed token conversion. Any launch and eligibility details will be announced separately. VIP buys the stated game benefits.</p></details>
       </div>
-      <button type="button" class="vault-membership" id="vaultVip">VIP membership <span>View status ›</span></button>
-      <p class="vault-help">Need payment help? Send <strong>/paysupport</strong> to the bot. Purchase history is in Shop.</p>
     </div>
   </div>
-
-  <div class="sheet" id="vipSheet">
-    <div class="sheet-header">
-      <div>
-        <div class="sheet-title">VIP Advantage</div>
-        <div class="sheet-subtitle">
-          Built for serious farmers. Protect momentum, earn faster, and stand out on the leaderboard.
-        </div>
-      </div>
-      <button class="sheet-close" id="vipClose">×</button>
-    </div>
-    <div class="sheet-body">
-      <div class="withdraw-card" style="margin-bottom: 12px">
-        <div class="withdraw-row">
-          <div>
-            <div style="font-size: 11px; color: rgba(148, 163, 184, 0.95)">
-              VIP status
-            </div>
-            <div class="withdraw-amount" id="vipStatusText">Checking…</div>
-          </div>
-          <div class="balance-token-icon"><span>⭐</span></div>
-        </div>
-        <div class="withdraw-sub" id="vipPerksText">
-          VIP: 30 days · premium badge · priority perks · future drops.
-        </div>
-      </div>
-
-      <button class="friends-share-btn" id="vipBuyBtn">Activate VIP (30 days)</button>
-      <button class="withdraw-bottom-btn" id="vipPacksBtn">Open Coin Shop</button>
+  <div class="sheet" id="vaultDetailsSheet" role="region" aria-labelledby="vaultDetailsTitle">
+    <div class="sheet-header"><div><div class="sheet-title" id="vaultDetailsTitle">VIP terms &amp; purchases</div><div class="sheet-subtitle">Your benefits, receipts and support.</div></div><button class="sheet-close" id="vaultDetailsClose" aria-label="Back to Vault">×</button></div>
+    <div class="sheet-body vault-details">
+      <section id="vipTerms"><h2>VIP · 30 days · 500 Stars</h2><p>One payment, with no automatic renewal. Your 30 days start after confirmed payment. Renewals add 30 days after your existing VIP expiry.</p>
+      <ul><li>Twice your normal energy capacity, including active streak capacity bonuses. Regeneration speed stays the same; activation does not instantly fill the extra capacity.</li><li>Twice your normal tap coins, including active streak bonuses. The temporary 2× ad boost stacks with VIP.</li><li>Joining, referral, daily and fixed ad rewards, and purchased coin packs, keep their stated amounts. VIP does not multiply your existing balance.</li><li>When VIP expires, normal capacity and tap rewards return. Earned coins stay in your account.</li></ul><p>Fractional tap coins accumulate until they make a whole coin. The VIP bonus total counts extra coins actually credited since this update.</p><p>VIP grants game benefits, not a cash return or guaranteed airdrop. For payment problems or refund requests, contact payment support below. A refunded pass loses its unused VIP time; separately purchased time and earned coins are preserved.</p></section>
+      <section><h2>VIP purchases</h2><div id="vipOrderHistory">No purchase history loaded.</div></section>
+      <button type="button" class="vault-details-link" id="vipPacksBtn">Coin pack purchase history ›</button>
+      <button type="button" class="vault-details-link" id="vaultPaySupport">Payment help · /paysupport ›</button>
+      <div id="hubOwnedShield" hidden class="vip-box"><strong>Momentum Shield</strong><p>One eligible shield covers one missed day and is consumed when used.</p><div id="momentumShieldStatus"></div><div id="momentumShieldList" hidden></div></div>
     </div>
   </div>
 
@@ -2777,10 +2797,10 @@ const tabWithdraw = document.getElementById("tabWithdraw");
 const sheetBackdrop = document.getElementById("sheetBackdrop");
 const friendsSheet = document.getElementById("friendsSheet");
 const withdrawSheet = document.getElementById("withdrawSheet");
-const vipSheet = document.getElementById("vipSheet");
+const vipSheet = document.getElementById("vaultDetailsSheet");
 const friendsClose = document.getElementById("friendsClose");
 const withdrawClose = document.getElementById("withdrawClose");
-const vipClose = document.getElementById("vipClose");
+const vipClose = document.getElementById("vaultDetailsClose");
 const coinShopSheet = document.getElementById("coinShopSheet");
 const coinShopClose = document.getElementById("coinShopClose");
 const fabShop = document.getElementById("fabShop");
@@ -2867,6 +2887,7 @@ const state = {
   globalTotal: null,
 
   // Double points boost client state
+  vipUntil: null,
   doubleBoostActive: false,
   doubleBoostUntil: null,
   momentumShieldQty: 0,
@@ -3649,6 +3670,7 @@ function render() {
   const balDisplay = confirmed ? formatNumber(view.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
+  if(typeof renderVault==='function')renderVault();
   updateRecoveryTapFeedback();
   tapBtn.disabled = !accountIsReady() || !confirmed || (window.__lastState?.recovery_test === true && !window.__lastState?.recovery_gameplay);
   const tapLabel = document.getElementById("tapButtonLabel");
@@ -3657,7 +3679,7 @@ function render() {
 
   // Points per tap (x2 when boost active)
   const streakTapMultiplier=state.streakMeta?.active?Number(state.streakMeta.tap_multiplier)||1:1;
-  const effectivePerTap = Number(((state.doubleBoostActive ? perTapBase * 2 : perTapBase)*streakTapMultiplier).toFixed(2));
+  const effectivePerTap = effectiveTapRate(state);
   if (perTapText) {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
   }
@@ -3862,7 +3884,7 @@ setInterval(() => {
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status|overview|order-status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -3876,7 +3898,7 @@ async function apiPost(path, body, opts = {}) {
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || path === "/api/tapPacket" || path === "/api/stars/invoice") ? new AbortController() : null;
+  const controller = (readOnly || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -4321,6 +4343,7 @@ function applyBackendState(data) {
   if (!data || !data.ok) return;
   // Keep the last successful server state and invalidate older in-flight polls.
   window.__lastState = data;
+  if("vip_until" in data)state.vipUntil=data.vip_until;
   window.__backendStateRevision = (window.__backendStateRevision || 0) + 1;
 
   const confirmedMaxEnergy = data.max_energy_effective ?? data.max_energy;
@@ -4628,7 +4651,7 @@ const applied = (res && typeof res.applied === "number") ? res.applied : chunk;
 const rejected = Math.max(0, chunk - applied);
 if (rejected > 0) {
       window.__allowBalanceDecreaseOnce = true;
-  const perTapNow = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
+  const perTapNow = effectiveTapRate(state);
   state.bal = Math.max(0, (state.bal || 0) - rejected * perTapNow);
   state.today = Math.max(0, (state.today || 0) - rejected * perTapNow);
   state.energy = Math.min(maxEnergy, (state.energy || 0) + rejected);
@@ -4697,8 +4720,7 @@ function recoveryTapView(saved) {
   if (!window.__lastState?.recovery_gameplay) return saved;
   const q = readRecoveryQueue();
   const pending = q.pending + (q.packet?.count || 0);
-  const multiplier = saved.doubleBoostActive ? 2 : 1;
-  const points = pending * perTapBase * multiplier;
+  const points = pending * effectiveTapRate(saved);
   return {...saved, bal:saved.bal + points, today:saved.today + points,
     energy:Math.max(0, saved.energy - pending)};
 }
@@ -4749,7 +4771,7 @@ async function runRecoveryTap(addTap = true) {
     ++__stateRequestVersion; // Discard state polls begun before this input.
     window.__lastTapAt = Date.now();
     recoveryTapMessage = "";
-    if (typeof animateHomeTap === "function") animateHomeTap(state.doubleBoostActive ? perTapBase * 2 : perTapBase);
+    if (typeof animateHomeTap === "function") animateHomeTap(effectiveTapRate(state));
     render(); // Immediate projected balance, points and energy; no server round trip.
     scheduleRecoveryFlush(); return;
   }
@@ -4843,7 +4865,7 @@ function onTapPress(ev) {
   }
 
   // Optimistic UI update for responsiveness
-  const perTap = state.doubleBoostActive ? perTapBase * 2 : perTapBase;
+  const perTap = effectiveTapRate(state);
   state.energy = Math.max(0, (state.energy || 0) - 1);
   state.bal = (state.bal || 0) + perTap;
   state.today = (state.today || 0) + perTap;
@@ -5051,46 +5073,9 @@ async function prefetchMissionUrls() {
   });
 }
 
-// ⭐ VIP Pass (Stripe-first)
-// NOTE: We no longer sell VIP for in-game points; VIP is purchased via Stripe.
-let __vipProductCache = null;
-let __vipProductLastFetch = 0;
-
-async function getVipProduct(force = false) {
-  const now = Date.now();
-  if (!force && __vipProductCache && (now - __vipProductLastFetch) < 60_000) {
-    return __vipProductCache;
-  }
-  const res = await apiPost("/api/vip/product", {});
-  if (res && res.ok && res.product) {
-    __vipProductCache = res.product;
-    __vipProductLastFetch = now;
-    return __vipProductCache;
-  }
-  // If backend doesn't have VIP configured yet, return null.
-  __vipProductCache = null;
-  __vipProductLastFetch = now;
-  return null;
-}
-
-function openVipSheet() {
-  showAppSheet(vipSheet, tabWithdraw);
-}
-
-function closeVipSheet() {
-  vipSheet.classList.remove("show");
-
-  // Only hide the backdrop if no other sheets are open
-  const anyOtherOpen =
-    (boostSheet && boostSheet.classList.contains("show")) ||
-    (coinShopSheet && coinShopSheet.classList.contains("show")) ||
-    (friendsSheet && friendsSheet.classList.contains("show")) ||
-    (withdrawSheet && withdrawSheet.classList.contains("show"));
-
-  if (!anyOtherOpen) {
-    sheetBackdrop.classList.remove("show");
-  }
-}
+// VIP opens directly in Vault; terms and history use a secondary details sheet.
+function openVipSheet(){openVault();}
+function closeVipSheet(){openVault();}
 
 function showAppSheet(sheet, tab) {
   if (!accountIsReady()) return;
@@ -5290,7 +5275,7 @@ function updateBoostHub() {
   });
 }
 document.getElementById('homeLeaderboard')?.addEventListener('click',()=>{if(accountIsReady())openLeaderboard('global');});
-document.getElementById('vaultVip')?.addEventListener('click',()=>{if(accountIsReady())handleVipPass();});
+
 document.getElementById('sharePreviewDetails')?.addEventListener('toggle',renderShareCardCanvas);
 
 
@@ -5545,79 +5530,144 @@ async function handleSponsorQuests() {
   await openBoostSheet();
 }
 
-async function refreshVipStatus() {
-  vipStatusText.textContent = "Checking…";
-  vipBuyBtn.disabled = true;
-
-  // Pull VIP config (price/link) from backend (Supabase)
-  const vipProduct = await getVipProduct(false);
-  const priceLabel = vipProduct && vipProduct.price_gbp ? `£${Number(vipProduct.price_gbp).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "";
-  const title = vipProduct && vipProduct.title ? vipProduct.title : "VIP Pass (30 days)";
-
-  // Status (active/until) from backend
-  const res = await apiPost("/api/vip/status", {});
-  if (!res || !res.ok) {
-    vipStatusText.textContent = "Unavailable";
-    vipPerksText.textContent = "VIP perks: +50% max energy · +25% regen · +10% tap points · Daily VIP chest · +1 sponsor quest/day.";
-    vipBuyBtn.textContent = vipProduct ? `Get VIP · ${priceLabel || "Checkout"}` : "VIP not configured";
-    vipBuyBtn.disabled = !vipProduct;
-    return;
+// Vault v11: confirmed, account-scoped data. Invoice callbacks never grant VIP.
+let vaultData=null,vaultOwner=null,vaultRequest=null,vaultEpoch=0,vaultError=false,vaultBusy=false,vaultChecked=0,vaultClockOffset=0,vaultMessage='',vaultPolling=false;
+function vaultNow(){return Date.now()+vaultClockOffset;}
+function effectiveTapRate(saved){
+ const streak=saved?.streakMeta?.active?Math.max(1,Number(saved.streakMeta.tap_multiplier)||1):1;
+ const vip=Date.parse(saved?.vipUntil||saved?.vip_until||'')>vaultNow()?2:1;
+ const ad=Date.parse(saved?.doubleBoostUntil||'')>vaultNow()?2:1;
+ return Math.round(streak*vip*ad*10000)/10000;
+}
+function vaultSnapshot(){return accountIsReady()&&vaultOwner===homeUserId()?vaultData:null;}
+function resetVault(owner){vaultOwner=owner;vaultData=null;vaultRequest=null;vaultEpoch++;vaultError=false;vaultBusy=false;vaultPolling=false;vaultChecked=0;vaultMessage='';document.getElementById('vipTermsAccepted').checked=false;}
+function vaultPendingKey(owner){return 'jigcoin_vip_pending_v11:'+owner;}
+function vaultPending(owner=homeUserId()){const value=appStorage.getItem(vaultPendingKey(owner));return /^vp_[a-f0-9]{48}$/.test(value||'')?value:null;}
+function validVaultData(d,owner){
+ const num=v=>Number.isFinite(v)&&v>=0;
+ return d?.ok&&String(d.telegram_id)===String(owner)&&Number.isFinite(Date.parse(d.server_now))&&
+ d.product?.sku==='VIP_30D_V11'&&d.product.stars===500&&d.product.days===30&&d.product.currency==='XTR'&&d.product.auto_renew===false&&d.product.terms==='vip-v11-20261117'&&
+ typeof d.product.enabled==='boolean'&&typeof d.vip_active==='boolean'&&(!d.vip_active||Number.isFinite(Date.parse(d.vip_until)))&&
+ Number.isSafeInteger(d.vip_bonus_coins)&&d.vip_bonus_coins>=0&&num(d.benefits?.standard_tap)&&d.benefits.standard_tap>=1&&
+ d.benefits.vip_tap===d.benefits.standard_tap*2&&num(d.benefits.standard_energy)&&d.benefits.vip_energy===d.benefits.standard_energy*2&&Array.isArray(d.recent_orders);
+}
+function renderVault(){
+ const d=vaultSnapshot(),ready=accountIsReady(),balance=ready&&homeIdentity===homeUserId()?homeConfirmedBalance:null;
+ const goal=homeGoalModel(balance),active=!!d&&Date.parse(d.vip_until)>vaultNow();
+ withdrawBalanceText.textContent=Number.isSafeInteger(balance)?formatNumber(balance):'…';
+ document.getElementById('vaultRank').textContent=goal?.current.name||'—';
+ document.getElementById('vaultGoal').textContent=goal?(goal.complete?'Highest coin rank unlocked':`${formatNumber(goal.remaining)} coins to ${goal.nextName}`):'Your next rank appears after sync.';
+ const pct=goal?Math.round(goal.progress*100):0;
+ document.getElementById('vaultProgressLabel').textContent=goal?`${pct}%`:'';
+ document.getElementById('vaultProgressFill').style.width=pct+'%';document.getElementById('vaultProgress').setAttribute('aria-valuenow',String(pct));
+ vipStatusText.textContent=active?'VIP active':'30-day pass';
+ document.querySelector('#withdrawSheet .vault-vip').dataset.active=String(active);
+ document.getElementById('vaultVipTitle').textContent=active?'Your VIP is working.':'Double your tap coins.';
+ document.getElementById('vipTapValue').textContent=d?`${d.benefits.standard_tap} → ${d.benefits.vip_tap} per tap`:'2× your usual tap rate';
+ document.getElementById('vipEnergyValue').textContent=d?`${d.benefits.standard_energy} → ${d.benefits.vip_energy} energy`:'2× your usual capacity';
+ const bonus=document.getElementById('vipBonusText');bonus.hidden=!d||!active;bonus.textContent=d?`+${formatNumber(d.vip_bonus_coins)} extra VIP coins credited`:'';
+ const expiry=document.getElementById('vipExpiryText');expiry.hidden=!active;expiry.textContent=active?'Active until '+new Date(d.vip_until).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+ const pending=vaultPending();
+ vipBuyBtn.disabled=!ready||!d||vaultError||!d.product.enabled||vaultBusy||!!pending||!document.getElementById('vipTermsAccepted').checked;
+ vipBuyBtn.textContent=vaultBusy?'Checking payment…':!d?(vaultError?'VIP temporarily unavailable':'Loading VIP offer…'):!d.product.enabled?'VIP currently unavailable':`${active?'Extend':'Activate'} VIP · ★ ${d.product.stars}`;
+ document.getElementById('vipFeedback').textContent=vaultMessage||(vaultError?'Could not refresh VIP. Please retry.':pending?'Payment confirmation pending. Check again shortly.':'');
+ const retry=document.getElementById('vipRetry');retry.hidden=!(vaultError||pending)||vaultBusy;retry.textContent=pending?'Check payment':'Retry';
+}
+function renderVipHistory(){
+ const container=document.getElementById('vipOrderHistory'),d=vaultSnapshot();container.replaceChildren();
+ if(!d){container.textContent='Refresh Vault to load your purchases.';return;}
+ if(!d.recent_orders.length){container.textContent='Your confirmed VIP purchases will appear here.';return;}
+ for(const order of d.recent_orders){
+  const row=document.createElement('div');row.className='vault-order';
+  const title=document.createElement('strong');title.textContent=`VIP · ${Number(order.stars)} Stars · ${String(order.status)}`;
+  const detail=document.createElement('span');detail.textContent=new Date(order.created_at).toLocaleString('en-GB');
+  const ref=document.createElement('small');ref.textContent='Order: '+String(order.payload);row.append(title,detail,ref);container.append(row);
+ }
+}
+async function refreshVipStatus(force=false){
+ const owner=homeUserId();if(!owner||!accountIsReady())return null;
+ if(vaultOwner!==owner)resetVault(owner);
+ if(vaultRequest){if(!force)return vaultRequest;await vaultRequest;return refreshVipStatus(true);}
+ if(!force&&vaultData&&!vaultError&&Date.now()-vaultChecked<30000){renderVault();return vaultData;}
+ const epoch=vaultEpoch;
+ vaultRequest=(async()=>{
+  const result=await apiPost('/api/vip/overview',{}, {timeoutMs:8000});
+  if(epoch!==vaultEpoch||owner!==homeUserId())return null;
+  if(!validVaultData(result,owner)){vaultError=true;return null;}
+  vaultData=result;vaultClockOffset=Date.parse(result.server_now)-Date.now();vaultChecked=Date.now();vaultError=false;
+  state.vipUntil=result.vip_until;
+  const approved=result.recent_orders.find(o=>o.status==='approved'&&/^vp_[a-f0-9]{48}$/.test(o.payload||''));
+  if(approved)appStorage.setItem(vaultPendingKey(owner),approved.payload);
+  return result;
+ })().catch(()=>{if(epoch===vaultEpoch)vaultError=true;return null;}).finally(()=>{if(epoch===vaultEpoch){vaultRequest=null;renderVault();renderVipHistory();}});
+ return vaultRequest;
+}
+function openVault(){
+ showAppSheet(withdrawSheet,tabWithdraw);
+ if(vaultOwner!==homeUserId())resetVault(homeUserId());
+ renderVault();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
+}
+function openVaultDetails(){showAppSheet(vipSheet,tabWithdraw);renderVipHistory();void refreshVipStatus();}
+async function checkVipPayment(){
+ const owner=homeUserId(),order=vaultPending(owner);if(!owner||!order||vaultPolling)return;
+ const epoch=vaultEpoch;vaultPolling=true;vaultBusy=true;vaultMessage='Waiting for confirmed payment…';renderVault();
+ try{
+  for(let attempt=0;attempt<6;attempt++){
+   const result=await apiPost('/api/vip/order-status',{order_id:order},{timeoutMs:8000});
+   if(epoch!==vaultEpoch||owner!==homeUserId())return;
+   if(result?.ok&&result.order?.payload===order){
+    const status=result.order.status;
+    if(['paid','refunded','expired'].includes(status)){
+     appStorage.removeItem(vaultPendingKey(owner));
+     vaultMessage=status==='paid'?'Payment confirmed. Your VIP status is updated.':status==='refunded'?'Payment refunded. Your account has been updated.':'This checkout expired. You can try again.';
+     await refreshVipStatus(true);await refreshState();return;
+    }
+   }
+   if(attempt<5)await new Promise(resolve=>setTimeout(resolve,1200));
   }
-
-  const active = !!res.vip_active;
-  if (active) {
-    const untilMs = Date.parse(res.vip_until);
-    const remaining = isNaN(untilMs) ? 0 : Math.max(0, untilMs - Date.now());
-    vipStatusText.textContent = remaining > 0 ? `Active · ${msToCountdown(remaining)}` : "Active";
-    vipPerksText.textContent = "VIP active ✅  +50% max energy · +25% regen · +10% tap points · Daily VIP chest · +1 sponsor quest/day.";
-    vipBuyBtn.textContent = "VIP is active";
-    vipBuyBtn.disabled = true;
-  } else {
-    vipStatusText.textContent = "Inactive";
-    vipPerksText.textContent = "VIP perks: +50% max energy · +25% regen · +10% tap points · Daily VIP chest · +1 sponsor quest/day.";
-    vipBuyBtn.textContent = vipProduct ? `${title} · ${priceLabel || "Checkout"}` : "VIP not configured";
-    vipBuyBtn.disabled = !vipProduct;
+  vaultMessage='Still awaiting payment confirmation. You can return later or check again.';
+ }finally{if(epoch===vaultEpoch){vaultPolling=false;vaultBusy=false;renderVault();}}
+}
+async function buyVipPass(){
+ if(vaultBusy||vaultPending()||!document.getElementById('vipTermsAccepted').checked)return;
+ const owner=homeUserId(),epoch=vaultEpoch;vaultBusy=true;vaultMessage='';renderVault();
+ try{
+  const d=await refreshVipStatus(true);if(epoch!==vaultEpoch||owner!==homeUserId())return;
+  if(!d||!d.product.enabled){vaultMessage='VIP checkout is currently unavailable. Please retry later.';return;}
+  const tg=window.Telegram?.WebApp;if(typeof tg?.openInvoice!=='function'){vaultMessage='Open JigCoin inside Telegram to purchase VIP.';return;}
+  const response=await apiPost('/api/vip/create-checkout',{terms_accepted:true,terms_version:d.product.terms},{timeoutMs:12000});
+  if(epoch!==vaultEpoch||owner!==homeUserId())return;
+  if(!response?.ok||!/^vp_[a-f0-9]{48}$/.test(response.order_id||'')||!/^https:\/\/t\.me\/\$[A-Za-z0-9_-]+$/.test(response.url||'')){
+   vaultMessage=response?.reason==='PAYMENT_PENDING'?'A payment is already being confirmed. Check Purchases & help.':'Could not open checkout. No VIP has been activated; please retry.';return;
   }
+  appStorage.setItem(vaultPendingKey(owner),response.order_id);
+  tg.openInvoice(response.url,status=>{
+   if(epoch!==vaultEpoch||owner!==homeUserId())return;
+   if(status==='cancelled'||status==='failed'){
+    appStorage.removeItem(vaultPendingKey(owner));vaultMessage=status==='cancelled'?'Checkout cancelled.':'Payment did not complete. Please retry.';renderVault();void refreshVipStatus(true);
+   }else{void checkVipPayment();}
+  });
+ }catch(_){vaultMessage='Checkout could not open. Please retry or check payment status.';}
+ finally{if(epoch===vaultEpoch){vaultBusy=false;renderVault();}}
 }
-
-function handleCoinShop() {
-  openCoinShopSheet();
-}
-
-async function handleVipPass() {
-  openVipSheet();
-  await refreshVipStatus();
-}
-
-// Backwards compatibility (older cards / deep links)
-async function handleVipPremium() {
-  return handleVipPass();
-}
-
-async function buyVipPass() {
-  const vipProduct = await getVipProduct(true);
-  if (!vipProduct) {
-    showToast("VIP is not configured yet.");
-    return;
-  }
-
-  const payWithCard = window.confirm(
-    "Choose payment method for VIP:\n\nOK = Card (Stripe)\nCancel = Crypto (Coinbase)"
-  );
-
-  const provider = payWithCard ? "stripe" : "coinbase";
-  const sku = (vipProduct.sku || "vip_30d").toString().trim() || "vip_30d";
-  showToast(payWithCard ? "Opening card checkout…" : "Opening crypto checkout…");
-
-  const res = await apiPost("/api/payments/create-checkout", { sku, provider });
-  if (res && res.ok && res.url) {
-    const opened = openExternalLink(res.url);
-    if (!opened) showToast("Couldn't open checkout. Please allow external links.");
-    return;
-  }
-
-  showToast("VIP checkout unavailable. Check payment config.");
-}
+async function handleCoinShop(){openCoinShopSheet();}
+async function handleVipPass(){openVault();}
+async function handleVipPremium(){openVault();}
+document.getElementById('vipTermsAccepted').addEventListener('change',renderVault);
+document.getElementById('vipTermsOpen').addEventListener('click',event=>{event.preventDefault();openVaultDetails();});
+document.getElementById('vaultHistoryOpen').addEventListener('click',()=>{openVaultDetails();document.getElementById('vipOrderHistory').scrollIntoView({block:'nearest'});});
+document.getElementById('vipRetry').addEventListener('click',()=>vaultPending()?checkVipPayment():refreshVipStatus(true));
+document.getElementById('vaultPaySupport').addEventListener('click',()=>{showToast('Send /paysupport to the JigCoin bot.');const url='https://t.me/JIGCOINBOT';if(window.Telegram?.WebApp?.openTelegramLink)window.Telegram.WebApp.openTelegramLink(url);else window.open(url,'_blank','noopener');});
+window.addEventListener('jigcoin:account-ready',()=>setTimeout(()=>{void refreshVipStatus();},100));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&withdrawSheet.classList.contains('show')){void refreshVipStatus(true);if(vaultPending())void checkVipPayment();}});
+setInterval(()=>{
+ const d=vaultSnapshot();if(!d)return;
+ if(d.vip_active&&Date.parse(d.vip_until)<=vaultNow()){
+  d.vip_active=false;state.vipUntil=null;maxEnergy=d.benefits.standard_energy;state.energy=Math.min(Number(state.energy)||0,maxEnergy);
+  void refreshState();void refreshVipStatus(true);render();
+ }else if(withdrawSheet.classList.contains('show')&&!document.hidden&&Date.now()-vaultChecked>30000){void refreshVipStatus(true);}
+},1000);
+// End Vault v11 controller.
 
 async function handleInviteTask() { openFriendsSheet(); }
 function openFriendsSheet() {
@@ -5874,15 +5924,7 @@ tabFriends.addEventListener("click", () => {
   openFriendsSheet(); // Invite + share card
 });
 
-tabWithdraw.addEventListener("click", async () => {
-  showAppSheet(withdrawSheet, tabWithdraw);
-  const res = await apiPost("/api/withdraw/info", {});
-  if (res && res.ok && typeof res.balance === "number") {
-    withdrawBalanceText.textContent = formatNumber(res.balance);
-  } else {
-    withdrawBalanceText.textContent = formatNumber(state.bal);
-  }
-});
+tabWithdraw.addEventListener('click',openVault);
 
 friendsClose.addEventListener("click", () => {
   friendsSheet.classList.remove("show");
@@ -5898,7 +5940,6 @@ withdrawClose.addEventListener("click", () => {
 
 vipClose.addEventListener("click", () => {
   closeVipSheet();
-  setActiveTab(tabFarm);
 });
 
 
@@ -5912,6 +5953,7 @@ if (vipPacksBtn) {
   vipPacksBtn.disabled = false;
   vipPacksBtn.addEventListener("click", () => {
     openCoinShopSheet();
+    const history=coinShopSheet.querySelector(".hub-history");if(history){history.open=true;history.scrollIntoView({block:"nearest"});}
   });
 }
 
