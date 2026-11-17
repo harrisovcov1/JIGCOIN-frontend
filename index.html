@@ -2095,6 +2095,38 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 .rank-share-action{display:block;min-height:44px;margin:8px auto 0;padding:8px 12px;border:1px solid #e6bf66;border-radius:10px;background:#f6ce65;color:#281c07;font:700 12px/1.3 system-ui;cursor:pointer}
 .rank-celebration-close{position:absolute;right:0;top:0;width:32px;height:32px;border:0;background:none;color:#d1dcee;font-size:22px;cursor:pointer}
 </style>
+
+<style>
+/* v7: stable loading geometry and a legible five-pack shop. */
+.home-coin-loading{display:none}
+#homeCoinWrap[data-loading=true] .tap-btn-main{background:radial-gradient(circle,#1d2d43,#101a2c);border:2px solid #33465e;box-shadow:inset 0 0 24px #213b5222;color:#aec1da}
+#homeCoinWrap[data-loading=true] #homeCoinArtwork,#homeCoinWrap[data-loading=true] .tap-btn-label{visibility:hidden}
+#homeCoinWrap[data-loading=true] .home-coin-loading{display:block;font:600 12px/1.5 system-ui;letter-spacing:0;max-width:80%;text-align:center}
+#homeCoinWrap[data-loading=true]{filter:none!important;box-shadow:none!important}
+#homeNextPreview[data-loading=true] #homeNextCoin{visibility:hidden}
+#coinShopSheet .sheet-body{display:flex;flex-direction:column;padding:14px 16px 10px;gap:0}
+#coinShopSheet #coinPackList{display:flex;flex-direction:column;gap:8px;flex:1 0 auto}
+#coinShopSheet .hub-catalog-dense .hub-product,#coinShopSheet .hub-product{flex:1;min-height:78px;margin:0;padding:10px 12px;grid-template-columns:minmax(0,1fr) 112px;gap:3px 10px;align-content:center}
+#coinShopSheet #hubStarter:not([hidden]){margin-bottom:10px}
+#coinShopSheet .hub-product-label{font-size:12px;line-height:1.3;color:#c6d2e3}
+#coinShopSheet .hub-catalog-dense .hub-product-coins,#coinShopSheet .hub-product-coins{font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+#coinShopSheet .hub-product-coins span{font-size:12px;letter-spacing:0}
+#coinShopSheet .hub-unit-value{font-size:11px;line-height:1.3}
+#coinShopSheet .hub-buy{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:48px;background:linear-gradient(135deg,#ffe28b,#f9c642);color:#281d08;box-shadow:inset 0 1px 0 #fff2bd66}
+#coinShopSheet .hub-buy span{font-size:10px;font-weight:600}#coinShopSheet .hub-buy strong{font-size:15px;line-height:1.3;white-space:nowrap}
+#coinShopSheet .hub-buy:disabled{background:#23344c;color:#a8b9d0;box-shadow:none;cursor:default}
+#coinShopSheet .hub-history{flex-shrink:0;margin:10px 0 0}
+#coinShopSheet #hubShopNotice{flex-shrink:0;margin:6px 0 0}
+#coinShopSheet .hub-catalog-status{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;line-height:1.4;color:#bbccdf;margin:8px 0 0}
+#coinShopSheet .hub-catalog-status .shop-retry{min-height:44px;margin:0}
+#coinShopSheet .hub-skeleton{border-color:#2b3c54}
+.hub-skeleton>span{display:block;background:#22334a;border-radius:6px}
+.hub-skeleton .skeleton-label{grid-column:1;width:65%;height:15px}
+.hub-skeleton .skeleton-amount{grid-column:1;width:80%;height:29px}
+.hub-skeleton .skeleton-rate{grid-column:1;width:52%;height:14px}
+.hub-skeleton .skeleton-buy{grid-column:2;grid-row:1 / span 3;width:112px;height:48px;border-radius:11px}
+@media(max-width:350px){#coinShopSheet .sheet-body{padding:12px}#coinShopSheet .hub-catalog-dense .hub-product,#coinShopSheet .hub-product{grid-template-columns:minmax(0,1fr) 94px;padding:9px;gap:3px 7px}#coinShopSheet .hub-buy,.hub-skeleton .skeleton-buy{width:94px}#coinShopSheet .hub-product-label{font-size:11px}#coinShopSheet .hub-catalog-dense .hub-product-coins{font-size:22px}#coinShopSheet .hub-buy strong{font-size:14px}}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -2115,7 +2147,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
       <div class="event-banner" id="eventBanner"><div class="event-row"><div><div class="event-title" id="eventTitle">Live event</div><div class="event-sub" id="eventSub"></div></div><div class="pill" id="seasonPill">Season</div></div></div>
     </div>
 
-    <div class="account-status" id="accountStatus" role="status" aria-live="polite">
+    <div class="account-status sr-only" id="accountStatus" role="status" aria-live="polite">
       <div><strong id="accountStatusTitle">Loading your account</strong><p id="accountStatusBody">Connecting to your saved balance and global rank…</p></div>
       <button id="accountRetry" type="button" hidden>Retry</button>
     </div>
@@ -2147,17 +2179,18 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
           </div>
         </div>
 
-        <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1">
+        <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1" data-loading="true">
           <svg class="coin-progress" viewBox="0 0 220 220" aria-hidden="true"><circle cx="110" cy="110" r="106"/><circle id="homeGoalRing" cx="110" cy="110" r="106" pathLength="100"/></svg>
           <div class="coin-feedback" id="homeTapFeedback" aria-hidden="true"></div>
           <div class="home-celebration" id="homeCelebration" role="status" aria-live="polite" hidden></div>
-          <button class="tap-btn-main" id="tapBtn" disabled>
+          <button class="tap-btn-main" id="tapBtn" aria-busy="true" disabled>
+            <span class="home-coin-loading" aria-hidden="true">Loading your coin…</span>
             <span id="homeCoinArtwork" aria-hidden="true"></span><div class="tap-btn-ring"></div><span class="coin-emblem" aria-hidden="true">J</span><span class="coin-wordmark" aria-hidden="true">JIGCOIN</span>
             <div class="tap-btn-label" id="tapButtonLabel">Loading</div>
           </button>
         </div>
 
-        <button id="homeNextPreview" class="home-next-preview" type="button"><span id="homeNextCoin" aria-hidden="true"></span><span><div class="home-goal" id="homeGoal">Your next rank is loading…</div>
+        <button id="homeNextPreview" class="home-next-preview" data-loading="true" type="button"><span id="homeNextCoin" aria-hidden="true"></span><span><div class="home-goal" id="homeGoal">Your next rank is loading…</div>
         <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
         <div class="home-session-row"><button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button><button id="homeBoostAction" class="home-boost-action" type="button">2× tap boost ›</button></div>
         <div class="tap-metrics">
@@ -2437,7 +2470,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
       <div id="hubStarter" hidden></div>
       <div class="hub-section-title">Choose your pack</div>
       <p class="hub-small">In-game coins. No cash value or guaranteed airdrop.</p>
-      <div id="coinPackList" aria-live="polite"><div class="shop-status">Loading packs…</div></div>
+      <div id="coinPackList" aria-live="polite" aria-busy="true"><div class="shop-status">Preparing your packs…</div></div>
+      <div id="hubCatalogStatus" class="hub-catalog-status" role="status" hidden></div>
       <details class="hub-history"><summary>Orders &amp; payment help</summary><div id="hubOrderHistory"></div><p id="hubSupport" class="hub-small"></p></details>
       <p id="hubShopNotice" class="hub-small" role="status">Checking shop availability…</p>
     </div>
@@ -3186,7 +3220,8 @@ function renderHomeSession() {
   let pending=0,message='';
   if(window.__lastState?.recovery_gameplay){const q=readRecoveryQueue();pending=q.pending+(q.packet?.count||0);message=recoveryTapMessage;}
   else{pending=getPendingTaps()+getTapQueue().reduce((sum,p)=>sum+Number(p.count||0),0);}
-  status.textContent=!accountIsReady()?'Sync paused':message?'Save details ›':pending?'Saving…':'Saved ✓';
+  const connecting=['loading','connecting'].includes(window.__accountPhase);
+  status.textContent=!accountIsReady()?(connecting?'Syncing…':'Sync paused'):message?'Save details ›':pending?'Saving…':'Saved ✓';
   status.dataset.state=message?'error':pending?'pending':'saved';
   document.getElementById('homeNormalSyncStatus').textContent=message||(!accountIsReady()?'Reconnect to refresh your saved balance.':pending?'Your taps are stored on this device while confirmation is pending.':'All queued taps have been confirmed.');
   const remaining=homeBoostRemaining(state.doubleBoostActive,state.doubleBoostUntil);
@@ -3221,7 +3256,7 @@ function renderHomeRace(){
   const race=homeRaceModel(homeRaceSnapshot,homeUserId());
   const fresh=Date.now()-homeRaceSyncedAt<90000;
   if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text+' · Rivals ›';el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
-  else{el.textContent=accountIsReady()?'View your nearest rivals ›':'Race updates when your account reconnects';el.title='';}
+  else{el.textContent=accountIsReady()?'View your nearest rivals ›':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
 }
 async function refreshHomeRace(force=false){
   const delay=homeRaceSnapshot&&homeRaceSnapshot.me.global_rank!==state.globalRank?8000:60000;
@@ -3275,9 +3310,19 @@ function collectibleCountdown(ms){const days=Math.floor(Math.max(0,ms)/86400000)
 function progressionNow(){return progressionClock?progressionClock+(performance.now()-progressionSnapshotAt):Date.now();}
 function launchEquipped(){return !!progressionCurrent()?.event?.owned&&appStorage.getItem('jigcoin_launch_skin:'+homeUserId())==='on';}
 function renderCollectibleCoin(goal){
-  setCoinArtwork(document.getElementById('homeCoinArtwork'),goal?.tier??0,launchEquipped());
+  const loading=!accountIsReady()||!goal;
+  const art=document.getElementById('homeCoinArtwork'),preview=document.getElementById('homeNextCoin');
+  document.getElementById('homeCoinWrap').dataset.loading=String(loading);
+  document.getElementById('homeNextPreview').dataset.loading=String(loading);
+  document.getElementById('tapBtn').setAttribute('aria-busy',String(loading));
+  if(loading){
+    // An unknown account has no rank coin. Keep its space without showing Recruit.
+    for(const el of [art,preview]){el.innerHTML='';delete el.dataset.artwork;}
+    return;
+  }
+  setCoinArtwork(art,goal.tier,launchEquipped());
   document.getElementById('homeCoinWrap').dataset.aura=String(!!progressionCurrent()?.checkin?.cosmetics?.some(c=>c.key==='momentum_aura'&&c.owned));
-  const preview=document.getElementById('homeNextCoin');setCoinArtwork(preview,goal?.complete?7:(goal?.tier??0)+1);
+  setCoinArtwork(preview,goal.complete?7:goal.tier+1);
   document.getElementById('homeNextPreview').setAttribute('aria-label',goal?.complete?'View your unlocked rank collection':`Preview ${goal?.nextName||'your next rank'} coin`);
 }
 async function refreshProgression(force=false){
@@ -3524,7 +3569,7 @@ function updateGlobalRankVisuals() {
   globalRankFillEl.style.transform = `scaleX(${valid ? (total === 1 ? 1 : (total-rank)/(total-1)) : 0})`;
   if (globalRankTierTextEl) {
     globalRankTierTextEl.textContent = valid ? `Position ${formatNumber(rank)} of ${formatNumber(total)} players`
-      : accountIsReady() ? "Global rank is temporarily unavailable." : "Waiting for a confirmed global rank.";
+      : accountIsReady() ? "Global rank is temporarily unavailable." : "Loading leaderboard…";
   }
   globalRankNextTextEl.textContent = valid
     ? (accountIsReady() ? "Based on the latest saved leaderboard." : "Last confirmed rank · reconnect to update.")
@@ -3552,7 +3597,7 @@ function setAccountPhase(phase) {
   const body = document.getElementById("accountStatusBody");
   const retry = document.getElementById("accountRetry");
   const content = document.getElementById("accountContent");
-  if (status) status.hidden = phase === "ready";
+  if (status) {status.hidden = phase === "ready";status.classList.toggle('sr-only',phase === 'loading');}
   if (title) title.textContent = (messages[phase] || messages.loading)[0];
   if (body) body.textContent = (messages[phase] || messages.loading)[1] +
     (confirmed && phase !== "ready" ? " Figures shown are from the last successful sync." : "");
@@ -3802,7 +3847,7 @@ setInterval(() => {
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -5014,7 +5059,24 @@ function closeCoinShopSheet() {
 // Stars catalogue and verified-order delivery. Browser invoice callbacks never credit coins.
 let hubCatalog = null, hubClockOffset = 0, hubPurchaseBusy = false, hubMissions = [], hubMissionLoadedAt = 0;
 let hubLoadVersion = 0;
+const HUB_CATALOG_TTL = 60000;
+let hubCatalogOwner=null,hubCatalogLoadedAt=0,hubCatalogVisitedAt=0,hubCatalogError=false,hubCatalogRequest=null;
 const hubNow = () => Date.now() + hubClockOffset;
+function shopCatalogFresh(){
+  return accountIsReady()&&homeUserId()!==null&&hubCatalogOwner===homeUserId()&&!!hubCatalog&&
+    !hubCatalogError&&Date.now()-hubCatalogLoadedAt<HUB_CATALOG_TTL;
+}
+function shopCatalogStatus(message='',retry=false){
+  const el=document.getElementById('hubCatalogStatus');
+  el.hidden=!message;el.replaceChildren();
+  if(!message)return;
+  const text=document.createElement('span');text.textContent=message;el.append(text);
+  if(retry){const button=document.createElement('button');button.type='button';button.className='shop-retry';button.textContent='Retry';button.addEventListener('click',()=>loadCoinPacks({force:true}));el.append(button);}
+}
+function renderShopSkeleton(){
+  coinPackList.classList.add('hub-catalog-dense');
+  coinPackList.innerHTML='<span class="sr-only">Loading coin packs</span>'+Array.from({length:5},()=>'<article class="hub-product hub-skeleton" aria-hidden="true"><span class="skeleton-label"></span><span class="skeleton-amount"></span><span class="skeleton-rate"></span><span class="skeleton-buy"></span></article>').join('');
+}
 function shopLoadError(element, result, retry) {
   element.innerHTML = '<div class="shop-status">The shop is temporarily unavailable. Your saved coins are safe.<br><button class="shop-retry" type="button">Try again</button></div>';
   element.querySelector('button').addEventListener('click',retry);
@@ -5024,7 +5086,7 @@ function validStarsProduct(p) {
 }
 function starsProductCard(p,starter=false) {
   const label = starter ? 'One-time starter offer' : p.title;
-  const disabled = !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
+  const disabled = !shopCatalogFresh() || !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
   const packs=(hubCatalog?.products||[]).filter(validStarsProduct).filter(x=>!x.starter);
   const rate=p.coins/p.stars;
   const best=!starter && packs.length>1 && rate===Math.max(...packs.map(x=>x.coins/x.stars)) && packs.some(x=>x.coins/x.stars<rate);
@@ -5033,11 +5095,11 @@ function starsProductCard(p,starter=false) {
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
     <div class="hub-unit-value">${rate.toLocaleString('en-GB',{maximumFractionDigits:2})} coins per Star</div>
     ${starter?'<div class="hub-offer-clock" aria-live="off"></div>':''}
-    <button type="button" class="hub-buy" data-stars-sku="${p.sku}" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`Buy for ★ ${p.stars.toLocaleString('en-GB')}`}</button>
+    <button type="button" class="hub-buy" data-stars-sku="${p.sku}" aria-label="Buy ${formatNumber(p.coins)} coins for ${p.stars.toLocaleString('en-GB')} Telegram Stars" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`<span>Buy for</span><strong>★ ${p.stars.toLocaleString('en-GB')}</strong>`}</button>
   </article>`;
 }
 function renderStarsCatalog() {
-  if(!hubCatalog)return;
+  if(!hubCatalog||hubCatalogOwner!==homeUserId())return;
   const products=(hubCatalog.products||[]).filter(validStarsProduct);
   const offer=products.find(p=>p.starter);
   const starterEl=document.getElementById('hubStarter');
@@ -5052,16 +5114,58 @@ function renderStarsCatalog() {
   document.getElementById('hubSupport').textContent=hubCatalog.support_contact?`Payment help: ${hubCatalog.support_contact}. You can also send /paysupport to the bot.`:'Payment support will be shown here before purchases open.';
   renderHubOrders();updateBoostHub();
 }
-async function loadCoinPacks() {
-  const version=++hubLoadVersion;
-  coinPackList.innerHTML='<div class="shop-status">Loading packs…</div>';
-  const res=await apiPost('/api/stars/catalog',{});
-  if(version!==hubLoadVersion)return;
-  if(!res?.ok){hubCatalog=null;document.getElementById('hubStarter').hidden=true;shopLoadError(coinPackList,res,loadCoinPacks);document.getElementById('hubShopNotice').textContent='Purchases unavailable until the shop reconnects.';return;}
-  hubCatalog=res;
-  if(Number.isFinite(Date.parse(res.server_now)))hubClockOffset=Date.parse(res.server_now)-Date.now();
-  renderStarsCatalog();
+async function loadCoinPacks({preview=false,force=false}={}) {
+  const owner=homeUserId();
+  if(!accountIsReady()||owner===null)return;
+  if(hubCatalogOwner!==owner){
+    ++hubLoadVersion;hubCatalog=null;hubCatalogOwner=owner;hubCatalogRequest=null;
+    hubCatalogLoadedAt=0;hubCatalogVisitedAt=0;hubCatalogError=false;
+    document.getElementById('hubStarter').hidden=true;
+    document.getElementById('hubOrderHistory').replaceChildren();
+  }
+  if(!force&&shopCatalogFresh()&&(preview||Date.now()-hubCatalogVisitedAt<HUB_CATALOG_TTL)){
+    if(!preview){renderStarsCatalog();shopCatalogStatus();coinPackList.setAttribute('aria-busy','false');}
+    return hubCatalog;
+  }
+  if(hubCatalogRequest){
+    // A real visit waits for a preload, then records its own visit once.
+    if((!preview&&hubCatalogRequest.preview)||(force&&!hubCatalogRequest.force)){
+      if(!hubCatalog)renderShopSkeleton();
+      return hubCatalogRequest.promise.then(()=>owner===homeUserId()?loadCoinPacks({force}):undefined);
+    }
+    return hubCatalogRequest.promise;
+  }
+  const request={version:++hubLoadVersion,preview,force,promise:null};hubCatalogRequest=request;
+  if(!preview){
+    if(hubCatalog)renderStarsCatalog();else renderShopSkeleton();
+    coinPackList.setAttribute('aria-busy','true');
+    shopCatalogStatus(hubCatalog?'Updating shop availability…':'');
+  }
+  request.promise=(async()=>{
+    try{
+      const res=await apiPost(preview?'/api/stars/catalog-preview':'/api/stars/catalog',{},{silent:true,fastAuth:true,timeoutMs:8000});
+      if(request.version!==hubLoadVersion||owner!==homeUserId()||!accountIsReady())return;
+      if(!res?.ok||res.telegram_id!==owner||!Array.isArray(res.products)||typeof res.enabled!=='boolean'||!Number.isFinite(Date.parse(res.server_now)))throw Error('CATALOG_UNAVAILABLE');
+      hubCatalog=res;hubCatalogLoadedAt=Date.now();hubCatalogError=false;
+      if(!preview)hubCatalogVisitedAt=Date.now();
+      hubClockOffset=Date.parse(res.server_now)-Date.now();
+      if(!preview||coinShopSheet.classList.contains('show')){renderStarsCatalog();shopCatalogStatus();}
+      return res;
+    }catch(_){
+      if(request.version!==hubLoadVersion||owner!==homeUserId()||!accountIsReady())return;
+      hubCatalogError=true;
+      if(!preview||coinShopSheet.classList.contains('show')){
+        if(hubCatalog){renderStarsCatalog();shopCatalogStatus('Could not refresh prices. Retry to buy.',true);}
+        else{document.getElementById('hubStarter').hidden=true;shopLoadError(coinPackList,null,()=>loadCoinPacks({force:true}));}
+        document.getElementById('hubShopNotice').textContent='Purchases unavailable until the shop reconnects.';
+      }
+    }finally{
+      if(hubCatalogRequest===request){hubCatalogRequest=null;coinPackList.setAttribute('aria-busy','false');}
+    }
+  })();
+  return request.promise;
 }
+window.addEventListener('jigcoin:account-ready',()=>setTimeout(()=>loadCoinPacks({preview:true}),0));
 function renderHubOrders() {
   const box=document.getElementById('hubOrderHistory');
   const orders=hubCatalog?.recent_orders||[];
@@ -5069,26 +5173,37 @@ function renderHubOrders() {
   box.innerHTML=orders.length?orders.map(o=>`<div class="hub-order"><strong>${Number(o.coins).toLocaleString('en-GB')} coins · ${escapeHtml(labels[o.status]||'Check status')}</strong><small>Reference: ${escapeHtml(o.payload)}</small><button class="shop-retry" data-order-id="${escapeHtml(o.payload)}">Check order</button></div>`).join(''):'<p class="hub-small">No purchases yet.</p>';
   box.querySelectorAll('[data-order-id]').forEach(btn=>btn.addEventListener('click',()=>checkStarsOrder(btn.dataset.orderId,false)));
 }
-async function checkStarsOrder(id,poll=true) {
+async function checkStarsOrder(id,poll=true,owner=homeUserId()) {
   for(let n=0;n<(poll?10:1);n++) {
+    if(owner!==homeUserId()||!accountIsReady())return false;
     const r=await apiPost('/api/stars/status',{order_id:id});
+    if(owner!==homeUserId()||!accountIsReady())return false;
     if(r?.ok && ['paid','refunded'].includes(r.order?.status)) {
       await syncStateIfIdle();
+      if(owner!==homeUserId()||!accountIsReady())return false;
       showToast(r.order.status==='paid'?'Payment confirmed — your coins are saved.':'This payment was refunded.');
-      await loadCoinPacks();return true;
+      await loadCoinPacks({force:true});return true;
     }
     if(r?.ok && (r.order?.status==='expired' || (!poll && ['created','invoiced'].includes(r.order?.status)))) {
       showToast(r.order.status==='expired'?'Checkout expired. Choose a pack to start again.':'Checkout has not completed. Reopen this pack when ready.');
-      await loadCoinPacks();return false;
+      await loadCoinPacks({force:true});return false;
     }
     if(!poll || document.hidden)break;
     await new Promise(resolve=>setTimeout(resolve,1500));
   }
+  if(owner!==homeUserId()||!accountIsReady())return false;
   showToast('Payment not yet confirmed. Check Orders & payment help; do not pay again.');
-  await loadCoinPacks();return false;
+  await loadCoinPacks({force:true});return false;
 }
 async function buyStarsPack(sku) {
   if(hubPurchaseBusy||!hubCatalog?.enabled)return;
+  const owner=homeUserId();
+  if(!accountIsReady()||owner===null)return;
+  if(!shopCatalogFresh()){
+    const refreshed=await loadCoinPacks({force:true});
+    if(owner===homeUserId()&&accountIsReady())showToast(refreshed?'Shop refreshed. Choose your pack to continue.':'Shop unavailable. Retry when your connection returns.');
+    return;
+  }
   const product=(hubCatalog.products||[]).find(p=>p.sku===sku && validStarsProduct(p));
   if(!product)return;
   if(product.starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow())){showToast('This starter offer has ended.');return;}
@@ -5097,12 +5212,14 @@ async function buyStarsPack(sku) {
   hubPurchaseBusy=true;renderStarsCatalog();
   try {
     const r=await apiPost('/api/stars/invoice',{sku});
+    if(owner!==homeUserId()||!accountIsReady())return;
     if(!r?.ok || !r.url || !r.order_id){showToast((r?.reason||r?.error)==='OFFER_EXPIRED'?'This starter offer has ended.':'Checkout is not ready. Please try again or contact payment support.');return;}
     // Once created, the order is recoverable from the server even if the app closes.
     const outcome=await new Promise(resolve=>tg.openInvoice(r.url,resolve));
+    if(owner!==homeUserId()||!accountIsReady())return;
     if(outcome==='cancelled')showToast('Checkout closed. Checking your order…');
-    await checkStarsOrder(r.order_id,outcome!=='cancelled');
-  } catch(_){showToast('Could not open checkout. Check your orders before trying again.');}
+    await checkStarsOrder(r.order_id,outcome!=='cancelled',owner);
+  } catch(_){if(owner===homeUserId()&&accountIsReady())showToast('Could not open checkout. Check your orders before trying again.');}
   finally{hubPurchaseBusy=false;renderStarsCatalog();}
 }
 function updateBoostHub() {
