@@ -2104,7 +2104,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #homeCoinWrap[data-loading=true] .home-coin-loading{display:block;font:600 12px/1.5 system-ui;letter-spacing:0;max-width:80%;text-align:center}
 #homeCoinWrap[data-loading=true]{filter:none!important;box-shadow:none!important}
 #homeNextPreview[data-loading=true] #homeNextCoin{visibility:hidden}
-#coinShopSheet .sheet-body{display:flex;flex-direction:column;padding:14px 16px 10px;gap:0}
+/* v7.1: let the packs share the space recovered from the duplicate introduction. */
+#coinShopSheet .sheet-body{display:flex;flex:1;flex-direction:column;padding:14px 16px 10px;gap:0}
 #coinShopSheet #coinPackList{display:flex;flex-direction:column;gap:8px;flex:1 0 auto}
 #coinShopSheet .hub-catalog-dense .hub-product,#coinShopSheet .hub-product{flex:1;min-height:78px;margin:0;padding:10px 12px;grid-template-columns:minmax(0,1fr) 112px;gap:3px 10px;align-content:center}
 #coinShopSheet #hubStarter:not([hidden]){margin-bottom:10px}
@@ -2462,17 +2463,21 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
     <div class="sheet-header">
       <div>
         <div class="sheet-title">Coin Shop</div>
-        <div class="sheet-subtitle">Choose a pack. Pay with Telegram Stars.</div>
+        <div class="sheet-subtitle">Choose your boost. Get more coins.</div>
       </div>
-      <button class="sheet-close" id="coinShopClose">×</button>
+      <button class="sheet-close" id="coinShopClose" aria-label="Close Coin Shop">×</button>
     </div>
     <div class="sheet-body">
       <div id="hubStarter" hidden></div>
-      <div class="hub-section-title">Choose your pack</div>
-      <p class="hub-small">In-game coins. No cash value or guaranteed airdrop.</p>
-      <div id="coinPackList" aria-live="polite" aria-busy="true"><div class="shop-status">Preparing your packs…</div></div>
+      <div id="coinPackList" aria-label="Coin packs" aria-live="polite" aria-busy="true"><div class="shop-status">Preparing your packs…</div></div>
       <div id="hubCatalogStatus" class="hub-catalog-status" role="status" hidden></div>
-      <details class="hub-history"><summary>Orders &amp; payment help</summary><div id="hubOrderHistory"></div><p id="hubSupport" class="hub-small"></p></details>
+      <details class="hub-history">
+        <summary>Orders &amp; payment help</summary>
+        <p class="hub-small">Packs add in-game coins to your balance after payment confirmation. Pay with Telegram Stars.</p>
+        <p class="hub-small">In-game coins have no cash value. Buying a pack does not guarantee an airdrop allocation or future value.</p>
+        <div id="hubOrderHistory"></div>
+        <p id="hubSupport" class="hub-small"></p>
+      </details>
       <p id="hubShopNotice" class="hub-small" role="status">Checking shop availability…</p>
     </div>
   </div>
@@ -5110,7 +5115,7 @@ function renderStarsCatalog() {
   coinPackList.innerHTML=packs.map(p=>starsProductCard(p)).join('');
   if(!packs.length)coinPackList.innerHTML='<p class="hub-small">Coin packs are being prepared.</p>';
   coinShopSheet.querySelectorAll('[data-stars-sku]').forEach(btn=>btn.addEventListener('click',()=>buyStarsPack(btn.dataset.starsSku)));
-  document.getElementById('hubShopNotice').textContent=hubCatalog.enabled?'Purchases use Telegram Stars. Coins arrive after payment confirmation.':'Preview only — purchases are not enabled. Prices are initial test offers.';
+  document.getElementById('hubShopNotice').textContent=hubCatalog.enabled?'Telegram Stars · Coins after confirmation':'Preview only — purchases are not enabled. Prices are initial test offers.';
   document.getElementById('hubSupport').textContent=hubCatalog.support_contact?`Payment help: ${hubCatalog.support_contact}. You can also send /paysupport to the bot.`:'Payment support will be shown here before purchases open.';
   renderHubOrders();updateBoostHub();
 }
