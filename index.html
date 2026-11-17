@@ -1739,6 +1739,54 @@ button:disabled {cursor:default;}
 .home-boost-shortcuts button {flex:1;min-width:0;min-height:44px;padding:8px;border:1px solid #435573;border-radius:12px;background:#15233a;color:#e2e8f0;font:inherit;font-size:12px;font-weight:600;}
 button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
+/* Invite v8: one overview, separate details; overflow stays accessible. */
+#friendsSheet .invite-overview{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 16px;}
+#friendsSheet .invite-reward-card{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;padding:20px 18px 10px;border:1px solid #77602f;border-radius:20px;background:radial-gradient(ellipse at 95% 0,#39352b 0, #18263c 55%,#101c30 100%);}
+#friendsSheet .invite-eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#e5c575;}
+#friendsSheet .invite-eyebrow .brand-coin{width:26px;height:26px;border-radius:8px;font-size:20px;}
+#friendsSheet h2{margin:12px 0 6px;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px;}
+#friendsSheet h2 strong{font-size:clamp(38px,11vw,52px);letter-spacing:-.04em;line-height:1.05;color:#ffda74;font-variant-numeric:tabular-nums;}
+#friendsSheet h2 span{font-size:16px;font-weight:650;color:#edf2fb;}
+#friendsSheet #inviteQualification{font-size:13px;line-height:1.45;margin:4px 0 16px;color:#c1cde0;max-width:38ch;}
+#friendsSheet .friends-share-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:52px;margin:0;background:linear-gradient(110deg,#ffe397,#ffce4c);font-size:16px;font-weight:800;border-radius:14px;box-shadow:inset 0 1px 0 #fff0be;}
+#friendsSheet .friends-share-btn span{font-size:23px;line-height:1;}
+#friendsSheet .invite-copy{min-height:44px;margin:4px auto 0;background:none;border:0;color:#c5d7f5;font-size:13px;font-weight:650;padding:8px 22px;}
+#friendsSheet button:disabled,#inviteDetailsSheet button:disabled{opacity:.5;cursor:default;}
+#friendsSheet .friends-summary{flex-shrink:0;margin:0;gap:10px;}
+#friendsSheet .friends-summary-col{padding:13px 14px;gap:4px;}
+#friendsSheet .friends-summary-col span{font-size:12px;}
+#friendsSheet .friends-summary-col strong{font-size:26px;font-variant-numeric:tabular-nums;}
+#friendsSheet .invite-milestone{flex-shrink:0;padding:14px 15px;border:1px solid #304057;border-radius:16px;background:#101d30;}
+#friendsSheet .invite-milestone-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;}
+#friendsSheet #inviteTierName{color:#e9c976;font-size:11px;}
+#friendsSheet .invite-milestone p{font-size:12px;line-height:1.45;color:#bccde2;margin:8px 0 10px;}
+#friendsSheet progress{display:block;width:100%;height:6px;appearance:none;border:0;border-radius:8px;overflow:hidden;background:#25374f;accent-color:#f5ce65;}
+#friendsSheet progress::-webkit-progress-bar{background:#25374f;border-radius:8px;}
+#friendsSheet progress::-webkit-progress-value{background:#f5ce65;border-radius:8px;}
+#friendsSheet progress::-moz-progress-bar{background:#f5ce65;}
+#friendsSheet #inviteProgressText{display:block;margin-top:7px;font-size:11px;color:#9fb2cf;}
+#friendsSheet .invite-details-link{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0;min-height:48px;padding:8px 4px;border:0;background:none;color:#d8e5f8;font-size:13px;text-align:left;}
+#friendsSheet .invite-details-link span{font-size:24px;}
+#friendsSheet .invite-status{font-size:11px;line-height:1.4;color:#dfc891;margin:6px 0;}
+#friendsSheet .invite-status[hidden]{display:none;}
+#friendsSheet .invite-status button,#inviteDetailsSheet #inviteHistoryRetry{min-height:44px;padding:8px 10px;background:none;border:0;text-decoration:underline;color:#ffe098;font-size:12px;}
+#friendsSheet button:focus-visible,#inviteDetailsSheet button:focus-visible{outline:2px solid #f8d476;outline-offset:3px;}
+#inviteDetailsSheet .sheet-body{flex:1;}
+#inviteDetailsSheet .invite-detail-section{padding:0 0 16px;margin-bottom:16px;border-bottom:1px solid #2c3c54;}
+#inviteDetailsSheet h2{font-size:16px;margin:0 0 10px;}
+#inviteDetailsSheet p{font-size:12px;line-height:1.5;color:#bdccdf;margin:8px 0;}
+#inviteDetailsSheet #inviteLinkText{font-size:11px;white-space:normal;overflow-wrap:anywhere;padding:10px;background:#10213a;color:#b9cfee;}
+#inviteDetailsSheet .invite-tier-row,#inviteDetailsSheet .invite-credit{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;font-size:12px;}
+#inviteDetailsSheet .invite-tier-row strong,#inviteDetailsSheet .invite-credit strong{color:#f6d47d;white-space:nowrap;}
+#inviteDetailsSheet .invite-tier-row[data-current="true"]{color:#fce7a9;font-weight:700;}
+#inviteDetailsSheet .invite-history-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#inviteDetailsSheet .invite-history-heading h2{margin:0;}
+#inviteDetailsSheet #inviteHistoryList{list-style:none;margin:0;padding:0;}
+#inviteDetailsSheet .invite-credit small{display:block;color:#9cafca;font-size:11px;margin-top:3px;}
+#inviteDetailsSheet .invite-history-note{font-size:11px;}
+@media(max-height:720px){#friendsSheet .invite-overview{gap:8px;padding:10px 14px;}#friendsSheet .invite-reward-card{padding:14px 14px 4px;}#friendsSheet h2{margin-top:8px;}#friendsSheet h2 strong{font-size:38px;}#friendsSheet .friends-summary-col{padding:10px 12px;}#friendsSheet .invite-milestone{padding:11px 13px;}}
+@media(max-width:350px){#friendsSheet .invite-overview{padding:10px 12px;}#friendsSheet h2 span{font-size:14px;}#friendsSheet .sheet-subtitle{font-size:12px;}}
+
 </style>
 
 <style>
@@ -2302,77 +2350,38 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
   </div>
 
   <div class="sheet" id="friendsSheet">
-    <div class="sheet-header"><div><div class="sheet-title">Invite</div><div class="sheet-subtitle">Play together. Earn referral rewards.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title">Invite &amp; earn</div><div class="sheet-subtitle">Bring a friend. Build your rewards.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-body invite-overview">
+      <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
+        <div class="invite-eyebrow"><span class="brand-coin" aria-hidden="true">J</span> YOUR NEXT REFERRAL</div>
+        <h2 id="inviteRewardTitle"><strong id="inviteRewardAmount">—</strong> <span>coins for you</span></h2>
+        <p id="inviteQualification">Checking your reward and invite link…</p>
+        <button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <span aria-hidden="true">↗</span></button>
+        <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button>
+        <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
+      </section>
+      <div class="friends-summary"><div class="friends-summary-col"><span>Friends rewarded</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
+      <section class="invite-milestone" aria-labelledby="inviteNextTitle">
+        <div class="invite-milestone-top"><strong id="inviteNextTitle">Your next milestone</strong><span id="inviteTierName">—</span></div>
+        <p id="inviteNextText">Your progress appears after checking.</p>
+        <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
+        <span id="inviteProgressText">—</span>
+      </section>
+      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Rewards &amp; invite history <span aria-hidden="true">›</span></button>
+    </div>
+  </div>
+
+  <div class="sheet" id="inviteDetailsSheet">
+    <div class="sheet-header"><div><div class="sheet-title">Your invite rewards</div><div class="sheet-subtitle">How rewards work and what you’ve earned.</div></div><button type="button" class="sheet-close" id="inviteDetailsClose" aria-label="Back to Invite">×</button></div>
     <div class="sheet-body">
-      <section class="invite-hero"><span class="invite-art" aria-hidden="true">↗</span><h2>Build your team</h2><p>Share your link. Earn coins when a friend joins and meets the reward requirements.</p>
-        <button class="friends-share-btn" id="shareTelegramBtn">Invite a friend</button>
-        <div class="friends-link-row"><div class="friends-link" id="inviteLinkText">Loading your link…</div><button class="friends-copy-btn" id="copyInviteBtn">Copy link</button></div>
-      </section>
-      <div class="launch-boost" id="launchBoostInvite" hidden><strong>Early access bonus</strong><div id="launchBoostCountdown"></div></div>
-      <div class="friends-summary"><div class="friends-summary-col"><span>Friends joined</span><strong id="friendsJoinedText">0</strong></div><div class="friends-summary-col"><span>Referral coins</span><strong id="referralPointsText">…</strong></div></div>
-      <details class="app-details"><summary>Your team &amp; referral progress</summary>      <section class="tier-card" id="teamCard">
-        <div class="tier-top">
-          <div>
-            <div class="tier-title">Your team</div>
-            <div class="tier-meta" id="teamMeta">Loading your team…</div>
-          </div>
-          <div class="pill" id="teamPill">Team</div>
-        </div>
-        <div class="tier-stats">
-          <div class="friends-summary">
-            <div class="friends-summary-col">
-              <span>Team size</span>
-              <span id="teamSizeText">0 players</span>
-            </div>
-            <div class="friends-summary-col">
-              <span>Team earnings</span>
-              <span id="teamEarningsText">0</span>
-            </div>
-          </div>
-        </div>
-        <div class="tier-meta" id="teamNext">
-          Track your friends and earned referral coins here.
-        </div>
-      </section>
-
-      <div class="tier-card" id="refTierCard">
-        <div class="tier-top">
-          <div>
-            <div class="tier-title">Referral ladder</div>
-            <div class="tier-meta" id="refTierMeta">Loading your tier…</div>
-          </div>
-          <div class="pill good" id="refTierPill">Tier</div>
-        </div>
-        <div class="tier-bar"><div class="tier-fill" id="refTierFill"></div></div>
-        <div class="tier-meta" id="refTierNext">Next tier: …</div>
-      </div>
-
-
-      <div class="social-proof" id="socialProof">
-        <div class="social-proof-row">
-          <div class="sp-item">
-            <div class="sp-label">Joined today</div>
-            <div class="sp-value" id="joinedTodayText">–</div>
-          </div>
-          <div class="sp-item">
-            <div class="sp-label">Top inviter</div>
-            <div class="sp-value" id="topInviterText">–</div>
-          </div>
-        </div>
-      </div>
-
-</details>
-      <details class="app-details" id="sharePreviewDetails"><summary>Create a progress card</summary>      <div class="share-card" id="shareCard">
-        <div class="share-card-header">Share your progress</div>
-        <canvas id="shareCardCanvas" width="960" height="540"></canvas>
-        <div class="share-card-actions">
-          <button class="btn" id="copyShareTextBtn">Copy share text</button>
-          <button class="btn" id="downloadShareCardBtn">Download card</button>
-        </div>
-        <div class="share-card-hint">Your saved balance and invite link, ready to share.</div>
-      </div>
-
-</details>
+      <section class="invite-detail-section"><h2>How to earn</h2><p id="inviteRuleDetail">Checking the current reward rules…</p><p>Your rate increases with friends rewarded. A new rate applies to later referrals; each friend rewards you once. Sharing a link alone does not earn coins.</p><div class="friends-link" id="inviteLinkText">Checking your link…</div></section>
+      <section class="invite-detail-section"><h2>Reward milestones</h2><div id="inviteTierList"></div></section>
+      <section class="invite-detail-section"><div class="invite-history-heading"><h2>Recent referral credits</h2><button type="button" id="inviteHistoryRetry">Refresh</button></div><p id="inviteHistoryStatus" role="status">Open this view to check your credits.</p><ul id="inviteHistoryList"></ul><p class="invite-history-note">Up to 10 confirmed credits. Your totals appear on Invite.</p></section>
+      <details class="app-details" id="sharePreviewDetails"><summary>Create a progress card</summary><div class="share-card" id="shareCard">
+        <div class="share-card-header">Share your progress</div><canvas id="shareCardCanvas" width="960" height="540"></canvas>
+        <div class="share-card-actions"><button type="button" class="btn" id="copyShareTextBtn">Copy share text</button><button type="button" class="btn" id="downloadShareCardBtn">Download card</button></div>
+        <div class="share-card-hint">Your saved game progress and invite link, ready to share.</div>
+      </div></details>
     </div>
   </div>
 
@@ -3709,9 +3718,7 @@ function render() {
   }
 
 
-  friendsJoinedText.textContent = confirmed ? formatNumber(state.friendsJoined || 0) : "—";
-  referralPointsText.textContent = confirmed ? formatNumber(state.referralPoints || 0) : "—";
-  inviteLinkText.textContent = state.inviteLink || FALLBACK_REF_LINK;
+  renderInviteOverview();
 
   withdrawBalanceText.textContent = confirmed ? formatNumber(state.bal) : "—";
 
@@ -3852,7 +3859,7 @@ setInterval(() => {
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -3887,102 +3894,135 @@ async function apiPost(path, body, opts = {}) {
 }
 
 
-async function loadTeamSummary() {
-  try {
-    const res = await apiPost("/api/referrals/summary", {});
-    if (!res || !res.ok) return;
-
-    const teamSize = Number(res.teamSize || 0);
-    const teamEarnings = Number(res.teamEarnings || 0);
-
-    const sizeEl = document.getElementById("teamSizeText");
-    const earnEl = document.getElementById("teamEarningsText");
-    const metaEl = document.getElementById("teamMeta");
-    const pillEl = document.getElementById("teamPill");
-    const nextEl = document.getElementById("teamNext");
-
-    if (sizeEl) sizeEl.textContent = `${teamSize.toLocaleString("en-GB")} players`;
-    if (earnEl) earnEl.textContent = teamEarnings.toLocaleString("en-GB");
-
-    if (pillEl) {
-      if (teamSize >= 20) {
-        pillEl.textContent = "Growing fast";
-        pillEl.classList.add("good");
-      } else if (teamSize > 0) {
-        pillEl.textContent = "Active team";
-        pillEl.classList.add("ok");
-      } else {
-        pillEl.textContent = "No team yet";
-      }
-    }
-
-    if (metaEl) {
-      if (teamSize > 0) {
-        metaEl.textContent = `Your team is already ${teamSize.toLocaleString("en-GB")} players.`;
-      } else {
-        metaEl.textContent = "Invite your first players to start your team earnings.";
-      }
-    }
-
-    if (nextEl) {
-      if (teamSize === 0) {
-        nextEl.textContent = "Invite your first friend – early team builders get the biggest advantage.";
-      } else if (teamSize < 5) {
-        nextEl.textContent = "1–2 more invites and your team starts to grow much faster than solo players.";
-      } else if (teamSize < 20) {
-        nextEl.textContent = "Keep scaling – teams above 20 players climb the ladder much faster.";
-      } else {
-        nextEl.textContent = "Invite friends and track your team’s saved progress here.";
-      }
-    }
-  } catch (err) {
-    console.warn("loadTeamSummary error", err);
-  }
+// Invite v8: account-scoped data; one request per view, bounded waits and retry.
+let inviteData=null,inviteOwner=null,inviteCheckedAt=0,invitePending=null,inviteVersion=0,inviteError=false;
+let inviteCredits=null,inviteHistoryPending=null,inviteHistoryCheckedAt=0,inviteHistoryError=false;
+let inviteRenderedView=null;
+const INVITE_CACHE_MS=30000;
+function inviteSnapshot(){return accountIsReady()&&inviteOwner===homeUserId()?inviteData:null;}
+function inviteReset(owner){
+  inviteOwner=owner;inviteData=null;inviteCheckedAt=0;invitePending=null;inviteVersion++;
+  inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;
 }
-
-async function loadReferralStatus() {
-  // optional endpoint; safe if backend hasn't enabled it
-  const res = await apiPost("/api/referral/status", {});
-  if (!res || !res.ok) return;
-
-  const tierName = res.tier_name || `Tier ${res.tier || 1}`;
-  const cur = Number(res.current || res.referrals || 0);
-  const nextAt = Number(res.next_at || res.next_threshold || 0);
-  const prevAt = Number(res.prev_at || res.prev_threshold || 0);
-  const pct = nextAt > prevAt ? Math.max(0, Math.min(1, (cur - prevAt) / (nextAt - prevAt))) : 1;
-
-  const pill = document.getElementById("refTierPill");
-  const meta = document.getElementById("refTierMeta");
-  const next = document.getElementById("refTierNext");
-  const fill = document.getElementById("refTierFill");
-
-  if (pill) pill.textContent = tierName;
-  if (meta) meta.textContent = `${cur.toLocaleString("en-GB")} referrals · multiplier ${res.multiplier || "1.0"}x`;
-  if (next) next.textContent = nextAt ? `Next tier at ${nextAt.toLocaleString("en-GB")} referrals` : "Max tier reached";
-  if (fill) fill.style.width = `${Math.round(pct * 100)}%`;
-
-  // Social proof (optional fields from backend)
-  const joinedToday = document.getElementById("joinedTodayText");
-  const topInviter = document.getElementById("topInviterText");
-  if (joinedToday) joinedToday.textContent = (res.joined_today != null) ? Number(res.joined_today).toLocaleString("en-GB") : "—";
-  if (topInviter) topInviter.textContent = res.top_inviter ? String(res.top_inviter) : "—";
-
-  // Refresh share card after we have latest state/tier
-  renderShareCardCanvas();
+function validInviteLink(link,owner){
+  try{const url=new URL(link);return url.origin==='https://t.me'&&/^\/[A-Za-z0-9_]{5,32}$/.test(url.pathname)&&
+    [...url.searchParams].length===1&&url.searchParams.get('startapp')===`ref_${owner}`&&!url.hash&&!url.username&&!url.password;}
+  catch(_){return false;}
 }
+function validInviteData(data,owner){
+  const integer=value=>Number.isSafeInteger(value)&&value>=0;
+  if(!data?.ok||String(data.telegram_id)!==String(owner)||!Number.isFinite(Date.parse(data.server_now))||
+    !validInviteLink(data.invite_link,owner)||!integer(data.reward_coins)||data.reward_coins<1||
+    !integer(data.friends_rewarded)||!integer(data.coins_earned)||!integer(data.previous_at)||
+    data.previous_at>data.friends_rewarded||typeof data.tier_name!=='string'||!data.tier_name||
+    !['join','activity'].includes(data.qualification?.mode)||
+    (data.qualification.mode==='activity'&&(!integer(data.qualification.min_taps)||data.qualification.min_taps<1)))return false;
+  if(data.next_at!==null&&(!integer(data.next_at)||data.next_at<=data.friends_rewarded||
+    !integer(data.next_reward_coins)||data.next_reward_coins<1))return false;
+  if(!Array.isArray(data.tiers)||data.tiers.length<1||data.tiers.length>12)return false;
+  return data.tiers.every((row,index)=>integer(row.at)&&typeof row.name==='string'&&row.name&&
+    integer(row.reward_coins)&&row.reward_coins>0&&(index===0?row.at===0:row.at>data.tiers[index-1].at));
+}
+function inviteRule(data){
+  return data.qualification.mode==='activity'
+    ? `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} taps in one UTC day, or completes a sponsor task.`
+    : 'When a new friend joins through your link.';
+}
+function renderInviteOverview(){
+  const el=id=>document.getElementById(id),data=inviteSnapshot();
+  const view=[data,inviteError,!!invitePending];
+  if(inviteRenderedView&&view.every((value,index)=>value===inviteRenderedView[index]))return;
+  inviteRenderedView=view;
+  el('inviteRewardAmount').textContent=data?`+${formatNumber(data.reward_coins)}`:'—';
+  el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
+  friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
+  referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
+  inviteLinkText.textContent=data?data.invite_link:'Your invite link appears after checking.';
+  for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn])if(button)button.disabled=!data;
+  el('inviteTierName').textContent=data?data.tier_name:'—';
+  el('inviteNextTitle').textContent=data?.next_at===null?'Top referral rate unlocked':'Your next milestone';
+  el('inviteNextText').textContent=!data?'Your progress appears after checking.':data.next_at===null
+    ? `Keep earning ${formatNumber(data.reward_coins)} coins per rewarded friend.`
+    : `${formatNumber(data.next_at-data.friends_rewarded)} more rewarded ${data.next_at-data.friends_rewarded===1?'friend unlocks':'friends unlock'} ${formatNumber(data.next_reward_coins)} coins per referral.`;
+  el('inviteProgress').max=data?.next_at!==null&&data?data.next_at-data.previous_at:1;
+  el('inviteProgress').value=data?(data.next_at===null?1:data.friends_rewarded-data.previous_at):0;
+  el('inviteProgressText').textContent=!data?'—':data.next_at===null?`${formatNumber(data.friends_rewarded)} friends rewarded`:`${formatNumber(data.friends_rewarded)} / ${formatNumber(data.next_at)} friends rewarded`;
+  el('inviteProgress').setAttribute('aria-valuetext',el('inviteProgressText').textContent);
+  el('inviteLoadStatus').hidden=!inviteError;
+  el('inviteStatusText').textContent=data?'Showing your last checked rewards.':'Couldn’t check your rewards.';
+  el('inviteRetry').disabled=!!invitePending;
+  el('inviteRewardTitle').setAttribute('aria-busy',String(!!invitePending));
+  el('inviteRuleDetail').textContent=data?inviteRule(data):'Refresh Invite to check the current reward rules.';
+  el('inviteTierList').innerHTML=data?data.tiers.map(row=>`<div class="invite-tier-row" data-current="${row.at===data.previous_at}"><span>${escapeHtml(row.name)} · ${formatNumber(row.at)} rewarded</span><strong>${formatNumber(row.reward_coins)} coins</strong></div>`).join(''):'';
+}
+async function loadInviteSummary({force=false}={}){
+  const owner=homeUserId();if(!accountIsReady()||owner===null){renderInviteOverview();return;}
+  if(owner!==inviteOwner)inviteReset(owner);
+  if(invitePending)return invitePending.promise;
+  if(!force&&inviteData&&Date.now()-inviteCheckedAt<INVITE_CACHE_MS){renderInviteOverview();return;}
+  const request={version:inviteVersion,promise:null};invitePending=request;inviteError=false;renderInviteOverview();
+  request.promise=(async()=>{
+    try{
+      const data=await apiPost('/api/invite/summary',{}, {silent:true,timeoutMs:8000,fastAuth:true});
+      if(request.version!==inviteVersion||owner!==homeUserId()||!accountIsReady())return;
+      if(!validInviteData(data,owner))throw Error('INVITE_UNAVAILABLE');
+      inviteData=data;inviteCheckedAt=Date.now();inviteError=false;
+    }catch(_){if(request.version===inviteVersion&&owner===homeUserId())inviteError=true;}
+    finally{if(invitePending===request){invitePending=null;renderInviteOverview();}}
+  })();return request.promise;
+}
+function renderInviteHistory(){
+  const el=id=>document.getElementById(id),data=inviteSnapshot();
+  const credits=data?inviteCredits:null;
+  el('inviteHistoryRetry').disabled=!!inviteHistoryPending||!data;
+  el('inviteHistoryStatus').textContent=inviteHistoryPending?'Checking your credits…':inviteHistoryError?'Couldn’t load your credits. Tap Refresh to retry.':!credits?'Check Invite first to load your account.':credits.length?'Latest confirmed referral credits.':'No recorded referral credits yet. Invite your first friend to get started.';
+  el('inviteHistoryList').innerHTML=credits?credits.map(row=>`<li class="invite-credit"><span>Referral reward<small>${row.credited_at?escapeHtml(new Date(row.credited_at).toLocaleDateString('en-GB')):'Confirmed'}</small></span><strong>+${formatNumber(row.coins)}</strong></li>`).join(''):'';
+}
+async function loadInviteHistory({force=false}={}){
+  await loadInviteSummary();const data=inviteSnapshot();if(!data){renderInviteHistory();return;}
+  if(inviteHistoryPending)return inviteHistoryPending.promise;
+  if(!force&&inviteCredits&&Date.now()-inviteHistoryCheckedAt<INVITE_CACHE_MS){renderInviteHistory();return;}
+  const owner=homeUserId(),request={version:inviteVersion,promise:null};inviteHistoryPending=request;inviteHistoryError=false;renderInviteHistory();
+  request.promise=(async()=>{
+    try{
+      const result=await apiPost('/api/invite/history',{}, {silent:true,timeoutMs:8000,fastAuth:true});
+      if(request.version!==inviteVersion||owner!==homeUserId()||!accountIsReady())return;
+      if(!result?.ok||String(result.telegram_id)!==String(owner)||!Array.isArray(result.credits)||result.credits.length>10||
+        result.credits.some(row=>!Number.isSafeInteger(row.coins)||row.coins<=0||
+        (row.credited_at!==null&&!Number.isFinite(Date.parse(row.credited_at)))))throw Error('BAD_HISTORY');
+      inviteCredits=result.credits;inviteHistoryCheckedAt=Date.now();
+    }catch(_){if(request.version===inviteVersion&&owner===homeUserId())inviteHistoryError=true;}
+    finally{if(inviteHistoryPending===request){inviteHistoryPending=null;renderInviteHistory();}}
+  })();return request.promise;
+}
+function openInviteDetails(){
+  showAppSheet(document.getElementById('inviteDetailsSheet'),tabFriends);
+  renderInviteOverview();renderInviteHistory();loadInviteHistory();document.getElementById('inviteDetailsClose').focus();
+}
+function shareInviteOnTelegram(){
+  const data=inviteSnapshot();if(!data)return;
+  const text='Come play JigCoin with me. Tap, collect daily rewards and climb the ranks.';
+  const url=`https://t.me/share/url?url=${encodeURIComponent(data.invite_link)}&text=${encodeURIComponent(text)}`;
+  try{
+    if(typeof window.Telegram?.WebApp?.openTelegramLink==='function')window.Telegram.WebApp.openTelegramLink(url);
+    else if(!window.open(url,'_blank','noopener'))showToast('If sharing did not open, use Copy link.');
+  }catch(_){showToast('Could not open sharing. Use Copy link.');}
+}
+async function copyInviteLink(){
+  const data=inviteSnapshot();if(!data)return;
+  try{await navigator.clipboard.writeText(data.invite_link);showToast('Invite link copied');}
+  catch(_){showToast('Could not copy. Try Invite on Telegram.');}
+}
+// End Invite v8 data and actions.
 
 function buildShareText() {
-  const bal = Number(state.bal || 0);
-  const streak = Number(state.streakDays || 0);
-  const rank = (document.getElementById("rankName") && document.getElementById("rankName").textContent) ? document.getElementById("rankName").textContent : "Recruit";
-  const link = (inviteLinkText && inviteLinkText.textContent) ? inviteLinkText.textContent.trim() : FALLBACK_REF_LINK;
-  return `I’m farming JigCoin 🪙
-Balance: ${bal.toLocaleString("en-GB")}
-Rank: ${rank} · Streak: ${streak}d
-Join here: ${link}`;
+  const data=inviteSnapshot();if(!data)return '';
+  return `Come play JigCoin with me. Tap, collect daily rewards and climb the ranks.
+${data.invite_link}`;
 }
 
 function renderShareCardCanvas() {
+  if(!inviteSnapshot())return;
   const c = document.getElementById("shareCardCanvas");
   if (!c) return;
   const ctx = c.getContext("2d");
@@ -4452,7 +4492,7 @@ async function initFromBackend() {
   });
   const optionalCards = () => {
     if (!accountIsReady()) return;
-    loadReferralStatus(); loadTeamSummary(); loadEventsAndSeason(); prefetchMissionUrls();
+    loadInviteSummary(); loadEventsAndSeason(); prefetchMissionUrls();
   };
   window.addEventListener("jigcoin:account-ready", optionalCards);
   clearInterval(window.__statePollInterval);
@@ -5567,21 +5607,11 @@ async function buyVipPass() {
   showToast("VIP checkout unavailable. Check payment config.");
 }
 
-async function handleInviteTask() {
-  showAppSheet(friendsSheet, tabFriends);
-  renderShareCardCanvas();
-  loadReferralStatus();
-  loadTeamSummary();
-  showToast("Share your link – you earn when friends actually join.");
-}
-
+async function handleInviteTask() { openFriendsSheet(); }
 function openFriendsSheet() {
   showAppSheet(friendsSheet, tabFriends);
-  renderShareCardCanvas();
-  loadReferralStatus();
-  loadTeamSummary();
+  renderInviteOverview();loadInviteSummary();
 }
-
 
 async function handleEnergyBoostTask() { await openBoostSheet('sp_emergency_energy'); }
 async function handleDoubleBoostTask() { await openBoostSheet('sp_double_points'); }
@@ -5899,29 +5929,18 @@ sheetBackdrop.addEventListener("click", () => {
   setActiveTab(tabFarm);
 });
 
-copyInviteBtn.addEventListener("click", async () => {
-  const link = state.inviteLink || FALLBACK_REF_LINK;
-  try {
-    await navigator.clipboard.writeText(link);
-    showToast("Invite link copied");
-  } catch (e) {
-    showToast("Could not copy link");
-  }
-});
-
-shareTelegramBtn.addEventListener("click", () => {
-  const link = state.inviteLink || FALLBACK_REF_LINK;
-  const text = encodeURIComponent(
-    `Join me in JigCoin. Tap, complete tasks and build your score.`
-  );
-  window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, "_blank");
-});
-
+copyInviteBtn.addEventListener('click',copyInviteLink);
+shareTelegramBtn.addEventListener('click',shareInviteOnTelegram);
+document.getElementById('inviteRetry').addEventListener('click',()=>loadInviteSummary({force:true}));
+document.getElementById('inviteDetailsOpen').addEventListener('click',openInviteDetails);
+document.getElementById('inviteDetailsClose').addEventListener('click',()=>{openFriendsSheet();document.getElementById('inviteDetailsOpen').focus();});
+document.getElementById('inviteHistoryRetry').addEventListener('click',()=>loadInviteHistory({force:true}));
 
 if (copyShareTextBtn) {
   copyShareTextBtn.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(buildShareText());
+      const text=buildShareText();if(!text)return;
+      await navigator.clipboard.writeText(text);
       showToast("Share text copied");
     } catch (e) {
       showToast("Could not copy share text");
@@ -5931,6 +5950,7 @@ if (copyShareTextBtn) {
 
 if (downloadShareCardBtn) {
   downloadShareCardBtn.addEventListener("click", () => {
+    if(!inviteSnapshot())return;renderShareCardCanvas();
     const c = document.getElementById("shareCardCanvas");
     if (!c) return;
     try {
@@ -6196,28 +6216,7 @@ initFromBackend();
   </script>
 
 <script>
-// Optional referral promotion: display only confirmed live limits/deadlines.
-let referralPromotionDeadline=null;
-async function refreshReferralPromotion() {
-  const box=document.getElementById('launchBoostInvite'),label=document.getElementById('launchBoostCountdown');
-  if(!box || !label || !accountIsReady())return;
-  try {
-    const response=await fetch(API_BASE+'/api/stats');const data=await response.json();
-    if(!response.ok || !data?.ok || !accountIsReady()){box.hidden=true;return;}
-    const remaining=Number(data.early_bonus_remaining);
-    const active=data.early_bonus_active===true && data.early_bonus_remaining!=null && Number.isSafeInteger(remaining) && remaining>0;
-    box.hidden=!active;if(!active)return;
-    const bonus=Number(data.invite_bonus);
-    label.textContent=`Starter bonus: ${remaining.toLocaleString('en-GB')} places remaining${Number.isFinite(bonus)&&bonus>0?` · ${bonus.toLocaleString('en-GB')} coins per eligible referral`:''}`;
-    const seconds=data.early_bonus_ends_in;
-    referralPromotionDeadline=seconds!=null && Number.isFinite(Number(seconds))?Date.now()+Number(seconds)*1000:null;
-    if(referralPromotionDeadline && referralPromotionDeadline<=Date.now())box.hidden=true;
-  } catch(_){box.hidden=true;}
-}
-window.addEventListener('jigcoin:account-ready',refreshReferralPromotion);
-if(accountIsReady())void refreshReferralPromotion();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshReferralPromotion();syncStateIfIdle();}});
-setInterval(()=>{if(referralPromotionDeadline && Date.now()>=referralPromotionDeadline)document.getElementById('launchBoostInvite').hidden=true;},1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncStateIfIdle();if(document.getElementById('friendsSheet').classList.contains('show'))loadInviteSummary();}});
 </script>
 
 
