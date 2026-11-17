@@ -1739,7 +1739,7 @@ button:disabled {cursor:default;}
 .home-boost-shortcuts button {flex:1;min-width:0;min-height:44px;padding:8px;border:1px solid #435573;border-radius:12px;background:#15233a;color:#e2e8f0;font:inherit;font-size:12px;font-weight:600;}
 button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 
-/* Invite v8: one overview, separate details; overflow stays accessible. */
+/* Invite v10: one overview, separate details; overflow stays accessible. */
 #friendsSheet .invite-overview{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 16px;}
 #friendsSheet .invite-reward-card{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;padding:20px 18px 10px;border:1px solid #77602f;border-radius:20px;background:radial-gradient(ellipse at 95% 0,#39352b 0, #18263c 55%,#101c30 100%);}
 #friendsSheet .invite-eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#e5c575;}
@@ -1787,6 +1787,8 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 @media(max-height:720px){#friendsSheet .invite-overview{gap:8px;padding:10px 14px;}#friendsSheet .invite-reward-card{padding:14px 14px 4px;}#friendsSheet h2{margin-top:8px;}#friendsSheet h2 strong{font-size:38px;}#friendsSheet .friends-summary-col{padding:10px 12px;}#friendsSheet .invite-milestone{padding:11px 13px;}}
 @media(max-width:350px){#friendsSheet .invite-overview{padding:10px 12px;}#friendsSheet h2 span{font-size:14px;}#friendsSheet .sheet-subtitle{font-size:12px;}}
 
+#friendsSheet #inviteWelcome{margin:8px 0 4px;color:#ffe08a;font-size:clamp(13px,3.6vw,16px);line-height:1.35}
+#friendsSheet #inviteQualification{margin:4px 0 12px}
 </style>
 
 <style>
@@ -2353,14 +2355,15 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
     <div class="sheet-header"><div><div class="sheet-title">Invite &amp; earn</div><div class="sheet-subtitle">Bring a friend. Build your rewards.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
-        <div class="invite-eyebrow"><span class="brand-coin" aria-hidden="true">J</span> YOUR NEXT REFERRAL</div>
+        <div class="invite-eyebrow"><span class="brand-coin" aria-hidden="true">J</span> YOUR NEXT SUCCESSFUL INVITE</div>
         <h2 id="inviteRewardTitle"><strong id="inviteRewardAmount">—</strong> <span>coins for you</span></h2>
+        <p id="inviteWelcome">New-player bonus is being checked…</p>
         <p id="inviteQualification">Checking your reward and invite link…</p>
         <button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <span aria-hidden="true">↗</span></button>
         <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button>
         <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
       </section>
-      <div class="friends-summary"><div class="friends-summary-col"><span>Friends rewarded</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
+      <div class="friends-summary"><div class="friends-summary-col"><span>Successful invites</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
       <section class="invite-milestone" aria-labelledby="inviteNextTitle">
         <div class="invite-milestone-top"><strong id="inviteNextTitle">Your next milestone</strong><span id="inviteTierName">—</span></div>
         <p id="inviteNextText">Your progress appears after checking.</p>
@@ -2374,8 +2377,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
   <div class="sheet" id="inviteDetailsSheet">
     <div class="sheet-header"><div><div class="sheet-title">Your invite rewards</div><div class="sheet-subtitle">How rewards work and what you’ve earned.</div></div><button type="button" class="sheet-close" id="inviteDetailsClose" aria-label="Back to Invite">×</button></div>
     <div class="sheet-body">
-      <section class="invite-detail-section"><h2>How to earn</h2><p id="inviteRuleDetail">Checking the current reward rules…</p><p>Your rate increases with friends rewarded. A new rate applies to later referrals; each friend rewards you once. Sharing a link alone does not earn coins.</p><div class="friends-link" id="inviteLinkText">Checking your link…</div></section>
-      <section class="invite-detail-section"><h2>Reward milestones</h2><div id="inviteTierList"></div></section>
+      <section class="invite-detail-section"><h2>How to earn</h2><p id="inviteRuleDetail">Checking the current reward rules…</p><p>Each new friend can count once. The milestone invite earns the higher rate: invite #5 earns 1,000 coins. Earlier rewards stay unchanged. Sharing a link alone does not earn coins.</p><div class="friends-link" id="inviteLinkText">Checking your link…</div></section>
+      <section class="invite-detail-section"><h2>Coins per successful invite</h2><div id="inviteTierList"></div></section>
       <section class="invite-detail-section"><div class="invite-history-heading"><h2>Recent referral credits</h2><button type="button" id="inviteHistoryRetry">Refresh</button></div><p id="inviteHistoryStatus" role="status">Open this view to check your credits.</p><ul id="inviteHistoryList"></ul><p class="invite-history-note">Up to 10 confirmed credits. Your totals appear on Invite.</p></section>
       <details class="app-details" id="sharePreviewDetails"><summary>Create a progress card</summary><div class="share-card" id="shareCard">
         <div class="share-card-header">Share your progress</div><canvas id="shareCardCanvas" width="960" height="540"></canvas>
@@ -3894,7 +3897,7 @@ async function apiPost(path, body, opts = {}) {
 }
 
 
-// Invite v8: account-scoped data; one request per view, bounded waits and retry.
+// Invite v10: account-scoped data; one request per view, bounded waits and retry.
 let inviteData=null,inviteOwner=null,inviteCheckedAt=0,invitePending=null,inviteVersion=0,inviteError=false;
 let inviteCredits=null,inviteHistoryPending=null,inviteHistoryCheckedAt=0,inviteHistoryError=false;
 let inviteRenderedView=null;
@@ -3911,21 +3914,29 @@ function validInviteLink(link,owner){
 }
 function validInviteData(data,owner){
   const integer=value=>Number.isSafeInteger(value)&&value>=0;
-  if(!data?.ok||String(data.telegram_id)!==String(owner)||!Number.isFinite(Date.parse(data.server_now))||
+  if(!data?.ok||data.policy_version!=='referrals_welcome_v10'||data.welcome_coins!==1000||
+    String(data.telegram_id)!==String(owner)||!Number.isFinite(Date.parse(data.server_now))||
     !validInviteLink(data.invite_link,owner)||!integer(data.reward_coins)||data.reward_coins<1||
     !integer(data.friends_rewarded)||!integer(data.coins_earned)||!integer(data.previous_at)||
     data.previous_at>data.friends_rewarded||typeof data.tier_name!=='string'||!data.tier_name||
     !['join','activity'].includes(data.qualification?.mode)||
     (data.qualification.mode==='activity'&&(!integer(data.qualification.min_taps)||data.qualification.min_taps<1)))return false;
   if(data.next_at!==null&&(!integer(data.next_at)||data.next_at<=data.friends_rewarded||
-    !integer(data.next_reward_coins)||data.next_reward_coins<1))return false;
-  if(!Array.isArray(data.tiers)||data.tiers.length<1||data.tiers.length>12)return false;
-  return data.tiers.every((row,index)=>integer(row.at)&&typeof row.name==='string'&&row.name&&
-    integer(row.reward_coins)&&row.reward_coins>0&&(index===0?row.at===0:row.at>data.tiers[index-1].at));
+    !integer(data.next_reward_coins)||data.next_reward_coins<1||typeof data.next_tier_name!=='string'))return false;
+  if(!Array.isArray(data.tiers)||data.tiers.length!==5)return false;
+  if(!data.tiers.every((row,index)=>integer(row.at)&&typeof row.name==='string'&&row.name&&
+    integer(row.reward_coins)&&row.reward_coins>0&&(index===0?row.at===1:row.at===data.tiers[index-1].through+1)&&
+    (index===data.tiers.length-1?row.through===null:integer(row.through)&&row.through>=row.at)))return false;
+  const current=data.tiers.find(row=>data.friends_rewarded>=row.at&&(row.through===null||data.friends_rewarded<=row.through));
+  const upcoming=data.tiers.find(row=>row.at>data.friends_rewarded);
+  const nextRate=data.tiers.find(row=>data.friends_rewarded+1>=row.at&&(row.through===null||data.friends_rewarded+1<=row.through));
+  return data.previous_at===(current?.at??0)&&data.tier_name===(current?.name??'Get started')&&
+    data.next_at===(upcoming?.at??null)&&data.next_reward_coins===(upcoming?.reward_coins??null)&&
+    data.next_tier_name===(upcoming?.name??null)&&data.reward_coins===nextRate?.reward_coins;
 }
 function inviteRule(data){
   return data.qualification.mode==='activity'
-    ? `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} taps in one UTC day, or completes a sponsor task.`
+    ? `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} taps in one UTC day, or claims one confirmed ad reward.`
     : 'When a new friend joins through your link.';
 }
 function renderInviteOverview(){
@@ -3934,6 +3945,7 @@ function renderInviteOverview(){
   if(inviteRenderedView&&view.every((value,index)=>value===inviteRenderedView[index]))return;
   inviteRenderedView=view;
   el('inviteRewardAmount').textContent=data?`+${formatNumber(data.reward_coins)}`:'—';
+  el('inviteWelcome').textContent=data?`Your friend starts with ${formatNumber(data.welcome_coins)} coins. Free for every new player.`:'New-player bonus appears after checking.';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
@@ -3942,18 +3954,18 @@ function renderInviteOverview(){
   el('inviteTierName').textContent=data?data.tier_name:'—';
   el('inviteNextTitle').textContent=data?.next_at===null?'Top referral rate unlocked':'Your next milestone';
   el('inviteNextText').textContent=!data?'Your progress appears after checking.':data.next_at===null
-    ? `Keep earning ${formatNumber(data.reward_coins)} coins per rewarded friend.`
-    : `${formatNumber(data.next_at-data.friends_rewarded)} more rewarded ${data.next_at-data.friends_rewarded===1?'friend unlocks':'friends unlock'} ${formatNumber(data.next_reward_coins)} coins per referral.`;
+    ? `Keep earning ${formatNumber(data.reward_coins)} coins per successful invite.`
+    : data.friends_rewarded===0?`Your first successful invite earns ${formatNumber(data.reward_coins)} coins and unlocks Bronze.`:`${data.next_tier_name} at ${formatNumber(data.next_at)} successful invites: ${formatNumber(data.next_reward_coins)} coins each, starting with invite #${formatNumber(data.next_at)}.`;
   el('inviteProgress').max=data?.next_at!==null&&data?data.next_at-data.previous_at:1;
   el('inviteProgress').value=data?(data.next_at===null?1:data.friends_rewarded-data.previous_at):0;
-  el('inviteProgressText').textContent=!data?'—':data.next_at===null?`${formatNumber(data.friends_rewarded)} friends rewarded`:`${formatNumber(data.friends_rewarded)} / ${formatNumber(data.next_at)} friends rewarded`;
+  el('inviteProgressText').textContent=!data?'—':data.next_at===null?`${formatNumber(data.friends_rewarded)} successful invites`:`${formatNumber(data.friends_rewarded)} / ${formatNumber(data.next_at)} successful invites`;
   el('inviteProgress').setAttribute('aria-valuetext',el('inviteProgressText').textContent);
   el('inviteLoadStatus').hidden=!inviteError;
   el('inviteStatusText').textContent=data?'Showing your last checked rewards.':'Couldn’t check your rewards.';
   el('inviteRetry').disabled=!!invitePending;
   el('inviteRewardTitle').setAttribute('aria-busy',String(!!invitePending));
   el('inviteRuleDetail').textContent=data?inviteRule(data):'Refresh Invite to check the current reward rules.';
-  el('inviteTierList').innerHTML=data?data.tiers.map(row=>`<div class="invite-tier-row" data-current="${row.at===data.previous_at}"><span>${escapeHtml(row.name)} · ${formatNumber(row.at)} rewarded</span><strong>${formatNumber(row.reward_coins)} coins</strong></div>`).join(''):'';
+  el('inviteTierList').innerHTML=data?data.tiers.map(row=>`<div class="invite-tier-row" data-current="${row.at===data.previous_at}"><span>${escapeHtml(row.name)} · ${row.through===null?`${formatNumber(row.at)}+`:`${formatNumber(row.at)}–${formatNumber(row.through)}`} invites</span><strong>${formatNumber(row.reward_coins)} each</strong></div>`).join(''):'';
 }
 async function loadInviteSummary({force=false}={}){
   const owner=homeUserId();if(!accountIsReady()||owner===null){renderInviteOverview();return;}
@@ -4001,7 +4013,7 @@ function openInviteDetails(){
 }
 function shareInviteOnTelegram(){
   const data=inviteSnapshot();if(!data)return;
-  const text='Come play JigCoin with me. Tap, collect daily rewards and climb the ranks.';
+  const text=`Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and climb the ranks.`;
   const url=`https://t.me/share/url?url=${encodeURIComponent(data.invite_link)}&text=${encodeURIComponent(text)}`;
   try{
     if(typeof window.Telegram?.WebApp?.openTelegramLink==='function')window.Telegram.WebApp.openTelegramLink(url);
@@ -4013,11 +4025,11 @@ async function copyInviteLink(){
   try{await navigator.clipboard.writeText(data.invite_link);showToast('Invite link copied');}
   catch(_){showToast('Could not copy. Try Invite on Telegram.');}
 }
-// End Invite v8 data and actions.
+// End Invite v10 data and actions.
 
 function buildShareText() {
   const data=inviteSnapshot();if(!data)return '';
-  return `Come play JigCoin with me. Tap, collect daily rewards and climb the ranks.
+  return `Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and climb the ranks.
 ${data.invite_link}`;
 }
 

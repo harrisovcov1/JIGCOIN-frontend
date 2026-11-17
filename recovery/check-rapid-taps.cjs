@@ -58,7 +58,7 @@ test('reload preserves pending packet and received counter',async()=>{const h=ha
 test('energy capacity excludes queued taps; no invisible over-credit',async()=>{const h=harness({energy:8});for(let i=0;i<10;i++)h.touch();assert.equal(h.ctx.readRecoveryQueue().received,8);assert.match(h.el.textContent,/Energy/);await h.flush();assert.equal(h.total(),8);});
 test('server partial acceptance is explicitly counted as limited',async()=>{const h=harness();for(let i=0;i<10;i++)h.touch();h.limit(6);await h.flush();assert.equal(h.ctx.readRecoveryQueue().confirmed,6);assert.equal(h.ctx.readRecoveryQueue().limited,4);assert.match(h.el.textContent,/4 limited/);});
 test('mouse pointer clicks count once and keyboard remains usable',async()=>{const h=harness({touch:false});for(let i=0;i<10;i++){h.pointer();h.click();}h.advance(1000);h.click(0);await h.flush();assert.equal(h.total(),11);});
-test('disabled countdown has explicit foreground and WebKit text colour',()=>{assert.match(html,/#sponsorList \.ad-quest-row button:disabled[^}]*opacity:1[^}]*color:#f1f5f9;[^}]*-webkit-text-fill-color:#f1f5f9/s);});
+test('disabled countdown has explicit foreground and WebKit text colour',()=>{assert.match(html,/\.boost-action:disabled[^}]*opacity:1[^}]*color:#cbd5e1;[^}]*-webkit-text-fill-color:#cbd5e1/s);});
 test('account poll waits for queued mutations but startup can still authenticate',async()=>{
  const h=harness();let reads=0;
  h.ctx.refreshState=async()=>{reads++;return{ok:true};};h.ctx.__stateInFlight=null;

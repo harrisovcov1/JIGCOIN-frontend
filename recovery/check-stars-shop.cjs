@@ -4,12 +4,12 @@ const html=fs.readFileSync('index.html','utf8');
 const code=html.slice(html.indexOf('let hubCatalog = null'),html.indexOf('// ------------ Momentum Shield UI'));
 function setup({enabled=true,products=[{sku:'JC_SMALL',title:'Small pack',coins:1000,stars:100}],expires=null,openInvoice,replies=[]}={}){
  const calls=[],toasts=[];let syncs=0;
- const ctx={Date,console,setTimeout:(fn)=>fn(),document:{hidden:false,getElementById:()=>null},window:{Telegram:{WebApp:openInvoice?{openInvoice}:{} }},
+ const ctx={Date,console,progressionCurrent:()=>null,renderDailyRewards(){},accountIsReady:()=>true,homeUserId:()=>10001,setTimeout:(fn)=>fn(),document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>[]},window:{addEventListener(){},Telegram:{WebApp:openInvoice?{openInvoice}:{} }},
  escapeHtml:s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;'),formatNumber:n=>n.toLocaleString('en-GB'),showToast:s=>toasts.push(s),
  syncStateIfIdle:async()=>{syncs++;},apiPost:async(...args)=>{calls.push(args);const r=replies.shift();return typeof r==='function'?r():r;}};
  vm.createContext(ctx);vm.runInContext(code,ctx);
  ctx.catalog={enabled,products,offer_expires_at:expires};
- vm.runInContext('hubCatalog=catalog; renderStarsCatalog=()=>{}; loadCoinPacks=async()=>{};',ctx);
+ vm.runInContext('hubCatalog=catalog; hubCatalogOwner=10001; hubCatalogLoadedAt=Date.now(); renderStarsCatalog=()=>{}; loadCoinPacks=async()=>{};',ctx);
  return Object.assign(ctx,{calls,toasts,syncCount:()=>syncs});
 }
 test('disabled shop never requests an invoice',async()=>{const c=setup({enabled:false});await c.buyStarsPack('JC_SMALL');assert.equal(c.calls.length,0);});
@@ -45,17 +45,29 @@ test('catalogue validates quantities and escapes product labels',()=>{
  assert.match(c.starsProductCard({sku:'JC_X',title:'<script>',coins:1000,stars:100}),/&lt;script&gt;/);
 });
 
-test('Hub shows actual cooldown and claimable state, preserving active boost countdown',()=>{
- const c=setup();
- const makeCard=()=>{const classes=new Set();return {dataset:{},reward:{textContent:''},classList:{add:x=>classes.add(x),toggle:(x,v)=>v?classes.add(x):classes.delete(x)},querySelector(){return this.reward;}};};
- const energy=makeCard(),double=makeCard(),els={};
- c.document={getElementById:id=>els[id]||(els[id]={textContent:'',hidden:false})};
- c.coinShopSheet={querySelector:sel=>sel.includes('boost_energy')?energy:double,querySelectorAll:()=>[]};
- c.state={energy:3,streakDays:1,momentumShieldQty:0,doubleBoostActive:true};c.maxEnergy=50;
- c.msToCountdown=()=> '2h';double.reward.textContent='Active · 5m';
- c.missions=[{code:'sp_emergency_energy',cooldown_remaining_seconds:7200,status:'cooldown'},{code:'sp_double_points',cooldown_remaining_seconds:7200,status:'cooldown'}];
- vm.runInContext('hubMissions=missions;hubMissionLoadedAt=Date.now();',c);c.updateBoostHub();
- assert.equal(energy.dataset.disabledReason,'This boost is available in 2h.');assert.equal(double.reward.textContent,'Active · 5m');
- c.missions=[{code:'sp_emergency_energy',cooldown_remaining_seconds:0,status:'claimable'}];
- vm.runInContext('hubMissions=missions;',c);c.updateBoostHub();assert.equal(energy.reward.textContent,'Ready to claim');assert.match(els.hubRecommendation.textContent,/ready to claim/);
+test('shop refresh delegates daily display and expired offers disable checkout',()=>{
+ const c=setup();const els={};
+ c.document={getElementById:id=>els[id]||(els[id]={textContent:'',hidden:false,dataset:{}})};
+ const button={disabled:false},clock={textContent:'',parentElement:{querySelector:()=>button}};
+ c.coinShopSheet={querySelectorAll:()=>[clock]};
+ c.state={streakDays:1,lastCheckin:new Date().toISOString().slice(0,10),momentumShieldQty:0};
+ c.msToCountdown=()=> '2h';
+ let refreshed=0;c.renderDailyRewards=()=>refreshed++;vm.runInContext("hubCatalog.offer_expires_at='2000-01-01T00:00:00Z';",c);c.updateBoostHub();
+ assert.equal(button.disabled,true);assert.equal(refreshed,1);
+});
+
+test('an invoice response for a previous account never opens checkout',async()=>{
+ let resolve,opened=0;const pending=new Promise(r=>resolve=r);
+ const c=setup({openInvoice(){opened++;},replies:[()=>pending]});
+ const buying=c.buyStarsPack('JC_SMALL');c.homeUserId=()=>10002;
+ resolve({ok:true,url:'https://t.me/$invoice',order_id:'abc'});await buying;assert.equal(opened,0);assert.equal(c.syncCount(),0);
+});
+test('checkout closing after an account switch never polls or updates the other account',async()=>{
+ let close,opened;const open=new Promise(r=>opened=r);const c=setup({openInvoice:(_url,fn)=>{close=fn;opened();},replies:[{ok:true,url:'https://t.me/$invoice',order_id:'abc'}]});
+ const buying=c.buyStarsPack('JC_SMALL');await open;c.homeUserId=()=>10002;close('paid');await buying;
+ assert.equal(c.calls.length,1);assert.equal(c.syncCount(),0);
+});
+test('stale cached prices must refresh before a new checkout is allowed',async()=>{
+ const c=setup({openInvoice(){throw Error('should not open');}});vm.runInContext('hubCatalogLoadedAt=Date.now()-61000;',c);
+ let refresh=0;c.loadCoinPacks=async()=>{refresh++;return {ok:true};};await c.buyStarsPack('JC_SMALL');assert.equal(refresh,1);assert.equal(c.calls.length,0);
 });
