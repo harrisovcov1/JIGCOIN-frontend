@@ -2088,6 +2088,9 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 @media(max-width:350px){#boostSheet .boost-card{grid-template-columns:minmax(0,1fr) 106px;padding:11px;gap:5px 8px}#boostSheet .boost-card h3{font-size:14px}#boostSheet .boost-icon{width:26px;height:26px;flex-basis:26px;font-size:18px}#boostSheet .boost-state{font-size:11px}#boostSheet .boost-action{font-size:12px}}
 /* v5.3 polish: preserve approved sizing and card order. */
 #boostSheet .streak-benefit-preview{display:block;color:#dbd5a6;font-size:.92em;margin-top:2px}
+.cosmetic-avatar.century{border:2px solid #a2dcff;outline:2px solid #437591;outline-offset:2px;background:linear-gradient(135deg,#13314b,#285878);color:#ddf4ff;border-radius:12px}
+.cosmetic-avatar.endurance{border:3px double #f6d58a;outline:2px solid #b7a2df;outline-offset:3px;background:linear-gradient(135deg,#46345e,#1b2946);color:#ffe4a2;border-radius:10px}
+#homeDailySheet #dailyRewardAmount{overflow-wrap:anywhere}
 .home-celebration{padding:14px 24px;pointer-events:auto}
 .rank-share-action{display:block;min-height:44px;margin:8px auto 0;padding:8px 12px;border:1px solid #e6bf66;border-radius:10px;background:#f6ce65;color:#281c07;font:700 12px/1.3 system-ui;cursor:pointer}
 .rank-celebration-close{position:absolute;right:0;top:0;width:32px;height:32px;border:0;background:none;color:#d1dcee;font-size:22px;cursor:pointer}
@@ -2235,11 +2238,12 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
       <p class="quest-info" id="dailyRestoreReceipt" role="status" hidden></p><button class="shop-retry" id="dailyRestoreCheck" hidden>Check restore payment</button>
       <section class="daily-benefits-summary" aria-label="Your streak benefits">
         <p class="daily-perks" id="dailyRewardPerks"></p><p class="daily-next-unlock" id="dailyNextUnlock"></p>
-        <p class="daily-continuity">From day 30: <b>2,000 coins every day</b> while your streak continues.</p>
+        <p class="daily-continuity" id="dailyRewardSchedule"></p>
+        <p class="daily-next-unlock" id="dailyDoubleReward"></p>
       </section>
       <div class="daily-calendar" id="dailyRewardCalendar" aria-label="Seven-day reward calendar"></div>
       <details class="daily-more"><summary>Perks &amp; permanent unlocks</summary><p class="quest-info" id="dailyRewardNextPerk"></p><section class="daily-cosmetics"><h3>Unlock once. Keep forever.</h3><div id="dailyCosmeticList"></div></section></details>
-      <details class="daily-more quest-info"><summary>Coin milestones &amp; missed days</summary><p id="dailyRewardMilestones"></p><p>Check in once per UTC day. Day 30 includes a one-time 5,000-coin milestone bonus. After a missed day, a free restart resets your streak benefits, but keeps your coins, ranks and unlocked cosmetics. Eligible Momentum Shields still work automatically.</p></details>
+      <details class="daily-more quest-info"><summary>Reward rules &amp; missed days</summary><p id="dailyRewardMilestones"></p><p>Check in once per UTC day. Collected days show a tick; upcoming days show the current reward schedule. Earlier payouts stay yours. After a missed day, a free restart resets your streak benefits, but keeps your coins, ranks and unlocked cosmetics. Eligible Momentum Shields still work automatically.</p></details>
       <label class="daily-reminder"><input type="checkbox" id="dailyReminder"><span>Extra reminder before reset<small>One in-app reminder in the final two hours, only if still unclaimed. No Telegram messages.</small></span></label>
       <button class="quest-action" id="dailyPlayCollect">Daily challenge &amp; Launch Edition ›</button>
     </div>
@@ -3374,6 +3378,7 @@ function dailyBenefitPreview(c) {
   if(!c||c.broken)return '';
   const candidates=(c.cosmetics||[]).filter(x=>!x.owned&&x.days>c.days).map(x=>({day:x.days,label:x.name,priority:0}));
   if(c.next_tier?.day>c.days)candidates.push({day:c.next_tier.day,label:`+${c.next_tier.tap_bonus_percent}% tap coins`,priority:1});
+  if(c.policy?.milestoneEvery&&c.next_milestone?.day>c.days)candidates.push({day:c.next_milestone.day,label:`${Number(c.next_milestone.reward).toLocaleString('en-GB')} coins`,priority:2});
   candidates.sort((a,b)=>a.day-b.day||a.priority-b.priority);
   if(candidates.length)return `Day ${candidates[0].day}: ${candidates[0].label}`;
   return c.tier?.tap_bonus_percent>0?`+${c.tier.tap_bonus_percent}% tap coins active`:'';
@@ -3382,7 +3387,7 @@ function renderRestoreOption(c,fresh,now){
   const r=c?.restore,eligible=fresh&&c.broken&&r?.eligible&&Date.parse(r.expires_at)>now;
   const el=id=>document.getElementById(id);
   el('dailyRestoreCard').hidden=!eligible;
-  el('dailyRestoreBenefits').textContent=eligible?`Restore ${r.days} days: ${formatNumber(r.daily_reward)} daily coins · +${r.tap_bonus_percent}% tap coins · +${r.energy_bonus} energy capacity.`:'';
+  el('dailyRestoreBenefits').textContent=eligible?`Restore ${r.days} days: ${Number.isFinite(r.next_reward)?`next claim ${formatNumber(r.next_reward)} coins`:`${formatNumber(r.daily_reward)} regular daily coins`} · +${r.tap_bonus_percent}% tap coins · +${r.energy_bonus} energy capacity.`:'';
   el('dailyRestoreDeadline').textContent=eligible?`Available until 00:00 UTC · ${msToCountdown(Date.parse(r.expires_at)-now)} left`:'';
   el('dailyRestoreBuy').disabled=!eligible||!r.enabled||restorePurchaseBusy||dailyRewardsBusy||restorePendingAccount===homeUserId();
   el('dailyRestoreBuy').textContent=restorePurchaseBusy?'Checking payment…':restorePendingAccount===homeUserId()?'Payment confirmation pending':!r?.enabled?'Restore purchases are unavailable':'Restore · ★ 250';
@@ -3439,11 +3444,12 @@ function dailyCheckinModel(){
   const c=progressionCurrent()?.checkin;
   return c&&Array.isArray(c.calendar)&&Array.isArray(c.cosmetics)&&Number.isFinite(c.today_reward)&&Number.isFinite(Date.parse(c.resets_at))?c:null;
 }
-function dailyMarkerMarkup(c,full=false){return c.calendar.map(d=>`<span class="daily-marker" data-claimed="${!!d.claimed}" data-focus="${!!d.focus}"><span aria-label="Day ${Number(d.day)}${d.claimed?', collected':''}">${d.claimed?'✓ ':''}${full?'Day ':''}${Number(d.day)}</span>${full?`<b>${formatNumber(d.reward)}</b><small>${d.cosmetic==='momentum_aura'?'Aura unlock':d.cosmetic==='veteran_frame'?'Frame unlock':'coins'}</small>`:''}</span>`).join('');}
+function dailyCosmeticStyle(key){return ({momentum_aura:{className:'aura',label:'Momentum',symbol:'J',detail:'Coin glow & leaderboard badge'},veteran_frame:{className:'veteran',label:'Veteran',symbol:'J',detail:'Gold leaderboard frame'},century_crest:{className:'century',label:'Century',symbol:'C',detail:'Century crest on leaderboards'},endurance_frame:{className:'endurance',label:'Endurance',symbol:'E',detail:'Endurance leaderboard frame'}})[key]||null;}
+function dailyMarkerMarkup(c,full=false){return c.calendar.map(d=>`<span class="daily-marker" data-claimed="${!!d.claimed}" data-focus="${!!d.focus}"><span aria-label="Day ${Number(d.day)}${d.claimed?', collected':''}">${full?'Day ':''}${Number(d.day)}</span>${full?`<b>${d.claimed?'✓':formatNumber(d.reward)}</b><small>${d.claimed?'Collected':d.cosmetic?escapeHtml(dailyCosmeticStyle(d.cosmetic)?.label||'Cosmetic')+' unlock':'coins'}</small>`:d.claimed?' ✓':''}</span>`).join('');}
 function dailyCosmeticMarkup(keys,name){
-  const veteran=keys.includes('veteran_frame'),aura=keys.includes('momentum_aura');
-  if(!veteran&&!aura)return escapeHtml(name);
-  return `<span class="player-cosmetic"><span aria-hidden="true" class="cosmetic-avatar ${veteran?'veteran':'aura'}">J</span><span>${escapeHtml(name)}<small>${veteran?'Veteran': 'Momentum'}${veteran&&aura?' · Momentum':''}</small></span></span>`;
+  const key=['endurance_frame','century_crest','veteran_frame','momentum_aura'].find(k=>keys.includes(k)),style=dailyCosmeticStyle(key);
+  if(!style)return escapeHtml(name);
+  return `<span class="player-cosmetic"><span aria-hidden="true" class="cosmetic-avatar ${style.className}">${style.symbol}</span><span>${escapeHtml(name)}<small>${style.label}${key!=='momentum_aura'&&keys.includes('momentum_aura')?' · Momentum':''}</small></span></span>`;
 }
 function renderDailyRewards(){
   const c=dailyCheckinModel(),id=homeUserId(),now=progressionNow();
@@ -3458,20 +3464,25 @@ function renderDailyRewards(){
   el('tabTasks').setAttribute('aria-label',ready?`Rewards, daily ${num(c.today_reward)} coins available`:'Rewards');
   el('homeDailySheet').dataset.broken=String(!!(fresh&&c.broken));
   el('dailyRewardsError').hidden=fresh;
-  el('dailyRewardEyebrow').textContent=!fresh?'Daily streak':c.broken?'Streak recovery':c.claimed?`Day ${c.days} · collected`:`Day ${c.next_day} · free daily reward`;
-  el('dailyRewardAmount').textContent=!fresh?'Checking…':c.broken?`${c.days}-day streak`:c.claimed?'Collected ✓':`${num(c.today_reward)} coins`;
+  el('dailyRewardEyebrow').textContent=!fresh?'Daily streak':c.broken?'Streak recovery':c.claimed?'Daily streak':`Day ${c.next_day} · free daily reward`;
+  el('dailyRewardAmount').textContent=!fresh?'Checking…':c.broken?`${num(c.days)}-day streak`:c.claimed?`Day ${num(c.days)} collected ✓`:`${num(c.today_reward)} coins`;
   const recoverable=fresh&&c.broken&&c.restore?.eligible&&Date.parse(c.restore.expires_at)>now;
-  el('dailyRewardNext').textContent=!fresh?'Refresh to check today’s reward and recovery options.':c.broken?`Keep every coin and cosmetic. ${recoverable?'Restore your streak or start again free.':'Start a new streak for free.'}`:c.claimed?`Tomorrow: ${num(c.next_reward)} coins${c.next_day===7?' + Momentum aura':c.next_day===30?' + Veteran frame':''}`:'Collect today’s reward to advance your streak.';
+  const tomorrowCosmetic=c?.cosmetics.find(x=>x.days===c.next_day&&!x.owned);
+  el('dailyRewardNext').textContent=!fresh?'Refresh to check today’s reward and recovery options.':c.broken?`Keep every coin and cosmetic. ${recoverable?'Restore your streak or start again free.':'Start a new streak for free.'}`:c.claimed?`Tomorrow: ${num(c.next_reward)} coins${tomorrowCosmetic?' + '+tomorrowCosmetic.name:''}`:'Collect today’s reward to advance your streak.';
   const claim=el('dailyRewardClaim');claim.disabled=!fresh||dailyRewardsBusy||restorePurchaseBusy;claim.textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh rewards above':c.claimed?'Back to tapping':`${c.broken?'Start new streak free · ': 'Claim '}${num(c.today_reward)} coins`;
   el('dailyRewardReset').textContent=fresh&&!c.broken?`${c.claimed?'Next claim':'Claim before reset'} in ${msToCountdown(Math.max(0,Date.parse(c.resets_at)-now))} · 00:00 UTC`:'';
   el('dailyRewardCalendar').innerHTML=fresh?dailyMarkerMarkup(c,true):'';
-  el('dailyRewardPerks').textContent=c?`${c.tier.name}: +${c.tier.tap_bonus_percent}% tap coins · +${c.tier.energy_bonus} energy capacity`:'Your perks appear after a successful refresh.';
+  el('dailyRewardPerks').textContent=!fresh?'Refresh to check your perks.':c.broken?'Start again free or restore eligible continuity to resume streak perks.':c.tier.tap_bonus_percent>0||c.tier.energy_bonus>0?`${c.tier.name}: +${c.tier.tap_bonus_percent}% tap coins · +${c.tier.energy_bonus} energy capacity`:c.next_tier?`Day ${c.next_tier.day} unlocks +${c.next_tier.tap_bonus_percent}% tap coins and +${c.next_tier.energy_bonus} energy capacity.`:'Keep checking in for your next perk.';
+  el('dailyRewardSchedule').textContent=!fresh?'':c.policy?`Start at ${num(c.policy.start)} coins. +${num(c.policy.step)} per day until Day ${num(c.policy.capDay)}: ${num(c.policy.cap)} coins on regular days.`:`From Day ${num(c.continuing_from_day||30)}: ${num(c.continuing_reward||2000)} coins daily.`;
+  const doubleDay=fresh&&c.policy?.milestoneEvery&&c.next_milestone;
+  el('dailyDoubleReward').hidden=!doubleDay;
+  el('dailyDoubleReward').textContent=doubleDay?`Next Double Reward Day: Day ${num(doubleDay.day)} · ${num(doubleDay.reward)} coins.`:'';
   const unowned=c?.cosmetics.filter(x=>!x.owned).sort((a,b)=>a.days-b.days)[0];
   el('dailyNextUnlock').textContent=!fresh?'Refresh to see your next unlock.':unowned?`Next collectible: Day ${unowned.days} · ${unowned.name}`:c.next_tier?`Next perk: Day ${c.next_tier.day} · ${c.next_tier.name}`:'Your permanent collectibles are unlocked.';
   const t=c?.next_tier;
   el('dailyRewardNextPerk').textContent=t?`Day ${t.day}: ${t.name} unlocks +${t.tap_bonus_percent}% tap coins and +${t.energy_bonus} energy capacity. Fractional tap coins accumulate until they make a whole coin.`:'Keep checking in for daily coins. Your unlocked cosmetics stay yours.';
-  el('dailyCosmeticList').innerHTML=c?c.cosmetics.map(x=>`<div class="daily-cosmetic"><span class="cosmetic-avatar ${x.key==='veteran_frame'?'veteran':'aura'}" aria-hidden="true">J</span><div><b>${escapeHtml(x.name)}${x.owned?' · Owned ✓':''}</b><p>${x.owned?'Permanently unlocked':`Reach ${Number(x.days)} consecutive check-ins`} · ${x.key==='veteran_frame'?'Profile frame on leaderboards':'Coin glow & leaderboard badge'}</p></div></div>`).join(''):'';
-  el('dailyRewardMilestones').textContent=c?c.milestones.map(m=>`Day ${m.day}: ${num(m.reward)} coins`).join(' · ')+'. Includes the daily reward; each milestone bonus is awarded once per streak.':'';
+  el('dailyCosmeticList').innerHTML=c?c.cosmetics.filter(x=>dailyCosmeticStyle(x.key)).map(x=>{const style=dailyCosmeticStyle(x.key);return `<div class="daily-cosmetic"><span class="cosmetic-avatar ${style.className}" aria-hidden="true">${style.symbol}</span><div><b>${escapeHtml(x.name)}${x.owned?' · Owned ✓':''}</b><p>${x.owned?'Permanently unlocked':`Reach ${Number(x.days)} consecutive check-ins`} · ${style.detail}</p></div></div>`;}).join(''):'';
+  el('dailyRewardMilestones').textContent=c?.policy?`The regular daily reward caps at ${num(c.policy.cap)} coins.${c.policy.milestoneEvery?` Every ${num(c.policy.milestoneEvery)}th streak day pays ${num(c.policy.cap+c.policy.milestoneBonus)} total: ${num(c.policy.cap)} regular + ${num(c.policy.milestoneBonus)} bonus. The following day returns to ${num(c.policy.cap)}. This repeats for as long as your streak continues.`:''} Tap and energy perks have separate limits. The highest tier is Day 60: +40% tap coins and +50 energy capacity.`:c?c.milestones.map(m=>`Day ${m.day}: ${num(m.reward)} coins`).join(' · ')+'. Includes the daily reward.':'';
   renderRestoreOption(c,fresh,now);
   updateRewardRecommendation();
   updateDailyNotice(c,fresh,now);
