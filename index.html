@@ -2,6 +2,7 @@
 <!-- JigCoin frontend deployment retry 1: 2026-11-14. -->
 <html lang="en">
 <head>
+<meta name="jigcoin-build" content="leaderboards-v12-20261117">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2224,6 +2225,49 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #withdrawSheet .vault-live-status{font-size:11px}
 @media(max-height:700px){#withdrawSheet .vault-vip{gap:7px;padding:12px}#withdrawSheet .vault-content{gap:8px}#withdrawSheet .vault-vip h2{font-size:21px}}
 </style>
+
+<style id="leaderboard-v12-style">
+/* v12: the main race fits a phone; long rankings and rules keep accessible scrolling. */
+.leaderboard-screen{padding:14px;gap:8px;overflow:hidden;container-type:size}
+.leaderboard-screen [hidden]{display:none!important}
+.leaderboard-screen button{font:inherit;cursor:pointer;touch-action:manipulation}
+.leaderboard-screen button:disabled{opacity:.5;cursor:default}
+.leaderboard-screen button:focus-visible{outline:3px solid #ffe699;outline-offset:2px}
+.leaderboard-heading{flex:none;margin:0}.leaderboard-heading h2{font-size:23px;line-height:1.2}.leaderboard-heading p{margin-top:3px}
+.leaderboard-tabs{flex:none;margin:0;gap:6px}.leaderboard-tabs .lb-tab-btn{background:#111c31;color:#aebdd2;min-height:44px;font-size:13px;font-weight:700}
+.leaderboard-tabs .lb-tab-btn[aria-pressed="true"]{background:linear-gradient(120deg,#ffe698,#ffce43);color:#342700;box-shadow:inset 0 0 0 1px #ffe6a0}
+.lb-toolbar{display:flex;align-items:center;justify-content:space-between;gap:6px;flex:none;color:#c5d0df;font-size:11px;min-height:32px}
+.lb-text-btn{border:0;background:transparent;color:#c8d8f0;padding:6px;min-height:44px;font-size:12px!important;font-weight:600}
+.lb-toolbar .lb-text-btn{min-height:32px;color:#ffdc77}
+.lb-status{font-size:12px;line-height:1.4;color:#f8d78f;padding:8px;background:#282521;border-radius:8px;flex:none}
+#lbContent{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:1px 1px 4px}
+.lb-race-card{padding:12px 14px;border:1px solid #455a77;border-radius:16px;background:linear-gradient(130deg,#183349,#172137)}
+.lb-eyebrow{font-size:9px;letter-spacing:1.5px;font-weight:800;color:#bdd1e8}
+.lb-race-value{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:6px 0}
+.lb-race-value>strong{font-size:29px;line-height:1.1;color:#fff}.lb-race-value>strong>span{font-size:12px;color:#c1ccdd;font-weight:500}
+.lb-race-value>span{font-size:12px;color:#e5ebf4;text-align:right}
+.lb-race-card p{color:#ffe08c;font-size:12px;line-height:1.35;margin:7px 0 0;font-weight:600}
+.lb-section-label{font-size:9px;letter-spacing:1.4px;color:#a7b8cf;font-weight:700;margin:12px 2px 7px}
+.lb-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.lb-podium>div{padding:9px 6px;border-radius:12px;background:#151f34;border:1px solid #31425d;display:grid;gap:4px;text-align:center}
+.lb-podium>div[data-place="1"]{border-color:#a8842e;background:linear-gradient(140deg,#36301f,#172137)}
+.lb-podium b{color:#ffdc77;font-size:12px}.lb-podium span{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lb-podium strong{font-size:14px;color:#fff}
+.lb-list{display:grid;gap:5px}.lb-row{min-height:47px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:6px;background:#111b2e;border:1px solid #233149;border-radius:11px;padding:7px 9px}
+.lb-row[data-me="true"]{background:#2b2a22;border-color:#b5903c}
+.lb-position{font-size:12px;color:#d4dfed}.lb-name{font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lb-row strong{font-size:13px;text-align:right}
+.lb-row strong small{display:block;font-size:9px;font-weight:400;color:#aabbd0;margin-top:2px}
+.lb-medal{display:block;color:#f2cf75;font-size:9px;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.lb-row .player-cosmetic{gap:4px}.lb-row .cosmetic-avatar{width:22px;height:22px;flex:none}.lb-row .player-cosmetic>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.lb-row .player-cosmetic small{font-size:9px}
+.lb-actions{flex:none;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:center;gap:8px;padding-top:4px}
+.lb-primary{min-height:46px;border:1px solid #ffe48f;border-radius:13px;background:linear-gradient(120deg,#ffe89e,#ffce43);color:#352500;font-size:14px!important;font-weight:800!important;padding:8px}
+.lb-footer{display:flex;justify-content:space-between;border-top:1px solid #2d3a50;flex:none;gap:4px}.lb-footer .lb-text-btn{flex:1;color:#b2c3dc}.lb-footer [aria-pressed="true"]{color:#ffdb72}
+.lb-empty{font-size:13px;line-height:1.6;color:#b2c2d8;padding:16px 8px;text-align:center}
+.lb-detail{padding:4px 5px;color:#b8c8dc;font-size:13px;line-height:1.55}.lb-detail h3{font-size:17px;color:#fff;margin:8px 0 12px}.lb-detail h4{color:#ffdf89;margin:20px 0 8px}.lb-detail b{color:#eef2f8}.lb-award{padding:8px 0;border-bottom:1px solid #243249;display:flex;gap:10px;justify-content:space-between}.lb-award>span{overflow-wrap:anywhere;min-width:0}.lb-award strong{white-space:nowrap;font-size:12px}.lb-award .lb-medal{font-size:12px}
+.lb-pager{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:12px;color:#aebdd2}
+@container(max-height:650px){.lb-section-label{margin-top:8px}.lb-race-card{padding:10px 12px}.lb-row{min-height:43px;padding:6px 8px}.lb-podium>div{padding:7px 5px;gap:3px}.lb-race-value>strong{font-size:26px}}
+@media(max-height:740px){.leaderboard-screen{padding:10px;gap:5px}.leaderboard-heading p{display:none}.leaderboard-heading h2{font-size:21px}.lb-toolbar{min-height:28px}.lb-toolbar .lb-text-btn{min-height:28px}.lb-race-card{padding:9px 11px}.lb-race-card p{margin-top:4px}.lb-race-value{margin:4px 0}.lb-section-label{margin:8px 2px 5px}.lb-podium>div{padding:7px 5px}.lb-footer .lb-text-btn{min-height:40px}}
+</style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -2450,7 +2494,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
           <div><span class="vault-benefit-icon" aria-hidden="true">2×</span><strong>Tap coins</strong><span id="vipTapValue">2× your usual tap rate</span></div>
           <div><span class="vault-benefit-icon" aria-hidden="true">ϟ</span><strong>Energy capacity</strong><span id="vipEnergyValue">2× your usual capacity</span></div>
         </div>
-        <p class="vault-vip-note" id="vipPerksText">Includes streak perks · Ad boost stacks</p>
+        <p class="vault-vip-note" id="vipPerksText">Stacks with your streak and ad boost</p>
         <div class="vault-vip-result"><p class="vault-vip-earned" id="vipBonusText" hidden></p><p class="vault-expiry" id="vipExpiryText" hidden></p></div>
         <label class="vault-terms-consent"><input type="checkbox" id="vipTermsAccepted"><span>I agree to the <button type="button" class="vault-text-button" id="vipTermsOpen">VIP terms</button></span></label>
         <button type="button" class="vault-buy" id="vipBuyBtn" disabled>Loading VIP offer…</button>
@@ -3902,7 +3946,7 @@ setInterval(() => {
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status|overview|order-status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status|overview|order-status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window|history))$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -3916,7 +3960,7 @@ async function apiPost(path, body, opts = {}) {
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
+  const controller = (readOnly || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -6054,240 +6098,179 @@ if (downloadShareCardBtn) {
 setTimeout(() => renderShareCardCanvas(), 0);
 
 
-// ---------------- LEADERBOARD OVERLAY ----------------
-const leaderboardHTML = `
-  <section id="leaderboardScreen" class="leaderboard-screen" style="display:none" aria-labelledby="lbTitle">
-    <div class="leaderboard-heading"><div><h2 id="lbTitle">Leaderboard</h2><p>Compare your saved score.</p></div><button id="lbCloseBtn" aria-label="Back to Home">×</button></div>
-    <div class="leaderboard-tabs" role="group" aria-label="Leaderboard period"><button id="lbTabGlobal" class="lb-tab-btn">Global</button><button id="lbTabDaily" class="lb-tab-btn">Daily</button><button id="lbTabFriends" class="lb-tab-btn">Friends</button></div>
-    <div id="lbMySummary"><div id="lbMySummaryText">Loading your rank…</div></div>
-    <div id="lbOvertakeBanner" style="display:none"></div>
-    <div id="lbContent"></div>
-    <p id="lbFooterInvite">Find your referral link in Invite.</p>
-  </section>
-`;
-
-document.body.insertAdjacentHTML("beforeend", leaderboardHTML);
-
-const leaderboardScreen = document.getElementById("leaderboardScreen");
-const lbCloseBtn = document.getElementById("lbCloseBtn");
-const lbTabGlobal = document.getElementById("lbTabGlobal");
-const lbTabDaily = document.getElementById("lbTabDaily");
-const lbTabFriends = document.getElementById("lbTabFriends");
-const lbContent = document.getElementById("lbContent");
-const lbMySummary = document.getElementById("lbMySummary");
-const lbMySummaryText = document.getElementById("lbMySummaryText");
-const lbOvertakeBanner = document.getElementById("lbOvertakeBanner");
-const lbFooterInvite = document.getElementById("lbFooterInvite");
-function setLeaderboardTabActive(activeKey) {
-  const tabs = [
-    { key: "global", el: lbTabGlobal },
-    { key: "daily", el: lbTabDaily },
-    { key: "friends", el: lbTabFriends },
-  ];
-  tabs.forEach(({ key, el }) => {
-    if (!el) return;
-    if (key === activeKey) {
-      el.style.background = "linear-gradient(135deg,#fbbf24,#fb923c)";
-      el.style.color = "#111827";
-    } else {
-      el.style.background = "rgba(15,23,42,0.7)";
-      el.style.color = "#9ca3af";
-    }
-  });
+// ---------------- LEADERBOARD OVERLAY v12 ----------------
+function escapeHtml(str){return String(str??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+const leaderboardHTML=`
+ <section id="leaderboardScreen" class="leaderboard-screen" style="display:none" aria-labelledby="lbTitle">
+  <div class="leaderboard-heading"><div><h2 id="lbTitle">Leaderboard</h2><p>Make your next move.</p></div><button id="lbCloseBtn" aria-label="Back to Home">×</button></div>
+  <div class="leaderboard-tabs" role="group" aria-label="Choose leaderboard">
+   <button id="lbTabDaily" class="lb-tab-btn" data-lb-mode="daily">Daily</button><button id="lbTabGlobal" class="lb-tab-btn" data-lb-mode="global">Global</button><button id="lbTabFriends" class="lb-tab-btn" data-lb-mode="friends">Friends</button>
+  </div>
+  <div class="lb-toolbar"><span id="lbClock">Today’s tap coins</span><button id="lbRefresh" class="lb-text-btn">Refresh</button></div>
+  <div id="lbStatus" class="lb-status" role="status" aria-live="polite" hidden></div>
+  <div id="lbContent"></div>
+  <div id="lbActions" class="lb-actions"><button id="lbPrimary" class="lb-primary">Keep tapping</button><button id="lbSecondary" class="lb-text-btn">Explore VIP</button></div>
+  <div class="lb-footer"><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules</button></div>
+ </section>`;
+document.body.insertAdjacentHTML('beforeend',leaderboardHTML);
+const leaderboardScreen=document.getElementById('leaderboardScreen');
+const lbEl=id=>document.getElementById(id);
+let lbOwner=null,lbEpoch=0,lbMode='daily',lbView='overview',lbPage=0,lbHistoryPage=0,lbData=null,lbHistoryData=null,lbLoading=false,lbError='',lbLoadedAt=0,lbClockOffset=0,lbNextRefresh=0;
+const lbCache=new Map(),lbRequests=new Map(),lbSentEvents=new Set();
+function lbVisible(){return leaderboardScreen.style.display==='flex'&&!document.hidden;}
+function lbIdentity(){return String(homeUserId()||'');}
+function lbHasVip(){return Date.parse(state.vipUntil||'')>Date.now();}
+function lbEnsureOwner(){
+ const id=lbIdentity();if(id===lbOwner)return;
+ lbOwner=id;lbEpoch++;lbCache.clear();lbRequests.clear();lbSentEvents.clear();lbData=null;lbHistoryData=null;lbError='';lbLoading=false;lbLoadedAt=0;
 }
-
-function openLeaderboard(initialTab) {
-  if (!leaderboardScreen || !accountIsReady()) return;
-  leaderboardScreen.style.display = "flex";
-  const main=document.getElementById("mainScroll");if(main)main.inert=true;
-  document.body.style.overflow = "hidden";
-  const tab = initialTab || "global";
-  if (tab === "friends") {
-    setLeaderboardTabActive("friends");
-    loadFriendsLeaderboard();
-  } else if (tab === "daily") {
-    setLeaderboardTabActive("daily");
-    loadDailyLeaderboard();
-  } else {
-    setLeaderboardTabActive("global");
-    loadGlobalLeaderboard();
+function lbTrack(event){
+ if(!accountIsReady())return;
+ const key=lbIdentity()+':'+new Date().toISOString().slice(0,10)+':'+event;
+ if(lbSentEvents.has(key))return;lbSentEvents.add(key);
+ void apiPost('/api/leaderboard/event',{event},{fastAuth:true,timeoutMs:8000}).then(r=>{if(!r?.ok)lbSentEvents.delete(key);}).catch(()=>lbSentEvents.delete(key));
+}
+function setLeaderboardTabActive(key){
+ for(const mode of ['daily','global','friends']){
+  const button=lbEl('lbTab'+mode[0].toUpperCase()+mode.slice(1));button.setAttribute('aria-pressed',String(mode===key));
+ }
+}
+function openLeaderboard(initialTab='daily'){
+ if(!accountIsReady())return;
+ backToHome();lbEnsureOwner();leaderboardScreen.style.display='flex';document.getElementById('mainScroll').inert=true;document.body.style.overflow='hidden';
+ lbEl('lbCloseBtn').focus();lbSelectMode(['daily','global','friends'].includes(initialTab)?initialTab:'daily');
+}
+function closeLeaderboard(){
+ lbEpoch++;lbLoading=false;leaderboardScreen.style.display='none';document.getElementById('mainScroll').inert=false;document.body.style.overflow='';
+}
+function lbSelectMode(mode){
+ lbEnsureOwner();lbMode=mode;lbView='overview';lbPage=0;lbError='';lbData=null;lbHistoryData=null;setLeaderboardTabActive(mode);lbTrack('view_'+mode);void lbLoad(false);
+}
+function lbValidBoard(d,owner,mode,page){
+ const integer=n=>Number.isSafeInteger(n)&&n>=0;
+ const row=x=>x&&/^[1-9]\d{0,15}$/.test(String(x.telegram_id))&&integer(x.score)&&Number.isSafeInteger(x.rank)&&x.rank>0&&x.rank<=d.total&&typeof x.display_name==='string';
+ return d?.ok&&d.version===12&&String(d.telegram_id)===owner&&d.mode===mode&&d.page===page&&integer(d.total)&&
+ /^\d{4}-\d{2}-\d{2}$/.test(d.day||'')&&Number.isFinite(Date.parse(d.server_now))&&Number.isFinite(Date.parse(d.ends_at))&&
+ Date.parse(d.ends_at)>Date.parse(d.server_now)&&typeof d.awards_enabled==='boolean'&&/^\d{4}-\d{2}-\d{2}$/.test(d.award_start_day||'')&&
+ ['podium','nearby','entries'].every(k=>Array.isArray(d[k])&&d[k].every(row))&&
+ (d.me===null||(String(d.me.telegram_id)===owner&&integer(d.me.score)&&(d.me.rank===null||row(d.me))))&&typeof d.has_more==='boolean'&&
+ (d.overtake===null||(d.me?.rank>1&&integer(d.overtake?.need_points)&&d.overtake.need_points>0&&d.nearby.some(x=>x.rank===d.me.rank-1&&String(x.telegram_id)===String(d.overtake.target_telegram_id)&&x.score-d.me.score+1===d.overtake.need_points)));
+}
+function lbValidHistory(d,owner,page){
+ const award=x=>x&&/^\d{4}-\d{2}-\d{2}$/.test(x.day||'')&&[1,2,3].includes(x.place)&&Number.isSafeInteger(x.score)&&x.score>0;
+ return d?.ok&&d.version===12&&String(d.telegram_id)===owner&&d.page===page&&Array.isArray(d.podiums)&&d.podiums.every(x=>award(x)&&typeof x.display_name==='string')&&Array.isArray(d.my_awards)&&d.my_awards.every(award)&&typeof d.has_more==='boolean';
+}
+function lbErrorText(r){
+ const reason=r?.reason||r?.error;
+ if(reason==='MAINTENANCE_MODE')return 'This leaderboard is paused for maintenance. Try again shortly.';
+ if(r?.status===401||reason==='NO_TELEGRAM_ID')return 'Your session expired. Close and reopen JigCoin.';
+ if(reason==='TIMEOUT')return 'The leaderboard took too long to respond. Please retry.';
+ if(reason==='NETWORK')return 'Connection interrupted. Please retry.';
+ return 'Could not update this leaderboard. Please retry.';
+}
+async function lbLoad(force=false){
+ if(!accountIsReady()||!lbVisible())return;
+ lbEnsureOwner();const owner=lbOwner,mode=lbMode,history=lbView==='history',page=history?lbHistoryPage:lbPage,key=owner+':'+(history?'history':mode)+':'+page,epoch=++lbEpoch;
+ const cached=lbCache.get(key);
+ const usable=cached&&(history||Date.parse(cached.data.ends_at)>Date.now()+lbClockOffset);
+ if(usable){if(history)lbHistoryData=cached.data;else lbData=cached.data;lbLoadedAt=cached.at;}
+ else {if(history)lbHistoryData=null;else lbData=null;}
+ lbError='';lbLoading=true;lbNextRefresh=Date.now()+30000;renderLeaderboard();
+ if(usable&&!force&&Date.now()-cached.at<15000){lbLoading=false;renderLeaderboard();return cached.data;}
+ let request=lbRequests.get(key);
+ if(!request){request=apiPost('/api/leaderboard/'+(history?'history':mode),{page},{timeoutMs:15000}).catch(()=>({ok:false,reason:'NETWORK'}));lbRequests.set(key,request);}
+ const r=await request;if(lbRequests.get(key)===request)lbRequests.delete(key);
+ if(owner!==lbIdentity()||epoch!==lbEpoch||!lbVisible())return null;
+ lbLoading=false;lbNextRefresh=Date.now()+30000;
+ if(!(history?lbValidHistory(r,owner,page):lbValidBoard(r,owner,mode,page))){lbError=lbErrorText(r);lbTrack('load_error');renderLeaderboard();return null;}
+ lbLoadedAt=Date.now();lbCache.set(key,{at:lbLoadedAt,data:r});
+ if(history)lbHistoryData=r;else{lbData=r;lbClockOffset=Date.parse(r.server_now)-Date.now();}
+ renderLeaderboard();return r;
+}
+const lbMedalNames={1:'Daily Champion',2:'Daily Silver',3:'Daily Bronze'};
+const lbDate=day=>new Date(day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+function lbMedalMarkup(m){return m&&[1,2,3].includes(m.place)&&/^\d{4}-\d{2}-\d{2}$/.test(m.day||'')?`<small class="lb-medal">${escapeHtml(lbMedalNames[m.place])} · ${escapeHtml(lbDate(m.day))}</small>`:'';}
+function lbRow(row){
+ const me=String(row.telegram_id)===lbOwner;
+ return `<div class="lb-row" data-me="${me}"><span class="lb-position">#${formatNumber(row.rank)}</span><span class="lb-name">${dailyCosmeticMarkup(row.cosmetics||[],me?'You':row.display_name)}${lbMedalMarkup(row.medal)}</span><strong>${formatNumber(row.score)}<small>${lbMode==='daily'?'tap coins':'coins'}</small></strong></div>`;
+}
+function lbPager(page,more,history=false){return `<div class="lb-pager"><button class="lb-text-btn" data-lb-page="${page-1}" ${page===0?'disabled':''}>Previous</button><span>Page ${page+1}</span><button class="lb-text-btn" data-lb-page="${page+1}" ${more?'':'disabled'}>Next</button></div>`;}
+function renderLeaderboard(){
+ const content=lbEl('lbContent'),d=lbData;
+ lbEl('lbRefresh').disabled=lbLoading;lbEl('lbRefresh').textContent=lbLoading?'Updating…':lbError?'Retry':'Refresh';
+ const status=lbEl('lbStatus');status.hidden=!lbError;status.textContent=lbError+((lbView==='history'?lbHistoryData:d)?' Showing your last loaded results.':'');
+ lbEl('lbView').textContent=lbView==='overview'?'Full rankings':'Your race';lbEl('lbHistory').setAttribute('aria-pressed',String(lbView==='history'));lbEl('lbRules').setAttribute('aria-pressed',String(lbView==='rules'));
+ lbEl('lbActions').hidden=lbView==='rules'||lbView==='history';
+ lbEl('lbPrimary').textContent=lbMode==='friends'&&d?.total<=1?'Invite your first challenger':'Keep tapping';
+ lbEl('lbSecondary').textContent=lbMode==='friends'?'Invite friends':lbMode==='global'?'Coin Shop':lbHasVip()?'Ad boost':'Explore VIP';
+ if(lbView==='rules'){
+  content.innerHTML=`<div class="lb-detail"><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Podium medals:</b> The top three eligible players receive dated cosmetic badges after a two-minute closing check. No coin or cash prize. System accounts and currently banned accounts are excluded. Badges record the results at finalization.</p><p>Your coins and VIP remain when the Daily board resets. Medal races start on ${escapeHtml(d?.award_start_day?lbDate(d.award_start_day):'the first full UTC day after installation')}.</p></div>`;
+ }else if(lbView==='history'){
+  const h=lbHistoryData;
+  if(!h)content.innerHTML=`<div class="lb-empty">${lbLoading?'Loading verified medals…':'Medal history is unavailable. Use Retry above.'}</div>`;
+  else{
+   const own=h.my_awards.length?h.my_awards.map(a=>`<div class="lb-award">${lbMedalMarkup(a)}<strong>${formatNumber(a.score)} tap coins</strong></div>`).join(''):'<p>No medals yet. Your first podium finish will appear here.</p>';
+   let last='',podiums='';for(const a of h.podiums){if(a.day!==last){podiums+=`<h4>${escapeHtml(lbDate(a.day))}</h4>`;last=a.day;}podiums+=`<div class="lb-award"><span>#${a.place} · ${escapeHtml(a.display_name)}</span><strong>${formatNumber(a.score)}</strong></div>`;}
+   content.innerHTML=`<div class="lb-detail"><h3>Your medals</h3>${own}<h3>Verified podiums</h3>${podiums||'<p>No completed medal races yet. Results appear after a full UTC race day and the closing check.</p>'}${lbPager(lbHistoryPage,h.has_more,true)}</div>`;
   }
-}
-
-function closeLeaderboard() {
-  if (!leaderboardScreen) return;
-  leaderboardScreen.style.display = "none";
-  const main=document.getElementById("mainScroll");if(main)main.inert=false;
-  document.body.style.overflow = "";
-}
-
-lbCloseBtn.addEventListener("click", () => {
-  closeLeaderboard();
-  setActiveTab(tabFarm);
-});
-
-function renderMySummary(prefix, rank, total) {
-  if (!lbMySummaryText) return;
-  if (!rank || !total) {
-    lbMySummaryText.textContent = "Play to join the leaderboard.";
-    return;
+ }else if(!d){content.innerHTML=`<div class="lb-empty">${lbLoading?'Loading your race…':'Rank unavailable until the leaderboard reconnects.'}</div>`;
+ }else{
+  const me=d.me,target=d.overtake;
+  const title=me?.rank?`#${formatNumber(me.rank)} <span>of ${formatNumber(d.total)}</span>`:lbMode==='daily'?'Start today’s race':'Not currently ranked';
+  const targetText=target?`${formatNumber(target.need_points)} ${lbMode==='daily'?'tap coins':'coins'} to pass #${formatNumber(me.rank-1)}`:
+   me?.rank===1?(d.total>1?'You’re leading this race.':'Your first challenger is still to come.'):
+   lbMode==='daily'?'Your first confirmed tap puts you in today’s race.':'Your position appears when your account is eligible.';
+  const hero=`<div class="lb-race-card"><div class="lb-eyebrow">YOUR ${lbMode==='daily'?'DAILY':lbMode==='global'?'GLOBAL':'FRIENDS'} POSITION</div><div class="lb-race-value"><strong>${title}</strong><span>${formatNumber(me?.score||0)} ${lbMode==='daily'?'tap coins':'coins'}</span></div><p>${escapeHtml(targetText)}</p></div>`;
+  if(lbView==='full')content.innerHTML=hero+`<div class="lb-list">${d.entries.map(lbRow).join('')||'<p>No ranked players yet.</p>'}</div>`+lbPager(lbPage,d.has_more);
+  else{
+   const podium=d.podium.length?`<div class="lb-section-label">TOP THREE</div><div class="lb-podium">${d.podium.map(r=>`<div data-place="${r.rank}"><b>#${r.rank}</b><span>${escapeHtml(String(r.telegram_id)===lbOwner?'You':r.display_name)}</span><strong>${formatNumber(r.score)}</strong></div>`).join('')}</div>`:'';
+   // Your position is already pinned in the hero; show the adjacent rivals once.
+   const near=d.nearby.filter(r=>r.rank!==me?.rank&&Math.abs(r.rank-(me?.rank||0))<=1);
+   content.innerHTML=hero+podium+`<div class="lb-section-label">${near.length?'YOUR NEAREST RIVALS':'YOUR NEXT MOVE'}</div><div class="lb-list">${near.length?near.map(lbRow).join(''):`<div class="lb-empty">${lbMode==='friends'?'Invite a friend to start a personal race.':me?.rank?'Keep tapping to build your lead.':'Start tapping to set your first score.'}</div>`}</div>`;
   }
-  lbMySummaryText.textContent = `${prefix} #${formatNumber(rank)}`;
+ }
+ content.querySelectorAll('[data-lb-page]').forEach(button=>button.addEventListener('click',()=>{
+  const p=Number(button.dataset.lbPage);if(p<0||lbLoading)return;if(lbView==='history')lbHistoryPage=p;else lbPage=p;content.scrollTop=0;void lbLoad();
+ }));
+ lbTick();
 }
-
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function lbTick(){
+ const d=lbData,el=lbEl('lbClock');
+ if(lbView==='history'){el.textContent='Dated results · cosmetic badges';return;}
+ if(!d){el.textContent=lbMode==='daily'?'Today’s tap coins':lbMode==='friends'?'Your referral connections':'Saved coin balances';return;}
+ if(lbMode==='daily'){
+  const seconds=Math.max(0,Math.ceil((Date.parse(d.ends_at)-Date.now()-lbClockOffset)/1000));
+  const label=d.awards_enabled?'Ends in':'First medal race in';
+  el.textContent=seconds?`${label} ${Math.floor(seconds/3600)}h ${Math.floor(seconds%3600/60)}m ${seconds%60}s · UTC`:'New UTC day · updating…';
+ }else el.textContent=`${formatNumber(d.total)} players · ${lbMode==='friends'?'referral connections':'saved coins'}`;
+ el.title=lbLoadedAt?'Last loaded '+new Date(lbLoadedAt).toLocaleTimeString('en-GB'):'';
 }
-
-
-function renderList(items, getRank, getName, getValue, highlightTid) {
-  if (!lbContent) return;
-  if (!Array.isArray(items) || items.length === 0) {
-    lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">No data yet. Start playing to appear here.</div>';
-    return;
-  }
-  let html = "";
-  for (const row of items) {
-    const rank = getRank(row);
-    const nameRaw = getName(row) || "Player";
-    const name = escapeHtml(nameRaw);
-    const value = getValue(row);
-    const isMe = highlightTid && Number(row.telegram_id) === Number(highlightTid);
-    html += `
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:10px 12px;
-        margin-bottom:8px;
-        border-radius:12px;
-        background:${isMe ? "rgba(251,191,36,0.15)" : "rgba(15,23,42,0.9)"};
-        border:${isMe ? "1px solid rgba(251,191,36,0.8)" : "1px solid rgba(15,23,42,0.9)"};
-        font-size:13px;
-      ">
-        <div>
-          <div style="font-weight:600;">#${formatNumber(rank)} · ${dailyCosmeticMarkup(row.cosmetics||[],nameRaw)}</div>
-        </div>
-        <div style="text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;">
-          <div style="font-size:13px; font-weight:600; letter-spacing:0.01em;">${formatNumber(value)} pts</div>
-        </div>
-      </div>
-    `;
-  }
-  lbContent.innerHTML = html;
-}
-
-function loadGlobalLeaderboard() {
-  lbOvertakeBanner.style.display = "none";
-  lbOvertakeBanner.innerHTML = "";
-  lbFooterInvite.style.display = "block";
-  lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Loading global leaderboard…</div>';
-  apiPost("/api/leaderboard/global", {}).then((res) => {
-    if (!res || !res.ok) {
-      lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Error loading leaderboard.</div>';
-      renderMySummary("Global rank", null, null);
-      return;
-    }
-    const me = res.me || {};
-    renderMySummary("Global rank", me.global_rank, me.global_total);
-    renderList(
-      (res.global || []).slice(0, 10),
-      (row) => row.global_rank,
-      (row) => row.username || row.first_name || row.last_name,
-      (row) => row.balance || 0,
-      me.telegram_id
-    );
-  });
-}
-
-function loadDailyLeaderboard() {
-  lbOvertakeBanner.style.display = "none";
-  lbOvertakeBanner.innerHTML = "";
-  lbFooterInvite.style.display = "block";
-  lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Loading daily ranks…</div>';
-  apiPost("/api/leaderboard/daily", {}).then((res) => {
-    if (!res || !res.ok) {
-      lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Error loading daily leaderboard.</div>';
-      renderMySummary("Daily rank", null, null);
-      return;
-    }
-    const me = res.me || {};
-    renderMySummary("Daily rank", me.daily_rank, me.daily_total);
-    renderList(
-      (res.daily || []).slice(0, 10),
-      (row) => row.daily_rank,
-      (row) => row.username || row.first_name || row.last_name,
-      (row) => row.today_farmed || 0,
-      me.telegram_id
-    );
-  });
-}
-
-function loadFriendsLeaderboard() {
-  lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Loading friends leaderboard…</div>';
-  apiPost("/api/leaderboard/friends", {}).then((res) => {
-    if (!res || !res.ok) {
-      lbContent.innerHTML = '<div style="padding:24px; text-align:center; opacity:0.7;">Error loading friends leaderboard.</div>';
-      renderMySummary("Friends rank", null, null);
-      lbOvertakeBanner.style.display = "none";
-      lbOvertakeBanner.innerHTML = "";
-      lbFooterInvite.style.display = "block";
-      return;
-    }
-    const me = res.me || {};
-    renderMySummary("Friends rank", me.friend_rank, (res.friends || []).length);
-
-    if (res.overtake && res.overtake.target_display_name && typeof res.overtake.need_points === "number") {
-      lbOvertakeBanner.style.display = "block";
-      lbOvertakeBanner.innerHTML = `
-        <div style="
-          border-radius:16px;
-          padding:10px 12px;
-          background:linear-gradient(90deg,#fbbf24,#fb923c);
-          color:#111827;
-          font-size:13px;
-          font-weight:600;
-          text-align:left;
-          margin-bottom:4px;
-        ">
-          ⭐ Overtake ${res.overtake.target_display_name} by +${formatNumber(res.overtake.need_points)} pts
-        </div>
-      `;
-    } else {
-      lbOvertakeBanner.style.display = "none";
-      lbOvertakeBanner.innerHTML = "";
-    }
-
-    lbFooterInvite.style.display = "block";
-    renderList(
-      (res.friends || []).slice(0, 10),
-      (row) => row.friend_rank,
-      (row) => row.username || row.first_name || row.last_name,
-      (row) => row.balance || 0,
-      me.telegram_id
-    );
-  });
-}
-
-lbTabGlobal.addEventListener("click", () => {
-  setLeaderboardTabActive("global");
-  loadGlobalLeaderboard();
+lbEl('lbCloseBtn').addEventListener('click',()=>{closeLeaderboard();backToHome();});
+for(const mode of ['daily','global','friends'])lbEl('lbTab'+mode[0].toUpperCase()+mode.slice(1)).addEventListener('click',()=>lbSelectMode(mode));
+lbEl('lbRefresh').addEventListener('click',()=>{if(!lbLoading)void lbLoad(true);});
+lbEl('lbView').addEventListener('click',()=>{lbView=lbView==='overview'?'full':'overview';lbPage=0;lbEl('lbContent').scrollTop=0;void lbLoad();});
+lbEl('lbHistory').addEventListener('click',()=>{lbView='history';lbHistoryPage=0;lbEl('lbContent').scrollTop=0;lbTrack('view_history');void lbLoad();});
+lbEl('lbRules').addEventListener('click',()=>{lbEpoch++;lbLoading=false;lbView=lbView==='rules'?'overview':'rules';lbEl('lbContent').scrollTop=0;renderLeaderboard();});
+lbEl('lbPrimary').addEventListener('click',()=>{
+ if(lbMode==='friends'&&lbData?.total<=1){lbTrack('open_invite');closeLeaderboard();openFriendsSheet();}
+ else{lbTrack('keep_tapping');closeLeaderboard();backToHome();}
 });
-
-lbTabDaily.addEventListener("click", () => {
-  setLeaderboardTabActive("daily");
-  loadDailyLeaderboard();
+lbEl('lbSecondary').addEventListener('click',()=>{
+ const mode=lbMode,boost=mode==='daily'&&lbHasVip();lbTrack(boost?'open_rewards':mode==='daily'?'open_vip':mode==='global'?'open_shop':'open_invite');closeLeaderboard();
+ if(boost)openBoostSheet('sp_double_points');else if(mode==='daily')openVault();else if(mode==='global')openCoinShopSheet();else openFriendsSheet();
 });
-
-lbTabFriends.addEventListener("click", () => {
-  setLeaderboardTabActive("friends");
-  loadFriendsLeaderboard();
-});
+leaderboardScreen.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLeaderboard();backToHome();}});
+setInterval(()=>{
+ if(!lbVisible()||!accountIsReady())return;
+ if(lbIdentity()!==lbOwner){lbEnsureOwner();lbNextRefresh=0;renderLeaderboard();}
+ lbTick();
+ if(lbView==='rules'||lbView==='history'||lbLoading)return;
+ const boundary=lbData&&Date.parse(lbData.ends_at)<=Date.now()+lbClockOffset;
+ if(boundary&&lbMode==='daily'&&lbNextRefresh>Date.now()+2000){lbData=null;lbCache.clear();lbNextRefresh=0;}
+ if(Date.now()>=lbNextRefresh)void lbLoad(true);
+},1000);
+document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady()&&lbView!=='rules')void lbLoad(true);});
+// ---------------- END LEADERBOARD v12 ----------------
 
 // Init: render placeholders synchronously, then hydrate without blocking on config.
 loadStateLocal();
