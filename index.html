@@ -2023,8 +2023,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #boostSheet .boost-state{grid-column:1;font-size:11px;line-height:1.45;margin:0;min-height:0;color:#b9c8dc}
 #boostSheet .boost-action{grid-column:2;grid-row:1/3;align-self:center;min-height:44px;padding:8px;font-size:12px;line-height:1.3;width:100%;margin:0}
 #boostSheet .boost-streak{border-color:#41645b;background:linear-gradient(110deg,#182d31,#101d30)}
-#boostSheet .boost-streak[data-ready=true]{border-color:#dbb85f;background:linear-gradient(110deg,#343021,#101d30)}
-#boostSheet .boost-streak[data-ready=true] .boost-action:not(:disabled){background:#f8cb54;color:#251a05;border-color:#e1b94f}
+#boostSheet .boost-streak.boost-recommended{border-color:#dbb85f;background:linear-gradient(110deg,#343021,#101d30)}
+#boostSheet .boost-streak.boost-recommended .boost-action:not(:disabled){background:#f8cb54;color:#251a05;border-color:#e1b94f}
 #rewardsDailyAmount{font-size:12px}#rewardsDailyCard[data-claimed=true] #rewardsDailyAmount{color:#a8dcca}
 #boostSheet .boost-footnote{font-size:10px;line-height:1.5;margin:8px 2px}
 #homeDailySheet .sheet-body{padding:12px 14px 16px}
@@ -2086,6 +2086,11 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 #boostSheet.rewards-roomy .boost-action{min-height:56px;font-size:14px;padding:11px}
 #boostSheet.rewards-roomy #coinRewardAmount,#boostSheet.rewards-roomy #rewardsDailyAmount{font-size:15px}
 @media(max-width:350px){#boostSheet .boost-card{grid-template-columns:minmax(0,1fr) 106px;padding:11px;gap:5px 8px}#boostSheet .boost-card h3{font-size:14px}#boostSheet .boost-icon{width:26px;height:26px;flex-basis:26px;font-size:18px}#boostSheet .boost-state{font-size:11px}#boostSheet .boost-action{font-size:12px}}
+/* v5.3 polish: preserve approved sizing and card order. */
+#boostSheet .streak-benefit-preview{display:block;color:#dbd5a6;font-size:.92em;margin-top:2px}
+.home-celebration{padding:14px 24px;pointer-events:auto}
+.rank-share-action{display:block;min-height:44px;margin:8px auto 0;padding:8px 12px;border:1px solid #e6bf66;border-radius:10px;background:#f6ce65;color:#281c07;font:700 12px/1.3 system-ui;cursor:pointer}
+.rank-celebration-close{position:absolute;right:0;top:0;width:32px;height:32px;border:0;background:none;color:#d1dcee;font-size:22px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -3047,6 +3052,16 @@ function homeOvertakeModel(previous,current,identity,bestRank) {
 function homeEnergyLow(energy,cap) {
   return Number.isFinite(energy)&&energy>=0&&Number.isFinite(cap)&&cap>0&&energy<=cap*.2;
 }
+function homeCoinUnlock(tier) {
+  return ['bronze coin','gold coin','silver coin','jade coin','amethyst coin','Elite crown coin','Champion coin','Legend coin'][tier] || 'next coin';
+}
+function homeRankShareModel(value,identity,currentIdentity,balance,link) {
+  const rank=HOME_TIERS.find(t=>t.min===value&&t.min>0);
+  if(!rank||!Number.isSafeInteger(identity)||identity<=0||identity!==currentIdentity||!Number.isSafeInteger(balance)||balance<value)return null;
+  let url;try{url=new URL(link);}catch(_){return null;}
+  if(url.origin!=='https://t.me'||url.pathname.toLowerCase()!=='/jigcoinbot'||url.username||url.password)return null;
+  return {url:url.href,text:`I unlocked ${rank.name} in JigCoin! 🪙\n${value.toLocaleString('en-GB')} in-game coins milestone. Tap, collect and climb the ranks with me.`};
+}
 // End of pure Home models.
 let homeIdentity=null,homeMilestoneState=null,homeConfirmedBalance=null,homeCelebrationTimer=null;
 let homeRaceSnapshot=null,homeRaceSyncedAt=0,homeRaceAttemptAt=0,homeRaceBusy=false,homeLastHaptic=0;
@@ -3075,12 +3090,32 @@ function observeHomeConfirmedState(data) {
   appStorage.setItem(homeMilestoneKey(id),JSON.stringify(homeMilestoneState));
   if(updated.milestone && !document.hidden && !document.getElementById('mainScroll').inert)showHomeCelebration(updated.milestone);
 }
+function scheduleRankCelebrationDismiss(el) {
+  clearTimeout(homeCelebrationTimer);
+  homeCelebrationTimer=setTimeout(()=>{if(el.contains(document.activeElement)||el.matches(':hover'))return;el.hidden=true;},8000);
+}
+function shareHomeRank(value,identity) {
+  const payload=accountIsReady()?homeRankShareModel(value,identity,homeUserId(),homeConfirmedBalance,state.inviteLink):null;
+  if(!payload){showToast('Refresh your saved rank before sharing.');return;}
+  const url=`https://t.me/share/url?url=${encodeURIComponent(payload.url)}&text=${encodeURIComponent(payload.text)}`;
+  try{
+    if(typeof window.Telegram?.WebApp?.openTelegramLink==='function')window.Telegram.WebApp.openTelegramLink(url);
+    else window.open(url,'_blank','noopener,noreferrer');
+  }catch(_){showToast('Sharing is unavailable. Your rank is saved.');}
+}
 function showHomeCelebration(value) {
-  const rank=HOME_TIERS.find(tier=>tier.min===value);if(!rank)return;
+  const rank=HOME_TIERS.find(tier=>tier.min===value),identity=homeUserId();if(!rank||!identity)return;
   const el=document.getElementById('homeCelebration');
   el.replaceChildren(document.createTextNode(`${rank.name} unlocked!`));
   const sub=document.createElement('small');sub.textContent=`${formatNumber(value)} coins · Rank confirmed`;el.append(sub);el.hidden=false;
-  clearTimeout(homeCelebrationTimer);homeCelebrationTimer=setTimeout(()=>{el.hidden=true;},3500);
+  const share=document.createElement('button');share.type='button';share.className='rank-share-action';share.textContent='Share your new rank';
+  share.addEventListener('click',()=>shareHomeRank(value,identity));el.append(share);
+  const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='rank-celebration-close';dismiss.textContent='×';dismiss.setAttribute('aria-label','Dismiss rank celebration');
+  dismiss.addEventListener('click',()=>{clearTimeout(homeCelebrationTimer);el.hidden=true;document.getElementById('tapBtn').focus();});el.append(dismiss);
+  el.onfocusin=el.onpointerenter=()=>clearTimeout(homeCelebrationTimer);
+  el.onfocusout=el.onpointerleave=()=>scheduleRankCelebrationDismiss(el);
+  el.onkeydown=e=>{if(e.key==='Escape'){e.stopPropagation();dismiss.click();}};
+  scheduleRankCelebrationDismiss(el);
   try{if(appStorage.getItem('jigcoin_home_haptics')!=='off')window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success');}catch(_){}
 }
 function observeHomeRace(snapshot,id,now=Date.now()) {
@@ -3132,7 +3167,7 @@ function renderHomeProgress(view) {
   // animate the total but cannot unlock a rank before the server confirms it.
   const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null);
   document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
-  document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':`Next coin · ${formatNumber(goal.next)} total · Preview ›`):'Build your score, one tap at a time.';
+  document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':`Unlock the ${homeCoinUnlock(goal.tier+1)} · Preview ›`):'Build your score, one tap at a time.';
   document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
   document.getElementById('homeCoinWrap').dataset.coinTier=String(goal?.tier??0);
   rankNameEl.textContent=goal?goal.current.name:'—';
@@ -3335,6 +3370,14 @@ function updateDailyNotice(c,fresh,now){
   dailyNoticeTimer=setTimeout(()=>{if(notice.contains(document.activeElement))return;hideDailyNotice();},8000);
 }
 
+function dailyBenefitPreview(c) {
+  if(!c||c.broken)return '';
+  const candidates=(c.cosmetics||[]).filter(x=>!x.owned&&x.days>c.days).map(x=>({day:x.days,label:x.name,priority:0}));
+  if(c.next_tier?.day>c.days)candidates.push({day:c.next_tier.day,label:`+${c.next_tier.tap_bonus_percent}% tap coins`,priority:1});
+  candidates.sort((a,b)=>a.day-b.day||a.priority-b.priority);
+  if(candidates.length)return `Day ${candidates[0].day}: ${candidates[0].label}`;
+  return c.tier?.tap_bonus_percent>0?`+${c.tier.tap_bonus_percent}% tap coins active`:'';
+}
 function renderRestoreOption(c,fresh,now){
   const r=c?.restore,eligible=fresh&&c.broken&&r?.eligible&&Date.parse(r.expires_at)>now;
   const el=id=>document.getElementById(id);
@@ -3347,6 +3390,8 @@ function renderRestoreOption(c,fresh,now){
   el('rewardsDailyCard').dataset.claimed=String(!!(fresh&&c.claimed));
   el('rewardsDailyCard').dataset.ready=String(!!(fresh&&!c.claimed&&!c.broken));
   el('rewardsDailyStatus').textContent=!fresh?'Refresh to check your streak':c.broken?`${c.days}-day streak paused · Free restart${eligible?' or restore':''}`:c.claimed?`Day ${c.days} · Tomorrow ${formatNumber(c.next_reward)} coins`:`Day ${c.next_day} · Free, no advert`;
+  const benefit=fresh?dailyBenefitPreview(c):'';
+  if(benefit){const line=document.createElement('span');line.className='streak-benefit-preview';line.textContent=benefit;el('rewardsDailyStatus').append(line);}
   el('rewardsDailyAction').disabled=!accountIsReady()||dailyRewardsBusy;
   el('rewardsDailyAction').textContent=dailyRewardsBusy?'Saving…':!fresh?'Refresh daily rewards':c.broken?'View streak options':c.claimed?'Calendar & perks':`Collect ${formatNumber(c.today_reward)}`;
 }
@@ -3428,6 +3473,7 @@ function renderDailyRewards(){
   el('dailyCosmeticList').innerHTML=c?c.cosmetics.map(x=>`<div class="daily-cosmetic"><span class="cosmetic-avatar ${x.key==='veteran_frame'?'veteran':'aura'}" aria-hidden="true">J</span><div><b>${escapeHtml(x.name)}${x.owned?' · Owned ✓':''}</b><p>${x.owned?'Permanently unlocked':`Reach ${Number(x.days)} consecutive check-ins`} · ${x.key==='veteran_frame'?'Profile frame on leaderboards':'Coin glow & leaderboard badge'}</p></div></div>`).join(''):'';
   el('dailyRewardMilestones').textContent=c?c.milestones.map(m=>`Day ${m.day}: ${num(m.reward)} coins`).join(' · ')+'. Includes the daily reward; each milestone bonus is awarded once per streak.':'';
   renderRestoreOption(c,fresh,now);
+  updateRewardRecommendation();
   updateDailyNotice(c,fresh,now);
   el('dailyReminder').checked=appStorage.getItem('jigcoin_daily_reminder:'+id)==='on';
   const event=progressionCurrent()?.event,live=event?.status==='live'&&Date.parse(event.ends_at)>now;
@@ -5171,7 +5217,7 @@ function getBoostView(code, mission, now=Date.now()) {
     return {...blocked('Energy is full'),detail:'Use some energy before watching a refill advert.'};
   const until=Date.parse(state.doubleBoostUntil||'');
   if (code==='sp_double_points' && (until>now || (state.doubleBoostActive && !Number.isFinite(until))))
-    return {action:'play',disabled:false,label:'Back to tapping · 2× active',detail:Number.isFinite(until)?`2× taps · ${msToCountdown(until-now)} remaining`:'2× tap coins are active.'};
+    return {action:'play',disabled:false,label:'Back to tapping',detail:Number.isFinite(until)?`2× taps · ${msToCountdown(until-now)} remaining`:'2× tap coins are active.'};
   if (boostLoadError) return {...blocked('Temporarily unavailable'),detail:'Check availability again below.'};
   if (!mission) return blocked('Checking availability…');
   const age=Math.max(0,(now-Number(mission.countdown_as_of_ms||hubMissionLoadedAt||now))/1000);
@@ -5188,8 +5234,28 @@ function getBoostView(code, mission, now=Date.now()) {
   const policy=rewardCooldownLabel(mission);
   return {action:'start',disabled:false,label:code==='sp_visit_partner'?`Watch ad · +${Number(mission.payout_amount)||200}`:code==='sp_emergency_energy'?'Watch ad · Refill':'Watch ad · 2×',detail:`${benefit}${policy?` · Every ${policy}`:''}`};
 }
+function rewardRecommendation(views,{dailyReady=false,busy=false,energy=0,cap=50}={}) {
+  if(busy)return null;
+  const available=views.filter(v=>!v.view.disabled);
+  const confirmed=available.find(v=>v.view.action==='claim');
+  if(confirmed)return confirmed.code;
+  if(dailyReady)return 'daily';
+  const start=code=>available.find(v=>v.code===code&&v.view.action==='start');
+  if(energy<=cap*.2&&start('sp_emergency_energy'))return 'sp_emergency_energy';
+  if(energy>cap*.2&&start('sp_double_points'))return 'sp_double_points';
+  return start('sp_visit_partner')?.code||available.find(v=>v.view.action==='play')?.code||null;
+}
+function updateRewardRecommendation() {
+  const c=dailyCheckinModel();
+  const dailyReady=!!c&&!c.claimed&&!c.broken&&!progressionError&&Date.parse(c.resets_at)>progressionNow()&&accountIsReady();
+  const views=Object.keys(BOOST_PLACEMENTS).map(code=>({code,view:getBoostView(code,hubMissions.find(m=>m.code===code))}));
+  const preferred=rewardRecommendation(views,{dailyReady,busy:!accountIsReady()||window.__rewardActionBusy||dailyRewardsBusy||restorePurchaseBusy,energy:Number(state.energy||0),cap:Number(maxEnergy||50)});
+  document.getElementById('rewardsDailyCard').classList.toggle('boost-recommended',preferred==='daily');
+  for(const {code} of views)boostSheet.querySelector(`[data-boost-code="${code}"]`)?.classList.toggle('boost-recommended',preferred===code);
+  const claim=views.find(v=>v.code===preferred)?.view.action==='claim';
+  document.getElementById('boostRecommendation').textContent=claim?'A confirmed reward is ready for you.':preferred==='daily'?'Your free daily reward is ready.':preferred==='sp_emergency_energy'?'Low on energy? A refill is available.':preferred==='sp_double_points'?'Continue your tapping session.':'Choose your next reward.';
+}
 function renderBoostCards() {
-  const views=[];
   const coinMission=hubMissions.find(m=>m.code==='sp_visit_partner');
   document.getElementById('coinRewardAmount').textContent=coinMission?`+${Number(coinMission.payout_amount)||200}`:'…';
   for (const [code,placement] of Object.entries(BOOST_PLACEMENTS)) {
@@ -5197,13 +5263,9 @@ function renderBoostCards() {
     const button=document.getElementById(placement.button),status=document.getElementById(placement.status);
     button.textContent=view.label; button.disabled=view.disabled; button.dataset.action=view.action;
     button.setAttribute('aria-label',`${view.label}: ${placement.name}`); status.textContent=view.detail;
-    boostSheet.querySelector(`[data-boost-code="${code}"]`)?.classList.remove('boost-recommended');
-    if (!view.disabled) views.push({code,view});
+
   }
-  const lowEnergy=Number(state.energy||0)<=Number(maxEnergy||50)/4;
-  const preferred=views.find(v=>v.view.action==='claim') || views.find(v=>v.code===(lowEnergy?'sp_emergency_energy':'sp_visit_partner'));
-  if (preferred) boostSheet.querySelector(`[data-boost-code="${preferred.code}"]`)?.classList.add('boost-recommended');
-  document.getElementById('boostRecommendation').textContent=preferred?.view.action==='claim'?'A confirmed reward is ready for you.':lowEnergy?'Low on energy? Refill before your next tapping session.':'Choose your next reward.';
+  updateRewardRecommendation();
   document.getElementById('boostRefresh').hidden=!boostLoadError && hubMissions.some(m=>BOOST_PLACEMENTS[m.code]);
 }
 function refreshBoostMissions() {
