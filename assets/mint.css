@@ -290,7 +290,18 @@
 }
 
 /* The scene and the tap target occupy the same grid track. Only the art changes at a rank milestone. */
-.tap-card, #crownPreview { --press-light: #e5af67; --press-tint: none; }
+/* Set the accent on both the fitted Home press and the cabinet preview. */
+:where(.tap-card, #crownPreview) {
+  --press-light: #e5af67;
+  --press-tint: none;
+  --press-glow: #edb15c30;
+}
+[data-finish="rank-0"] { --press-light: #e8ae8a; --press-tint: sepia(.15) saturate(.78); --press-glow: #c57c5535; }
+[data-finish="rank-3"] { --press-light: #8edfc9; --press-tint: hue-rotate(99deg) saturate(.67); --press-glow: #77e3bf38; }
+[data-finish="rank-4"] { --press-light: #d5b4f6; --press-tint: hue-rotate(229deg) saturate(.66); --press-glow: #b48ade42; }
+[data-finish="rank-5"] { --press-light: #dac78c; --press-tint: saturate(.34) brightness(.68); --press-glow: #d4aa4434; }
+[data-finish="rank-6"] { --press-light: #efb2b0; --press-tint: hue-rotate(318deg) saturate(.82); --press-glow: #cd607c42; }
+[data-finish="rank-7"] { --press-light: #e8e9f0; --press-tint: saturate(.12) brightness(1.07); --press-glow: #e2e7ec36; }
 [data-finish="rank-2"] { --press-light: #92e6ff; --press-tint: hue-rotate(150deg) saturate(.86); }
 [data-finish="midnight"] { --press-light: #e8ce92; --press-tint: saturate(.5) brightness(.8); }
 #mainScroll .tap-card { isolation: isolate; }
@@ -316,7 +327,7 @@
 }
 .mint-press-scene::after, .mint-cabinet-scene::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 57%,#edb15c30,transparent 65%);
+  background: radial-gradient(ellipse at 50% 57%,var(--press-glow),transparent 65%);
 }
 [data-finish="rank-2"] :is(.mint-press-scene,.mint-cabinet-scene)::after {
   background: radial-gradient(ellipse at 65% 44%,#a16feb45,transparent 60%),radial-gradient(ellipse at 29% 63%,#65e3ff50,transparent 55%);
@@ -329,6 +340,10 @@
 .mint-cabinet-scene { position: relative; isolation: isolate; display: grid; place-items:center; overflow:hidden; border-radius: 12px; min-height: 0; padding: 10px; }
 #cabinetCoin { display: block; z-index: 1; width: min(46vw,23dvh,170px); aspect-ratio: 1; }
 #crownPreview #cabinetCoin img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.mint-preview-heading { display:grid; grid-template-columns:44px minmax(0,1fr) 44px; align-items:center; margin:2px 0; }
+#crownPreview .mint-preview-heading button { width:44px; height:44px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--press-light); font:30px/1 system-ui; cursor:pointer; }
+#crownPreview .mint-preview-heading h2 { margin:0; font-size:clamp(18px,5vw,23px); line-height:1.1; }
+#crownPreview #cabinetCoin svg { display:block; width:100%; height:100%; }
 #crownPreview .mint-swatches { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; margin: 10px 0; }
 #crownPreview .mint-swatches button { padding: 5px; min-height: 44px; border: 1px solid #59646b; border-radius: 8px; background: #18232e; color: #e4eaf0; font: 600 12px/1.2 system-ui; }
 #crownPreview .mint-swatches [aria-pressed="true"] { color: #181c21; border-color: var(--press-light); background: var(--press-light); }

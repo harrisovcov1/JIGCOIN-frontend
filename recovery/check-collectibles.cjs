@@ -7,7 +7,24 @@ function setup(){const els=new Map(),store=new Map(),calls=[];let time=1000;
  vm.createContext(ctx);vm.runInContext(code,ctx);return {ctx,calls,els,store,setTime:t=>time=t};
 }
 const fixture=()=>({ok:true,telegram_id:10001,server_now:'2026-11-16T12:00:00Z',daily:{day:'2026-11-16',progress:100,target:100,reward:50,eligible:true,claimed:false,resets_at:'2026-11-17T00:00:00Z'},event:{key:'launch-edition-1',owned:false,eligible:false,status:'upcoming',target:250,progress:0}});
-test('all inline scripts parse and SVG tier assets differ structurally',()=>{for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);const {ctx}=setup();const art=Array.from({length:8},(_,i)=>ctx.coinArtwork(i).replaceAll(/jc-art-\d+/g,'id'));assert.equal(new Set(art).size,8);assert.match(ctx.coinArtwork(1,true),/LAUNCH EDITION/);assert.ok(art.every(s=>!/<script|https?:|onload/i.test(s)));});
+test('all inline scripts parse and each saved rank uses a distinct bundled WebP',()=>{
+ for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) new vm.Script(m[1]);
+ const {ctx}=setup();
+ const artwork=new Set();
+ for(let tier=0;tier<8;tier++){
+  const markup=ctx.coinArtwork(tier);
+  const path=markup.match(/src="(\.\/assets\/[a-z-]+\.webp)"/)?.[1];
+  assert.ok(path,'Missing rank image for tier '+tier);
+  const asset=fs.readFileSync(path);
+  assert.equal(asset.toString('ascii',0,4),'RIFF');
+  assert.equal(asset.toString('ascii',8,12),'WEBP');
+  artwork.add(require('node:crypto').createHash('sha256').update(asset).digest('hex'));
+  assert.doesNotMatch(markup,/<script|https?:|onload/i);
+ }
+ assert.equal(artwork.size,8);
+ assert.match(ctx.coinArtwork(1,true),/LAUNCH EDITION/);
+ assert.match(ctx.coinArtwork(1,'vip'),/midnight-crown\.webp/);
+});
 test('a saved local skin preference cannot equip an unowned collectible or another account skin',()=>{const {ctx,store}=setup();store.set('jigcoin_launch_skin:10001','on');assert.equal(ctx.launchEquipped(),false);ctx.response=fixture();vm.runInContext('progressionState=response;',ctx);assert.equal(ctx.launchEquipped(),false);ctx.response.event.owned=true;assert.equal(ctx.launchEquipped(),true);ctx.homeUserId=()=>10002;assert.equal(ctx.launchEquipped(),false);assert.equal(ctx.progressionCurrent(),null);});
 test('initial status loads immediately without needing a fifteen-second wait',async()=>{const {ctx,calls}=setup();ctx.response=fixture();await ctx.refreshProgression();assert.equal(calls[0][0],'/api/progression');assert.equal(ctx.progressionCurrent().daily.progress,100);});
 test('failed refresh never shifts the authoritative countdown backwards',async()=>{const {ctx,setTime}=setup();ctx.response=fixture();await ctx.refreshProgression(true);const initial=ctx.progressionNow();setTime(11000);ctx.apiPost=async()=>{throw Error('offline');};await ctx.refreshProgression(true);assert.equal(ctx.progressionNow(),initial+10000);});

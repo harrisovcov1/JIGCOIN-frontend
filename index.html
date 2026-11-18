@@ -2798,8 +2798,8 @@ body{justify-content:flex-start}
 #pilotMedalList{white-space:pre-line;font-size:13px;padding:8px}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
-  <link rel="stylesheet" href="./assets/mint.css">
-  <script defer src="./assets/race-card.js"></script>
+  <link rel="stylesheet" href="./assets/mint.css?v=full-ranks-1">
+  <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -3034,7 +3034,11 @@ Three free runs</button>
   </div>
   <dialog id="crownPreview" aria-labelledby="crownPreviewTitle">
     <div class="mint-cabinet-scene"><span id="cabinetCoin" aria-hidden="true"></span></div>
-    <h2 id="crownPreviewTitle">Midnight Crown</h2>
+    <div class="mint-preview-heading">
+      <button type="button" data-browse-rank="previous" aria-label="Preview previous rank finish">‹</button>
+      <h2 id="crownPreviewTitle" aria-live="polite">Midnight Crown</h2>
+      <button type="button" data-browse-rank="next" aria-label="Preview next rank finish">›</button>
+    </div>
     <p id="cabinetCaption">Black enamel and gold laurel. Included with active VIP.</p>
     <div class="mint-swatches" role="group" aria-label="Preview a coin finish">
       <button type="button" data-try-finish="rank-1">Foundry Gold</button>
@@ -3499,15 +3503,20 @@ const HOME_TIERS = Object.freeze([
 ].map(Object.freeze));
 const rankConfig = HOME_TIERS.map((tier,i)=>({...tier,max:HOME_TIERS[i+1]?.min??Infinity}));
 
-const MINT_FINISHES = {
-  'rank-1': {name:'Foundry Gold',art:'./assets/foundry-gold.webp',caption:'Brushed brass and amber inlays. Grinder rank at 10,000 saved coins.'},
-  'rank-2': {name:'Aurora Glass',art:'./assets/aurora-glass.webp',caption:'Silver over blue and violet glass. Operator rank at 50,000 saved coins.'},
-  midnight: {name:'Midnight Crown',art:'./assets/midnight-crown.webp',caption:'Black enamel and gold laurel. Equip it in the Vault with active VIP.'}
-};
+const MINT_FINISHES = Object.freeze({
+  'rank-0': { name: 'Copper Strike', art: './assets/recruit-copper.webp', caption: 'Brushed copper with concentric lathe grooves.' },
+  'rank-1': { name: 'Foundry Gold', art: './assets/foundry-gold.webp', caption: 'Brushed brass and amber inlays.' },
+  'rank-2': { name: 'Aurora Glass', art: './assets/aurora-glass.webp', caption: 'Silver over blue and violet glass.' },
+  'rank-3': { name: 'Jade Sentinel', art: './assets/commander-jade.webp', caption: 'Deep jade framed by silver chevrons.' },
+  'rank-4': { name: 'Amethyst Prism', art: './assets/general-amethyst.webp', caption: 'Faceted amethyst around a raised silver J.' },
+  'rank-5': { name: 'Onyx Crest', art: './assets/elite-onyx.webp', caption: 'A gold starburst engraved into polished black onyx.' },
+  'rank-6': { name: 'Garnet Laurel', art: './assets/champion-garnet.webp', caption: 'Rose-gold laurel around a deep garnet face.' },
+  'rank-7': { name: 'Platinum Sovereign', art: './assets/legend-platinum.webp', caption: 'Mother-of-pearl set in platinum beneath a gold crown.' },
+  midnight: { name: 'Midnight Crown', art: './assets/midnight-crown.webp', caption: 'Black enamel and gold laurel. Equip it in the Vault with active VIP.' },
+  launch: { name: 'Launch Edition', caption: 'Gold wings on navy enamel. Earned in the Launch Edition event.' }
+});
 function mintFinishName(key) {
-  if(MINT_FINISHES[key]) return MINT_FINISHES[key].name;
-  if(key==='launch') return 'Launch Edition';
-  return /^rank-[0-7]$/.test(key) ? HOME_TIERS[Number(key.slice(-1))].name : 'Finish unrecorded';
+  return Object.hasOwn(MINT_FINISHES,key) ? MINT_FINISHES[key].name : 'Finish unrecorded';
 }
 
 const state = {
@@ -3858,7 +3867,29 @@ function openHomeJourney(showSync=false){
   document.getElementById('journeySettings').open=showSync;
   document.getElementById('homeJourneyNext').textContent=next?`${formatNumber(Math.max(0,next.min-homeConfirmedBalance))} coins to go · ${formatNumber(next.min)} total`:'JigCoin Legend unlocked · Keep climbing the leaderboard.';
   const grid=document.getElementById('homeTierGrid');grid.replaceChildren();
-  HOME_TIERS.forEach((t,i)=>{const finish=MINT_FINISHES['rank-'+i];const item=document.createElement(finish?'button':'div');if(finish){item.type='button';item.dataset.tryFinish='rank-'+i;item.setAttribute('aria-label','Preview '+finish.name+' · '+t.name);}item.className='coin-tier';item.dataset.coinTier=String(i);item.dataset.current=String(i===tier);item.dataset.stage=i===tier?'current':i===tier+1?'next':i<tier?'earned':'locked';const coin=document.createElement('span');coin.className='mini-coin';coin.innerHTML=coinArtwork(i);coin.setAttribute('aria-hidden','true');const name=document.createElement('strong');name.textContent=t.name;const detail=document.createElement('small');detail.textContent=`${formatNumber(t.min)}${i===tier?' · Current':i===tier+1?' · Next':''}`;item.append(coin,name,detail);grid.append(item);});
+  HOME_TIERS.forEach((rank,index)=>{
+    const key='rank-'+index;
+    const current=index===tier;
+    const next=index===tier+1;
+    const item=document.createElement('button');
+    item.type='button';
+    item.className='coin-tier';
+    item.dataset.tryFinish=key;
+    item.dataset.coinTier=String(index);
+    item.dataset.current=String(current);
+    item.dataset.stage=current?'current':next?'next':index<tier?'earned':'locked';
+    item.setAttribute('aria-label','Preview '+mintFinishName(key)+' · '+rank.name);
+    const coin=document.createElement('span');
+    coin.className='mini-coin';
+    coin.setAttribute('aria-hidden','true');
+    coin.innerHTML=coinArtwork(index);
+    const name=document.createElement('strong');
+    name.textContent=rank.name;
+    const detail=document.createElement('small');
+    detail.textContent=formatNumber(rank.min)+(current?' · Current':next?' · Next':'');
+    item.append(coin,name,detail);
+    grid.append(item);
+  });
   const milestone=homeMajorMilestones().filter(n=>n<=(homeMilestoneState?.highWater||0)).at(-1);
   const highest=HOME_TIERS.find(tier=>tier.min===milestone);
   document.getElementById('homeMilestoneRecord').textContent=highest?`Highest rank recorded here: ${highest.name} · ${formatNumber(milestone)} coins`:'First rank unlock: Grinder · 10,000 coins';
@@ -3885,12 +3916,14 @@ function mintFinishArtwork(key) {
   return '<span class="mint-archive-coin" aria-hidden="true">J</span>';
 }
 function previewMint(key) {
-  if(!MINT_FINISHES[key]) key='rank-1';
+  if(!Object.hasOwn(MINT_FINISHES,key)) key='rank-0';
   const dialog=document.getElementById('crownPreview');
   dialog.dataset.finish=key;
   document.getElementById('cabinetCoin').innerHTML=mintFinishArtwork(key);
   document.getElementById('crownPreviewTitle').textContent=MINT_FINISHES[key].name;
-  document.getElementById('cabinetCaption').textContent=MINT_FINISHES[key].caption;
+  const rank=key.startsWith('rank-') ? HOME_TIERS[Number(key.slice(5))] : null;
+  const caption=MINT_FINISHES[key].caption;
+  document.getElementById('cabinetCaption').textContent=rank ? caption+' '+rank.name+' · '+(rank.min ? formatNumber(rank.min)+' saved coins.' : 'Starting finish.') : caption;
   for(const option of dialog.querySelectorAll('[data-try-finish]')) option.setAttribute('aria-pressed',String(option.dataset.tryFinish===key));
   if(!dialog.open) dialog.showModal();
 }
@@ -7064,6 +7097,15 @@ initFromBackend();
   window.JigPilot={sync,canRefill,equipped,renderCoin,openRace,setStyle};
   el('shopVipPass').addEventListener('click',openVault);
   el('pilotPreviewOpen').addEventListener('click',()=>previewMint('midnight'));
+  el('crownPreview').addEventListener('click',event=>{
+    const arrow=event.target.closest('[data-browse-rank]');
+    if(!arrow) return;
+    const forwards=arrow.dataset.browseRank==='next';
+    const key=el('crownPreview').dataset.finish;
+    const current=key.startsWith('rank-') ? Number(key.slice(5)) : forwards ? -1 : 0;
+    const target=(current+(forwards?1:-1)+HOME_TIERS.length)%HOME_TIERS.length;
+    previewMint('rank-'+target);
+  });
   el('mintCabinetOpen').addEventListener('click',()=>previewMint(document.querySelector('.tap-card').dataset.finish));
   document.addEventListener('click',event=>{
     const choice=event.target.closest('[data-try-finish]');

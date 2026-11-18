@@ -12,6 +12,99 @@ refill='sp_emergency_energy'
 coin='sp_visit_partner'
 boost='sp_double_points'
 
+RANKS = [
+    (0, 'Copper Strike', 'recruit-copper.webp'),
+    (10_000, 'Foundry Gold', 'foundry-gold.webp'),
+    (50_000, 'Aurora Glass', 'aurora-glass.webp'),
+    (150_000, 'Jade Sentinel', 'commander-jade.webp'),
+    (500_000, 'Amethyst Prism', 'general-amethyst.webp'),
+    (1_500_000, 'Onyx Crest', 'elite-onyx.webp'),
+    (5_000_000, 'Garnet Laurel', 'champion-garnet.webp'),
+    (10_000_000, 'Platinum Sovereign', 'legend-platinum.webp'),
+]
+
+def expect_art(image, rank):
+    expect(image).to_have_attribute('src', './assets/' + RANKS[rank][2])
+    assert image.evaluate('async img => { await img.decode(); return img.naturalWidth > 0 }')
+
+def check_rank_ladder(page, account, initial_bounds):
+    home_coin = page.locator('#homeCoinArtwork img')
+    home_name = page.locator('#mintFinishName')
+    tap = page.locator('#tapBtn')
+    filters = set()
+
+    def set_balance(balance, rank):
+        account['balance'] = balance
+        page.evaluate('refreshState()')
+        expect(home_name).to_have_text(RANKS[rank][1])
+        expect(page.locator('#mintPressCard')).to_have_attribute('data-finish', f'rank-{rank}')
+        expect_art(home_coin, rank)
+        expect_art(page.locator('#homeNextCoin img'), min(rank + 1, len(RANKS) - 1))
+        dismiss = page.locator('.rank-celebration-close')
+        if dismiss.is_visible():
+            dismiss.click()
+        bounds = tap.bounding_box()
+        assert [bounds[key] for key in ('width', 'height')] == [initial_bounds[key] for key in ('width', 'height')]
+        assert tap.evaluate('el => { const b = el.getBoundingClientRect(); return el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2)) }')
+
+    for rank, (threshold, name, _) in enumerate(RANKS):
+        if rank:
+            set_balance(threshold - 1, rank - 1)
+        set_balance(threshold, rank)
+        filters.add(page.locator('.mint-press-scene').evaluate("el => getComputedStyle(el, '::before').filter"))
+        page.locator('#tabWithdraw').click()
+        expect_art(page.locator('#vaultRankArt img'), rank)
+        page.locator('#tabFarm').click()
+    assert len(filters) == len(RANKS), filters
+
+    set_balance(10_000, 1)
+    page.locator('#homeJourneyOpen').click()
+    expect(page.locator('#homeTierGrid button[data-try-finish]')).to_have_count(len(RANKS))
+    for rank, (_, name, _) in enumerate(RANKS):
+        tier = page.locator(f'#homeTierGrid [data-try-finish="rank-{rank}"]')
+        expect_art(tier.locator('img'), rank)
+        tier.click()
+        expect(page.locator('#crownPreviewTitle')).to_have_text(name)
+        expect_art(page.locator('#cabinetCoin img'), rank)
+        page.locator('#crownPreview [type=submit]').click()
+    page.locator('#homeJourneyClose').click()
+    expect(home_name).to_have_text('Foundry Gold')
+    page.locator('#mintCabinetOpen').click()
+    page.locator('#crownPreview [data-browse-rank="previous"]').click()
+    expect_art(page.locator('#cabinetCoin img'), 0)
+    page.locator('#crownPreview [data-browse-rank="next"]').click()
+    expect_art(page.locator('#cabinetCoin img'), 1)
+    page.locator('#crownPreview [type=submit]').click()
+
+def check_race_art(page, account):
+    # Verify the actual exported PNG contains the same artwork as each frozen finish.
+    for left in range(0, len(RANKS), 2):
+        account['race_finishes'] = [f'rank-{left}', f'rank-{left + 1}']
+        page.locator('[data-race-action=reload]').click()
+        photos = page.locator('.race-finish img')
+        for i, rank in enumerate([left, left + 1]):
+            expect_art(photos.nth(i), rank)
+            expect(page.locator('.race-specimen').nth(i)).to_contain_text(RANKS[rank][1])
+        page.locator('[data-race-action=image]').click()
+        expect(page.locator('#resultImage')).to_be_visible()
+        errors = page.locator('#raceCardImage').evaluate("""async png => {
+            await png.decode();
+            const canvas = document.createElement('canvas');
+            canvas.width = png.naturalWidth; canvas.height = png.naturalHeight;
+            const ctx = canvas.getContext('2d', {willReadFrequently:true});
+            ctx.drawImage(png, 0, 0);
+            return [...document.querySelectorAll('.race-finish img')].map((coin,i) => {
+                const x = i === 0 ? 228 : 652, y = 248;
+                // Interior pixels avoid the medal's antialiased outer clipping path.
+                const actual = ctx.getImageData(x-25,y-25,50,50).data;
+                ctx.drawImage(coin,x-77,y-77,154,154);
+                const expected = ctx.getImageData(x-25,y-25,50,50).data;
+                return actual.reduce((sum,val,index) => sum + Math.abs(val-expected[index]),0) / actual.length;
+            });
+        }""")
+        assert max(errors) < 1, (account['race_finishes'], errors)
+        page.locator('#resultImage [type=submit]').click()
+
 def check(browser,width,height):
     context=browser.new_context(viewport={'width':width,'height':height},is_mobile=True,has_touch=True, reduced_motion='reduce',service_workers='block')
     page=context.new_page()
@@ -23,6 +116,7 @@ def check(browser,width,height):
     calls=[]
     rival_code='2'*20
     card_code='a'*32
+    a['race_finishes'] = ['rank-2','rank-1']
     def screenshot(label):
         destination=os.getenv('JIGCOIN_SCREENSHOT_DIR')
         if destination and width==390:
@@ -61,8 +155,8 @@ def check(browser,width,height):
             out=dict(ok=True,telegram_id=str(tg),server_now=iso(now()),week='2026-11-16',closes_at=iso(now()+timedelta(days=3)),runs_left=a['left'],seconds=45,run=run,best=score,place=1 if score else None,share_code='1'*20 if score else None,leaders=[{'place':1,'name':'Northstar','score':4,'me':False,'share_code':rival_code}],rival=None)
             if score and run and not run['live'] and (d.get('rival')==rival_code or d.get('card')==card_code):
                 out['result']={'code':card_code,'week':out['week'],'margin':3,'players':[
-                    {'name':'Northstar','me':False,'score':4,'slot':2,'finish':'rank-2','challenge':rival_code},
-                    {'name':'Pilot','me':True,'score':1,'slot':1,'finish':'rank-1','challenge':'1'*20}]}
+                    {'name':'Northstar','me':False,'score':4,'slot':2,'finish':a['race_finishes'][0],'challenge':rival_code},
+                    {'name':'Pilot','me':True,'score':1,'slot':1,'finish':a['race_finishes'][1],'challenge':'1'*20}]}
         if p.startswith('/api/stars/catalog'):
             packs=[(1000,100),(3000,250),(7000,500),(37500,2500),(700000,35000)]
             out=dict(ok=True,telegram_id=tg,server_now=iso(now()),enabled=True,products=[dict(sku='JC_P'+str(i),coins=c,stars=s,title='Coin pack') for i,(c,s) in enumerate(packs)],recent_orders=[])
@@ -104,6 +198,7 @@ def check(browser,width,height):
         celebration=page.locator('.rank-celebration-close')
         if celebration.is_visible(): celebration.click()
         screenshot('aurora')
+        check_rank_ladder(page, a, coin_size)
         a['balance']=17800
         page.evaluate('async()=>{await refreshState()}')
         page.locator('#homeBoostAction').click()
@@ -132,6 +227,7 @@ def check(browser,width,height):
         expect(page.locator('#resultImage')).to_be_visible()
         assert page.locator('#raceCardImage').evaluate('x=>x.decode().then(()=>[x.naturalWidth,x.naturalHeight])')==[880,540]
         page.locator('#resultImage [type=submit]').click()
+        check_race_art(page, a)
         # A shared result can be opened from a fresh launch without spending a run.
         starts=calls.count('/api/weekly/start')
         page.goto(base+'/?tgWebAppStartParam=ref_101__src_duel_'+card_code,wait_until='domcontentloaded')
@@ -192,7 +288,7 @@ def check(browser,width,height):
         assert not [c for c in calls if c.endswith('/invoice') or c.endswith('/create-checkout')]
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert not errors,errors
-        print(f'{width}x{height}: fixed coin bounds at 50,000, cabinet, race result/deep link/rematch/PNG, VIP, shop and ad recovery passed',flush=True)
+        print(f'{width}x{height}: all eight saved-rank thresholds, fixed tap size, cabinet, rank journey, Vault, race images/PNGs, deep link/rematch, VIP, shop and ad recovery passed',flush=True)
     except Exception:
         print('Client errors:',errors,'recent paths:',calls[-16:],'account:',page.evaluate('window.__accountPhase'),'view:',page.locator('.sheet.show').all_text_contents().__str__()[:350],flush=True)
         raise

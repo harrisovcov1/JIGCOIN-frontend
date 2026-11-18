@@ -11,7 +11,7 @@ window.JigRaceCard = (() => {
   }
 
   async function coinImage(key) {
-    if (MINT_FINISHES[key]) return imageFrom(MINT_FINISHES[key].art);
+    if (Object.hasOwn(MINT_FINISHES,key) && MINT_FINISHES[key].art) return imageFrom(MINT_FINISHES[key].art);
     if (!key) return null;
     const box = document.createElement('div');
     box.innerHTML = mintFinishArtwork(key);
