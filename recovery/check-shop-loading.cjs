@@ -61,9 +61,12 @@ test('ready event preloads once; no requests run before account confirmation',as
 });
 test('cold Home has neutral artwork until a rank is confirmed and recovers without stale SVG',()=>{
   const c=setup();c.ctx.progressionCurrent=()=>null;c.ctx.launchEquipped=()=>false;
+  c.ctx.homeIdentity=c.ctx.homeUserId();
+  const themes=[];c.ctx.syncMintWorld=tier=>themes.push(tier);
   const rendered=[];c.ctx.setCoinArtwork=(el,tier)=>{rendered.push(tier);el.innerHTML='tier-'+tier;el.dataset.artwork=String(tier);};
   const start=html.indexOf('function renderCollectibleCoin('),end=html.indexOf('async function refreshProgression',start);vm.runInContext(html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+html.slice(start,end),c.ctx);
   c.ready(false);c.ctx.renderCollectibleCoin(null);assert.equal(rendered.length,0);assert.equal(c.els.get('homeCoinWrap').dataset.loading,'true');
   c.ready(true);c.ctx.renderCollectibleCoin({tier:1,nextName:'Operator'});assert.deepEqual(rendered,[1,2]);assert.equal(c.els.get('homeCoinWrap').dataset.loading,'false');
   c.ready(false);c.ctx.renderCollectibleCoin({tier:1});assert.equal(c.els.get('homeCoinArtwork').innerHTML,'');assert.equal(c.els.get('homeCoinArtwork').dataset.artwork,undefined);
+  assert.deepEqual(themes,[null,1,null]);
 });

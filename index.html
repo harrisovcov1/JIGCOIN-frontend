@@ -2799,25 +2799,37 @@ body{justify-content:flex-start}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
   <link rel="stylesheet" href="./assets/mint.css?v=full-ranks-1">
+  <link rel="stylesheet" href="./assets/mint-world.css?v=worlds-1">
+  <link rel="stylesheet" href="./assets/mint-home.css?v=worlds-1">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
 </head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
-    <div class="header">
+    <header class="header mint-dashboard">
+      <div class="mint-masthead">
+        <h1 class="mint-wordmark">JigCoin</h1>
+        <div id="homeSessionControls" class="home-session-row mint-instruments">
+          <button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button>
+          <button id="homeJourneyOpen" class="mint-rank-plaque" type="button" aria-label="View your coin evolution"><span id="rankName">—</span></button>
+          <button id="homeBoostAction" class="home-boost-action" type="button" aria-controls="weeklySheet" disabled>Weekly race</button>
+        </div>
+      </div>
       <div class="card home-balance-card">
-        <div class="balance-heading"><span class="card-balance-label">In-game coins</span><button class="card-balance-token" id="homeJourneyOpen" type="button" aria-label="View your coin evolution"><span id="rankName">—</span><span aria-hidden="true"> ›</span></button></div>
-        <div class="card-balance-value" id="balanceText">…</div>
+        <div class="mint-balance-dial">
+          <span class="card-balance-label">Your coins</span>
+          <div class="card-balance-value" id="balanceText">…</div>
+        </div>
         <button class="global-rank-block" id="homeLeaderboard" type="button" aria-label="Open global leaderboard">
-          <span class="global-rank-top-row"><span class="global-rank-label">Leaderboard</span><strong class="global-rank-value" id="globalRankValue">—</strong><span aria-hidden="true">›</span></span>
-          <span class="global-rank-tier" id="globalRankTierText">Waiting for your account…</span>
+          <span class="global-rank-top-row"><strong class="global-rank-value" id="globalRankValue">—</strong><span class="global-rank-tier" id="globalRankTierText"></span></span>
+          <span class="global-rank-label">Leaderboard</span>
           <span class="global-rank-bar"><span class="global-rank-fill" id="globalRankFill"></span></span>
           <span class="sr-only" id="globalRankNextText">Rank is confirmed by the server.</span>
         </button>
-        <button class="home-race" id="homeRace" type="button" aria-label="View your nearest rivals">Your next rival appears after sync.</button>
         <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points"><span id="homeRankGoalLabel">Next level</span> <span id="nextRankPointsText">—</span></span></div>
       </div>
-    </div>
+      <button class="home-race" id="homeRace" type="button" aria-label="View your nearest rivals">Your next rival appears after sync.</button>
+    </header>
 
     <div class="account-status sr-only" id="accountStatus" role="status" aria-live="polite">
       <div><strong id="accountStatusTitle">Loading your account</strong><p id="accountStatusBody">Connecting to your saved balance and global rank…</p></div>
@@ -2825,21 +2837,13 @@ body{justify-content:flex-start}
     </div>
     <div class="account-content" id="accountContent" inert>
       <div class="tap-card" id="mintPressCard">
-        <div class="tap-card-header">
-          <div class="tap-card-left">
-            <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><small>The Mint</small><strong id="mintFinishName">JigCoin</strong></button>
-            <div class="tap-title" id="homeTapPrompt" aria-live="polite">Tap to earn coins</div>
-            <div class="tap-subtitle">
-              Tap the JigCoin. Build your score.
-            </div>
-            <div class="tap-hint">
-              <span id="perTap">+1</span> per tap
-            </div>
-
+        <div class="mint-chamber-bay">
+          <div class="mint-press-scene" aria-hidden="true"></div>
+          <div class="tap-card-header mint-chamber-caption">
+            <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><strong id="mintFinishName">JigCoin</strong></button>
+            <span class="tap-hint"><span id="perTap">+1</span> per tap</span>
           </div>
-        </div>
-
-        <div class="mint-press-scene" aria-hidden="true"></div>
+          <div class="tap-title" id="homeTapPrompt" aria-live="polite" hidden>Tap to earn coins</div>
         <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1" data-loading="true">
           <svg class="coin-progress" viewBox="0 0 220 220" aria-hidden="true"><circle cx="110" cy="110" r="106"/><circle id="homeGoalRing" cx="110" cy="110" r="106" pathLength="100"/></svg>
           <div class="coin-feedback" id="homeTapFeedback" aria-hidden="true"></div>
@@ -2851,13 +2855,9 @@ body{justify-content:flex-start}
           </button>
         </div>
 
+        </div>
         <button id="homeNextPreview" class="home-next-preview" data-loading="true" type="button"><span id="homeNextCoin" aria-hidden="true"></span><span><div class="home-goal" id="homeGoal">Your next rank is loading…</div>
         <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
-        <div id="homeSessionControls" class="home-session-row">
-          <button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button>
-          <button id="homeBoostAction" class="home-boost-action" type="button" aria-controls="boostSheet" disabled>Weekly race
-Three free runs</button>
-        </div>
         <div class="tap-metrics">
           <div class="tap-metric" id="homeEnergyMetric">
             <div class="energy-readout"><span class="metric-label">Energy</span><span id="energyText">0 / 50</span></div>
@@ -3159,13 +3159,43 @@ let tg =
     ? window.Telegram.WebApp
     : null;
 
+// Cache only the last confirmed visual rank for this Telegram identity.
+let mintWorldOwner, mintWorldRank, mintWorldBridge;
+function syncMintWorld(confirmedRank) {
+  const root=document.documentElement;
+  const bridge=window.Telegram?.WebApp;
+  const id=bridge?.initDataUnsafe?.user?.id;
+  const owner=Number.isSafeInteger(id) && id>0 ? id : null;
+  const key='jigcoin_mint_rank_v1:'+owner;
+  const verified=owner && Number.isInteger(confirmedRank) && confirmedRank>=0 && confirmedRank<8;
+  let rank=owner===mintWorldOwner ? mintWorldRank : null;
+  if(verified) {
+    rank=String(confirmedRank);
+    if(rank!==mintWorldRank || owner!==mintWorldOwner) appStorage.setItem(key,rank);
+  } else if(owner && owner!==mintWorldOwner) {
+    const cached=appStorage.getItem(key);
+    if(/^[0-7]$/.test(cached)) rank=cached;
+  }
+  if(owner===mintWorldOwner && rank===mintWorldRank && bridge===mintWorldBridge) return;
+  mintWorldOwner=owner;
+  mintWorldRank=rank;
+  mintWorldBridge=bridge;
+  if(rank!=null) root.dataset.mintRank=rank;
+  else delete root.dataset.mintRank;
+  const css=getComputedStyle(root);
+  const base=css.getPropertyValue('--mint-ink').trim() || '#111317';
+  for(const [method,color] of [['setHeaderColor',base],['setBackgroundColor',base],['setBottomBarColor',base]]) {
+    try { bridge?.[method]?.(color); } catch (_) { /* Older Telegram versions use native colours. */ }
+  }
+}
 function initializeTelegram() {
   tg = window.Telegram?.WebApp || null;
   if (!tg) return;
   try { if (tg.isVersionAtLeast?.("8.0") && !tg.isFullscreen) tg.requestFullscreen?.(); } catch (_) {}
-  for (const [method, arg] of [["ready"], ["expand"], ["setHeaderColor", "#050816"], ["setBackgroundColor", "#050816"]]) {
-    try { if (typeof tg[method] === "function") tg[method](arg); } catch (_) {}
+  for (const method of ["ready","expand"]) {
+    try { tg[method]?.(); } catch (_) {}
   }
+  syncMintWorld();
 }
 window.addEventListener("jigcoin:telegram-ready", initializeTelegram);
 initializeTelegram();
@@ -3553,6 +3583,7 @@ function maybeStartOnboardingFromBackend(data) {
   if (onboardingState.owner !== owner) {
     Object.assign(onboardingState, {owner, seenOpen:false, hint:false, completed:false, recorded:false, recording:false, retryAt:0});
     prompt.textContent = 'Tap to earn coins';
+    prompt.hidden=true;
   }
   const firstVisit = data.onboarding?.first_visit_hint;
   if(data.onboarding_required === false) onboardingState.recorded = true;
@@ -3569,14 +3600,14 @@ function maybeStartOnboardingFromBackend(data) {
     onboardingState.seenOpen = true;
     onboardingState.hint = firstVisit === true && !data.recovery_test;
     onboardingState.completed = !onboardingState.hint;
-    if (onboardingState.hint) prompt.textContent = 'Tap the coin to play';
+    if (onboardingState.hint) { prompt.hidden=false; prompt.textContent='Tap the coin to play'; }
   }
   if (onboardingState.hint && Number(data.onboarding?.accepted_taps) > 0) {
     onboardingState.hint = false;
     onboardingState.completed = true;
     prompt.textContent = 'Tap saved ✓';
     setTimeout(() => {
-      if (homeUserId() === owner && prompt.textContent === 'Tap saved ✓') prompt.textContent = 'Tap to earn coins';
+      if (homeUserId() === owner && prompt.textContent === 'Tap saved ✓') { prompt.textContent='Tap to earn coins'; prompt.hidden=true; }
     }, 2200);
   }
 }
@@ -3822,7 +3853,7 @@ function renderHomeSession() {
   action.dataset.focus=refill?'sp_emergency_energy':'weekly';
   action.setAttribute('aria-controls',refill?'boostSheet':'weeklySheet');
   action.dataset.active=String(!refill);
-  const label=refill?'Low energy · Refill\nOptional advert':'Weekly race\nThree free runs';
+  const label=refill?'Refill energy · ad':'Weekly race';
   if(action.textContent!==label) action.textContent=label;
   action.ariaLabel=refill?'View optional energy refill':'Open weekly friend race';
   action.title=action.ariaLabel;
@@ -3843,8 +3874,8 @@ function renderHomeRace(){
   const el=document.getElementById('homeRace');if(!el)return;
   const race=homeRaceModel(homeRaceSnapshot,homeUserId());
   const fresh=Date.now()-homeRaceSyncedAt<90000;
-  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text+' · Rivals ›';el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
-  else{el.textContent=accountIsReady()?'View your nearest rivals ›':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
+  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text;el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
+  else{el.textContent=accountIsReady()?'View your nearest rivals':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
 }
 async function refreshHomeRace(force=false){
   const delay=homeRaceSnapshot&&homeRaceSnapshot.me.global_rank!==state.globalRank?8000:60000;
@@ -3947,7 +3978,9 @@ function collectibleCountdown(ms){const days=Math.floor(Math.max(0,ms)/86400000)
 function progressionNow(){return progressionClock?progressionClock+(performance.now()-progressionSnapshotAt):Date.now();}
 function launchEquipped(){return !!progressionCurrent()?.event?.owned&&appStorage.getItem('jigcoin_launch_skin:'+homeUserId())==='on';}
 function renderCollectibleCoin(goal){
-  const loading=!accountIsReady()||!goal;
+  const currentOwner=homeUserId();
+  const loading=!accountIsReady()||!goal||homeIdentity!==currentOwner||!currentOwner;
+  syncMintWorld(loading ? null : goal.tier);
   const art=document.getElementById('homeCoinArtwork'),preview=document.getElementById('homeNextCoin');
   document.getElementById('homeCoinWrap').dataset.loading=String(loading);
   document.getElementById('homeNextPreview').dataset.loading=String(loading);
@@ -4237,8 +4270,7 @@ function updateGlobalRankVisuals() {
   globalRankValueEl.textContent = valid ? `#${formatNumber(rank)}` : "—";
   globalRankFillEl.style.transform = `scaleX(${valid ? (total === 1 ? 1 : (total-rank)/(total-1)) : 0})`;
   if (globalRankTierTextEl) {
-    globalRankTierTextEl.textContent = valid ? `${formatNumber(total)} players`
-      : accountIsReady() ? "Global rank is temporarily unavailable." : "Loading leaderboard…";
+    globalRankTierTextEl.textContent = valid ? `of ${formatNumber(total)}` : "";
   }
   globalRankNextTextEl.textContent = valid
     ? (accountIsReady() ? "Based on the latest saved leaderboard." : "Last confirmed rank · reconnect to update.")

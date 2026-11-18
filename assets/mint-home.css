@@ -1,0 +1,189 @@
+/* The dashboard is one instrument. Only the exchangeable coin, press and metal finish vary by rank. */
+#mainScroll.home-compact {
+  --home-cut: var(--mint-corner, 7px);
+  --home-bevel: polygon(var(--home-cut) 0,calc(100% - var(--home-cut)) 0,100% var(--home-cut),100% calc(100% - var(--home-cut)),calc(100% - var(--home-cut)) 100%,var(--home-cut) 100%,0 calc(100% - var(--home-cut)),0 var(--home-cut));
+  --home-steel: linear-gradient(105deg,var(--mint-panel,#1c1e23),color-mix(in srgb,var(--mint-metal,#707172) 24%,var(--mint-panel,#1c1e23)) 43%,var(--mint-panel,#1c1e23) 65%,var(--mint-ink,#131417));
+  --home-satin: repeating-linear-gradient(2deg,transparent 0 2px,#ffffff04 2.4px,transparent 3px);
+  --home-inlay: inset 0 1px 0 #ffffff38, inset 0 -1px 0 #000c, 0 2px 3px #0007;
+  font-family: system-ui, sans-serif;
+  padding:0 0 4px!important;
+  color:var(--mint-text,#eee9dd);
+  background:var(--mint-grain,var(--home-satin)),var(--home-steel);
+  overflow-x:hidden;
+}
+#mainScroll.home-compact .mint-dashboard {
+  flex:0 0 auto; display:flex; flex-direction:column; gap:4px;
+  width:100%; margin:0; padding:0 12px 7px!important; box-sizing:border-box;
+}
+.mint-masthead {
+  position:relative; isolation:isolate; display:grid; place-items:center; width:calc(100% + 24px);
+  align-self:center; padding:5px 13px 1px;
+  background-color:var(--mint-panel,#25272b);
+  background-image:var(--mint-fascia,none),var(--home-steel);
+  background-repeat:no-repeat; background-position:center; background-size:100% 100%;
+  box-shadow:inset 0 -1px #ffffff19,inset 0 -5px 8px #0006;
+}
+.mint-wordmark {
+  display:flex; align-items:center; justify-content:center; gap:13px; width:76%; margin:0;
+  color:var(--mint-text,#eee9dd); text-shadow:0 1px 0 #000,0 2px 3px #000a,0 -1px #fff5;
+  font:600 clamp(26px,min(9cqw,5.6cqh),45px)/1.06 Georgia,"Times New Roman",serif; letter-spacing:.012em;
+}
+.mint-wordmark::before,.mint-wordmark::after { content:""; width:clamp(12px,8vw,39px); height:1px; background:linear-gradient(90deg,transparent,var(--mint-metal,#9d9688)); }
+.mint-wordmark::after { transform:rotate(180deg); }
+#mainScroll #homeSessionControls.mint-instruments {
+  display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; width:100%; margin:0;
+  min-height:35px; gap:5px; padding:0 6px; container-type:normal;
+}
+#mainScroll #homeJourneyOpen {
+  display:grid; place-items:center; position:relative; isolation:isolate; padding:6px 16px; min-width:96px; min-height:37px;
+  border:0; border-radius:0; background:transparent; box-shadow:none; color:var(--mint-ink,#181614);
+  font:750 clamp(12px,3.7cqw,16px)/1.15 system-ui,sans-serif; letter-spacing:.1em; text-shadow:0 1px #ffffff70;
+  cursor:pointer; white-space:nowrap;
+}
+#homeJourneyOpen::before {
+  content:""; z-index:-1; position:absolute; inset:4px 0 5px; clip-path:var(--home-bevel);
+  background:var(--home-satin),linear-gradient(180deg,var(--mint-highlight,#e9cc99),var(--mint-accent,#c99a62) 32%,color-mix(in srgb,var(--mint-accent,#c99a62) 65%,var(--mint-ink,#211b14)) 92%,var(--mint-highlight,#e9cc99));
+  box-shadow:inset 0 1px #fff9,inset 0 -2px #0009;
+}
+#mainScroll #homeSaveStatus,#mainScroll #homeBoostAction {
+  position:static; align-self:center; width:fit-content; max-width:100%; min-height:35px; margin:0;
+  padding:3px 5px; background:none; border:none; border-radius:4px; box-shadow:none;
+  color:var(--mint-muted,#c4beb4); font:600 clamp(10px,2.7cqw,12px)/1.25 system-ui,sans-serif;
+  letter-spacing:0; text-align:center; text-shadow:0 1px 1px #000; white-space:normal;
+}
+#mainScroll #homeSaveStatus { justify-self:start; }
+#mainScroll #homeBoostAction { justify-self:end; }
+#mainScroll #homeBoostAction::before,#mainScroll #homeBoostAction::after { content:none; }
+#mainScroll #homeBoostAction::first-line { color:inherit; font:inherit; }
+#mainScroll #homeBoostAction[data-focus="sp_emergency_energy"],#mainScroll #homeSaveStatus[data-state="error"] { color:var(--mint-highlight,#ebcd9c); }
+#mainScroll.home-compact .mint-dashboard .home-balance-card {
+  display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); grid-template-rows:auto; align-items:center; gap:0;
+  min-height:clamp(48px,8cqh,72px); width:100%; margin:0; padding:5px clamp(13px,5cqw,22px)!important;
+  border:1px solid var(--mint-edge,#5e5e5d); border-radius:3px!important; clip-path:var(--home-bevel);
+  background:var(--mint-grain,var(--home-satin)),var(--home-steel); box-shadow:var(--home-inlay);
+}
+#mainScroll .mint-balance-dial { display:grid; align-content:center; min-width:0; min-height:0; text-align:left; }
+#mainScroll .mint-balance-dial .card-balance-label, #mainScroll #homeLeaderboard .global-rank-label {
+  width:auto; padding:0; margin:0; text-transform:uppercase; color:var(--mint-muted,#b9b8b4);
+  font:650 clamp(8px,2.3cqw,10px)/1.2 system-ui,sans-serif; letter-spacing:.16em;
+}
+#mainScroll .mint-dashboard .home-balance-card #balanceText {
+  grid-column:auto; grid-row:auto; width:auto; height:auto; margin:0;
+  font:720 clamp(25px,min(8.8cqw,5.3cqh),39px)/1.04 system-ui,sans-serif;
+  color:var(--mint-text,#eee9dd); font-variant-numeric:tabular-nums; text-shadow:0 2px 3px #0008;
+}
+#mainScroll .mint-dashboard #homeLeaderboard {
+  grid-area:auto; justify-self:stretch; align-self:center; display:grid; align-content:center; gap:3px;
+  min-height:40px; width:auto; margin:0!important; padding:1px 0 1px clamp(10px,4.6cqw,21px)!important;
+  border:0; border-left:1px solid var(--mint-edge,#6b6a68); border-radius:0; background:none; box-shadow:inset 1px 0 #0006;
+  color:var(--mint-text,#eee9dd); text-align:left; white-space:nowrap;
+}
+#mainScroll #homeLeaderboard .global-rank-top-row { display:flex;align-items:baseline;gap:4px;justify-content:flex-start;min-width:0; }
+#mainScroll #homeLeaderboard :is(#globalRankValue,#globalRankTierText) { color:inherit; font:700 clamp(14px,4.5cqw,21px)/1.1 system-ui,sans-serif;letter-spacing:0; }
+#mainScroll #homeLeaderboard .global-rank-bar { display:none; }
+#mainScroll .mint-dashboard #homeRace {
+  position:relative; display:block; width:100%; flex:auto; min-height:clamp(27px,4.4cqh,35px);
+  margin:0; padding:3px 24px; border:1px solid color-mix(in srgb,var(--mint-accent,#bc956a) 75%,var(--mint-panel,#292b30));
+  clip-path:var(--home-bevel); border-radius:3px; background:var(--home-satin),linear-gradient(120deg,color-mix(in srgb,var(--mint-accent,#bd986a) 21%,var(--mint-panel,#292b30)),var(--mint-ink,#121317));
+  box-shadow:var(--home-inlay); color:var(--mint-highlight,#edcd9b);
+  font:650 clamp(11px,3.35cqw,15px)/1.2 system-ui,sans-serif;text-align:center;
+}
+#mainScroll .mint-dashboard #homeRace::after{content:'›';position:absolute;right:11px;top:50%;transform:translateY(-52%);font-size:20px;font-weight:400;}
+#mainScroll #accountContent {
+  display:flex;flex:1 0 auto; min-height:0; width:100%;padding:0 0 0!important; gap:4px;
+}
+#mainScroll.home-compact #mintPressCard {
+  flex:1 0 auto; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(176px,1fr) auto auto; align-items:stretch;
+  gap:0; padding:0!important; margin:0!important; width:100%; min-height:0; border:0;border-radius:0;
+  background:none;box-shadow:none;overflow:visible;
+}
+.mint-chamber-bay {
+  position:relative; width:100%; min-height:176px; overflow:hidden; isolation:isolate; container-type:size;
+  background-color:var(--mint-ink,#131417); box-shadow:inset 0 1px 0 #fffa;
+}
+#mainScroll.home-compact .mint-chamber-bay .mint-press-scene {
+  display:block; position:absolute; inset:0; width:100%;height:100%;min-height:0;margin:0;border:0;border-radius:0;
+}
+#mainScroll .mint-chamber-bay .mint-press-scene::before {
+  background-image:var(--mint-chamber,url('./mint-press.webp')); background-position:center center;
+  background-repeat:no-repeat; background-size:100% 100%; filter:none; transition:none;
+}
+#mainScroll .mint-chamber-bay .mint-press-scene::after { background:linear-gradient(180deg,#0001,transparent 16%,transparent 89%,#0004); }
+#mainScroll #mintPressCard .mint-chamber-caption {
+  z-index:3; position:absolute; top:6.5%; left:50%; transform:translateX(-50%); width:81%; min-height:33px;
+  display:flex;justify-content:center;align-items:center;gap:0;margin:0;padding:0 10px; clip-path:var(--home-bevel);
+  background:var(--home-satin),linear-gradient(100deg,var(--mint-ink,#131417),color-mix(in srgb,var(--mint-panel,#26282c) 82%,var(--mint-edge,#5f6061)),var(--mint-ink,#131417));
+  border:1px solid color-mix(in srgb,var(--mint-metal,#7c7870) 70%,#000); box-shadow:var(--home-inlay);
+}
+#mainScroll #mintCabinetOpen {display:block;min-width:0;min-height:32px;padding:2px 12px 2px 2px;text-align:center;}
+#mainScroll #mintCabinetOpen #mintFinishName {display:block;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;color:var(--mint-text,#eee9dd);font:680 clamp(9px,2.95cqw,14px)/1.2 system-ui,sans-serif; text-transform:uppercase;letter-spacing:.16em;}
+#mainScroll .mint-chamber-caption .tap-hint {display:block;min-width:0;padding:0 0 0 12px;margin:0;border-left:1px solid var(--mint-edge,#686869);color:var(--mint-text,#eee9dd);font:480 clamp(10px,3cqw,14px)/1.2 system-ui,sans-serif;white-space:nowrap;}
+#mainScroll #homeTapPrompt { z-index:4; position:absolute; left:50%; bottom:2.1%; width:max-content;max-width:90%; transform:translateX(-50%); padding:3px 10px; color:#fff!important; background:#101215e8;border-radius:4px;font-size:12px;pointer-events:none; }
+#mainScroll #homeTapPrompt[hidden] {display:none}
+#mainScroll.home-compact .mint-chamber-bay #homeCoinWrap {
+  --coin-size: clamp(94px,min(65cqw,66cqh),312px);
+  z-index:2; position:absolute; left:50%; bottom:9%; transform:translateX(-50%);
+  width:calc(var(--coin-size) + 8px); height:calc(var(--coin-size) + 8px); margin:0;
+}
+#mainScroll .mint-chamber-bay #homeCoinWrap #tapBtn {
+  box-sizing:border-box; width:var(--coin-size);height:var(--coin-size);min-width:0;min-height:0; padding:0;
+  border:0; border-radius:50%;background:transparent;box-shadow:0 4px 6px #0008; touch-action:manipulation;
+}
+#mainScroll .mint-chamber-bay #homeCoinArtwork{ inset:0; }
+#mainScroll .mint-chamber-bay .coin-progress circle { stroke:transparent; }
+#mainScroll .mint-chamber-bay .coin-progress #homeGoalRing {stroke:var(--mint-accent,#ccab70);stroke-width:1.4;filter:none; }
+#mainScroll.home-compact #homeNextPreview {
+  display:flex; justify-content:center;align-items:center;gap:12px; min-height:clamp(51px,8.3cqh,75px);
+  margin:0; padding:4px 12px; width:100%;background:transparent; color:var(--mint-text,#eee9dd);
+}
+#mainScroll #homeNextCoin {display:block;flex:none;width:clamp(35px,6.5cqh,55px);height:auto;aspect-ratio:1;filter:drop-shadow(0 2px 2px #000b);}
+#mainScroll #homeNextPreview>span:last-child {border-left:1px solid var(--mint-edge,#55595d);padding-left:12px;}
+#mainScroll #homeNextPreview #homeGoal{color:var(--mint-text,#eee9dd);font-size:clamp(12px,3.7cqw,17px);}
+#mainScroll #homeNextPreview #homeGoalCaption {display:block;color:var(--mint-muted,#beb9af);margin-top:3px;font-size:clamp(9px,2.6cqw,12px);}
+#mainScroll #mintPressCard .tap-metrics,#mainScroll .home-shortcuts .home-streak-strip,#mainScroll #homeLaunchStrip {
+  border:1px solid var(--mint-edge,#5c5d5d); border-radius:2px; clip-path:var(--home-bevel);
+  background:var(--mint-grain,var(--home-satin)),var(--home-steel);box-shadow:var(--home-inlay);
+}
+#mainScroll #mintPressCard .tap-metrics {grid-template-columns:minmax(0,1fr) minmax(72px,28%);margin:0 10px 0;min-height:clamp(44px,6.3cqh,58px);}
+#mainScroll #homeTodayMetric {align-items:center;justify-content:center;justify-items:center;border-color:var(--mint-edge,#5c5d5d);}
+#mainScroll #homeEnergyMetric,#mainScroll #homeTodayMetric {padding:4px 13px;min-height:40px}
+#mainScroll #homeEnergyMetric .metric-label,#mainScroll #homeTodayMetric .metric-label {color:var(--mint-muted,#bbb9b7);font:650 9px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.13em}
+#mainScroll #energyText,#mainScroll #todayText {color:var(--mint-text,#eee9dd)}
+#mainScroll #homeEnergyMetric .energy-bar {height:6px;background:var(--mint-ink,#121416);border-radius:2px;box-shadow:inset 0 1px 2px #000;}
+#mainScroll .home-shortcuts { flex:none; align-items:stretch; margin:0 10px 0; gap:5px; }
+#mainScroll .home-shortcuts .home-streak-strip { margin:0!important;padding:0 9px; }
+#mainScroll .home-shortcuts .daily-summary { display:flex;gap:8px;align-items:center;min-height:40px; }
+#mainScroll .streak-strip-icon {width:23px;height:23px;flex:none;border-radius:3px;color:#c0edd5;background:#26493c;border:1px solid #618170;}
+#mainScroll .streak-strip-arrow {color:var(--mint-muted,#b9b7b0);}
+#mainScroll .streak-strip-copy {display:flex;gap:8px;align-items:center;text-transform:uppercase;color:var(--mint-text,#eee9dd);}
+#mainScroll .streak-strip-copy strong,#mainScroll .streak-strip-copy #hubDailyProgress {color:inherit;font:640 clamp(8px,2.55cqw,12px)/1.25 system-ui,sans-serif;letter-spacing:.035em;}
+#mainScroll .streak-strip-copy #hubDailyProgress {border-left:1px solid var(--mint-edge,#666);padding-left:8px;margin:0;font-weight:480;color:var(--mint-muted,#c4c1bb);}
+#mainScroll :is(button,a):focus-visible {outline:2px solid var(--mint-highlight,#f1d093);outline-offset:-3px; }
+@container (min-height:720px) {
+  .mint-masthead {padding-block:10px 4px;}
+  #mainScroll #homeSessionControls.mint-instruments,#mainScroll #homeJourneyOpen,#mainScroll #homeSaveStatus,#mainScroll #homeBoostAction {min-height:44px;}
+  #mainScroll .home-shortcuts .daily-summary {min-height:46px;}
+  #mainScroll #mintPressCard .mint-chamber-caption {min-height:40px;}
+}
+@container (max-height:520px) {
+  .mint-masthead {padding-block:1px 0;}
+  #mainScroll .mint-masthead .mint-wordmark {font-size:24px;}
+  #mainScroll .mint-dashboard {gap:2px;padding-bottom:4px!important;}
+  #mainScroll #homeSessionControls.mint-instruments,#mainScroll #homeSaveStatus,#mainScroll #homeJourneyOpen,#mainScroll #homeBoostAction {min-height:31px;}
+  #mainScroll #mintPressCard .mint-chamber-caption {top:3%;min-height:25px;}
+  #mainScroll #mintCabinetOpen {min-height:25px;}
+  #mainScroll.home-compact #homeNextPreview {min-height:43px;}
+}
+
+/* Fit Telegram's shortest portrait viewport while retaining a usable coin and streak row. */
+@media (max-width: 360px) and (max-height: 540px) {
+  html .app-shell .bottom-nav { min-height:50px; height:50px; padding-block:2px; }
+  #mainScroll.home-compact .mint-dashboard { padding-bottom:2px!important; gap:1px; }
+  #mainScroll.home-compact #mintPressCard { grid-template-rows:minmax(166px,1fr) auto auto; }
+  #mainScroll.home-compact .mint-chamber-bay { min-height:166px; }
+  #mainScroll.home-compact .mint-chamber-bay #homeCoinWrap {
+    --coin-size: clamp(119px,min(65cqw,72cqh),312px);
+    bottom:4%;
+  }
+  #mainScroll .home-shortcuts .daily-summary { min-height:35px; }
+}
