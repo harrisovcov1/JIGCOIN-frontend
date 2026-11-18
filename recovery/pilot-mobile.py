@@ -21,6 +21,13 @@ def check(browser,width,height):
     base='https://pilot.jigcoin.test'
     a={'balance':17800,'energy':50,'skin':False,'vip':False,'run':None,'left':3,'reward':'available','legacy':False,'claims':0}
     calls=[]
+    rival_code='2'*20
+    card_code='a'*32
+    def screenshot(label):
+        destination=os.getenv('JIGCOIN_SCREENSHOT_DIR')
+        if destination and width==390:
+            Path(destination).mkdir(exist_ok=True,parents=True)
+            page.screenshot(path=str(Path(destination)/(label+'.png')),animations='disabled')
     fixturejs="""(() => {const user={id:101,first_name:'Pilot'};window.Telegram={WebApp:{initDataUnsafe:{user},initData:new URLSearchParams({user:JSON.stringify(user)}).toString(),ready(){},expand(){},onEvent(){},offEvent(){},HapticFeedback:{impactOccurred(){},selectionChanged(){}},openTelegramLink(url){window.shared=url}}};window.adMode='hang';window.show_123=async function(opt){(window.adCalls||=[]).push(opt); if(opt.type==='preload'){if(window.adMode==='nofill')throw Error('Empty Feed');if(window.adMode==='hang')await new Promise(r=>window.resumePreload=r);}};})();"""
     page.add_init_script(fixturejs)
     def route(r):
@@ -41,8 +48,8 @@ def check(browser,width,height):
         if p=='/api/pilot/coin':a['skin']=d['equip']
         if p in ('/api/pilot/profile','/api/pilot/coin'):out=dict(ok=True,telegram_id=str(tg),vip_coin=a['skin'],refill=True,medals=[])
         if p=='/api/weekly/start':
-            if not a['run']:
-                a['run']=dict(id=str(uuid.uuid4()),slot=1,turn=0,score=0,ends_at=iso(now()+timedelta(seconds=45)),live=True,board={'tiles':[1,2,3,4,5,6],'target':3})
+            if not a['run'] or not a['run']['live']:
+                a['run']=dict(id=str(uuid.uuid4()),slot=4-a['left'],turn=0,score=0,ends_at=iso(now()+timedelta(seconds=45)),live=True,board={'tiles':[1,2,3,4,5,6],'target':3})
                 a['left']-=1
             out=dict(ok=True,telegram_id=str(tg),server_now=iso(now()),run=a['run'])
         if p=='/api/weekly/answer':
@@ -51,7 +58,11 @@ def check(browser,width,height):
             out=dict(ok=True,telegram_id=str(tg),server_now=iso(now()),run=a['run'],correct=True)
         if p=='/api/weekly/standings':
             run=a['run']; score=run['score'] if run else 0
-            out=dict(ok=True,telegram_id=str(tg),server_now=iso(now()),week='2026-11-16',closes_at=iso(now()+timedelta(days=3)),runs_left=a['left'],seconds=45,run=run,best=score,place=1 if score else None,share_code='1'*20 if score else None,leaders=[],rival=None)
+            out=dict(ok=True,telegram_id=str(tg),server_now=iso(now()),week='2026-11-16',closes_at=iso(now()+timedelta(days=3)),runs_left=a['left'],seconds=45,run=run,best=score,place=1 if score else None,share_code='1'*20 if score else None,leaders=[{'place':1,'name':'Northstar','score':4,'me':False,'share_code':rival_code}],rival=None)
+            if score and run and not run['live'] and (d.get('rival')==rival_code or d.get('card')==card_code):
+                out['result']={'code':card_code,'week':out['week'],'margin':3,'players':[
+                    {'name':'Northstar','me':False,'score':4,'slot':2,'finish':'rank-2','challenge':rival_code},
+                    {'name':'Pilot','me':True,'score':1,'slot':1,'finish':'rank-1','challenge':'1'*20}]}
         if p.startswith('/api/stars/catalog'):
             packs=[(1000,100),(3000,250),(7000,500),(37500,2500),(700000,35000)]
             out=dict(ok=True,telegram_id=tg,server_now=iso(now()),enabled=True,products=[dict(sku='JC_P'+str(i),coins=c,stars=s,title='Coin pack') for i,(c,s) in enumerate(packs)],recent_orders=[])
@@ -73,6 +84,28 @@ def check(browser,width,height):
         page.goto(base, wait_until='domcontentloaded')
         page.wait_for_function("window.JigPilot && window.__accountPhase==='ready' && JigPilot.canRefill()")
         coin_size=page.locator('#tapBtn').bounding_box()
+        expect(page.locator('#mintFinishName')).to_have_text('Foundry Gold')
+        page.locator('#mintCabinetOpen').click()
+        expect(page.locator('#crownPreview')).to_be_visible()
+        page.locator('[data-try-finish="rank-2"]').first.click()
+        expect(page.locator('#crownPreviewTitle')).to_have_text('Aurora Glass')
+        page.locator('#crownPreview [type=submit]').click()
+        expect(page.locator('#mintFinishName')).to_have_text('Foundry Gold')
+        a['balance']=49999
+        page.evaluate('async()=>{await refreshState()}')
+        before=page.locator('#tapBtn').bounding_box()
+        screenshot('foundry')
+        a['balance']=50000
+        page.evaluate('async()=>{await refreshState()}')
+        expect(page.locator('.tap-card')).to_have_attribute('data-finish','rank-2')
+        expect(page.locator('#mintFinishName')).to_have_text('Aurora Glass')
+        assert before==page.locator('#tapBtn').bounding_box()
+        assert page.locator('.mint-press-scene').evaluate("(x)=>getComputedStyle(x,'::before').filter").startswith('hue-rotate')
+        celebration=page.locator('.rank-celebration-close')
+        if celebration.is_visible(): celebration.click()
+        screenshot('aurora')
+        a['balance']=17800
+        page.evaluate('async()=>{await refreshState()}')
         page.locator('#homeBoostAction').click()
         start=page.locator('[data-race-action=start]')
         expect(start).to_have_text('Start run 1')
@@ -88,6 +121,26 @@ def check(browser,width,height):
         page.locator('#homeBoostAction').click()
         page.locator('[data-race-action=share]').click()
         assert 'ref_101__src_race_' in page.evaluate('window.shared')
+        page.locator('[data-rival]').click()
+        expect(page.locator('.mint-result h2')).to_have_text('Northstar wins by 3 pairs')
+        expect(page.locator('.race-specimen')).to_have_count(2)
+        assert page.locator('.race-finish img').evaluate_all('(images)=>images.every(x=>x.complete&&x.naturalWidth>0)')
+        screenshot('race-result')
+        page.locator('[data-race-action=share-result]').click()
+        assert 'ref_101__src_duel_'+card_code in page.evaluate('decodeURIComponent(window.shared)')
+        page.locator('[data-race-action=image]').click()
+        expect(page.locator('#resultImage')).to_be_visible()
+        assert page.locator('#raceCardImage').evaluate('x=>x.decode().then(()=>[x.naturalWidth,x.naturalHeight])')==[880,540]
+        page.locator('#resultImage [type=submit]').click()
+        # A shared result can be opened from a fresh launch without spending a run.
+        starts=calls.count('/api/weekly/start')
+        page.goto(base+'/?tgWebAppStartParam=ref_101__src_duel_'+card_code,wait_until='domcontentloaded')
+        expect(page.locator('.mint-result h2')).to_have_text('Northstar wins by 3 pairs')
+        assert calls.count('/api/weekly/start')==starts
+        page.locator('[data-race-action=rematch]').click()
+        expect(page.locator('.pilot-clock')).to_contain_text('Run 2 of 3')
+        assert calls.count('/api/weekly/start')==starts+1
+
         page.locator('#weeklyClose').click()
         page.locator('#tabShop').click()
         goal=page.locator('.hub-goal')
@@ -139,7 +192,7 @@ def check(browser,width,height):
         assert not [c for c in calls if c.endswith('/invoice') or c.endswith('/create-checkout')]
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert not errors,errors
-        print(f'{width}x{height}: race resume/share, shop goals, VIP artwork, low energy/return/no fill, legacy claim passed',flush=True)
+        print(f'{width}x{height}: fixed coin bounds at 50,000, cabinet, race result/deep link/rematch/PNG, VIP, shop and ad recovery passed',flush=True)
     except Exception:
         print('Client errors:',errors,'recent paths:',calls[-16:],'account:',page.evaluate('window.__accountPhase'),'view:',page.locator('.sheet.show').all_text_contents().__str__()[:350],flush=True)
         raise

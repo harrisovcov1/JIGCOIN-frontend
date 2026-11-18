@@ -288,3 +288,85 @@
   #boostSheet .pilot-free-activities .pilot-link { gap: 1px; padding-block: 6px; }
   #coinShopSheet .hub-goal .pack-goal-art { width: 46px; }
 }
+
+/* The scene and the tap target occupy the same grid track. Only the art changes at a rank milestone. */
+.tap-card, #crownPreview { --press-light: #e5af67; --press-tint: none; }
+[data-finish="rank-2"] { --press-light: #92e6ff; --press-tint: hue-rotate(150deg) saturate(.86); }
+[data-finish="midnight"] { --press-light: #e8ce92; --press-tint: saturate(.5) brightness(.8); }
+#mainScroll .tap-card { isolation: isolate; }
+#mainScroll .tap-card[data-finish] { border-color: #504e46; background: linear-gradient(125deg,#24292c,#141b23 65%); }
+#mainScroll .tap-card-header { width: 100%; }
+#mainScroll .tap-card-left { align-items: center; }
+.mint-nameplate {
+  flex: 0 1 auto; min-width: 0; min-height: 44px; text-align: left; padding: 1px 4px;
+  border: 0; background: transparent; color: #f7f0e2; font: inherit; cursor: pointer;
+}
+.mint-nameplate small { display: block; color: var(--press-light); font: 650 9px/1.15 system-ui; text-transform: uppercase; letter-spacing: .18em; }
+.mint-nameplate strong { display: block; font: 600 clamp(15px,5cqw,22px)/1.15 Georgia,serif; }
+#mainScroll .tap-card #homeTapPrompt { font-size: clamp(10px,2.7cqw,13px); color: #d1d4d4; font-weight: 500; }
+#mainScroll.home-compact .mint-press-scene {
+  grid-area: 2 / 1; position: relative; align-self: stretch; justify-self: stretch; min-height: 0;
+  margin: 0 -3px; border-radius: 9px; overflow: hidden; border-block: 1px solid #5d5951; pointer-events: none;
+}
+#mainScroll:not(.home-compact) .mint-press-scene { display: none; }
+#mainScroll.home-compact #homeCoinWrap { grid-area: 2 / 1; z-index: 1; }
+.mint-press-scene::before, .mint-cabinet-scene::before {
+  content: ''; position: absolute; inset: 0; background: #16191a url('./mint-press.webp') 50% 49% / cover no-repeat;
+  filter: var(--press-tint);
+}
+.mint-press-scene::after, .mint-cabinet-scene::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 57%,#edb15c30,transparent 65%);
+}
+[data-finish="rank-2"] :is(.mint-press-scene,.mint-cabinet-scene)::after {
+  background: radial-gradient(ellipse at 65% 44%,#a16feb45,transparent 60%),radial-gradient(ellipse at 29% 63%,#65e3ff50,transparent 55%);
+}
+.mint-finish-coin { width: 100%; height: 100%; display: block; border-radius: 50%; object-fit: contain; pointer-events: none; }
+#homeCoinWrap:has(.mint-finish-coin) #tapBtn { border-color: var(--press-light); background: #211e1b; box-shadow: 0 5px 9px #0009,0 0 16px #0006; }
+#homeCoinWrap:has(.mint-finish-coin) #homeCoinArtwork { inset: 0; }
+#homeCoinWrap:has(.mint-finish-coin) .tap-btn-label { visibility: hidden; }
+#homeTierGrid button.coin-tier { text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.mint-cabinet-scene { position: relative; isolation: isolate; display: grid; place-items:center; overflow:hidden; border-radius: 12px; min-height: 0; padding: 10px; }
+#cabinetCoin { display: block; z-index: 1; width: min(46vw,23dvh,170px); aspect-ratio: 1; }
+#crownPreview #cabinetCoin img { display: block; width: 100%; height: 100%; object-fit: contain; }
+#crownPreview .mint-swatches { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; margin: 10px 0; }
+#crownPreview .mint-swatches button { padding: 5px; min-height: 44px; border: 1px solid #59646b; border-radius: 8px; background: #18232e; color: #e4eaf0; font: 600 12px/1.2 system-ui; }
+#crownPreview .mint-swatches [aria-pressed="true"] { color: #181c21; border-color: var(--press-light); background: var(--press-light); }
+#crownPreview p { min-height: 2.9em; }
+@media (prefers-reduced-motion:no-preference) {
+ .mint-press-scene::before, .mint-cabinet-scene::before { transition: filter .26s ease; }
+}
+#weeklySheet .mint-result {
+  margin-bottom: 14px; padding: clamp(12px,4vw,23px); border: 1px solid #aa8d58; border-radius: 18px;
+  background: radial-gradient(ellipse at 18% -12%,#57503a 0,transparent 55%),linear-gradient(145deg,#202830,#111c27 76%);
+}
+.mint-result header { display:flex; justify-content:space-between; align-items:baseline; gap:8px; color:#edd19b; font:650 11px/1.3 system-ui; letter-spacing:.04em; }
+.mint-result header time,.mint-result>small,.race-specimen small { color:#c1cbd3; font-size:12px; }
+.mint-result h2 { color:#fff1d5; font:600 clamp(22px,6vw,34px)/1.1 Georgia,serif; margin:12px 0; overflow-wrap:anywhere; }
+.race-matchup { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-block:1px solid #8d785148; }
+.race-specimen { display:grid; justify-items:center; align-content:start; gap:3px; padding:12px 4px; text-align:center; min-width:0; }
+.race-specimen+.race-specimen { border-left:1px solid #8d785148; }
+.race-specimen strong { font-size:15px; overflow-wrap:anywhere; }
+.race-specimen b { color:#f7e3b6; font:650 28px/1.05 system-ui; font-variant-numeric:tabular-nums; }
+.race-finish { display:grid; place-items:center; width:clamp(48px,14vw,75px); aspect-ratio:1; margin-bottom:3px; }
+.race-finish>* { width:100%; height:100%; }
+.mint-archive-coin { border-radius:50%; border:2px solid #839199; display:grid; place-items:center; background:#46515a; color:#e1e6e7; font:bold 25px Georgia,serif; }
+.race-card-actions { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; margin:12px 0 5px; }
+#weeklySheet .race-card-actions button { min-height:44px; margin:0; padding:7px; }
+#weeklySheet .pilot-rival-button { background:transparent; color:#f4da9c; border:0; font:inherit; text-align:left; min-height:40px; padding:0 4px; overflow-wrap:anywhere; cursor:pointer; }
+#weeklySheet [hidden] { display:none!important; }
+.mint-result button:focus-visible,.mint-nameplate:focus-visible,#crownPreview button:focus-visible,.coin-tier:focus-visible { outline:2px solid #9ee7fc; outline-offset:2px; }
+.mint-result footer,.race-image-actions { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.mint-result footer small { color:#c1cbd3; font-size:12px; }
+#resultImage { margin:auto; padding:14px; width:min(96vw,540px); max-height:88dvh; border:1px solid #a38b61; border-radius:14px; background:#17232d; color:#f9eed6; }
+#resultImage h2 { font:600 21px/1.3 Georgia,serif; margin:0 0 8px; }
+#resultImage::backdrop { background:#040a10cb; }
+#raceCardImage { display:block; width:100%; height:auto; max-height:62dvh; object-fit:contain; }
+.race-image-actions { margin-top:8px; }
+.race-image-actions a,.race-image-actions button { background:#263847; border:1px solid #687780; color:#f6e4bd; border-radius:8px; min-height:44px; padding:8px 14px; display:inline-grid; place-content:center; font:600 14px system-ui; text-decoration:none; }
+#mainScroll .tap-card-header .tap-card-left { display:grid; grid-template-columns:minmax(0,1fr) auto auto; max-width:none; gap:8px; }
+#mainScroll .mint-nameplate { justify-self:start; max-width:100%; }
+#mainScroll .mint-nameplate strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#mainScroll #homeTapPrompt { text-align:right; }
+#leaderboardScreen .podium-medallion:has(svg) { position:relative; }
+.pilot-mini-coin>img,.pilot-mini-coin>svg { display:block; width:100%; height:100%; }

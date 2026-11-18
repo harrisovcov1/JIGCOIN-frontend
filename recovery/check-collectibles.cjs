@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),assert=require('node:assert/strict');
-const html=fs.readFileSync('index.html','utf8'),code=html.slice(html.indexOf('let coinArtworkSerial='),html.indexOf("document.getElementById('homeNextPreview').addEventListener"));
+const html=fs.readFileSync('index.html','utf8'),code=html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+html.slice(html.indexOf('let coinArtworkSerial='),html.indexOf("document.getElementById('homeNextPreview').addEventListener"));
 function setup(){const els=new Map(),store=new Map(),calls=[];let time=1000;
  const node=id=>{if(!els.has(id))els.set(id,{dataset:{},classList:{contains:()=>true,remove(){}},inert:false,style:{},setAttribute(){},replaceChildren(){},append(){}});return els.get(id);};
  const ctx={Date,Math,Number,String,performance:{now:()=>time},window:{},navigator:{onLine:true},document:{hidden:false,getElementById:node,querySelectorAll:()=>[],createElement:()=>({dataset:{},append(){}})},accountIsReady:()=>true,homeUserId:()=>10001,homeConfirmedBalance:12000,homeGoalModel:()=>({tier:1}),homeRaceModel:()=>null,formatNumber:String,msToCountdown:String,appStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},updateBoostHub(){},refreshBalance:async()=>calls.push('balance'),showToast:t=>calls.push(t),apiPost:async(p,b)=>{calls.push([p,b]);return ctx.response;}};
