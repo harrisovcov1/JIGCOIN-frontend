@@ -1,0 +1,404 @@
+/* The authenticated rank is the cabinet material. Special coins have their own finish. */
+:root, #crownPreview[data-finish^="rank-"] {
+  color-scheme: dark;
+  --mint-bg: #101418;
+  --mint-ink: #11161a;
+  --mint-surface: #21282b;
+  --mint-metal: #3c4548;
+  --mint-edge: #596167;
+  --mint-accent: #c3c8c6;
+  --mint-highlight: #f0efea;
+  --mint-text: #f4f0e8;
+  --mint-muted: #c0c4c3;
+  --mint-chamber: none;
+  --mint-fascia: none;
+  --mint-corner: 5px;
+  --mint-grain: repeating-linear-gradient(178deg, #ffffff04 0 1px, transparent 1px 4px);
+  --mint-mark: linear-gradient(140deg, transparent 63%, #ffffff09 63.3%, transparent 64%);
+  --mint-header: linear-gradient(115deg, var(--mint-metal), var(--mint-surface) 29%, var(--mint-bg) 73%);
+  --mint-panel: var(--mint-surface);
+  --mint-line: var(--mint-edge);
+  --mint-gold: var(--mint-accent);
+  --mint-rim: color-mix(in srgb, var(--mint-edge) 78%, var(--mint-surface));
+  --mint-inlay: color-mix(in srgb, var(--mint-accent) 42%, var(--mint-bg));
+  --mint-seam: color-mix(in srgb, var(--mint-highlight) 16%, transparent);
+  --mint-plate: linear-gradient(135deg, color-mix(in srgb, var(--mint-metal) 49%, var(--mint-surface)), var(--mint-surface) 37%, var(--mint-bg) 100%);
+  --mint-feature: radial-gradient(ellipse at 82% -48%, var(--mint-inlay), transparent 71%), var(--mint-plate);
+  --mint-button: linear-gradient(112deg, var(--mint-highlight), var(--mint-accent) 37%, color-mix(in srgb, var(--mint-accent) 82%, var(--mint-metal)) 70%, var(--mint-accent));
+}
+html[data-mint-rank="0"], #crownPreview[data-finish="rank-0"] {
+  --mint-fascia:url('./fascias/rank-0.webp');
+  --mint-bg:#100f0e; --mint-ink:#211a17; --mint-surface:#282320; --mint-metal:#4e3930; --mint-edge:#755344;
+  --mint-accent:#e2a47f; --mint-highlight:#f7d7b9; --mint-text:#f2eae1; --mint-muted:#c8bcb2;
+  --mint-chamber:url('./chambers/rank-0.webp'); --mint-corner:3px;
+  --mint-mark: radial-gradient(circle at 5px 5px, #c295724d 0 1px, transparent 1.8px),
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), #c295724d 0 1px, transparent 1.8px);
+  --mint-grain:repeating-linear-gradient(177deg,#f4d1ac06 0 1px,transparent 1px 3px);
+}
+html[data-mint-rank="1"], #crownPreview[data-finish="rank-1"] {
+  --mint-fascia:url('./fascias/rank-1.webp');
+  --mint-bg:#0e1217; --mint-ink:#171b20; --mint-surface:#24282c; --mint-metal:#44464a; --mint-edge:#6b6154;
+  --mint-accent:#e5b974; --mint-highlight:#f8e1b8; --mint-text:#f4eee2; --mint-muted:#cbc7be;
+  --mint-chamber:url('./mint-press.webp'); --mint-corner:5px;
+  --mint-grain:repeating-linear-gradient(174deg,#eee8d707 0 1px,transparent 1px 3px);
+  --mint-mark: linear-gradient(134deg,transparent 81%,#f1c17d11 81.2%,transparent 82%),
+    linear-gradient(136deg,transparent 83%,#f1c17d0e 83.2%,transparent 84%);
+}
+html[data-mint-rank="2"], #crownPreview[data-finish="rank-2"] {
+  --mint-fascia:url('./fascias/rank-2.webp');
+  --mint-bg:#0c1724; --mint-ink:#152436; --mint-surface:#192d40; --mint-metal:#37556a; --mint-edge:#64859f;
+  --mint-accent:#94def4; --mint-highlight:#e2eeff; --mint-text:#eff7fb; --mint-muted:#bccdda;
+  --mint-chamber:url('./chambers/rank-2.webp'); --mint-corner:13px;
+  --mint-mark:linear-gradient(117deg,transparent 48%,#74dfec0c 52%,#c3abff13 60%,transparent 66%);
+  --mint-grain:linear-gradient(167deg,#b1f8ff0c,transparent 25%,#c5abff07 56%,transparent 76%);
+}
+html[data-mint-rank="3"], #crownPreview[data-finish="rank-3"] {
+  --mint-fascia:url('./fascias/rank-3.webp');
+  --mint-bg:#091b19; --mint-ink:#102824; --mint-surface:#18352e; --mint-metal:#375b51; --mint-edge:#617e71;
+  --mint-accent:#92e1bf; --mint-highlight:#ddf2dc; --mint-text:#eef6ef; --mint-muted:#bdd0c8;
+  --mint-chamber:url('./chambers/rank-3.webp'); --mint-corner:3px;
+  --mint-mark:repeating-linear-gradient(136deg,transparent 0 21px,#a6e5c509 21px 23px,transparent 23px 29px);
+  --mint-grain:linear-gradient(155deg,rgba(149,201,176,.085),transparent 28%,rgba(11,78,63,.12) 59%,transparent 81%);
+}
+html[data-mint-rank="4"], #crownPreview[data-finish="rank-4"] {
+  --mint-fascia:url('./fascias/rank-4.webp');
+  --mint-bg:#171021; --mint-ink:#241a32; --mint-surface:#33253e; --mint-metal:#60476c; --mint-edge:#8f719b;
+  --mint-accent:#d4b1fa; --mint-highlight:#f8eaff; --mint-text:#f8efff; --mint-muted:#d1c1d8;
+  --mint-chamber:url('./chambers/rank-4.webp'); --mint-corner:10px;
+  --mint-mark:conic-gradient(from 24deg at 89% 2%,transparent 0 15%,#d1bbff10 15% 21%,transparent 21% 36%,#d1bbff0b 36% 42%,transparent 42% 100%);
+  --mint-grain:linear-gradient(67deg,transparent 44%,#b194ce08 44.5%,transparent 61%);
+}
+html[data-mint-rank="5"], #crownPreview[data-finish="rank-5"] {
+  --mint-fascia:url('./fascias/rank-5.webp');
+  --mint-bg:#0e0e10; --mint-ink:#171717; --mint-surface:#212121; --mint-metal:#48443b; --mint-edge:#7a6746;
+  --mint-accent:#dfc184; --mint-highlight:#fcf0cb; --mint-text:#f4f0e8; --mint-muted:#c6c3ba;
+  --mint-chamber:url('./chambers/rank-5.webp'); --mint-corner:2px;
+  --mint-mark:repeating-conic-gradient(from 11deg at 108% 120%,#f6d8990d 0deg 1deg,transparent 1.2deg 12deg);
+  --mint-grain:linear-gradient(114deg,transparent 19%,#ffffff07 22%,transparent 32%,#ffffff04 65%,transparent 72%);
+}
+html[data-mint-rank="6"], #crownPreview[data-finish="rank-6"] {
+  --mint-fascia:url('./fascias/rank-6.webp');
+  --mint-bg:#1b1017; --mint-ink:#291a22; --mint-surface:#3b252d; --mint-metal:#634042; --mint-edge:#926a65;
+  --mint-accent:#efb3a1; --mint-highlight:#ffe4c9; --mint-text:#fff0e9; --mint-muted:#dbc4be;
+  --mint-chamber:url('./chambers/rank-6.webp'); --mint-corner:18px;
+  --mint-mark:repeating-radial-gradient(ellipse at 99% 120%, transparent 0 16px,#ffc4ae0c 17px 18px,transparent 19px 29px);
+  --mint-grain:linear-gradient(111deg,transparent 0 24%,#ee8f8808 46%,transparent 60%);
+}
+html[data-mint-rank="7"], #crownPreview[data-finish="rank-7"] {
+  --mint-fascia:url('./fascias/rank-7.webp');
+  --mint-bg:#141921; --mint-ink:#202831; --mint-surface:#2b3640; --mint-metal:#56616a; --mint-edge:#8a9193;
+  --mint-accent:#eddaad; --mint-highlight:#fbf7ee; --mint-text:#fcfaf4; --mint-muted:#cfd8d7;
+  --mint-chamber:url('./chambers/rank-7.webp'); --mint-corner:8px;
+  --mint-mark:conic-gradient(from 212deg at 82% 110%,transparent 0 24%,#ebccad12 26%,#d1e4ef12 34%,#ddd3ea0a 40%,transparent 49%);
+  --mint-grain:linear-gradient(147deg,#d7dafa0d,transparent 34%,#fbf1d809 58%,transparent 80%);
+}
+
+html, html body { background:var(--mint-bg); color:var(--mint-text); }
+html .app-shell {
+  background:var(--mint-mark),var(--mint-grain),linear-gradient(105deg,var(--mint-ink),var(--mint-bg) 56%,var(--mint-ink));
+  box-shadow:inset 1px 0 var(--mint-seam),inset -1px 0 var(--mint-seam);
+}
+
+/* One continuous footrail, built around the original five touch targets. */
+html .app-shell .bottom-nav {
+  border:0;
+  border-top:1px solid var(--mint-rim);
+  border-radius:0;
+  margin-inline:0;
+  margin-bottom:0;
+  background:var(--mint-grain),linear-gradient(180deg,var(--mint-surface),var(--mint-ink) 54%,var(--mint-bg));
+  box-shadow:inset 0 1px #ffffff10,0 -2px 0 #0009;
+}
+html .bottom-nav :is(.nav-btn,#tabShop),
+html .bottom-nav #tabShop:not(.active) {
+  position:relative;
+  gap:2px;
+  padding:2px 0 5px;
+  border:0;
+  border-radius:2px;
+  background:none;
+  box-shadow:none;
+  color:var(--mint-muted);
+  font-weight:500;
+}
+html .bottom-nav :is(.nav-btn,#tabShop).active {
+  color:var(--mint-accent);
+  background:none;
+  border:0;
+  box-shadow:none;
+  text-shadow:0 1px 2px #0009;
+}
+html .bottom-nav .nav-icon { color:inherit; }
+html .bottom-nav .nav-btn.active::after {
+  content:"";
+  position:absolute;
+  height:2px;
+  width:clamp(25px,7vw,37px);
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--mint-accent);
+  box-shadow:0 0 7px color-mix(in srgb,var(--mint-accent) 43%,transparent);
+}
+
+/* The molded inset above each sheet carries the current cabinet's architectural trim. */
+html body :is(.sheet,#leaderboardScreen),
+html body :is(#resultImage,#crownPreview) {
+  color:var(--mint-text);
+  background-color:var(--mint-bg);
+  background-image:var(--mint-grain),linear-gradient(105deg,var(--mint-ink),var(--mint-bg) 65%);
+  border-color:var(--mint-rim);
+  border-radius:var(--mint-corner);
+  box-shadow:inset 0 0 0 1px var(--mint-rim),inset 0 0 0 3px #ffffff05,0 8px 22px #0006;
+}
+html body .sheet .sheet-header,
+html body #leaderboardScreen .leaderboard-heading {
+  position:relative;
+  isolation:isolate;
+  background:var(--mint-mark),var(--mint-grain),var(--mint-header);
+  border-bottom:1px solid var(--mint-inlay);
+  box-shadow:inset 0 1px var(--mint-seam),0 2px 0 #0004;
+}
+html body #leaderboardScreen .leaderboard-heading {
+  margin:-1px -1px 0;
+  padding:4px 5px;
+}
+html body .sheet .sheet-header::before,
+html body #leaderboardScreen .leaderboard-heading::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  background:linear-gradient(90deg,var(--mint-bg),transparent 80%),var(--mint-fascia) center / 100% 100% no-repeat;
+  opacity:.95;
+  pointer-events:none;
+}
+html body .sheet .sheet-header::after,
+html body #leaderboardScreen .leaderboard-heading::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  bottom:0;
+  left:4%;
+  right:4%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--mint-accent) 35%,var(--mint-highlight) 47%,var(--mint-edge) 71%,transparent);
+  opacity:.66;
+  pointer-events:none;
+}
+html body .sheet .sheet-title,
+html body #leaderboardScreen #lbTitle,
+html body #crownPreviewTitle,
+html body #resultImage h2 {
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:600;
+  letter-spacing:.008em;
+  color:var(--mint-text);
+  text-shadow:0 1px 2px #000c;
+}
+html body .sheet .sheet-subtitle,
+html body #leaderboardScreen .leaderboard-heading p { color:var(--mint-muted); }
+html body .sheet .sheet-close,
+html body #leaderboardScreen #lbCloseBtn {
+  background:var(--mint-grain),linear-gradient(140deg,var(--mint-surface),var(--mint-bg));
+  color:var(--mint-text);
+  border:1px solid var(--mint-edge);
+  border-radius:var(--mint-corner);
+  box-shadow:inset 0 1px var(--mint-seam),0 1px 3px #0007;
+}
+html body .sheet-backdrop { background:var(--mint-bg); }
+html body :is(#crownPreview,#resultImage)::backdrop { background:color-mix(in srgb,var(--mint-bg) 85%,transparent); }
+html body .sheet .sheet-body, html body #lbContent { scrollbar-color:var(--mint-edge) transparent; }
+
+/* The feature plates are polished; minor information is cut into quieter metal. */
+html body :is(#withdrawSheet,#friendsSheet,#coinShopSheet,#homeJourneySheet,#boostSheet,#weeklySheet,#homeDailySheet,#homeQuestSheet,#leaderboardScreen) :is(
+  .vault-summary,.vault-vip,.invite-reward-card,.hub-product.hub-goal,.journey-focus,.pilot-hero,
+  .pilot-target,.mint-result,.daily-reward-hero,.quest-card,.lb-race-card
+) {
+  background:var(--mint-mark),var(--mint-grain),var(--mint-feature);
+  color:var(--mint-text);
+  border:1px solid var(--mint-inlay);
+  border-block-start-color:var(--mint-edge);
+  border-radius:var(--mint-corner);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -2px #0005,0 2px 4px #0004;
+}
+html body :is(#withdrawSheet,#friendsSheet,#friendsDetailsSheet,#coinShopSheet,#boostSheet,#weeklySheet,#homeJourneySheet,#vaultDetailsSheet,#leaderboardScreen) :is(
+  .vault-benefits > div,.friends-summary,.invite-milestone,.invite-detail-section,.hub-product,.shop-vip-pass,
+  .pilot-link,.boost-card,.coin-tier,.lb-list .lb-row,.lb-podium > div,.vip-box,.pilot-tiles button
+),
+html body #boostSheet #rewardChoices .boost-card,
+html body #boostSheet .pilot-free-activities .pilot-link,
+html body #homeTierGrid .coin-tier,
+html body #coinShopSheet .hub-catalog-dense .hub-product {
+  background:var(--mint-grain),var(--mint-plate);
+  color:var(--mint-text);
+  border:1px solid var(--mint-rim);
+  border-radius:var(--mint-corner);
+  box-shadow:inset 0 1px var(--mint-seam),0 2px 3px #0002;
+}
+html body #coinShopSheet .hub-product.hub-goal,
+html body #coinShopSheet .hub-catalog-dense .hub-product.hub-goal,
+html body #homeTierGrid .coin-tier[data-current="true"],
+html body #boostSheet #rewardChoices .boost-card[data-selected="true"],
+html body #leaderboardScreen .lb-list .lb-row[data-me="true"],
+html body #leaderboardScreen .lb-podium:has([data-place="3"]) [data-place="1"] {
+  background:var(--mint-mark),var(--mint-feature);
+  border-color:var(--mint-accent);
+  box-shadow:inset 2px 0 var(--mint-accent),inset 0 1px var(--mint-seam);
+}
+html body #homeTierGrid .coin-tier[data-next="true"] {
+  border-color:var(--mint-edge);
+  border-inline-start:2px solid var(--mint-muted);
+}
+html body #friendsSheet .friends-summary-col { background:transparent; border-color:var(--mint-rim); }
+html body .sheet :is(.daily-more,.hub-history,.vault-utility,.pack-goal,.reward-upgrade,.journey-settings,.pilot-all-packs summary),
+html body #leaderboardScreen :is(.lb-footer,.lb-actions) { border-color:var(--mint-rim); }
+html body .sheet :is(.invite-eyebrow,.vault-benefit-icon,.vault-duration,.quest-kicker,.vault-total strong,.invite-reward-card h2 strong,.pilot-hero div > span,.pilot-target span,.pilot-free-activities .pilot-link span),
+html body #leaderboardScreen :is(.lb-race-card p,.lb-toolbar .lb-text-btn),
+html body #coinShopSheet .pack-goal strong { color:var(--mint-accent); }
+html body .sheet :is(.boost-state,.pilot-free-activities small,.hub-unit-value,.pack-goal small,.vault-payment-note,.quest-info,.journey-settings summary,.vault-expiry),
+html body #leaderboardScreen :is(.lb-section-label,.lb-eyebrow,.lb-cushion) { color:var(--mint-muted); }
+
+/* Metal keys retain a clear difference between the primary, secondary and disabled action. */
+html body .sheet :is(.quest-action,.vault-buy,.friends-share-btn,.pilot-primary):enabled,
+html body #crownPreview .pilot-primary:enabled,
+html body #coinShopSheet .hub-product.hub-goal .hub-buy:enabled,
+html body #leaderboardScreen :is(.lb-primary,.lb-tab-btn[aria-pressed="true"]):enabled,
+html body #boostSheet #rewardChoices .boost-card[data-selected="true"] .boost-action:enabled,
+html body #weeklySheet .pilot-tiles button[aria-pressed="true"] {
+  border:1px solid var(--mint-highlight);
+  border-radius:var(--mint-corner);
+  background:var(--mint-button);
+  color:#191614;
+  text-shadow:0 1px #ffffff35;
+  box-shadow:inset 0 1px #fff6,inset 0 -2px #0002,0 2px 4px #0004;
+}
+html body .sheet :is(.invite-copy,.boost-action,.shop-retry,.pilot-secondary,.vault-details-link):enabled,
+html body #leaderboardScreen .lb-tab-btn[aria-pressed="false"],
+html body #coinShopSheet .hub-buy:enabled,
+html body #crownPreview .mint-swatches button,
+html body #resultImage .race-image-actions :is(a,button) {
+  background:var(--mint-grain),var(--mint-plate);
+  border:1px solid var(--mint-edge);
+  border-radius:var(--mint-corner);
+  color:var(--mint-highlight);
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+html body #crownPreview .mint-swatches button[aria-pressed="true"] {
+  color:var(--mint-text);
+  outline:1px solid var(--press-light);
+  outline-offset:-2px;
+}
+html body :is(.sheet,#leaderboardScreen) :is(.vault-buy,.friends-share-btn,.boost-action,.hub-buy,.pilot-primary,.quest-action):disabled {
+  background:var(--mint-surface);
+  border-color:var(--mint-rim);
+  color:var(--mint-muted);
+  box-shadow:none;
+}
+/* Green is reserved for achieved or confirmed streaks regardless of rank. */
+html body #boostSheet #rewardChoices .boost-streak:not([data-selected="true"]) {
+  border-inline-start:2px solid #87c5aa;
+  background:linear-gradient(112deg,#67cb9e11,transparent 65%),var(--mint-plate);
+}
+html body #rewardWeekStrip .daily-marker:not([data-claimed="true"]):not([data-focus="true"]) {
+  background:var(--mint-ink);
+  border-color:var(--mint-rim);
+  color:var(--mint-muted);
+}
+html body .sheet :is(progress,.vault-progress,.quest-progress-bar) {
+  background:var(--mint-bg);
+  accent-color:var(--mint-accent);
+}
+html body #journeyProgress::-webkit-progress-bar {background:var(--mint-bg);}
+html body #journeyProgress::-webkit-progress-value {background:var(--mint-accent);}
+html body #journeyProgress::-moz-progress-bar {background:var(--mint-accent);}
+html body .sheet :is(.vault-progress i,.quest-progress-bar > span) { background:linear-gradient(90deg,var(--mint-accent),var(--mint-highlight)); }
+html body :is(.sheet,#leaderboardScreen,.bottom-nav,#crownPreview,#resultImage) :is(button,a,summary,input):focus-visible {
+  outline:2px solid var(--mint-highlight);
+  outline-offset:-3px;
+}
+html .bottom-nav .nav-btn:active, html .sheet button:enabled:active { filter:brightness(.93); }
+@media (max-height:620px) {
+  html body #leaderboardScreen .leaderboard-heading { padding-block:0; }
+}
+
+/* Looking into a locked cabinet previews its architecture without equipping that rank. */
+#crownPreview[data-finish^="rank-"] .mint-cabinet-scene::before {
+  background:var(--mint-ink) var(--mint-chamber) center / cover no-repeat;
+  filter:none;
+}
+#crownPreview[data-finish^="rank-"] .mint-cabinet-scene::after { background:none; }
+
+/* The catalogue's first pack sits in a display case. Its price and quantity remain
+   on their own solid plate when the last rank has no progression goal to show. */
+html body #coinShopSheet #coinPackList:has(.pilot-all-packs:not([open])) {
+  flex: 1 0 auto;
+  grid-template-rows: minmax(min-content,1fr) auto;
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(84px,30%);
+  grid-template-rows:minmax(96px,1fr) auto auto auto;
+  gap:2px 10px;
+  align-content:stretch;
+  isolation:isolate;
+  overflow:hidden;
+  padding:0 14px 12px;
+  background:var(--mint-grain),var(--mint-plate);
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child::before {
+  content:"";
+  grid-row:1;
+  grid-column:1/-1;
+  align-self:stretch;
+  min-height:96px;
+  margin:0 -14px 8px;
+  border-bottom:1px solid var(--mint-edge);
+  background:
+    radial-gradient(ellipse at 50% 50%,transparent 25%,#090a0b4d 80%),
+    var(--mint-chamber) center 48% / cover no-repeat, var(--mint-ink);
+}
+html[data-mint-rank="7"] #coinShopSheet {--display-coin:url('./legend-platinum.webp');}
+html body #coinShopSheet #coinPackList > .hub-product:first-child:not(.hub-goal)::after {
+  content:"";
+  grid-column:1/-1;
+  grid-row:1;
+  align-self:center;
+  justify-self:center;
+  height:clamp(65px,15cqh,116px);
+  max-height:90%;
+  aspect-ratio:1;
+  background:var(--display-coin,url('./foundry-gold.webp')) center / contain no-repeat;
+  filter:drop-shadow(0 3px 3px #0009);
+  pointer-events:none;
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .pack-goal {
+  grid-row:1;
+  grid-column:1/-1;
+  align-self:center;
+  display:flex;
+  gap:10px;
+  padding:8px 10px;
+  margin:0 0 8px;
+  border:1px solid var(--mint-rim);
+  border-radius:var(--mint-corner);
+  background:color-mix(in srgb,var(--mint-bg) 92%,transparent);
+  color:var(--mint-text);
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .pack-goal-art {
+  width:clamp(40px,8cqh,68px);
+  aspect-ratio:1;
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .hub-product-label {grid-row:2; color:var(--mint-muted);}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .hub-product-coins {
+  grid-row:3;
+  font-size:clamp(25px,7cqw,35px);
+  color:var(--mint-text);
+}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .hub-unit-value {grid-row:4; color:var(--mint-muted);}
+html body #coinShopSheet #coinPackList > .hub-product:first-child .hub-buy {grid-column:2;grid-row:2/span 3;}
+@container game-panel (max-height:540px) {
+  html body #coinShopSheet #coinPackList > .hub-product:first-child {grid-template-rows:minmax(72px,1fr) auto auto auto;padding-bottom:7px;}
+  html body #coinShopSheet #coinPackList > .hub-product:first-child::before {min-height:72px;margin-bottom:5px;}
+  html body #coinShopSheet #coinPackList > .hub-product:first-child:not(.hub-goal)::after {height:60px;}
+}

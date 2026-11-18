@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 import os, uuid
+import re
 
 root=Path(__file__).resolve().parents[1]
 now=lambda: datetime.now(timezone.utc)
@@ -27,11 +28,19 @@ def expect_art(image, rank):
     expect(image).to_have_attribute('src', './assets/' + RANKS[rank][2])
     assert image.evaluate('async img => { await img.decode(); return img.naturalWidth > 0 }')
 
+def expect_chamber(scene, rank):
+    expected = '/assets/mint-press.webp' if rank == 1 else f'/assets/chambers/rank-{rank}.webp'
+    background = scene.evaluate("el => getComputedStyle(el,'::before').backgroundImage")
+    sources = re.findall(r'url\(["\']?([^"\')]+)', background)
+    chamber = next((url for url in sources if urlsplit(url).path.endswith(expected)), None)
+    assert chamber, (rank, expected, background)
+    size = scene.evaluate("async (el,src) => {const image = new Image(); image.src = src; await image.decode(); return [image.naturalWidth,image.naturalHeight]}", chamber)
+    assert min(size) > 0, (rank, size)
+
 def check_rank_ladder(page, account, initial_bounds):
     home_coin = page.locator('#homeCoinArtwork img')
     home_name = page.locator('#mintFinishName')
     tap = page.locator('#tapBtn')
-    filters = set()
 
     def set_balance(balance, rank):
         account['balance'] = balance
@@ -51,11 +60,10 @@ def check_rank_ladder(page, account, initial_bounds):
         if rank:
             set_balance(threshold - 1, rank - 1)
         set_balance(threshold, rank)
-        filters.add(page.locator('.mint-press-scene').evaluate("el => getComputedStyle(el, '::before').filter"))
+        expect_chamber(page.locator('.mint-press-scene'), rank)
         page.locator('#tabWithdraw').click()
         expect_art(page.locator('#vaultRankArt img'), rank)
         page.locator('#tabFarm').click()
-    assert len(filters) == len(RANKS), filters
 
     set_balance(10_000, 1)
     page.locator('#homeJourneyOpen').click()
@@ -66,6 +74,7 @@ def check_rank_ladder(page, account, initial_bounds):
         tier.click()
         expect(page.locator('#crownPreviewTitle')).to_have_text(name)
         expect_art(page.locator('#cabinetCoin img'), rank)
+        expect_chamber(page.locator('#crownPreview .mint-cabinet-scene'), rank)
         page.locator('#crownPreview [type=submit]').click()
     page.locator('#homeJourneyClose').click()
     expect(home_name).to_have_text('Foundry Gold')
@@ -194,7 +203,7 @@ def check(browser,width,height):
         expect(page.locator('.tap-card')).to_have_attribute('data-finish','rank-2')
         expect(page.locator('#mintFinishName')).to_have_text('Aurora Glass')
         assert before==page.locator('#tapBtn').bounding_box()
-        assert page.locator('.mint-press-scene').evaluate("(x)=>getComputedStyle(x,'::before').filter").startswith('hue-rotate')
+        expect_chamber(page.locator('.mint-press-scene'), 2)
         celebration=page.locator('.rank-celebration-close')
         if celebration.is_visible(): celebration.click()
         screenshot('aurora')
