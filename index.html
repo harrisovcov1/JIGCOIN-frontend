@@ -2,7 +2,7 @@
 <!-- JigCoin frontend deployment retry 1: 2026-11-14. -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="release-v13.1-tap-layout-20261118">
+<meta name="jigcoin-build" content="release-v13.2-home-numbers-20261118">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -1931,7 +1931,6 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 .header .home-balance-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:4px 12px;padding:10px 13px!important}
 .balance-heading{grid-column:1/-1}.balance-heading .card-balance-token{min-height:32px;font:600 11px system-ui;color:#d8e3f3;cursor:pointer}
 .home-balance-card .card-balance-value{grid-column:1;grid-row:2;font-size:34px;line-height:1.1;margin:0;align-self:center;font-variant-numeric:tabular-nums}
-.home-balance-card .card-balance-value.long-balance{font-size:21px!important;overflow-wrap:anywhere}
 .home-balance-card .global-rank-block{grid-column:2;grid-row:2;padding:6px 8px!important;min-height:44px;box-shadow:none!important}
 .global-rank-label{font-size:9px}.global-rank-tier{font-size:10px}.global-rank-top-row{gap:5px}
 .home-race{grid-column:1/-1;font-size:11px;font-weight:600;color:#f9d985;margin:5px 0 0;line-height:1.4;min-height:16px}
@@ -2237,6 +2236,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #mainScroll .home-boost-action{width:100%;max-width:none;min-height:52px;padding:6px 8px}
 #todayText,#energyText,#perTap{font-variant-numeric:tabular-nums}
 </style>
+<style id="home-numbers-v13-2">
+/* Each total owns its space. Digit changes never add a row or resize the coin. */
+#mainScroll .header .home-balance-card{grid-template-columns:minmax(0,1fr);row-gap:5px}
+#mainScroll .home-balance-card #balanceText{grid-column:1/-1;grid-row:2;min-width:0;width:100%;height:44px;line-height:44px;margin:0;font-size:36px;letter-spacing:-.6px;white-space:nowrap;overflow-wrap:normal;word-break:normal;font-variant-numeric:tabular-nums}
+#mainScroll .home-balance-card #balanceText[data-number-size="wider"]{font-size:28px}
+#mainScroll .home-balance-card #balanceText[data-number-size="widest"]{font-size:20px}
+#mainScroll .home-balance-card #homeLeaderboard{grid-column:1/-1;grid-row:3;min-width:0;width:100%;margin:0!important}
+#mainScroll #homeLeaderboard .global-rank-top-row{min-width:0}
+#mainScroll #homeLeaderboard .global-rank-label,#mainScroll #homeLeaderboard .global-rank-value{white-space:nowrap}
+#mainScroll .tap-metrics{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+#mainScroll .tap-metrics .tap-metric{min-width:0;min-height:56px;padding:6px 9px;overflow-wrap:normal;word-break:normal}
+#mainScroll .tap-metrics .metric-label,#mainScroll .tap-metrics .metric-sub{white-space:nowrap;line-height:16px}
+#mainScroll .tap-metrics .tap-metric:first-child{grid-template-rows:20px 16px;align-content:center;row-gap:2px}
+#mainScroll .tap-metrics .tap-metric:nth-child(2){display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:16px 24px;align-content:center;justify-items:start;gap:0}
+#mainScroll #todayText{width:100%;min-width:0;height:24px;line-height:24px;font-size:20px;white-space:nowrap;overflow-wrap:normal;word-break:normal;letter-spacing:0;font-variant-numeric:tabular-nums}
+#mainScroll #todayText[data-number-size="wide"]{font-size:16px}
+#mainScroll #todayText[data-number-size="wider"]{font-size:12px}
+#mainScroll #todayText[data-number-size="widest"]{font-size:9px}
+#mainScroll .home-next-preview{min-height:64px}
+#mainScroll .home-next-preview>span:last-child{min-width:0}
+#mainScroll .home-session-row{min-height:58px}
+#mainScroll .home-boost-action{min-height:58px;line-height:16px}
+@media(max-width:350px){#mainScroll .home-balance-card #balanceText{font-size:32px}#mainScroll .home-balance-card #balanceText[data-number-size="wider"]{font-size:26px}#mainScroll .home-balance-card #balanceText[data-number-size="widest"]{font-size:18px}}
+</style>
 <style id="leaderboard-v12-style">
 /* v12: the main race fits a phone; long rankings and rules keep accessible scrolling. */
 .leaderboard-screen{padding:14px;gap:8px;overflow:hidden;container-type:size}
@@ -2450,7 +2473,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
   <div class="sheet" id="homeJourneySheet" role="dialog" aria-labelledby="homeJourneyTitle">
     <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Your rank journey</div><div class="sheet-subtitle">Climb to JigCoin Legend · 10,000,000 coins. Ranks follow your saved balance.</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
-    <div class="sheet-body"><p class="journey-next" id="homeJourneyNext"></p><div class="coin-tier-grid" id="homeTierGrid"></div><p class="journey-footnote">Coin styles celebrate your rank. They do not add coins or change tap rewards.</p><p class="journey-record" id="homeMilestoneRecord"></p><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></div>
+    <div class="sheet-body"><p class="journey-next" id="homeJourneyNext"></p><div class="coin-tier-grid" id="homeTierGrid"></div><p class="journey-footnote">Coin styles celebrate your rank. They do not add coins or change tap rewards.</p><p class="journey-record" id="homeMilestoneRecord"></p><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><p>Home totals show whole coins. Fractional tap bonuses continue to accumulate.</p><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></div>
   </div>
 
   <div class="sheet" id="friendsSheet">
@@ -2932,6 +2955,17 @@ function formatNumber(n) {
   return x.toLocaleString("en-GB");
 }
 
+// Home shows whole coins while the original tap/accounting state keeps fractions.
+// Floor the display only: a pending fraction must never appear as an earned coin.
+function formatHomeCoins(n) {
+  const x = Number(n);
+  return Number.isFinite(x) ? Math.floor(Math.max(0, x)).toLocaleString("en-GB") : "—";
+}
+function sizeHomeNumber(element) {
+  const length = element.textContent.length;
+  element.dataset.numberSize = length <= 7 ? "normal" : length <= 11 ? "wide" : length <= 15 ? "wider" : "widest";
+}
+
 function getTodayString() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -3232,7 +3266,6 @@ function animateHomeTap(points) {
   } catch (_) { /* Feedback is optional; tap accounting continues. */ }
 }
 function renderHomeProgress(view) {
-  balanceText.classList.toggle('long-balance',balanceText.textContent.length>9);
   // Rank progress uses the same saved balance everywhere. Pending taps can
   // animate the total but cannot unlock a rank before the server confirms it.
   const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null);
@@ -3661,15 +3694,17 @@ function render() {
   const confirmed = Number.isFinite(view.bal);
   const balSafe = confirmed ? Number(view.bal) : 0;
   const loading = !window.__accountPhase || ["loading", "connecting"].includes(window.__accountPhase);
-  const balDisplay = confirmed ? formatNumber(view.bal) : loading ? "…" : "—";
+  const balDisplay = confirmed ? formatHomeCoins(view.bal) : loading ? "…" : "—";
 
   balanceText.textContent = balDisplay;
+  sizeHomeNumber(balanceText);
   if(typeof renderVault==='function')renderVault();
   updateRecoveryTapFeedback();
   tapBtn.disabled = !accountIsReady() || !confirmed || (window.__lastState?.recovery_test === true && !window.__lastState?.recovery_gameplay);
   const tapLabel = document.getElementById("tapButtonLabel");
   if (tapLabel) tapLabel.textContent = !accountIsReady() ? (loading ? "Loading" : "Paused") : window.__lastState?.recovery_test ? "Test tap" : "Tap";
-  todayText.textContent = confirmed ? formatNumber(view.today) : "—";
+  todayText.textContent = confirmed ? formatHomeCoins(view.today) : "—";
+  sizeHomeNumber(todayText);
 
   // Points per tap (x2 when boost active)
   const streakTapMultiplier=state.streakMeta?.active?Number(state.streakMeta.tap_multiplier)||1:1;
