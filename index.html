@@ -3387,7 +3387,7 @@ function renderHomeSession() {
   const status=document.getElementById('homeSaveStatus'),action=document.getElementById('homeBoostAction');if(!status||!action)return;
   let pending=0,message='';
   if(window.__lastState?.recovery_gameplay){const q=readRecoveryQueue();pending=q.pending+(q.packet?.count||0);message=recoveryTapMessage;}
-  else{pending=getPendingTaps()+getTapQueue().reduce((sum,p)=>sum+Number(p.count||0),0);}
+  else{pending=getPendingTaps()||getTapQueue().length;message=typeof ordinarySaveNotice==='string'?(ordinarySaveNotice||legacyTapNotice):'';}
   const connecting=['loading','connecting'].includes(window.__accountPhase);
   status.textContent=!accountIsReady()?(connecting?'Syncing…':'Sync paused'):message?'Save details ›':pending?'Saving…':'Saved ✓';
   status.dataset.state=message?'error':pending?'pending':'saved';
@@ -4048,6 +4048,9 @@ async function apiPost(path, body, opts = {}) {
   }
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
+  if (opts.tapOwner && safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id !== opts.tapOwner) {
+    return {ok:false, reason:"ACCOUNT_CHANGED"};
+  }
   window.__tgAuthCache = { initData, telegram_id };
   const controller = (readOnly || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
@@ -4704,167 +4707,173 @@ async function initFromBackend() {
 // - persistent pending tap queue (never drop taps on transient failures)
 // - batch flush via /api/tapPacket
 // =============================
-const PENDING_TAPS_KEY = "ae_pending_taps";
-function getPendingTaps() {
-  const n = Number(appStorage.getItem(PENDING_TAPS_KEY) || "0");
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
-}
-function setPendingTaps(n) {
-  const v = Math.max(0, Math.floor(Number(n) || 0));
-  const saved = appStorage.setItem(PENDING_TAPS_KEY, String(v));
-  window.__pendingTapCount = v; // for quick debugging if needed
-  return saved;
+function safeParseJSON(str, fallback) {
+  try { return JSON.parse(str) ?? fallback; } catch (_) { return fallback; }
 }
 
-const TAP_QUEUE_KEY = "ae_tap_packet_queue_v1";
-function safeParseJSON(str, fallback) {
-  try {
-    const v = JSON.parse(str);
-    return v === null || v === undefined ? fallback : v;
-  } catch (e) {
-    return fallback;
-  }
-}
-function getTapQueue() {
-  const raw = appStorage.getItem(TAP_QUEUE_KEY) || "[]";
-  const q = safeParseJSON(raw, []);
-  return Array.isArray(q) ? q : [];
-}
-function setTapQueue(q) {
-  return appStorage.setItem(TAP_QUEUE_KEY, JSON.stringify(Array.isArray(q) ? q : []));
-}
 function makePacketId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
   }
-  // Fallback: not cryptographically strong, but good enough for idempotency keys.
   return "pkt_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2);
 }
 
 let __tapFlushTimer = null;
-let __tapRetryTimer = null;
 let __tapFlushing = false;
 let __lastPointerTapAt = 0;
+let ordinaryPendingCount = null;
+let ordinarySaveNotice = "";
+let legacyTapNotice = "";
 
-function scheduleTapFlush(delayMs = 180) {
-  if (__tapFlushTimer) return;
+// A tap is durable before the animation. Immutable input keys let separate
+// Telegram windows add taps without replacing each other's counters.
+function ordinaryPrefix(owner) { return "jigcoin_player_taps_v1:" + owner + ":"; }
+
+function ordinaryKeys(prefix) {
+  const keys = [];
+  const store = window.localStorage;
+  for (let index = 0; index < store.length; index++) {
+    const key = store.key(index);
+    if (key && key.startsWith(prefix)) keys.push(key);
+  }
+  return keys.sort();
+}
+
+function getPendingTaps() {
+  const owner = homeUserId();
+  if (!owner) return 0;
+  if (ordinaryPendingCount?.owner === owner) return ordinaryPendingCount.count;
+  try {
+    const count = ordinaryKeys(ordinaryPrefix(owner) + "tap:").length;
+    ordinaryPendingCount = {owner, count};
+    return count;
+  } catch (_) { return 0; }
+}
+
+function getTapQueue() {
+  const owner = homeUserId();
+  const packet = owner && safeParseJSON(appStorage.getItem(ordinaryPrefix(owner) + "batch"), null);
+  return packet ? [packet] : [];
+}
+
+function addOrdinaryTap() {
+  const owner = homeUserId();
+  if (!owner) return false;
+  const mode = navigator.locks?.request ? "b" : "s";
+  const key = ordinaryPrefix(owner) + "tap:" + mode + ":" + Date.now().toString(36) + "_" + makePacketId();
+  if (!appStorage.setItem(key, "1")) return false;
+  if (ordinaryPendingCount?.owner === owner) ordinaryPendingCount.count++;
+  ordinarySaveNotice = "";
+  return true;
+}
+
+function scheduleTapFlush(delayMs = 80) {
+  if (__tapFlushTimer !== null) return;
   __tapFlushTimer = setTimeout(() => {
     __tapFlushTimer = null;
-    flushPendingTaps();
+    void flushPendingTaps();
   }, delayMs);
 }
 
-function scheduleTapRetry(delayMs = 800) {
-  if (__tapRetryTimer) return;
-  __tapRetryTimer = setTimeout(() => {
-    __tapRetryTimer = null;
-    flushPendingTaps();
-  }, delayMs);
-}
-
-async function flushPendingTaps(opts = {}) {
-  // Preserve old packets for later review; do not submit them during this test.
-  if (!accountIsReady() || window.__lastState?.recovery_test === true) return;
-  if (__tapFlushing) {
-    scheduleTapFlush(220);
-    return;
-  }
-
-  let pending = getPendingTaps();
-  let queue = getTapQueue();
-  if (!pending && queue.length === 0) return;
-
-  __tapFlushing = true;
-  try {
-    // If we already have queued packets (e.g., after iOS WebView close), send those first.
-    if (queue.length === 0 && pending > 0) {
-      const chunk = Math.max(1, Math.min(20, pending));
-      queue = [{ packet_id: makePacketId(), count: chunk, created_at: Date.now() }];
-      if (setTapQueue(queue) === false) {
-        showToast("Unable to save taps on this device. Please reopen the mini app.");
-        return;
+// The shared batch is persisted before transmission. A retry uses the exact
+// same id and count even if the server committed just before the app closed.
+async function sendOrdinaryPacket(owner, canBatch) {
+  if (homeUserId() !== owner || !accountIsReady() || window.__lastState?.recovery_test) return false;
+  const prefix = ordinaryPrefix(owner);
+  const batchKey = prefix + "batch";
+  let packet = safeParseJSON(appStorage.getItem(batchKey), null);
+  let batched = !!packet;
+  if (!packet) {
+    // Unlocked clients always submit their immutable inputs individually.
+    // An individual receipt stays individual after a browser upgrade, too.
+    const singles = ordinaryKeys(prefix + "tap:s:");
+    if (singles.length) {
+      const key = singles[0];
+      packet = {id:key.slice((prefix + "tap:s:").length), keys:[key]};
+    } else {
+      const keys = ordinaryKeys(prefix + "tap:b:").slice(0, 20);
+      if (!keys.length) return false;
+      if (!canBatch) {
+        ordinarySaveNotice = "Older taps are saved on this device. Reopen in the Telegram browser that recorded them to finish syncing.";
+        render();
+        return false;
       }
+      packet = {id:makePacketId(), keys};
+      if (!appStorage.setItem(batchKey, JSON.stringify(packet))) throw Error("TAP_STORE_UNAVAILABLE");
+      batched = true;
     }
-
-    if (queue.length === 0) return;
-
-    const pkt = queue[0];
-    const chunk = Math.max(1, Math.floor(Number(pkt.count) || 0));
-
-    const res = await apiPost(
-      "/api/tapPacket",
-      { packet_id: pkt.packet_id, count: chunk },
-      { silent: true, keepalive: !!opts.keepalive, useBeacon: !!opts.useBeacon }
-    );
-
-// If server applied fewer taps than we sent (e.g. energy ran out),
-// roll back the optimistic UI for the rejected taps so balance/energy never "snap" later.
-const applied = (res && typeof res.applied === "number") ? res.applied : chunk;
-const rejected = Math.max(0, chunk - applied);
-if (rejected > 0) {
-      window.__allowBalanceDecreaseOnce = true;
-  const perTapNow = effectiveTapRate(state);
-  state.bal = Math.max(0, (state.bal || 0) - rejected * perTapNow);
-  state.today = Math.max(0, (state.today || 0) - rejected * perTapNow);
-  state.energy = Math.min(maxEnergy, (state.energy || 0) + rejected);
+  }
+  if (!Array.isArray(packet.keys) || !packet.keys.length || packet.keys.length > 20 ||
+      !packet.keys.every(key => typeof key === "string" && key.startsWith(prefix + "tap:"))) {
+    throw Error("TAP_STORE_UNAVAILABLE");
+  }
+  const count = packet.keys.length;
+  const res = await apiPost("/api/tapPacket", {packet_id:packet.id, count}, {silent:true, keepalive:true, fastAuth:true, tapOwner:owner});
+  if (!res?.ok || !Number.isInteger(res.applied) || res.applied < 0 || res.applied > count) throw Error("TAP_RECEIPT_PENDING");
+  // Removing the batch last makes an interrupted cleanup safe to repeat.
+  let newlyAcknowledged = false;
+  for (const key of packet.keys) {
+    if (window.localStorage.getItem(key) !== null) {
+      window.localStorage.removeItem(key);
+      newlyAcknowledged = true;
+    }
+  }
+  if (batched && safeParseJSON(appStorage.getItem(batchKey), null)?.id === packet.id) window.localStorage.removeItem(batchKey);
+  ordinaryPendingCount = null;
+  if (homeUserId() === owner && !window.__lastState?.recovery_test) {
+    if (newlyAcknowledged && res.applied < count) window.__allowBalanceDecreaseOnce = true;
+    ordinarySaveNotice = "";
+    if (newlyAcknowledged) applyBackendState(res);
+    render();
+  }
+  return true;
 }
 
-
-    // If we used sendBeacon, we cannot rely on an immediate response.
-    // Keep the packet in the queue; it will be retried on next open.
-    if (opts.useBeacon) {
-      return;
-    }
-
-    // If Telegram auth missing, do nothing (keeps queue, user will reopen inside Telegram).
-    if (!res || res.reason === "NO_TELEGRAM_ID") {
-      scheduleTapRetry(1000);
-      return;
-    }
-
-    // Rate limit: keep queue and retry shortly.
-    const err = res && (res.error || res.reason);
-    if (err === "TAP_RATE_LIMIT" || err === "RATE_LIMIT") {
-      scheduleTapRetry(900);
-      return;
-    }
-
-    // No energy / daily cap: server returns state; clear queue (can't apply).
-    if (res && res.ok === false && (res.reason === "NO_ENERGY" || res.reason === "MAX_TAPS_REACHED")) {
-      setPendingTaps(0);
-      setTapQueue([]);
-      applyBackendState(res);
+async function flushPendingTaps() {
+  const owner = homeUserId();
+  if (!owner || !accountIsReady() || window.__lastState?.recovery_test || navigator.onLine === false || __tapFlushing) return;
+  if (!getPendingTaps() && !getTapQueue().length) return;
+  __tapFlushing = true;
+  let retryDelay = 0;
+  try {
+    const lock = navigator.locks;
+    const sent = lock?.request
+      ? await lock.request(ordinaryPrefix(owner), () => sendOrdinaryPacket(owner, true))
+      : await sendOrdinaryPacket(owner, false);
+    if (sent) retryDelay = lock?.request ? 80 : 220;
+  } catch (_) {
+    if (homeUserId() === owner) {
+      ordinarySaveNotice = "Your taps are on this device. Reopen online to finish saving.";
       render();
-      return;
     }
-
-    // Other backend failure: keep queue and retry; also re-sync state quietly.
-    if (!res || res.ok !== true) {
-      refreshState(2);
-      scheduleTapRetry(900);
-      return;
-    }
-
-    // Success (or duplicate): remove the packet from the queue, subtract the chunk we sent
-    queue = getTapQueue();
-    if (queue.length && queue[0] && queue[0].packet_id === pkt.packet_id) {
-      queue.shift();
-      setTapQueue(queue);
-    }
-    pending = getPendingTaps();
-    setPendingTaps(Math.max(0, pending - chunk));
-    applyBackendState(res);
-    render();
-
-    // If there's more queued, continue flushing quickly.
-    if (getTapQueue().length > 0 || getPendingTaps() > 0) scheduleTapFlush(60);
-  } catch (e) {
-    // Network error: keep queue and retry.
-    scheduleTapRetry(900);
+    retryDelay = 1500;
   } finally {
     __tapFlushing = false;
+    ordinaryPendingCount = null;
+    if (retryDelay && !document.hidden && (getPendingTaps() || getTapQueue().length)) scheduleTapFlush(retryDelay);
   }
 }
+
+function resumeOrdinaryTaps() {
+  ordinaryPendingCount = null;
+  if (accountIsReady() && !window.__lastState?.recovery_test && (getPendingTaps() || getTapQueue().length)) scheduleTapFlush(0);
+}
+
+window.addEventListener("storage", event => {
+  if (!event.key || event.key.startsWith("jigcoin_player_taps_v1:")) resumeOrdinaryTaps();
+});
+window.addEventListener("jigcoin:account-ready", () => {
+  // Pre-upgrade pending taps have no owner field. Keep the originals intact.
+  // Crediting them automatically on a shared device could change the wrong balance.
+  const oldQueue = safeParseJSON(appStorage.getItem("ae_tap_packet_queue_v1"), []);
+  legacyTapNotice = Number(appStorage.getItem("ae_pending_taps")) > 0 || (Array.isArray(oldQueue) && oldQueue.length)
+    ? "This device has older unconfirmed taps with no account recorded. If coins are missing, contact support@jigcoin.app."
+    : "";
+  ordinarySaveNotice = "";
+  resumeOrdinaryTaps();
+});
+window.addEventListener("online", resumeOrdinaryTaps);
+
 
 // Durable owner queue, separate from the suspended historical public queue.
 // Project queued input for immediate game feedback; saved state stays authoritative.
@@ -5011,7 +5020,7 @@ function onTapPress(ev) {
   window.__lastTapAt = now;
 
   // Queue tap first (never lose it)
-  if (setPendingTaps(getPendingTaps() + 1) === false) {
+  if (!addOrdinaryTap()) {
     showToast("Unable to save taps on this device. Close and reopen the mini app.");
     return;
   }
@@ -5068,71 +5077,13 @@ function installTapInput(button, press) {
 installTapInput(tapBtn, onTapPress);
 
 // -------- Exit-safe save --------
-// iOS Telegram WebView may kill timers/fetch quickly on background/close.
-// We use sendBeacon for a *best-effort* final flush, then fall back to keepalive fetch.
-function beaconFlushPendingTaps(maxChunks = 6) {
-  if (!accountIsReady() || window.__lastState?.recovery_test === true) return true;
-  try {
-    if (!navigator.sendBeacon) return false;
-    let pending = getPendingTaps();
-    if (!pending) return true;
-
-    // Use cached Telegram auth immediately (no waits).
-    const cached = (window.__tgAuthCache || {});
-    let initData = cached.initData || "";
-    let telegram_id = cached.telegram_id || null;
-    try {
-      if (!telegram_id) telegram_id = appStorage.getItem("telegram_id") || null;
-    } catch (e) {}
-
-    // If we have no Telegram identity, we can't safely save.
-    if (!initData) return false;
-
-    // Move pending taps into durable packet queue first, then beacon-send them best-effort.
-    let queue = getTapQueue();
-    let sentTotal = 0;
-    for (let i = 0; i < maxChunks && pending > 0; i++) {
-      const chunk = Math.max(1, Math.min(25, pending));
-      const packet = { packet_id: genPacketId(), count: chunk, created_at: Date.now() };
-      queue.push(packet);
-
-      const payload = {
-        initData: initData || "",
-        telegram_id: telegram_id,
-        client: getClientSignals(),
-        packet_id: packet.packet_id,
-        count: packet.count,
-      };
-      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
-      navigator.sendBeacon(API_BASE + "/api/tapPacket", blob);
-
-      sentTotal += packet.count;
-
-      pending -= chunk;
-    }
-
-    setTapQueue(queue);
-    setPendingTaps(pending);
-    return sentTotal > 0;
-  } catch (e) {
-    return false;
-  }
-}
-
-// Flush queued taps when the app is backgrounded/closed
-window.addEventListener("pagehide", () => {
-  const didBeacon = beaconFlushPendingTaps();
-  // Fallback keepalive fetch (may still run on some devices)
-  if (!didBeacon) flushPendingTaps({ keepalive: true, fastAuth: true });
-});
-
+// Updates start from durable inputs and always use keepalive fetch. If iOS
+// suspends the app first, the same account resumes on its next confirmed open.
+window.addEventListener("pagehide", () => { void flushPendingTaps(); });
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    const didBeacon = beaconFlushPendingTaps();
-    if (!didBeacon) flushPendingTaps({ keepalive: true, fastAuth: true });
-  }
+  if (document.hidden) void flushPendingTaps();
+  else resumeOrdinaryTaps();
 });
-
 
 let dailyClaimInFlight = false;
 async function handleDailyTask(startNew=false) {
