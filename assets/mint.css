@@ -1,0 +1,290 @@
+:root {
+  --mint-line: #41536a;
+  --mint-gold: #f1cc85;
+  --mint-surface: linear-gradient(130deg, #23364a, #142338 60%, #111e2e);
+  --mint-feature: radial-gradient(ellipse at 100% 0%, #514531 0%, transparent 66%),
+    linear-gradient(130deg, #25384b, #152236 75%);
+}
+
+.sheet .sheet-header, #leaderboardScreen .lb-header {
+  background: linear-gradient(115deg, #15253a, #0d1627 75%);
+}
+#mainScroll .tap-card {
+  background: radial-gradient(ellipse closest-side at 50% 44%, #303943, transparent),
+    linear-gradient(146deg, #1b293b, #101c2c 72%);
+  box-shadow: inset 0 1px #ffffff12, 0 6px 24px #0003;
+}
+.midnight-coin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+#homeCoinWrap:has(.midnight-coin) #tapBtn {
+  background: #15191b;
+  border-color: #c29a50;
+  box-shadow: inset 0 0 0 3px #6d532b, 0 5px 0 #59421e, 0 12px 26px #0005;
+}
+#homeCoinWrap:has(.midnight-coin) #homeCoinArtwork { inset: 0; }
+#homeCoinWrap:has(.midnight-coin) .tap-btn-label { visibility: hidden; }
+
+#withdrawSheet .vault-vip, #friendsSheet .invite-reward-card,
+#coinShopSheet .hub-product.hub-goal, #homeJourneySheet .journey-focus,
+#leaderboardScreen .lb-race-card, #weeklySheet .pilot-hero {
+  background: var(--mint-feature);
+  box-shadow: inset 0 1px #fbe4b331, 0 4px 15px #0002;
+}
+#boostSheet #rewardChoices .boost-card, #homeTierGrid .coin-tier,
+#leaderboardScreen .lb-podium > div {
+  background: var(--mint-surface);
+  box-shadow: inset 0 1px #ffffff12;
+}
+#boostSheet #rewardChoices .boost-streak { background: linear-gradient(125deg, #193b3b, #16283a 75%); }
+#boostSheet #rewardChoices .boost-card[data-selected=true], #homeTierGrid .coin-tier[data-current=true],
+#leaderboardScreen .lb-podium > [data-place="1"] {
+  background: var(--mint-feature);
+  border-color: #c8a35e;
+}
+#friendsSheet .friends-summary { overflow: hidden; }
+#friendsSheet .friends-summary-col { border-radius: 0; box-shadow: none; }
+#friendsSheet .invite-emblem, #homeJourneySheet #journeyCoin, .shop-vip-pass img, #pilotCoinPreview {
+  filter: drop-shadow(0 4px 7px #0006);
+}
+#coinShopSheet .shop-vip-pass {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid #8c764e;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #322e27, #192637 78%);
+  color: #fce7b4;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.shop-vip-pass img { width: clamp(46px, 8dvh, 76px); height: auto; }
+.shop-vip-pass strong { display: block; font-size: clamp(16px, 4vw, 21px); }
+.shop-vip-pass small { display: block; margin-top: 2px; font-size: 13px; color: #c4d1e0; }
+.shop-vip-pass .pass-chevron { margin-left: auto; font-size: 24px; }
+#coinShopSheet .pilot-all-packs summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--mint-line);
+  font-weight: 650;
+  list-style: none;
+}
+.pilot-all-packs summary::-webkit-details-marker { display: none; }
+.pilot-all-packs summary::after { content: '+'; margin-right: 7px; color: var(--mint-gold); }
+.pilot-all-packs[open] summary::after { content: '−'; }
+#withdrawSheet .pilot-coin-row { border-block: 1px solid #9a845344; padding-block: 5px; margin: 0; }
+#withdrawSheet #pilotCoinPreview { width: clamp(42px, 7dvh, 70px); }
+#withdrawSheet .pilot-coin-row strong { font-size: 15px; color: #ffe8b8; }
+#withdrawSheet .vault-duration { white-space: nowrap; }
+#leaderboardScreen .podium-medallion:has(img) {
+  position: relative;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  filter: none;
+}
+#leaderboardScreen .podium-place {
+  position: absolute;
+  right: -5px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  min-width: 15px;
+  height: 15px;
+  border: 1px solid #bfa26a;
+  border-radius: 50%;
+  background: #152031;
+  color: #ffe2a3;
+  font: 700 10px/1 system-ui, sans-serif;
+}
+@container game-panel (min-height: 650px) {
+  #coinShopSheet .sheet-body:has(.pilot-all-packs:not([open])) { gap: 12px; }
+  #coinShopSheet .hub-product.hub-goal { padding: clamp(15px, 3cqh, 24px); }
+  #coinShopSheet .hub-goal .pack-goal-art { width: clamp(45px, 10cqh, 76px); }
+  #coinShopSheet .hub-goal .hub-product-coins { font-size: 29px; }
+}
+@container game-panel (max-height: 650px) {
+  #withdrawSheet .vault-vip { padding: 8px 10px; gap: 4px; }
+  #withdrawSheet #pilotCoinPreview { width: 39px; }
+  #withdrawSheet .pilot-coin-row { padding-block: 2px; }
+  #withdrawSheet .vault-utility > button, #withdrawSheet .vault-utility summary { min-height: 34px; }
+  #coinShopSheet .shop-vip-pass { padding-block: 4px; }
+}
+
+/* A race uses the same visible play area as the other tabs. */
+#weeklySheet { transition: none; }
+#weeklySheet .sheet-body { flex: 1; min-height: 0; }
+#weeklySheet .pilot-hero { flex: 0 0 auto; }
+#boostSheet #rewardChoices { flex: 0 0 auto; align-content: start; gap: 6px; }
+#boostSheet #rewardsDailyCard { padding: clamp(12px, 2.8cqh, 21px); }
+#rewardWeekStrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+#rewardWeekStrip .daily-marker {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 29px;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid #3c5665;
+  border-radius: 8px;
+  background: #152737;
+  color: #c4d5de;
+}
+#rewardWeekStrip .daily-marker[data-claimed=true] { color: #d2f5e7; border-color: #648f83; background: #24463f; }
+#rewardWeekStrip .daily-marker[data-focus=true] { color: #ffe6a2; border-color: #bd9d62; }
+#boostSheet .pilot-free-activities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  flex: 0 0 auto;
+}
+#boostSheet .pilot-free-activities .pilot-link {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-height: 83px;
+  padding: 10px;
+  background: var(--mint-surface);
+}
+.pilot-free-activities small { font-size: 12px; font-weight: 450; color: #c0ccdb; }
+#boostSheet .pilot-free-activities { flex: 1 0 auto; max-height: 170px; }
+#boostSheet .reward-footer { margin-top: auto; }
+
+#coinShopSheet #coinPackList:has(.pilot-all-packs:not([open])) { grid-template-rows: minmax(min-content, 1fr) auto; }
+#coinShopSheet .hub-goal .pack-goal { gap: 12px; padding-bottom: 11px; margin-bottom: 9px; }
+#coinShopSheet .hub-goal .pack-goal-art { width: clamp(50px, 11cqh, 88px); height: auto; aspect-ratio: 1; display: block; flex: none; }
+#coinShopSheet .hub-goal .pack-goal-art svg { width: 100%; height: auto; }
+#coinShopSheet .hub-goal .pack-goal strong { font-size: clamp(17px, 5cqw, 23px); }
+#coinShopSheet .hub-goal .pack-goal small { font-size: 12px; }
+#coinShopSheet .shop-vip-pass { min-height: clamp(75px, 16cqh, 116px); }
+#coinShopSheet .shop-vip-pass small { line-height: 1.35; }
+
+#withdrawSheet .vault-utility:not(:has(details[open])) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  border-top: 1px solid var(--mint-line);
+}
+#withdrawSheet .vault-utility:not(:has(details[open])) > * { border: 0; padding: 0; margin: 0; }
+#withdrawSheet .vault-utility:not(:has(details[open])) summary,
+#withdrawSheet .vault-utility:not(:has(details[open])) > button {
+  box-sizing: border-box;
+  justify-content: center;
+  text-align: center;
+  min-height: 44px;
+  padding: 3px;
+  border: 0;
+  font-size: 12px;
+  color: #c5d3e3;
+}
+#withdrawSheet .vault-utility:not(:has(details[open])) span[aria-hidden] { display:none; }
+@container game-panel (max-height: 575px) {
+  #withdrawSheet .vault-content { gap: 5px; padding: 6px 10px; }
+  #withdrawSheet .vault-summary { padding: 7px 10px; }
+  #withdrawSheet .vault-total { margin: 3px 0; }
+  #withdrawSheet .vault-vip { padding: 7px 10px; gap: 3px; }
+  #withdrawSheet .vault-benefits > div { padding: 5px 7px; }
+  #withdrawSheet .vault-vip h2 { font-size: 19px; }
+  #boostSheet .pilot-free-activities { flex: 0 0 auto; }
+}
+@container race-panel (max-height: 565px) {
+  #leaderboardScreen .lb-race-card { padding: 8px 10px; }
+  #leaderboardScreen .lb-race-card p { margin-block: 3px; }
+  #leaderboardScreen .lb-race-note { display: none; }
+  #leaderboardScreen .lb-podium:has([data-place="3"]) [data-place="1"] { min-height: 91px; }
+  #leaderboardScreen .lb-podium:has([data-place="3"]) [data-place="2"] { min-height: 82px; }
+  #leaderboardScreen .lb-podium > div { min-height: 76px; }
+}
+
+
+#pilotPreviewOpen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+#pilotPreviewOpen #pilotCoinPreview { display: block; flex: none; }
+#crownPreview {
+  width: min(320px, 88vw);
+  max-height: 84dvh;
+  margin: auto;
+  padding: 18px;
+  border: 1px solid #ad9157;
+  border-radius: 20px;
+  background: var(--mint-feature);
+  color: #f9eed6;
+  text-align: center;
+}
+#crownPreview::backdrop { background: rgb(6 12 22 / .8); }
+#crownPreview img { width: min(205px, 40dvh); height: auto; margin: 0 auto; }
+#crownPreview h2 { margin: 8px 0 4px; font-size: 23px; }
+#crownPreview p { margin: 0 0 14px; font-size: 14px; line-height: 1.45; color: #d3deec; }
+#crownPreview button { width: 100%; }
+
+#coinShopSheet .hub-goal { grid-template-rows: minmax(min-content, 1fr) auto auto auto; }
+#coinShopSheet .hub-goal .hub-product-coins { font-size: clamp(24px, 7cqw, 36px); }
+#coinShopSheet .hub-goal .pack-goal strong { line-height: 1.15; }
+#coinShopSheet .hub-goal .hub-buy { min-height: 48px; }
+
+#boostSheet .pilot-free-activities .pilot-link { justify-items: start; }
+#boostSheet .pilot-free-activities strong { font-size: clamp(15px, 4cqw, 18px); }
+#pilotChallengeMeter {
+  width: 80%;
+  height: 8px;
+  margin: 12px 0;
+  border: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  appearance: none;
+  background: #33465b;
+  accent-color: #71c6b4;
+}
+#pilotChallengeMeter::-webkit-progress-bar { background: #33465b; }
+#pilotChallengeMeter::-webkit-progress-value { background: #71c6b4; border-radius: 5px; }
+#pilotChallengeMeter::-moz-progress-bar { background: #71c6b4; }
+.activity-medal {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 3px;
+  background: linear-gradient(135deg, #fae8b4, #b78739);
+  border: 3px double #806127;
+  border-radius: 50%;
+  color: #594426;
+  font: 18px Georgia, serif;
+}
+@container game-panel (min-height: 590px) {
+  #boostSheet #rewardsDailyCard { min-height: clamp(116px, 20cqh, 178px); align-content: center; }
+  #boostSheet .pilot-free-activities { max-height: 36cqh; }
+  #boostSheet .pilot-free-activities .pilot-link { padding: 13px; gap: 7px; }
+}
+@container game-panel (max-height: 540px) {
+  #boostSheet .activity-medal { width: 22px; height: 22px; font-size: 13px; margin: 0; }
+  #boostSheet .pilot-free-activities .pilot-link { gap: 1px; padding-block: 6px; }
+  #coinShopSheet .hub-goal .pack-goal-art { width: 46px; }
+}

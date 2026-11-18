@@ -6,7 +6,7 @@ function setup({status='available',confirm=false,energy=3}={}) {
   const elements={},events={},calls=[],toasts=[];let refreshes=0,visible=true,now=Date.now();
   const element=id=>elements[id]||(elements[id]={dataset:{},classList:{remove(){},add(){},toggle(){}},setAttribute(){},addEventListener(n,fn){events[id+':'+n]=fn;},scrollIntoView(){}});
   const missions=['sp_emergency_energy','sp_double_points','sp_visit_partner'].map(code=>({code,provider:'monetag',status,payout_amount:code==='sp_visit_partner'?200:0,cooldown_seconds:code==='sp_double_points'?1800:300,cooldown_hours:1,countdown_as_of_ms:now,attempt_id:status==='claimable'?'verified-attempt':null}));
-  const ctx={Date,Promise,console,window:{},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
+  const ctx={Date,Promise,console,openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true}},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
     dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
     boostSheet:{classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
     sheetBackdrop:{classList:{remove(){}}},tabTasks:{},tabFarm:{},setActiveTab(){},showAppSheet(){visible=true;},updateBoostHub(){},syncStateIfIdle:async()=>{},
