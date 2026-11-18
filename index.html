@@ -1939,6 +1939,9 @@ button:focus-visible {outline:2px solid #93c5fd;outline-offset:3px;}
 .tap-card{padding:10px 12px!important;margin:8px 0!important;background:radial-gradient(ellipse at 50% 40%,#f8c85b0c,transparent 58%),#101a2d}
 .tap-card-header .tap-card-left{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;width:100%;flex-wrap:wrap}.tap-title{font-size:13px}.tap-hint{margin:0;padding:0;font-size:11px}.tap-card-header{min-height:20px}
 #onboardingCoach{flex-basis:100%}
+.onboarding-action{margin-top:10px;min-height:44px;padding:10px 16px;border:0;border-radius:12px;background:#ffd45a;color:#281f06;font:inherit;font-weight:750;cursor:pointer}
+.onboarding-action[hidden]{display:none}
+.onboarding-action:disabled{opacity:.65}
 .tap-btn-wrap{--coin-size:clamp(140px,25dvh,200px);--coin-light:#fff3bb;--coin-mid:#e2a52c;--coin-dark:#ad6c13;--coin-ink:#704909;--coin-edge:#edbd50;--ring-color:#f5cc69;width:calc(var(--coin-size) + 26px);height:calc(var(--coin-size) + 26px);margin:8px auto 4px;display:grid;place-items:center;isolation:isolate;touch-action:none}
 [data-coin-tier="0"]{--coin-light:#ffdfae;--coin-mid:#ca8c54;--coin-dark:#865031;--coin-ink:#64371e;--coin-edge:#d49b64;--ring-color:#dfa06c}
 [data-coin-tier="2"]{--coin-light:#f3fbff;--coin-mid:#a9c4da;--coin-dark:#5c7d98;--coin-ink:#284d69;--coin-edge:#cbe4f2;--ring-color:#a0d6ff}
@@ -2309,8 +2312,9 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
                 Step 1 of 3 · Start tapping
               </div>
               <div id="onboardingCoachBody" class="onboarding-coach-body">
-                Tap the big button to start farming. We’ll guide you through the first steps.
+                Tap the big coin. We’ll guide you through your first saved taps and free daily reward.
               </div>
+              <button id="onboardingAction" type="button" class="onboarding-action" hidden>Open Rewards</button>
               <div class="onboarding-coach-progress">
                 <div class="onboarding-coach-dot" data-onboarding-step="1"></div>
                 <div class="onboarding-coach-dot" data-onboarding-step="2"></div>
@@ -2958,136 +2962,56 @@ const state = {
   // First-session guided path
   onboardingRequired: false,
 };
-const ONBOARDING_LOCAL_KEY = "ae_onboarding_done_v1";
-
-const onboardingState = {
-  required: false,
-  active: false,
-  step: 0,
-  taps: 0,
-  dailyDone: false,
-};
-
-function isOnboardingDoneLocal() {
-  try {
-    return appStorage.getItem(ONBOARDING_LOCAL_KEY) === "1";
-  } catch (e) {
-    return false;
-  }
+// v13 introduction: only saved taps and a confirmed daily reward advance it.
+// Completion is account-scoped and acknowledged by the server, never localStorage.
+const onboardingState={owner:null,required:false,active:false,step:0,taps:0,dailyDone:false,pending:false,completed:false};
+function setOnboardingDots(step){
+  onboardingCoachDots.forEach(el=>el.classList.toggle('active',Number(el.getAttribute('data-onboarding-step'))===step));
 }
-
-function markOnboardingDoneLocal() {
-  try {
-    appStorage.setItem(ONBOARDING_LOCAL_KEY, "1");
-  } catch (e) {
-    // ignore storage failures
-  }
-}
-
-function setOnboardingDots(step) {
-  if (!onboardingCoachDots || typeof onboardingCoachDots.forEach !== "function") return;
-  onboardingCoachDots.forEach((el) => {
-    if (!el) return;
-    const s = Number(el.getAttribute("data-onboarding-step") || "0");
-    el.classList.toggle("active", s === step);
-  });
-}
-
-
-function showOnboardingStep(step) {
-  if (!onboardingCoach) return;
-  onboardingState.step = step;
-  onboardingState.active = true;
-  onboardingCoach.style.display = "block";
-
-  if (onboardingCoachTitle) {
-    if (step === 1) {
-      onboardingCoachTitle.textContent = "Step 1 of 3 · Start tapping";
-    } else if (step === 2) {
-      onboardingCoachTitle.textContent = "Step 2 of 3 · Claim your daily bonus";
-    } else {
-      onboardingCoachTitle.textContent = "Step 3 of 3 · Unlock Starter Bundle";
-    }
-  }
-
-  if (onboardingCoachBody) {
-    if (step === 1) {
-      onboardingCoachBody.textContent = "Tap the big button around 20 times to start farming your allocation.";
-    } else if (step === 2) {
-      onboardingCoachBody.textContent = "Open Tasks and claim your daily reward to lock in your streak.";
-    } else {
-      onboardingCoachBody.textContent = "Finish onboarding with a one-time Starter Bundle so your boost is locked in before launch.";
-    }
-  }
-
+function showOnboardingStep(step){
+  if(!onboardingCoach)return;
+  onboardingState.step=step;onboardingState.active=true;onboardingCoach.style.display='block';
+  const titles=['','Step 1 of 3 · Start tapping','Step 2 of 3 · Collect your daily reward','Step 3 of 3 · You’re ready'];
+  const bodies=['',`Tap the big coin: ${Math.min(20,onboardingState.taps)} of 20 taps saved. Tapping uses energy, which refills over time.`,
+    'Open Rewards and collect your free daily streak reward. Come back tomorrow to keep your streak growing.',
+    'Your progress is saved. Keep tapping, climb the ranks and join the daily leaderboard. The introduction is free.'];
+  onboardingCoachTitle.textContent=titles[step];onboardingCoachBody.textContent=bodies[step];
+  const action=document.getElementById('onboardingAction');
+  action.hidden=step===1;action.disabled=onboardingState.pending;
+  action.textContent=step===2?'Open Rewards':onboardingState.pending?'Saving…':'Start playing';
   setOnboardingDots(step);
-  if (typeof updateStarterStep3CardVisibility === "function") {
-    updateStarterStep3CardVisibility();
+}
+function hideOnboardingCoach(){if(onboardingCoach)onboardingCoach.style.display='none';onboardingState.active=false;}
+function maybeStartOnboardingFromBackend(data){
+  const owner=homeUserId();
+  if(onboardingState.owner!==owner)Object.assign(onboardingState,{owner,required:false,active:false,step:0,taps:0,dailyDone:false,pending:false,completed:false});
+  if(data.onboarding_required===false){onboardingState.completed=true;onboardingState.required=false;hideOnboardingCoach();return;}
+  if(data.onboarding_required!==true||onboardingState.completed){hideOnboardingCoach();return;}
+  onboardingState.required=true;
+  onboardingState.taps=Math.max(onboardingState.taps,Number(data.onboarding?.accepted_taps)||0);
+  onboardingState.dailyDone=onboardingState.dailyDone||data.onboarding?.daily_claimed===true;
+  showOnboardingStep(onboardingState.taps<20?1:onboardingState.dailyDone?3:2);
+}
+function handleOnboardingTap(){/* Optimistic taps are not completion evidence. */}
+function handleOnboardingDailyClaimed(){/* applyBackendState reads the confirmed daily claim. */}
+async function completeOnboarding(){
+  if(onboardingState.pending||!onboardingState.required||onboardingState.step!==3)return;
+  const owner=homeUserId();onboardingState.pending=true;showOnboardingStep(3);
+  try{
+    const result=await apiPost('/api/onboarding/complete',{});
+    if(owner!==homeUserId())return;
+    if(result?.ok&&result.onboarding_required===false){applyBackendState(result);showToast('You’re ready. Enjoy JigCoin!');}
+    else {onboardingCoachBody.textContent='Your introduction could not be confirmed yet. Your saved coins are safe. Tap Start playing to retry.';}
+  }catch(_){if(owner===homeUserId())onboardingCoachBody.textContent='Connection interrupted. Tap Start playing to retry.';}
+  finally{
+    if(owner===homeUserId()){
+      onboardingState.pending=false;const action=document.getElementById('onboardingAction');action.disabled=false;action.textContent='Start playing';
+    }
   }
 }
-
-function hideOnboardingCoach() {
-  if (onboardingCoach) {
-    onboardingCoach.style.display = "none";
-  }
-  onboardingState.active = false;
-  if (typeof updateStarterStep3CardVisibility === "function") {
-    updateStarterStep3CardVisibility();
-  }
-}
-
-function maybeStartOnboardingFromBackend(data) {
-  const required = !!data.onboarding_required;
-  onboardingState.required = required;
-
-  // Preload Starter Bundle offer availability so Step 3 can render in time.
-  if (typeof fetchStarterOfferAvailability === "function") {
-    fetchStarterOfferAvailability({ silent: true });
-  }
-
-  if (!required || isOnboardingDoneLocal()) {
-    hideOnboardingCoach();
-    return;
-  }
-
-  // Only start once per session
-  if (!onboardingState.active && onboardingState.step === 0) {
-    onboardingState.taps = 0;
-    onboardingState.dailyDone = false;
-    showOnboardingStep(1);
-  }
-}
-function handleOnboardingTap() {
-  if (!onboardingState.active || onboardingState.step !== 1) return;
-  onboardingState.taps += 1;
-  if (onboardingState.taps >= 20) {
-    showOnboardingStep(2);
-  }
-}
-
-
-function handleOnboardingDailyClaimed() {
-  if (!onboardingState.active) return;
-  onboardingState.dailyDone = true;
-  // Move to Starter Bundle step and finish onboarding server-side.
-  showOnboardingStep(3);
-  if (typeof fetchStarterOfferAvailability === "function") {
-    fetchStarterOfferAvailability({ silent: true });
-  }
-  completeOnboarding();
-}
-async function completeOnboarding() {
-  markOnboardingDoneLocal();
-  onboardingState.required = false;
-
-  try {
-    await apiPost("/api/onboarding/complete", {});
-  } catch (e) {
-    console.warn("onboarding completion failed", e);
-  }
-
-  hideOnboardingCoach();
-}
+document.getElementById('onboardingAction').addEventListener('click',()=>{
+  if(onboardingState.step===2)tabTasks.click();else void completeOnboarding();
+});
 
 
 function saveStateLocal(s) {
@@ -4321,6 +4245,7 @@ async function refreshState(attempt = 0) {
     if (res?.ok && Number.isFinite(res.balance) && res.balance >= 0) {
       applyBackendState({ ...res, global_rank: res.global_rank ?? null, global_total: res.global_total ?? null });
       setAccountPhase("ready");
+      if(typeof maybeStartOnboardingFromBackend==="function")maybeStartOnboardingFromBackend(res);
       render();
       return res;
     }
@@ -5849,135 +5774,6 @@ if (starterBannerBtn) {
 }
 
 
-const starterStepStripeBtn = document.getElementById("starterStepStripeBtn");
-const starterStepCoinbaseBtn = document.getElementById("starterStepCoinbaseBtn");
-
-async function ensureStarterOfferData(opts = {}) {
-  try {
-    const telegramId = getEffectiveTelegramId();
-    if (!telegramId) return null;
-
-    const res = await fetch(
-      API_BASE + `/api/shop/starter-offer?telegram_id=${encodeURIComponent(String(telegramId))}`,
-      { method: "GET" }
-    );
-    if (!res.ok) return null;
-
-    const data = await res.json().catch(() => null);
-    if (!data) return null;
-
-    const available =
-      typeof data.available === "boolean"
-        ? data.available
-        : typeof data.eligible === "boolean"
-        ? data.eligible
-        : false;
-
-    const checkoutUrl =
-      data.checkoutUrl ||
-      data.checkout_url ||
-      (data.product &&
-        (data.product.checkoutUrl || data.product.checkout_url));
-
-    const stripeUrl =
-      data.stripeCheckoutUrl ||
-      data.stripe_checkout_url ||
-      (data.product &&
-        (data.product.stripeCheckoutUrl || data.product.stripe_checkout_url));
-
-    starterOfferAlreadyPurchased = !!data.alreadyPurchased || !available;
-    starterOfferCoinbaseUrl = checkoutUrl || starterOfferCoinbaseUrl;
-    starterOfferStripeUrl = stripeUrl || starterOfferStripeUrl;
-    starterOfferCheckoutUrl = starterOfferStripeUrl || starterOfferCoinbaseUrl || null;
-
-    updateStarterStep3CardVisibility();
-
-    return {
-      available,
-      checkoutUrl,
-      stripeUrl,
-    };
-  } catch (e) {
-    if (!opts.silent) {
-      console.warn("Failed to refresh starter offer before launch", e);
-    }
-    return null;
-  }
-}
-
-function appendClientReference(url, telegramId) {
-  if (!url || !telegramId) return url;
-  try {
-    const u = new URL(url);
-    if (!u.searchParams.has("client_reference_id")) {
-      u.searchParams.set("client_reference_id", String(telegramId));
-    }
-    return u.toString();
-  } catch {
-    return url;
-  }
-}
-
-if (starterStepStripeBtn) {
-  starterStepStripeBtn.addEventListener("click", async () => {
-    try {
-      const telegramId = getEffectiveTelegramId();
-      if (!telegramId) {
-        showToast("Open from Telegram to unlock the Starter Bundle.");
-        return;
-      }
-
-      let url = starterOfferStripeUrl;
-      if (!url) {
-        showToast("Checking Starter Bundle status…");
-        const data = await ensureStarterOfferData();
-        if (!data || !data.available || !data.stripeUrl) {
-          showToast("Starter Bundle is not available right now.");
-          return;
-        }
-        url = data.stripeUrl;
-      }
-
-      const finalUrl = appendClientReference(url, telegramId);
-      if (!openExternalLink(finalUrl)) {
-        showToast("Could not open Starter Bundle link.");
-      }
-    } catch (e) {
-      console.error("Error launching Starter Bundle via Stripe", e);
-      showToast("Starter Bundle is not available right now.");
-    }
-  });
-}
-
-if (starterStepCoinbaseBtn) {
-  starterStepCoinbaseBtn.addEventListener("click", async () => {
-    try {
-      const telegramId = getEffectiveTelegramId();
-      if (!telegramId) {
-        showToast("Open from Telegram to unlock the Starter Bundle.");
-        return;
-      }
-
-      let url = starterOfferCoinbaseUrl || starterOfferCheckoutUrl;
-      if (!url) {
-        showToast("Checking Starter Bundle status…");
-        const data = await ensureStarterOfferData();
-        if (!data || !data.available || !data.checkoutUrl) {
-          showToast("Starter Bundle is not available right now.");
-          return;
-        }
-        url = data.checkoutUrl;
-      }
-
-      if (!openExternalLink(url)) {
-        showToast("Could not open Starter Bundle link.");
-      }
-    } catch (e) {
-      console.error("Error launching Starter Bundle via Coinbase", e);
-      showToast("Starter Bundle is not available right now.");
-    }
-  });
-}
 tabFarm.addEventListener("click", () => {
   closeLeaderboard();
   setActiveTab(tabFarm);
