@@ -2,7 +2,7 @@
 <!-- JigCoin frontend deployment retry 1: 2026-11-14. -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="leaderboards-v12-20261117">
+<meta name="jigcoin-build" content="release-v13.1-tap-layout-20261118">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2229,6 +2229,14 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 @media(max-height:700px){#withdrawSheet .vault-vip{gap:7px;padding:12px}#withdrawSheet .vault-content{gap:8px}#withdrawSheet .vault-vip h2{font-size:21px}}
 </style>
 
+<style id="tap-layout-v13-1">
+/* Stable type and control geometry in iOS WebViews; browser zoom stays enabled. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#mainScroll .home-session-row{display:grid;grid-template-columns:80px minmax(0,1fr);min-height:52px;align-items:center}
+#homeSaveStatus{min-width:0;white-space:nowrap;text-align:left}
+#mainScroll .home-boost-action{width:100%;max-width:none;min-height:52px;padding:6px 8px}
+#todayText,#energyText,#perTap{font-variant-numeric:tabular-nums}
+</style>
 <style id="leaderboard-v12-style">
 /* v12: the main race fits a phone; long rankings and rules keep accessible scrolling. */
 .leaderboard-screen{padding:14px;gap:8px;overflow:hidden;container-type:size}
@@ -6086,26 +6094,36 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncState
 
 
 <script>
-// Home and Rewards fit v5.2: use measured usable height, including Telegram chrome.
+// v13.1: fit to viewport/intro changes, never to tap counters or tap animation.
 (() => {
   const main=document.getElementById('mainScroll');
   const wrap=document.getElementById('homeCoinWrap');
   const coin=document.getElementById('tapBtn');
   const rewards=document.getElementById('boostSheet');
   if(!main||!wrap||!coin)return;
-  let pending=0;
+  const coach=document.getElementById('onboardingCoach');
+  const status=document.getElementById('accountStatus');
+  let pending=0,forceFit=false,lastHomeKey='';
   function fitHome(){
     pending=0;
+    const force=forceFit;forceFit=false;
     if(main.clientHeight<1||main.clientWidth<1)return;
+    if(rewards?.clientHeight)rewards.classList.toggle('rewards-roomy',rewards.clientHeight>=640&&rewards.clientWidth>=350);
+    // Content is deliberately absent from this key: Saved/Saving, coin totals,
+    // low-energy copy and particles must not resize the play surface.
+    const intro=coach?.style.display!=='none'&&coach?.getClientRects().length
+      ? document.getElementById('onboardingCoachTitle')?.textContent||'intro' : 'hidden';
+    const key=[main.clientWidth,main.clientHeight,window.__accountPhase||'',intro].join('|');
+    if(!force&&key===lastHomeKey)return;
     // Keep the one-line metrics and a single rank indicator at every height.
     main.classList.add('home-compact');
     main.classList.toggle('home-roomy',main.clientHeight>=620&&main.clientWidth>=350);
-    if(rewards?.clientHeight)rewards.classList.toggle('rewards-roomy',rewards.clientHeight>=640&&rewards.clientWidth>=350);
     const top=main.getBoundingClientRect().top;
     const bottom=Math.max(...Array.from(main.children).filter(el=>el.getClientRects().length)
       .map(el=>el.getBoundingClientRect().bottom));
     const contentHeight=bottom-top+main.scrollTop+(parseFloat(getComputedStyle(main).paddingBottom)||0);
-    const coinSize=parseFloat(getComputedStyle(coin).width);
+    // Layout dimensions exclude the pressed coin's visual transform.
+    const coinSize=coin.offsetWidth;
     if(!Number.isFinite(contentHeight)||!Number.isFinite(coinSize))return;
     const cardStyle=getComputedStyle(wrap.parentElement);
     const widthLimit=wrap.parentElement.clientWidth-(parseFloat(cardStyle.paddingLeft)||0)-(parseFloat(cardStyle.paddingRight)||0)-26;
@@ -6115,20 +6133,25 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncState
     const air=Math.max(0,Math.min(48,Math.floor((available-next)/2)));
     if(Math.abs(next-coinSize)>=1)wrap.style.setProperty('--coin-size',next+'px');
     if(air!==oldAir)wrap.style.setProperty('--home-coin-air',air+'px');
+    lastHomeKey=key;
   }
-  function scheduleFit(){if(!pending)pending=requestAnimationFrame(fitHome);}
+  function scheduleFit(force=false){forceFit=forceFit||force;if(!pending)pending=requestAnimationFrame(fitHome);}
   if(typeof ResizeObserver==='function'){
-    const observer=new ResizeObserver(scheduleFit);
+    const observer=new ResizeObserver(()=>scheduleFit());
     observer.observe(main);
     if(rewards)observer.observe(rewards);
-    for(const el of main.children)observer.observe(el);
+    // These can change real screen structure. The tap card/accountContent is
+    // NOT observed: it is also the output of this sizing routine.
+    if(coach)observer.observe(coach);
+    if(status)observer.observe(status);
   }
-  window.addEventListener('resize',scheduleFit);
-  window.addEventListener('orientationchange',scheduleFit);
-  window.visualViewport?.addEventListener('resize',scheduleFit);
-  document.fonts?.ready.then(scheduleFit);
+  window.addEventListener('resize',()=>scheduleFit());
+  window.addEventListener('orientationchange',()=>scheduleFit());
+  window.visualViewport?.addEventListener('resize',()=>scheduleFit());
+  window.addEventListener('jigcoin:account-ready',()=>scheduleFit(true));
+  document.fonts?.ready.then(()=>scheduleFit(true));
   // Telegram's CSS variables resize main; this also handles older WebViews.
-  const bindTelegramFit=()=>{try{window.Telegram?.WebApp?.onEvent?.('viewportChanged',scheduleFit);}catch(_){}};
+  const bindTelegramFit=()=>{try{window.Telegram?.WebApp?.onEvent?.('viewportChanged',()=>scheduleFit());}catch(_){}};
   window.addEventListener('jigcoin:telegram-ready',bindTelegramFit);
   bindTelegramFit();scheduleFit();
 })();
