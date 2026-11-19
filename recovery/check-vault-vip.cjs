@@ -37,3 +37,10 @@ test('Vault compares a confirmed streak with VIP, including expired VIP and a br
  h.setReply({...data(),streak_day:0});await h.ctx.refreshVipStatus(true);
  assert.equal(h.el('vipPerksText').textContent,'Your standard rate earns 100 coins per 100 taps before VIP.');
 });
+test('Shop and Vault share the same verified pass review and pending membership summary',async()=>{
+ const h=setup();h.ctx.tabShop={name:'Shop'};const opened=[];h.ctx.showAppSheet=(sheet,tab)=>opened.push({sheet,tab});
+ h.setReply(data(123,true));await h.ctx.refreshVipStatus();h.ctx.openVipOffer('shop');assert.equal(opened.at(-1).sheet,h.el('vipOfferSheet'));assert.equal(opened.at(-1).tab,h.ctx.tabShop);
+ assert.equal(h.el('shopVipSummary').textContent,h.el('vaultVipSummary').textContent);assert.match(h.el('shopVipState').textContent,/Active until.*512 extra tap coins recorded/);assert.equal(h.el('vipTermsAccepted').checked,false);
+ h.ctx.openVipOffer('vault');assert.equal(opened.at(-1).sheet,h.el('vipOfferSheet'));assert.equal(opened.at(-1).tab,h.ctx.tabWithdraw);
+ h.storage.set(h.ctx.vaultPendingKey(123),order);h.ctx.renderVault();assert.match(h.el('shopVipState').textContent,/Payment confirmation pending/);assert.equal(h.el('shopVipState').textContent,h.el('vaultVipState').textContent);assert.equal(h.el('vipBuyBtn').textContent,'Payment pending');assert.equal(h.el('vipBuyBtn').disabled,true);
+});

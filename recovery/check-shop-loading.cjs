@@ -72,23 +72,24 @@ test('cold Home has neutral artwork until a rank is confirmed and recovers witho
   assert.deepEqual(themes,[null,1,null]);
 });
 
-test('featured pack states the quantity, resulting balance and real rank threshold',()=>{
+test('one accessible pack gives exact resulting balance and rank gap without claiming an unearned rank',()=>{
   const c=setup();
   c.ctx.homeConfirmedBalance=18890;
-  c.ctx.homeGoalModel=()=>({tier:1,next:50000,nextName:'Operator',remaining:50000-c.ctx.homeConfirmedBalance});
+  const start=html.indexOf('function homeTierIndex('),end=html.indexOf('function advanceHomeMilestone(',start);
+  vm.runInContext(html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+html.slice(start,end),c.ctx);
   c.ctx.coinArtwork=()=>'<img>';
   const small={title:'Small coin pack',coins:1000,stars:100},medium={title:'Medium coin pack',coins:3000,stars:250};
   const card=()=>{const choice=c.ctx.packGoal([small,medium]);return c.ctx.starsProductCard(choice.product,false,true,choice.goal);};
   assert.equal(c.ctx.packGoal([small,medium]).product,medium);
-  assert.match(card(),/Add 3,000 coins/);
-  assert.match(card(),/Your balance after purchase · 21,890/);
-  assert.match(card(),/Operator at 50,000/);
-  assert.doesNotMatch(card(),/Unlock|Reach|Work towards/);
+  assert.match(card(),/3,000 <span>coins/);
+  assert.match(card(),/After purchase: 21,890 coins/);
+  assert.match(card(),/28,110 coins to Operator/);
+  assert.doesNotMatch(card(),/unlocked|Reach|Work towards/);
   c.ctx.homeConfirmedBalance=49000;
-  assert.match(card(),/Add 1,000 coins/);
-  assert.match(card(),/Unlock Operator at 50,000/);
+  assert.match(card(),/1,000 <span>coins/);
+  assert.match(card(),/After purchase: 50,000 coins · Operator unlocked/);
+  assert.match(card(),/100,000 coins to Commander/);
   c.ctx.homeConfirmedBalance=11500000;
-  c.ctx.homeGoalModel=()=>({tier:7,complete:true});
-  assert.match(card(),/Your balance after purchase · 11,501,000/);
-  assert.doesNotMatch(card(),/Operator|Unlock|undefined/);
+  assert.match(card(),/After purchase: 11,501,000 coins/);
+  assert.doesNotMatch(card(),/Operator|unlocked|undefined/);
 });
