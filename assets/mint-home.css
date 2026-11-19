@@ -156,6 +156,20 @@
 #mainScroll #homeEnergyMetric .metric-label,#mainScroll #homeTodayMetric .metric-label {color:var(--mint-muted,#bbb9b7);font:650 9px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.13em}
 #mainScroll #energyText,#mainScroll #todayText {color:var(--mint-text,#eee9dd)}
 #mainScroll #homeEnergyMetric .energy-bar {height:6px;background:var(--mint-ink,#121416);border-radius:2px;box-shadow:inset 0 1px 2px #000;}
+/* Keep the strip and coin stable when the low-energy route appears. */
+#mainScroll #mintPressCard .tap-metrics {min-height:54px;}
+#mainScroll #homeEnergyMetric {flex-direction:row;align-items:center;gap:8px;padding:4px 8px;min-height:52px;}
+#mainScroll .home-energy-gauge {flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+#mainScroll #homeRefillOpen {
+  display:flex;flex:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  width:76px;min-height:44px;padding:4px 5px;border:1px solid var(--mint-accent,#bc956a);border-radius:4px;
+  color:var(--mint-highlight,#edcd9b);background:linear-gradient(120deg,color-mix(in srgb,var(--mint-accent,#bd986a) 20%,var(--mint-panel,#292b30)),var(--mint-ink,#121317));
+  box-shadow:var(--home-inlay);font:600 10px/1.2 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;
+}
+#mainScroll #homeRefillOpen strong {font-size:12px;line-height:14px;}
+#mainScroll #homeRefillState {white-space:nowrap;font-variant-numeric:tabular-nums;}
+#mainScroll #homeRefillOpen[data-state="ready"] {background:linear-gradient(110deg,var(--mint-highlight,#edcd9b),var(--mint-accent,#bc956a));color:#211b11;}
+#mainScroll #homeRefillOpen[hidden] {display:none;}
 #mainScroll .home-shortcuts { flex:none; align-items:stretch; margin:0 10px 0; gap:5px; }
 #mainScroll .home-shortcuts .home-streak-strip { margin:0!important;padding:0 9px; }
 #mainScroll .home-shortcuts .daily-summary { display:flex;gap:8px;align-items:center;min-height:40px; }
