@@ -40,7 +40,7 @@ test('stale, mismatched, hidden or covered snapshots cannot interrupt Home',()=>
 });
 function refill(){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},setAttribute(name,value){this[name]=value;}});return nodes.get(id);};
- const c={document:{getElementById:get},window:{JigPilot:{canRefill:()=>true}},state:{energy:10},maxEnergy:50,accountIsReady:()=>true,getPendingTaps:()=>0,getTapQueue:()=>[],
+ const c={document:{getElementById:get},window:{JigPilot:{canRefill:()=>true}},state:{energy:10},maxEnergy:50,accountIsReady:()=>true,getPendingTaps:()=>0,getTapQueue:()=>[],preparedRefillFor:()=>null,requestRefillPreparation(){},
  recoveryTapView:s=>({energy:s.energy}),hubMissions:[{code:'sp_emergency_energy',countdown_as_of_ms:Date.now()}],hubMissionLoadedAt:Date.now(),msToCountdown:()=> '04:30',getBoostView:()=>({action:'start',label:'Watch ad'})};
  vm.createContext(c);vm.runInContext(pure+html.slice(html.indexOf('function renderHomeSession('),html.indexOf('async function refreshHomeRefillStatus(')),c);return {c,get};
 }
@@ -49,6 +49,8 @@ test('Home routes low-energy players to optional refill and others to the weekly
  const button=get('homeBoostAction');
  assert.equal(button.dataset.focus,'sp_emergency_energy');assert.equal(button['aria-controls'],'boostSheet');
  assert.match(button.textContent,/Refill energy.*ad/i);
+ c.state.energy=14;c.preparedRefillFor=()=>({});c.renderHomeSession();assert.equal(button.dataset.focus,'sp_emergency_energy','a prepared refill remains reachable after natural regeneration');
+ c.preparedRefillFor=()=>null;
  c.state.energy=50;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');assert.equal(button['aria-controls'],'weeklySheet');
  c.state.energy=0;c.window.JigPilot.canRefill=()=>false;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');
  c.accountIsReady=()=>false;c.renderHomeSession();assert.equal(button.disabled,true);

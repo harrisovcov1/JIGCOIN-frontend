@@ -5,13 +5,13 @@ const slice=(a,b)=>html.slice(html.indexOf(a),html.indexOf(b,html.indexOf(a)));
 const classes=(initial=[])=>{const s=new Set(initial);return{add:x=>s.add(x),remove:x=>s.delete(x),contains:x=>s.has(x)}};
 function route(ready){
  const old={classList:classes(['show'])},next={classList:classes(),querySelector:()=>body},body={scrollTop:200};
- const backdrop={classList:classes()},leaderboard={style:{display:'flex'}};let active=null,cleared=null,cancelled=false;
- const ctx={boostSheet:old,stopRewardWait(){cancelled=true;},hideDailyNotice(){},accountIsReady:()=>ready,document:{body:{style:{overflow:'hidden'}},getElementById:()=>leaderboard,querySelectorAll:()=>[old]},window:{__sponsorCountdownTick:12},clearInterval:id=>{cleared=id},sheetBackdrop:backdrop,setActiveTab:t=>{active=t}};
+ const backdrop={classList:classes()},leaderboard={style:{display:'flex'}};let active=null,cleared=null,cancelled=false,invalidated=false;
+ const ctx={boostSheet:old,stopRewardWait(){cancelled=true;},invalidateRefillPreparation(){invalidated=true;},hideDailyNotice(){},accountIsReady:()=>ready,document:{body:{style:{overflow:'hidden'}},getElementById:()=>leaderboard,querySelectorAll:()=>[old]},window:{__sponsorCountdownTick:12},clearInterval:id=>{cleared=id},sheetBackdrop:backdrop,setActiveTab:t=>{active=t}};
  vm.createContext(ctx);vm.runInContext(slice('function showAppSheet(', '// Coin Shop:'),ctx);
- ctx.showAppSheet(next,'Shop');return{old,next,body,backdrop,leaderboard,ctx,active,cleared,cancelled};
+ ctx.showAppSheet(next,'Shop');return{old,next,body,backdrop,leaderboard,ctx,active,cleared,cancelled,invalidated};
 }
 test('navigation refuses an unready account without touching panels',()=>{const r=route(false);assert.equal(r.old.classList.contains('show'),true);assert.equal(r.next.classList.contains('show'),false);assert.equal(r.active,null);assert.equal(r.cleared,null)});
-test('switching section closes previous panel and leaderboard, cancels old countdown and resets scroll',()=>{const r=route(true);assert.equal(r.old.classList.contains('show'),false);assert.equal(r.next.classList.contains('show'),true);assert.equal(r.backdrop.classList.contains('show'),true);assert.equal(r.leaderboard.style.display,'none');assert.equal(r.ctx.document.body.style.overflow,'');assert.equal(r.cleared,12);assert.equal(r.body.scrollTop,0);assert.equal(r.active,'Shop');assert.equal(r.cancelled,true)});
+test('switching section closes previous panel and leaderboard, cancels old countdown and resets scroll',()=>{const r=route(true);assert.equal(r.old.classList.contains('show'),false);assert.equal(r.next.classList.contains('show'),true);assert.equal(r.backdrop.classList.contains('show'),true);assert.equal(r.leaderboard.style.display,'none');assert.equal(r.ctx.document.body.style.overflow,'');assert.equal(r.cleared,12);assert.equal(r.body.scrollTop,0);assert.equal(r.active,'Shop');assert.equal(r.cancelled,true);assert.equal(r.invalidated,true)});
 function cards(products) {
  const elements={hubStarter:{},hubShopNotice:{},hubSupport:{}};
  const classes=new Set();
