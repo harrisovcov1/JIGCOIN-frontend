@@ -118,6 +118,12 @@
 #mainScroll #mintCabinetOpen {display:block;min-width:0;min-height:32px;padding:2px 12px 2px 2px;text-align:center;}
 #mainScroll #mintCabinetOpen #mintFinishName {display:block;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;color:var(--mint-text,#eee9dd);font:680 clamp(9px,2.95cqw,14px)/1.2 system-ui,sans-serif; text-transform:uppercase;letter-spacing:.16em;}
 #mainScroll .mint-chamber-caption .tap-hint {display:block;min-width:0;padding:0 0 0 12px;margin:0;border-left:1px solid var(--mint-edge,#686869);color:var(--mint-text,#eee9dd);font:480 clamp(10px,3cqw,14px)/1.2 system-ui,sans-serif;white-space:nowrap;}
+#mainScroll .mint-chamber-caption #homeTapRate {
+  align-self: stretch; min-height: 32px; padding-inline: 9px 4px;
+  border-block: 0; border-right: 0; border-radius: 0; background: transparent;
+  cursor: pointer; touch-action: manipulation;
+}
+#mainScroll #homeTapRate:focus-visible { outline: 2px solid var(--mint-highlight); outline-offset: -2px; }
 #mainScroll #homeTapPrompt { z-index:4; position:absolute; left:50%; bottom:2.1%; width:max-content;max-width:90%; transform:translateX(-50%); padding:3px 10px; color:#fff!important; background:#101215e8;border-radius:4px;font-size:12px;pointer-events:none; }
 #mainScroll #homeTapPrompt[hidden] {display:none}
 #mainScroll.home-compact .mint-chamber-bay #homeCoinWrap {

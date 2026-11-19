@@ -22,11 +22,11 @@ function fixture() {
   }};
 }
 
-test('countdown changes before the first poll and uses the server fraction', () => {
+test('positive energy refills before the first poll without a distracting countdown', () => {
   const {ctx,labels,accept} = fixture();
   accept(19,1100);
   ctx.renderHomeEnergy(ctx.state.energy,true);
-  assert.equal(labels.energyLabel.textContent,'Energy +1 in 2s');
+  assert.equal(labels.energyLabel.textContent,'Energy');
   ctx.time = 1899;
   ctx.updateProjectedEnergy();
   assert.equal(ctx.state.energy,19);
@@ -34,7 +34,7 @@ test('countdown changes before the first poll and uses the server fraction', () 
   ctx.updateProjectedEnergy();
   assert.equal(ctx.state.energy,20);
   ctx.renderHomeEnergy(ctx.state.energy,true);
-  assert.equal(labels.energyLabel.textContent,'Energy +1 in 3s');
+  assert.equal(labels.energyLabel.textContent,'Energy');
   assert.equal(ctx.energyText.textContent,'20 / 55');
 });
 test('28 to 30 crosses into the slower band; a paused timer catches up only to capacity', () => {
@@ -81,4 +81,15 @@ test('late account snapshots cannot replace a newer refill, spend or capacity on
   assert.equal(ctx.isOlderAccountSample(at(18,100000002)),false);
   ctx.homeUserId=()=>404;
   assert.equal(ctx.isOlderAccountSample(at(9,100000000)),false);
+});
+
+test('only exhausted energy shows the next-tap countdown, clearing at the first refill', () => {
+  const {ctx,labels,accept} = fixture();
+  accept(0,100);
+  ctx.renderHomeEnergy(ctx.state.energy,true);
+  assert.equal(labels.energyLabel.textContent,'Energy +1 in 1s');
+  ctx.time=900;ctx.updateProjectedEnergy();
+  ctx.renderHomeEnergy(ctx.state.energy,true);
+  assert.equal(ctx.energyText.textContent,'1 / 55');
+  assert.equal(labels.energyLabel.textContent,'Energy');
 });

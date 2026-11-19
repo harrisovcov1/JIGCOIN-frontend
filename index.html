@@ -2685,7 +2685,7 @@ body{justify-content:flex-start}
     display: grid;
     flex: 1 0 auto;
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "tier art" "reward art" "welcome welcome" "terms terms" "actions actions" "message message";
+    grid-template-areas: "tier art" "reward art" "terms terms" "welcome welcome" "actions actions" "message message";
     align-content: space-evenly;
     align-items: center;
     gap: 7px;
@@ -2808,13 +2808,23 @@ body{justify-content:flex-start}
 #pilotMedalList{white-space:pre-line;font-size:13px;padding:8px}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
-  <link rel="stylesheet" href="./assets/mint.css?v=full-ranks-1">
+  <link rel="stylesheet" href="./assets/mint.css?v=rewards-compact-2">
   <link rel="stylesheet" href="./assets/mint-world.css?v=phone-fit-2">
-  <link rel="stylesheet" href="./assets/mint-home.css?v=worlds-1">
+  <link rel="stylesheet" href="./assets/mint-home.css?v=tap-perks-2">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
 <style>
 #purchaseReview{box-sizing:border-box;width:min(92vw,380px);max-height:85vh;max-height:85dvh;overflow:auto;margin:auto;padding:18px;border:1px solid var(--press-light,#e5c88e);border-radius:12px;background:#1b2028;color:#f4f1e9;overflow-wrap:anywhere}
-#purchaseReview::backdrop{background:#080b10c9}
+#purchaseReview::backdrop,#streakMessageDialog::backdrop{background:#080b10c9}
+#streakMessageDialog{box-sizing:border-box;width:min(92vw,380px);max-height:84dvh;overflow:auto;margin:auto;padding:18px;border:1px solid var(--press-light,#e5c88e);border-radius:12px;background:#1b2028;color:#f4f1e9;overflow-wrap:anywhere}
+#streakMessageDialog h2{margin:0 0 8px;font:600 22px/1.2 Georgia,serif}
+#streakMessageDialog p,#streakMessageDialog label{font:400 14px/1.45 system-ui,sans-serif;margin:8px 0}
+#streakMessageTimeField:not([hidden]){display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+#streakMessageTime{box-sizing:border-box;max-width:100%;min-height:44px;padding:6px 10px;color-scheme:dark;color:#fff;background:#20242b;border:1px solid #8a877d;border-radius:6px;font:inherit}
+#streakMessageZone{color:#c3c7d2}
+.streak-message-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+#streakMessageDialog button{width:auto;min-height:44px;flex:1 1 85px;margin:0}
+#streakMessageDialog [hidden],.reminder-link[hidden]{display:none!important}
+.reminder-link{grid-column:1/-1;justify-self:start;min-height:36px;background:none;border:0;color:var(--press-light,#e5c88e);text-align:left;padding:4px 2px;font:600 13px/1.3 system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 #purchaseReview h2{font:600 23px/1.2 Georgia,serif;margin:0 0 10px}
 #purchaseReview p{margin:8px 0;font:400 14px/1.4 system-ui,sans-serif}
 #purchaseReview #purchaseReviewPrice{font-weight:700;color:#ffe0a6}
@@ -2861,7 +2871,7 @@ body{justify-content:flex-start}
           <div class="mint-press-scene" aria-hidden="true"></div>
           <div class="tap-card-header mint-chamber-caption">
             <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><strong id="mintFinishName">JigCoin</strong></button>
-            <span class="tap-hint"><span id="perTap">+1</span> per tap</span>
+            <button type="button" id="homeTapRate" class="tap-hint" aria-haspopup="dialog" aria-label="View coins per tap and streak perks"><span id="perTap">+1</span> per tap <span aria-hidden="true">›</span></button>
           </div>
           <div class="tap-title" id="homeTapPrompt" aria-live="polite" hidden>Tap to earn coins</div>
         <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1" data-loading="true">
@@ -2951,7 +2961,8 @@ body{justify-content:flex-start}
         <button class="quest-action" id="dailyRewardClaim" disabled>Checking…</button><p class="quest-info" id="dailyRewardReset"></p>
       </section>
       <p class="quest-info" id="dailyRestoreReceipt" role="status" hidden></p><button class="shop-retry" id="dailyRestoreCheck" hidden>Check restore payment</button>
-      <section class="daily-benefits-summary" aria-label="Your streak benefits">
+      <button id="calendarTelegramReminder" class="reminder-link" type="button" aria-haspopup="dialog" hidden>Remind me tomorrow</button>
+      <section class="daily-benefits-summary" id="dailyRateBenefits" tabindex="-1" aria-label="Your streak benefits">
         <p class="daily-perks" id="dailyRewardPerks"></p><p class="daily-next-unlock" id="dailyNextUnlock"></p>
         <p class="daily-continuity" id="dailyRewardSchedule"></p>
         <p class="daily-next-unlock" id="dailyDoubleReward"></p>
@@ -2988,9 +2999,9 @@ body{justify-content:flex-start}
     <div class="sheet-body invite-overview">
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"></div><div class="invite-eyebrow" id="inviteNextBadge">Next invite</div>
-        <h2 id="inviteRewardTitle"><strong id="inviteRewardAmount">—</strong> <span>coins for you</span></h2>
-        <p id="inviteWelcome">New-player bonus is being checked…</p>
+        <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
         <p id="inviteQualification">Checking your reward and invite link…</p>
+        <p id="inviteWelcome"></p>
         <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <span aria-hidden="true">↗</span></button>
         <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button></div>
         <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
@@ -3036,7 +3047,7 @@ body{justify-content:flex-start}
           <div><span class="vault-benefit-icon" aria-hidden="true">2×</span><strong>Tap coins</strong><span id="vipTapValue">2× your usual tap rate</span></div>
           <div><span class="vault-benefit-icon" aria-hidden="true">ϟ</span><strong>Energy capacity</strong><span id="vipEnergyValue">2× your usual capacity</span></div>
         </div>
-        <p class="vault-vip-note" id="vipPerksText">Stacks with your streak and ad boost</p>
+        <p class="vault-vip-note" id="vipPerksText">Your personal comparison appears when Vault connects.</p>
         <div class="pilot-coin-row" id="pilotCoinRow"><button id="pilotPreviewOpen" type="button" aria-haspopup="dialog" aria-label="Preview Midnight Crown"><span id="pilotCoinPreview" aria-hidden="true"><img class="midnight-coin" src="./assets/midnight-crown.webp" width="64" height="64" alt="" draggable="false"></span><span><strong>Midnight Crown</strong><small>Preview coin · Home &amp; podium ›</small></span></button><button id="pilotCoinEquip" class="vault-text-button" hidden>Equip</button></div>
         <div class="vault-vip-result"><p class="vault-vip-earned" id="vipBonusText" hidden></p><p class="vault-expiry" id="vipExpiryText" hidden></p></div>
         <div id="vipConsentPanel" hidden><label class="vault-terms-consent"><input type="checkbox" id="vipTermsAccepted"><span>I agree to the <button type="button" class="vault-text-button" id="vipTermsOpen">VIP terms</button></span></label></div>
@@ -3071,6 +3082,18 @@ body{justify-content:flex-start}
     <p>Your balance shows whole coins. Fractional tap bonuses continue to accumulate.</p>
     <form method="dialog"><button type="submit" class="quest-action">Close</button></form>
   </dialog>
+  <dialog id="streakMessageDialog" aria-labelledby="streakMessageTitle">
+    <h2 id="streakMessageTitle">Telegram reminder</h2>
+    <p id="streakMessageTerms">One message for your next daily reward, only if it is still unclaimed.</p>
+    <label id="streakMessageTimeField" hidden>Local time <input id="streakMessageTime" type="time" value="19:00" required><small id="streakMessageZone"></small></label>
+    <p id="streakMessageStatus" role="status" aria-live="polite"></p>
+    <div class="streak-message-actions">
+      <button id="streakMessageSave" type="button" class="quest-action" hidden>Set reminder</button>
+      <button id="streakMessageCancel" type="button" class="shop-retry" hidden>Cancel reminder</button>
+      <button id="streakMessageRetry" type="button" class="shop-retry" hidden>Check reminder</button>
+      <button id="streakMessageClose" type="button" class="shop-retry" autofocus>Close</button>
+    </div>
+  </dialog>
   <dialog id="crownPreview" aria-labelledby="crownPreviewTitle">
     <div class="mint-cabinet-scene"><span id="cabinetCoin" aria-hidden="true"></span></div>
     <div class="mint-preview-heading">
@@ -3079,11 +3102,6 @@ body{justify-content:flex-start}
       <button type="button" data-browse-rank="next" aria-label="Preview next rank finish">›</button>
     </div>
     <p id="cabinetCaption">Black enamel and gold laurel. Included with active VIP.</p>
-    <div class="mint-swatches" role="group" aria-label="Preview a coin finish">
-      <button type="button" data-try-finish="rank-1">Foundry Gold</button>
-      <button type="button" data-try-finish="rank-2">Aurora Glass</button>
-      <button type="button" data-try-finish="midnight">Midnight Crown</button>
-    </div>
     <form method="dialog"><button class="pilot-primary" type="submit">Close preview</button></form>
   </dialog>
   <dialog id="resultImage" aria-labelledby="resultImageTitle">
@@ -3117,6 +3135,7 @@ body{justify-content:flex-start}
         <div class="boost-state" id="rewardsDailyStatus" role="status">Checking your daily reward…</div>
         <button type="button" class="boost-action" id="rewardsDailyAction" disabled>Checking…</button>
         <div id="rewardWeekStrip" hidden aria-label="Streak calendar"></div>
+        <button id="rewardsTelegramReminder" class="reminder-link" type="button" aria-haspopup="dialog" hidden>Remind me tomorrow</button>
       </article>
       <article hidden class="boost-card boost-coins" data-boost-code="sp_visit_partner">
         <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">J</span><h3>Get coins <span id="coinRewardAmount">+200</span></h3></div>
@@ -3139,7 +3158,7 @@ body{justify-content:flex-start}
       </div>
       <p class="boost-footnote" id="boostCooldownNote">Daily streak is free. Optional ad rewards unlock after confirmation.</p>
       <div class="pilot-free-activities">
-        <button type="button" id="pilotDailyChallenge" class="pilot-link"><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span>+50 coins ›</span></button>
+        <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
         <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly friend race</strong><small>3 free runs · 45s each</small><span>Race for gold ›</span></button>
       </div>
       <div class="reward-footer">
@@ -4011,7 +4030,6 @@ function previewMint(key) {
   const rank=key.startsWith('rank-') ? HOME_TIERS[Number(key.slice(5))] : null;
   const caption=MINT_FINISHES[key].caption;
   document.getElementById('cabinetCaption').textContent=rank ? caption+' '+rank.name+' · '+(rank.min ? formatNumber(rank.min)+' saved coins.' : 'Starting finish.') : caption;
-  for(const option of dialog.querySelectorAll('[data-try-finish]')) option.setAttribute('aria-pressed',String(option.dataset.tryFinish===key));
   if(!dialog.open) dialog.showModal();
 }
 function coinArtwork(tier=0,launch=false){
@@ -4077,17 +4095,33 @@ async function refreshProgression(force=false){
     progressionState=res;progressionClock=Date.parse(res.server_now);progressionSnapshotAt=performance.now();progressionError=false;
   }catch(_){if(epoch===progressionEpoch&&id===homeUserId())progressionError=true;}finally{if(epoch!==progressionEpoch||id!==homeUserId())return;progressionCheckedAt=performance.now();progressionBusy=false;renderProgression();renderCollectibleCoin(homeGoalModel(homeConfirmedBalance));updateBoostHub();}
 }
+function rewardsChallengeView(daily) {
+  if (!accountIsReady() || navigator.onLine === false) return {state:'offline', label:'Connect to check'};
+  if (progressionClaimBusy) return {state:'pending', label:'Saving…'};
+  if (!daily || progressionError || Date.parse(daily.resets_at) <= progressionNow()) {
+    return progressionBusy ? {state:'loading', label:'Checking…'} :
+      {state:'retry', action:'refresh', label:'Check progress ›'};
+  }
+  if (daily.claimed) return {state:'collected', label:'Collected ✓'};
+  if (daily.eligible) return {state:'ready', action:'claim', label:`Claim ${formatNumber(daily.reward)} coins`};
+  return {state:'playing', action:'play', label:`Tap for ${formatNumber(daily.reward)} coins ›`};
+}
 function renderProgression(){
   const s=progressionCurrent(),d=s?.daily,e=s?.event?{...s.event}:null;
   if(e?.status==='live'&&Date.parse(e.ends_at)<=progressionNow())e.status='ended';
   const dayChanged=d&&Date.parse(d.resets_at)<=progressionNow();
   const dailyButton=document.getElementById('dailyQuestAction'),launchButton=document.getElementById('launchQuestAction');
   document.getElementById('dailyQuestProgress').textContent=d?`${d.progress} / ${d.target} confirmed taps · +${d.reward} coins`:'Connect to load your challenge.';
-  const pilotDailyProgress=document.getElementById('pilotDailyProgress');
-  if(pilotDailyProgress)pilotDailyProgress.textContent=d ? `${formatNumber(d.progress)} / ${formatNumber(d.target)} taps today` : 'Reach 100 taps today';
+  const tile = document.getElementById('pilotDailyChallenge');
+  const challenge = rewardsChallengeView(d);
+  tile.disabled = !challenge.action;
+  tile.dataset.state = challenge.state;
+  document.getElementById('pilotChallengeAction').textContent = challenge.label;
+  document.getElementById('pilotDailyProgress').textContent = d && !dayChanged ?
+    `${formatNumber(d.progress)} / ${formatNumber(d.target)} taps today` : 'Reach 100 taps today';
   const meter=document.getElementById('pilotChallengeMeter');
   if(meter){
-    meter.hidden=!(d && d.target>0);
+    meter.hidden=!(d && !dayChanged && d.target>0);
     if(!meter.hidden){meter.max=d.target;meter.value=d.progress;}
   }
   document.getElementById('dailyQuestFill').style.width=(d?100*d.progress/d.target:0)+'%';
@@ -4107,7 +4141,11 @@ async function openHomeQuests(){if(!accountIsReady())return;showAppSheet(documen
 async function claimProgression(kind){
   const s=progressionCurrent();if(progressionClaimBusy||progressionError||!s)return;
   const item=kind==='daily'?s.daily:s.event;
-  if(!item.eligible)return;
+  if (!accountIsReady() || navigator.onLine === false || !item.eligible || item.claimed ||
+      (kind === 'daily' && Date.parse(item.resets_at) <= progressionNow())) return;
+  // Ignore progression reads that started before this claim.
+  progressionEpoch++;
+  progressionBusy=false;
   const id=homeUserId();progressionClaimBusy=true;renderProgression();
   try{const result=await apiPost('/api/progression/claim',{kind,period:kind==='daily'?item.day:item.key});
     if(id!==homeUserId())return;
@@ -4305,6 +4343,11 @@ function renderDailyRewards(){
   el('dailyRewardReset').textContent=fresh&&!c.broken?`${c.claimed?'Next claim':'Claim before reset'} in ${msToCountdown(Math.max(0,Date.parse(c.resets_at)-now))} · 00:00 UTC`:'';
   el('dailyRewardCalendar').innerHTML=fresh?dailyMarkerMarkup(c,true):'';
   el('dailyRewardPerks').textContent=!fresh?'Refresh to check your perks.':c.broken?'Start again free or restore eligible continuity to resume streak perks.':c.tier.tap_bonus_percent>0||c.tier.energy_bonus>0?`${c.tier.name}: +${c.tier.tap_bonus_percent}% tap coins · +${c.tier.energy_bonus} energy capacity`:c.next_tier?`Day ${c.next_tier.day} unlocks +${c.next_tier.tap_bonus_percent}% tap coins and +${c.next_tier.energy_bonus} energy capacity.`:'Keep checking in for your next perk.';
+  if (fresh && !c.broken && c.tier.tap_bonus_percent > 0 && dailyRewardsOrigin === 'rate') {
+    const next = c.next_tier;
+    el('dailyRewardPerks').textContent = `Day ${num(c.days)} streak · +${num(c.tier.tap_bonus_percent)}% tap coins.` +
+      (next ? ` Reach Day ${num(next.day)} for +${num(next.tap_bonus_percent)}%.` : ' Highest streak bonus reached.');
+  }
   el('dailyRewardSchedule').textContent=!fresh?'':c.policy?`Start at ${num(c.policy.start)} coins. +${num(c.policy.step)} per day until Day ${num(c.policy.capDay)}: ${num(c.policy.cap)} coins on regular days.`:`From Day ${num(c.continuing_from_day||30)}: ${num(c.continuing_reward||2000)} coins daily.`;
   const doubleDay=fresh&&c.policy?.milestoneEvery&&c.next_milestone;
   el('dailyDoubleReward').hidden=!doubleDay;
@@ -4318,6 +4361,7 @@ function renderDailyRewards(){
   renderRestoreOption(c,fresh,now);
   updateRewardRecommendation();
   updateDailyNotice(c,fresh,now);
+  window.JigStreakReminder?.render();
   el('dailyReminder').checked=appStorage.getItem('jigcoin_daily_reminder:'+id)==='on';
   const event=progressionCurrent()?.event,live=event?.status==='live'&&Date.parse(event.ends_at)>now;
   const campaign=el('eventBanner')?.classList?.contains('show');
@@ -4327,18 +4371,24 @@ function renderDailyRewards(){
   if(live){setCoinArtwork(el('homeLaunchArt'),7,true);el('homeLaunchDeadline').textContent=event.owned?'In your collection · View ›':`${event.progress}/${event.target} taps · ${collectibleCountdown(Date.parse(event.ends_at)-now)} left`;}
 
 }
-async function openDailyRewards(origin='home'){if(!accountIsReady())return;hideDailyNotice();dailyRewardsOrigin=origin==='rewards'?'rewards':'home';restoreReceipt('');document.getElementById('dailyRestoreCheck').hidden=true;showAppSheet(document.getElementById('homeDailySheet'),dailyRewardsOrigin==='rewards'?tabTasks:tabFarm);document.getElementById('mainScroll').inert=true;renderDailyRewards();document.getElementById('dailyRewardsClose').setAttribute('aria-label',dailyRewardsOrigin==='rewards'?'Back to Rewards':'Back to Home');document.getElementById('dailyRewardsClose').focus();await refreshProgression(true);await checkRestorePayment(false);}
+async function openDailyRewards(origin='home'){if(!accountIsReady())return;hideDailyNotice();dailyRewardsOrigin=origin;void window.JigStreakReminder?.refresh();restoreReceipt('');document.getElementById('dailyRestoreCheck').hidden=true;showAppSheet(document.getElementById('homeDailySheet'),dailyRewardsOrigin==='rewards'?tabTasks:tabFarm);document.getElementById('mainScroll').inert=true;renderDailyRewards();document.getElementById('dailyRewardsClose').setAttribute('aria-label',dailyRewardsOrigin==='rewards'?'Back to Rewards':'Back to Home');document.getElementById(origin==='rate'?'dailyRateBenefits':'dailyRewardsClose').focus();await refreshProgression(true);await checkRestorePayment(false);}
 async function claimDailyReward(){
   const c=dailyCheckinModel();if(dailyRewardsBusy||restorePurchaseBusy||!c||progressionError||Date.parse(c.resets_at)<=progressionNow()||!accountIsReady())return;
   if(c.claimed){backToHome();return;}
   dailyRewardsBusy=true;renderDailyRewards();
-  try{await handleDailyTask(c.broken);}finally{dailyRewardsBusy=false;await refreshProgression(true);renderDailyRewards();const after=dailyCheckinModel();const unlocked=after?.claimed?after.cosmetics.filter(x=>x.owned&&!c.cosmetics.some(old=>old.key===x.key&&old.owned)):[];if(unlocked.length)showToast(`${formatNumber(after.today_reward)} coins collected · ${unlocked.map(x=>x.name).join(' + ')} unlocked!`);}
+  try{await handleDailyTask(c.broken);}finally{dailyRewardsBusy=false;await refreshProgression(true);renderDailyRewards();const after=dailyCheckinModel();if(after?.claimed&&!c.claimed)void window.JigStreakReminder?.refresh();const unlocked=after?.claimed?after.cosmetics.filter(x=>x.owned&&!c.cosmetics.some(old=>old.key===x.key&&old.owned)):[];if(unlocked.length)showToast(`${formatNumber(after.today_reward)} coins collected · ${unlocked.map(x=>x.name).join(' + ')} unlocked!`);}
 }
 document.getElementById('homeDailyOpen').addEventListener('click',()=>openBoostSheet('daily'));
 document.getElementById('dailyNoticeOpen').addEventListener('click',()=>{hideDailyNotice();openDailyRewards('home');});
 document.getElementById('dailyNoticeDismiss').addEventListener('click',hideDailyNotice);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)hideDailyNotice();});
-document.getElementById('dailyRewardsClose').addEventListener('click',()=>{document.getElementById('mainScroll').inert=false;if(dailyRewardsOrigin==='rewards')openBoostSheet();else backToHome();});
+document.getElementById('homeTapRate').addEventListener('click',()=>openDailyRewards('rate'));
+document.getElementById('dailyRewardsClose').addEventListener('click',()=>{
+  document.getElementById('mainScroll').inert=false;
+  if(dailyRewardsOrigin==='rewards') return openBoostSheet();
+  backToHome();
+  if(dailyRewardsOrigin==='rate') document.getElementById('homeTapRate').focus();
+});
 document.getElementById('rewardsDailyAction').addEventListener('click',()=>{const c=dailyCheckinModel();if(!c||c.claimed||c.broken||progressionError||Date.parse(c.resets_at)<=progressionNow())return openDailyRewards('rewards');return claimDailyReward();});
 document.getElementById('dailyRestoreBuy').addEventListener('click',buyStreakRestore);
 document.getElementById('dailyRestoreCheck').addEventListener('click',()=>checkRestorePayment(true));
@@ -4399,6 +4449,7 @@ function setAccountPhase(phase) {
   }
   // An old open overlay must not hide a connection/maintenance message.
   if (phase !== "ready") {
+    window.JigStreakReminder?.reset();
     const review=document.getElementById('purchaseReview');
     if(review?.open)review.close('cancel');
     stopRewardWait();
@@ -4439,6 +4490,8 @@ function render() {
   const effectivePerTap = effectiveTapRate(state);
   if (perTapText) {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
+    document.getElementById('homeTapRate').setAttribute('aria-label', confirmed ?
+      `${effectivePerTap} coins per tap. View streak perks` : 'View coins per tap and streak perks');
   }
 
   renderHomeEnergy(view.energy, confirmed);
@@ -4628,7 +4681,7 @@ setInterval(() => {
   refreshHomeRace();
   refreshHomeRefillStatus();
   refreshProgression();
-  if(document.getElementById("homeQuestSheet").classList.contains("show"))renderProgression();
+  if(document.getElementById("homeQuestSheet").classList.contains("show") || boostSheet.classList.contains("show"))renderProgression();
   if (boostSheet?.classList.contains("show")) { renderBoostCards(); pollBoostStatus(); }
 }, 1000);
 
@@ -4653,7 +4706,7 @@ async function apiPost(path, body, opts = {}) {
   const payloadOwner = safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id;
   if (payloadOwner !== telegram_id || (opts.tapOwner && opts.tapOwner !== telegram_id)) return {ok:false,reason:"TELEGRAM_ACCOUNT_CHANGED"};
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || /^\/api\/(weekly|pilot|mission)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
+  const controller = (readOnly || /^\/api\/(weekly|pilot|mission|streak\/reminder)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -4725,8 +4778,8 @@ function renderInviteOverview(){
   const nextName=data?.next_tier_name;
   el('inviteNextBadge').textContent=nextName ? `${formatNumber(data.next_at-data.friends_rewarded)} more to ${nextName}` : data?.tier_name || 'Next invite';
   if (data) setCoinArtwork(el('inviteTierArt'), Math.max(0,data.tiers.findIndex(row=>row.name===(nextName||data.tier_name))));
-  el('inviteRewardAmount').textContent=data?`+${formatNumber(data.reward_coins)}`:'—';
-  el('inviteWelcome').textContent=data?`New players start with ${formatNumber(data.welcome_coins)} free in-game coins.`:'New-player bonus appears after checking.';
+  el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'—';
+  el('inviteWelcome').textContent=data?`They start with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
@@ -5551,7 +5604,7 @@ function renderHomeEnergy(energy, confirmed, projected = null) {
   if (!projected && confirmed && accountIsReady() && energySample && energySample.owner === homeUserId()) {
     projected = projectEnergySample(energySample, maxEnergy, performance.now());
   }
-  label.textContent = projected?.nextMs != null && energy < maxEnergy
+  label.textContent = confirmed && energy === 0 && projected?.nextMs != null
     ? 'Energy +1 in ' + Math.ceil(projected.nextMs / 1000) + 's' : 'Energy';
   const fill = document.getElementById('energyFill');
   fill.style.transform = 'scaleX(' + (confirmed ? Math.min(1, Math.max(0, energy / maxEnergy)) : 0) + ')';
@@ -5901,17 +5954,17 @@ function renderReferencePacks(){
 }
 function packGoal(packs){
   const goal=homeIdentity===homeUserId() ? homeGoalModel(homeConfirmedBalance) : null;
-  if(!goal || goal.complete)return null;
+  if(!goal)return null;
   const small=packs.filter(p=>p.stars<=500).sort((a,b)=>a.stars-b.stars||a.coins-b.coins);
   if(!small.length)return null;
+  if(goal.complete)return {product:small[0],goal};
   const rankPack=small.find(p=>p.coins>=goal.remaining);
-  if(rankPack)return {product:rankPack,goal:{...goal,label:'Unlock '+goal.nextName,rankGoal:true}};
+  if(rankPack)return {product:rankPack,goal:{...goal,rankGoal:true}};
   const step=5000;
   const milestone=Math.min(goal.next,(Math.floor(homeConfirmedBalance/step)+1)*step);
   const gap=milestone-homeConfirmedBalance;
   const product=small.find(p=>p.coins>=gap)||small[0];
-  const verb=product.coins>=gap?'Reach ':'Work towards ';
-  return {product,goal:{...goal,label:verb+formatNumber(milestone)+' coins',rankGoal:false}};
+  return {product,goal};
 }
 function renderPackChoices(packs,preview,target=packGoal(packs)){
   const rates=packs.map(p=>p.coins/p.stars);
@@ -5936,7 +5989,7 @@ function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0) {
   const rate=p.coins/p.stars;
   const best=!starter && rate===bestRate;
   return `<article class="hub-product ${starter?'hub-starter':''} ${best?'hub-best':''} ${goal?'hub-goal':''}">
-    ${goal?`<div class="pack-goal"><span class="pack-goal-art" aria-hidden="true">${coinArtwork(goal.tier+(goal.rankGoal?1:0))}</span><div><strong>${escapeHtml(goal.label)}</strong><small>${formatNumber(homeConfirmedBalance+p.coins)} after this pack · ${escapeHtml(goal.nextName)} at ${formatNumber(goal.next)}</small></div></div>`:''}
+    ${goal?`<div class="pack-goal"><span class="pack-goal-art" aria-hidden="true">${coinArtwork(goal.tier+(goal.rankGoal?1:0))}</span><div><strong>Add ${formatNumber(p.coins)} coins</strong><small>Your balance after purchase · ${formatNumber(homeConfirmedBalance+p.coins)}</small>${goal.nextName?`<small>${goal.rankGoal?'Unlock ':''}${escapeHtml(goal.nextName)} at ${formatNumber(goal.next)}</small>`:''}</div></div>`:''}
     <div class="hub-product-label">${escapeHtml(label)}${best?'<span class="value-badge">Best value</span>':''}</div>
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
     <div class="hub-unit-value">${rate.toLocaleString('en-GB',{maximumFractionDigits:2})} coins per Star</div>
@@ -6409,6 +6462,7 @@ async function openBoostSheet(focusCode) {
   rewardsOfferOwner=homeUserId();
   arrangeRewardCards(requestedReward);
   showAppSheet(boostSheet,tabTasks);
+  void window.JigStreakReminder?.refresh();
   document.getElementById('boostSheetTitle').focus({preventScroll:true});
   renderBoostCards(); updateBoostHub();
   const requests=[refreshBoostMissions(false),syncStateIfIdle(),refreshProgression()];
@@ -6484,7 +6538,12 @@ for (const [code,placement] of Object.entries(BOOST_PLACEMENTS))
 document.getElementById('rewardCoinPacks').addEventListener('click',()=>openCoinShopSheet());
 for(const id of ['rewardRefillVip','rewardBoostVip'])
   document.getElementById(id).addEventListener('click',()=>openVault());
-document.getElementById('pilotDailyChallenge').addEventListener('click',openHomeQuests);
+document.getElementById('pilotDailyChallenge').addEventListener('click', () => {
+  const {action} = rewardsChallengeView(progressionCurrent()?.daily);
+  if (action === 'claim') return claimProgression('daily');
+  if (action === 'refresh') return refreshProgression(true);
+  if (action === 'play') backToHome();
+});
 document.getElementById('rewardsReturn').addEventListener('click',backToHome);
 document.getElementById('boostClose').addEventListener('click',()=>{
   stopRewardWait();
@@ -6539,8 +6598,13 @@ function renderVault(){
  if(goal) setCoinArtwork(document.getElementById('vaultRankArt'),goal.tier,window.JigPilot?.equipped()?'vip':launchEquipped());
  vipStatusText.textContent=active?'VIP active':d?`${d.product.days} days · ${d.product.stars} Stars`:'30-day pass';
  document.querySelector('#withdrawSheet .vault-vip').dataset.active=String(active);
- document.getElementById('vaultVipTitle').textContent=active?'Your VIP pass':d?`100 taps earn ${formatNumber(Math.round(d.benefits.vip_tap*100))} coins with VIP`:'Double your tap coins';
- document.getElementById('vipPerksText').textContent=active?'Includes your current streak and tap boost.':d?`At your current rate, 100 taps earn ${formatNumber(Math.round(d.benefits.standard_tap*100))} coins.`:'Includes your current streak and tap boost.';
+ const streakLabel=Number.isSafeInteger(d?.streak_day)&&d.streak_day>0?`Your Day ${formatNumber(d.streak_day)} streak`:'Your standard rate';
+ document.getElementById('vaultVipTitle').textContent=d
+   ? `${active?'VIP active':'With VIP'} · ${formatNumber(Math.round(d.benefits.vip_tap*100))} coins per 100 taps`
+   : 'Double your tap coins for 30 days';
+ document.getElementById('vipPerksText').textContent=d
+   ? `${streakLabel} earns ${formatNumber(Math.round(d.benefits.standard_tap*100))} coins per 100 taps before VIP.${d.benefits.ad_active?' Temporary ad boosts apply on top.':''}`
+   : 'Your personal comparison appears when Vault connects.';
  document.getElementById('vipTapValue').textContent=d?`${d.benefits.standard_tap} → ${d.benefits.vip_tap} per tap`:'2× your usual tap rate';
  document.getElementById('vipEnergyValue').textContent=d?`${d.benefits.standard_energy} → ${d.benefits.vip_energy} energy`:'2× your usual capacity';
  const bonus=document.getElementById('vipBonusText');bonus.hidden=!d||!active;bonus.textContent=d?`+${formatNumber(d.vip_bonus_coins)} extra VIP coins credited`:'';
@@ -7387,5 +7451,6 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncState
 // Size is set by the stable viewport in CSS, independently of counters and account state.
 </script>
 
+<script src="./assets/streak-reminder.js"></script>
 </body>
 </html>

@@ -276,18 +276,12 @@ html body #weeklySheet .pilot-tiles button[aria-pressed="true"] {
 html body .sheet :is(.invite-copy,.boost-action,.shop-retry,.pilot-secondary,.vault-details-link):enabled,
 html body #leaderboardScreen .lb-tab-btn[aria-pressed="false"],
 html body #coinShopSheet .hub-buy:enabled,
-html body #crownPreview .mint-swatches button,
 html body #resultImage .race-image-actions :is(a,button) {
   background:var(--mint-grain),var(--mint-plate);
   border:1px solid var(--mint-edge);
   border-radius:var(--mint-corner);
   color:var(--mint-highlight);
   box-shadow:inset 0 1px var(--mint-seam);
-}
-html body #crownPreview .mint-swatches button[aria-pressed="true"] {
-  color:var(--mint-text);
-  outline:1px solid var(--press-light);
-  outline-offset:-2px;
 }
 html body :is(.sheet,#leaderboardScreen) :is(.vault-buy,.friends-share-btn,.boost-action,.hub-buy,.pilot-primary,.quest-action):disabled {
   background:var(--mint-surface);
