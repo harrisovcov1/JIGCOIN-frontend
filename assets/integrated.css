@@ -21,7 +21,9 @@ html body .sheet .vip-summary .vip-summary-state {color:var(--mint-accent);font-
 .vip-summary .summary-chevron {font-size:25px;color:var(--mint-accent)}
 html body .sheet .vip-summary[data-active=true] {border-color:#8cba9c}
 html body .sheet .vip-summary[data-pending=true] .vip-summary-state {color:#f9d695}
-/* Every pack stays exposed, with one compact and truthful suggestion. */
+/* Every pack stays exposed, with one compact and truthful suggestion.
+   Match the former first-child specificity too, so cached mint-world.css cannot
+   restore the removed display-case rows or pseudo-elements. */
 html body #coinShopSheet .sheet-body {display:flex;flex-direction:column;gap:10px;justify-content:flex-start}
 .shop-balance-strip {font-size:12px;line-height:1.5;color:var(--mint-muted);padding:0 2px}
 .shop-balance-strip strong {color:var(--mint-text)}
@@ -29,22 +31,22 @@ html body #coinShopSheet .sheet-body {display:flex;flex-direction:column;gap:10p
 .shop-section-heading h2 {margin:0;font-size:16px;line-height:1.3}
 .shop-section-heading span {font-size:10px;line-height:1.3;text-align:right;color:var(--mint-muted)}
 html body #coinShopSheet #coinPackList {display:flex;flex:0 0 auto;flex-direction:column;gap:7px;margin:0}
-html body #coinShopSheet #coinPackList > .hub-product,
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
 html body #coinShopSheet .hub-catalog-dense .hub-product {
   display:grid;flex:none;grid-template-columns:minmax(0,1fr) 100px;grid-template-rows:auto auto;
   min-height:72px;gap:3px 8px;margin:0;padding:9px 11px;align-content:center;overflow:visible;
 }
-html body #coinShopSheet #coinPackList > .hub-product::before,
-html body #coinShopSheet #coinPackList > .hub-product::after {content:none;display:none}
-html body #coinShopSheet #coinPackList > .hub-product .hub-product-label {grid-column:1;grid-row:1;font-size:11px;line-height:1.3;color:var(--mint-muted)}
-html body #coinShopSheet #coinPackList > .hub-product .hub-product-coins {grid-column:1;grid-row:2;font-size:24px;line-height:1.1;letter-spacing:-.4px}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child)::before,
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child:not(.hub-goal))::after {content:none;display:none}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-product-label {grid-column:1;grid-row:1;font-size:11px;line-height:1.3;color:var(--mint-muted)}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-product-coins {grid-column:1;grid-row:2;font-size:24px;line-height:1.1;letter-spacing:-.4px}
 html body #coinShopSheet .hub-product-coins span {font-size:12px;letter-spacing:0}
-html body #coinShopSheet #coinPackList > .hub-product .hub-unit-value {grid-column:1;grid-row:3;font-size:11px;line-height:1.3}
-html body #coinShopSheet #coinPackList > .hub-product .hub-buy {grid-column:2;grid-row:1 / span 3;min-height:48px;width:100%;padding:5px;align-self:center}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-unit-value {grid-column:1;grid-row:3;font-size:11px;line-height:1.3}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy {grid-column:2;grid-row:1 / span 3;min-height:48px;width:100%;padding:5px;align-self:center}
 html body #coinShopSheet .hub-buy strong {font-size:17px;white-space:nowrap}
 html body #coinShopSheet .hub-buy span {font-size:10px}
-html body #coinShopSheet #coinPackList > .hub-product .pack-goal {display:block;grid-column:1 / -1;grid-row:4;align-self:auto;margin:5px 0 0;padding:6px 0 0;border:0;border-top:1px solid var(--mint-rim);background:none;box-shadow:none;border-radius:0}
-html body #coinShopSheet #coinPackList > .hub-product .pack-goal small {display:block;font-size:11px;line-height:1.4;color:var(--mint-muted)}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .pack-goal {display:block;grid-column:1 / -1;grid-row:4;align-self:auto;margin:5px 0 0;padding:6px 0 0;border:0;border-top:1px solid var(--mint-rim);background:none;box-shadow:none;border-radius:0}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .pack-goal small {display:block;font-size:11px;line-height:1.4;color:var(--mint-muted)}
 html body #coinShopSheet .value-badge {display:inline-block;margin:0 0 2px 5px;font-size:9px;line-height:1.3;padding:2px 4px;vertical-align:middle;white-space:normal;background:var(--mint-accent);color:var(--mint-ink)}
 html body #coinShopSheet .hub-product.hub-best:not(.hub-goal) {border-color:var(--mint-rim);box-shadow:inset 0 1px var(--mint-seam);background:var(--mint-grain),var(--mint-plate)}
 html body #coinShopSheet .hub-history {margin:0;padding:0;border-top:1px solid var(--mint-rim)}
@@ -201,8 +203,8 @@ html body #weeklySheet .pilot-clock strong {font-size:24px}
   html body .sheet .vip-summary img {width:43px;height:40px}
   html body .sheet .vip-summary strong {font-size:15px}
   html body .sheet .vip-summary small {font-size:11px}
-  html body #coinShopSheet #coinPackList>.hub-product {grid-template-columns:minmax(0,1fr) 89px;padding:8px;gap:2px 7px}
-  html body #coinShopSheet #coinPackList>.hub-product .hub-product-coins {font-size:22px}
+  html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) {grid-template-columns:minmax(0,1fr) 89px;padding:8px;gap:2px 7px}
+  html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .hub-product-coins {font-size:22px}
   html body #coinShopSheet .hub-buy strong {font-size:15px}
   .shop-section-heading {display:block}.shop-section-heading span {display:block;text-align:left;margin-top:2px}
   html body #friendsSheet .invite-reward-card {padding:11px;grid-template-columns:minmax(0,1fr) 55px}
