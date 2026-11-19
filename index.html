@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v16-home-header-4">
+<meta name="jigcoin-build" content="v16-home-option5-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2833,6 +2833,8 @@ body{justify-content:flex-start}
 #purchaseReview button{flex:1 1 auto;min-height:44px;margin:0;font:600 15px/1.25 system-ui,sans-serif}
 #purchaseReviewCancel{color:inherit;border:1px solid #7b8792;background:#262e38;border-radius:8px}
 </style>
+<!-- Approved Home Option 5; cosmetic layer inherits the authenticated rank skin. -->
+<link rel="stylesheet" href="./assets/home-option5.css?v=20261119-1">
 </head>
 <body>
   <div class="app-shell">
@@ -3941,6 +3943,7 @@ function animateHomeTap(points) {
 function renderHomeProgress(view) {
   // Distance follows the displayed coins. The saved tier controls artwork and unlocks.
   const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null,view.bal);
+  document.getElementById('homeNextPreview').dataset.rankComplete=String(Boolean(goal?.complete));
   document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':goal.remaining===0?`${goal.nextName} target reached · Saving…`:`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
   document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':(MINT_FINISHES['rank-'+(goal.tier+1)]?.name || 'Unlock the '+homeCoinUnlock(goal.tier+1))+' · Preview ›'):'Build your score, one tap at a time.';
   document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
@@ -4027,6 +4030,7 @@ function renderHomeRace(displayedBalance=recoveryTapView(state).bal){
   const el=document.getElementById('homeRace');if(!el)return;
   const race=homeRaceModel(homeRaceSnapshot,homeUserId(),displayedBalance);
   const fresh=Date.now()-homeRaceSyncedAt<90000;
+  el.dataset.rivalConfirmed=String(Boolean(accountIsReady()&&race&&fresh&&race.rank===state.globalRank));
   if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text;el.title='Your tap total against the latest saved rival score. Standings update after confirmation.';}
   else{el.textContent=accountIsReady()?'View your nearest rivals':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
 }

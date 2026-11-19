@@ -1,0 +1,307 @@
+/* JIGCOIN • Home Option 5. Approved artwork, real data, rank-driven surfaces.
+   Only existing Home selectors are changed. No fixed mock-up image or business logic. */
+#mainScroll.home-compact {
+  --h5-edge: color-mix(in srgb, var(--mint-accent) 73%, var(--mint-metal));
+  --h5-glow: color-mix(in srgb, var(--mint-accent) 40%, transparent);
+  --h5-soft: color-mix(in srgb, var(--mint-accent) 17%, transparent);
+  --h5-next-art: linear-gradient(123deg,transparent 56%,color-mix(in srgb,var(--mint-accent) 20%,transparent) 85%,transparent 100%);
+  --h5-plate: linear-gradient(114deg,var(--mint-ink),color-mix(in srgb,var(--mint-panel) 77%,var(--mint-metal)) 53%,var(--mint-ink));
+  overflow-x:hidden;
+}
+/* Future rank's colour is a tasteful teaser, never an override of the current skin. */
+html[data-mint-rank="0"] #mainScroll.home-compact {--h5-next-art:linear-gradient(126deg,transparent 55%,#9b6a2838 69%,#eab76e73 87%,#4726151c);}
+html[data-mint-rank="1"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 51%,#14688f25 68%,#20aff055 81%,#733fc89c 94%,#16294c53);}
+html[data-mint-rank="2"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 55%,#249b7455 80%,#73f4b67d 93%,#133c3550);}
+html[data-mint-rank="3"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 55%,#814d9f45 80%,#cb94f181 93%,#2a204350);}
+html[data-mint-rank="4"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 55%,#51452e52 80%,#e9c98583 93%,#1717174d);}
+html[data-mint-rank="5"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 55%,#9c3d5140 80%,#f39d9878 93%,#3e17284d);}
+html[data-mint-rank="6"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 55%,#829cba45 80%,#f9ead47f 93%,#1d283a4d);}
+html[data-mint-rank="7"] #mainScroll.home-compact {--h5-next-art:linear-gradient(127deg,transparent 65%,#e7d8b33f 93%,#232831);}
+#mainScroll.home-compact .mint-dashboard {
+  gap:clamp(2px,.65cqh,5px);
+}
+#mainScroll.home-compact .mint-masthead {
+  box-shadow:inset 0 -1px var(--h5-edge),inset 0 -6px 11px #0009,0 1px 4px var(--h5-soft);
+}
+#mainScroll.home-compact .mint-wordmark {
+  text-shadow:0 2px 2px #000b,0 -1px var(--h5-soft);
+}
+#mainScroll.home-compact #homeSessionControls {
+  gap:clamp(5px,2vw,10px);
+}
+#mainScroll.home-compact #homeJourneyOpen,
+#mainScroll.home-compact #homeBoostAction {
+  min-height:44px;
+  border-radius:clamp(4px,1.3vw,8px);
+}
+#mainScroll.home-compact #homeJourneyOpen::before {
+  background:var(--home-satin),var(--mint-button);
+  box-shadow:inset 0 1px #fffa,inset 0 -2px #0009;
+}
+#mainScroll.home-compact #homeBoostAction {
+  border-color:var(--h5-edge);
+  background:var(--home-satin),var(--h5-plate);
+  color:var(--mint-highlight);
+  box-shadow:inset 0 1px var(--mint-seam),0 2px 5px #0006;
+}
+#mainScroll.home-compact #homeBoostAction[data-focus="weekly"]::before {
+  background-color:var(--mint-highlight);
+}
+#mainScroll.home-compact #homeBoostAction[data-focus="weekly"]::after {
+  color:var(--mint-highlight);
+}
+#mainScroll.home-compact #homeBoostAction[data-focus="sp_emergency_energy"] {
+  background:linear-gradient(130deg,color-mix(in srgb,var(--mint-accent) 33%,var(--mint-ink)),var(--mint-panel));
+  color:var(--mint-highlight);
+}
+/* Engraved, equal-footing balance and standings with gold laurels. */
+#mainScroll.home-compact .mint-dashboard .home-balance-card {
+  position:relative;overflow:hidden;
+  border:1px solid var(--mint-edge);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -1px #000a;
+  background:var(--mint-grain),var(--home-steel);
+}
+#mainScroll.home-compact .mint-dashboard #homeLeaderboard {
+  position:relative;isolation:isolate;
+  padding-left:clamp(19px,5.5vw,26px)!important;
+  padding-right:clamp(17px,4.5vw,24px)!important;
+  text-align:center;justify-items:center;white-space:nowrap;
+}
+#mainScroll.home-compact #homeLeaderboard .global-rank-top-row {
+  justify-content:center;min-width:0;
+}
+#mainScroll.home-compact #homeLeaderboard .global-rank-label {
+  text-align:center;letter-spacing:clamp(.07em,.35vw,.17em);
+}
+#mainScroll.home-compact #homeLeaderboard::before,
+#mainScroll.home-compact #homeLeaderboard::after {
+  content:"";position:absolute;top:50%;z-index:-1;
+  width:clamp(13px,3.6vw,20px);height:clamp(24px,7vw,39px);
+  background-color:var(--mint-accent);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2028%2037%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M21%202C10%208%205%2018%2012%2035%22%2F%3E%3Cpath%20d%3D%22M17%208C10%205%209%202%209%201C15%202%2017%205%2017%208ZM13%2013C7%2012%204%209%203%206C9%207%2012%209%2013%2013ZM10%2019C4%2018%202%2015%201%2012C8%2013%2010%2016%2010%2019ZM9%2026C3%2025%201%2022%201%2019C7%2020%209%2023%209%2026ZM11%2032C5%2032%202%2029%201%2026C7%2027%2010%2029%2011%2032ZM19%209C24%207%2025%204%2025%202C19%204%2018%206%2019%209ZM14%2015C20%2014%2022%2011%2023%209C17%2010%2015%2012%2014%2015ZM12%2022C17%2021%2021%2018%2022%2016C16%2016%2013%2019%2012%2022ZM10%2028C16%2029%2019%2026%2021%2023C15%2023%2012%2025%2010%2028Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2028%2037%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M21%202C10%208%205%2018%2012%2035%22%2F%3E%3Cpath%20d%3D%22M17%208C10%205%209%202%209%201C15%202%2017%205%2017%208ZM13%2013C7%2012%204%209%203%206C9%207%2012%209%2013%2013ZM10%2019C4%2018%202%2015%201%2012C8%2013%2010%2016%2010%2019ZM9%2026C3%2025%201%2022%201%2019C7%2020%209%2023%209%2026ZM11%2032C5%2032%202%2029%201%2026C7%2027%2010%2029%2011%2032ZM19%209C24%207%2025%204%2025%202C19%204%2018%206%2019%209ZM14%2015C20%2014%2022%2011%2023%209C17%2010%2015%2012%2014%2015ZM12%2022C17%2021%2021%2018%2022%2016C16%2016%2013%2019%2012%2022ZM10%2028C16%2029%2019%2026%2021%2023C15%2023%2012%2025%2010%2028Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/100% 100% no-repeat;
+  pointer-events:none;opacity:.92;
+}
+#mainScroll.home-compact #homeLeaderboard::before {left:1px;transform:translateY(-50%);}
+#mainScroll.home-compact #homeLeaderboard::after {right:1px;transform:translateY(-50%) scaleX(-1);}
+#mainScroll.home-compact #homeLeaderboard :is(#globalRankValue,#globalRankTierText) {
+  font-size:clamp(13px,4.35cqw,21px);
+}
+/* Crown and chevrons accompany VERIFIED rival information only. */
+#mainScroll.home-compact .mint-dashboard #homeRace {
+  isolation:isolate;overflow:hidden;display:flex;justify-content:center;align-items:center;
+  min-height:clamp(28px,4.6cqh,36px);
+  padding:4px clamp(25px,7.5vw,40px);
+  border:1px solid var(--h5-edge);
+  background:
+    repeating-linear-gradient(53deg,transparent 0 7px,var(--h5-soft) 8px 11px,transparent 12px 31px) left center/22% 100% no-repeat,
+    repeating-linear-gradient(-53deg,transparent 0 7px,var(--h5-soft) 8px 11px,transparent 12px 31px) right center/22% 100% no-repeat,
+    var(--mint-grain),linear-gradient(103deg,var(--mint-ink),color-mix(in srgb,var(--mint-accent) 20%,var(--mint-ink)),var(--mint-ink));
+  box-shadow:inset 0 1px var(--h5-soft),inset 0 -2px #000a;
+  color:var(--mint-highlight);font-weight:760;
+  font-size:clamp(10px,3.45cqw,16px);
+  letter-spacing:.005em;text-shadow:0 1px 2px #000a;
+}
+#mainScroll.home-compact #homeRace[data-rival-confirmed="true"]::before {
+  content:"";flex:none;width:clamp(13px,3vw,18px);height:clamp(13px,3vw,18px);
+  margin-right:clamp(4px,1.3vw,9px);
+  background-color:var(--mint-highlight);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22m2%207%205.7%204.6L12%204l4.3%207.6L22%207l-1.8%2012H3.8L2%207Zm2.8%2014h14.4v2H4.8z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22m2%207%205.7%204.6L12%204l4.3%207.6L22%207l-1.8%2012H3.8L2%207Zm2.8%2014h14.4v2H4.8z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+}
+#mainScroll.home-compact #homeRace::after {
+  color:var(--mint-highlight);right:clamp(8px,2vw,13px);
+  font-weight:740;font-size:20px;
+}
+/* Preserve the real rank coin and the theme's press asset. Enhance only its housing. */
+#mainScroll.home-compact #mintPressCard .mint-chamber-caption {
+  border-color:var(--mint-edge);
+  box-shadow:inset 0 1px var(--mint-seam),0 2px 4px #0008;
+}
+#mainScroll.home-compact .mint-chamber-bay {
+  box-shadow:inset 0 1px 0 var(--h5-soft),inset 0 -1px 0 #000a;
+}
+#mainScroll.home-compact .mint-chamber-bay .mint-press-scene::after {
+  background:radial-gradient(ellipse at 50% 72%,var(--h5-soft),transparent 58%),linear-gradient(180deg,#0003,transparent 20%,transparent 78%,#0003);
+}
+/* Current coin + the REAL next coin, inside a single chamfered preview. */
+#mainScroll.home-compact #homeNextPreview {
+  position:relative;isolation:isolate;overflow:hidden;
+  justify-content:flex-start;gap:clamp(7px,2.5vw,13px);
+  margin:clamp(2px,.3cqh,4px) 10px 2px;
+  width:calc(100% - 20px);
+  padding:clamp(5px,.8cqh,9px) clamp(16px,4vw,26px);
+  min-height:clamp(56px,8.6cqh,80px);
+  border:1px solid var(--h5-edge);
+  clip-path:polygon(11px 0,calc(100% - 11px) 0,100% 50%,calc(100% - 11px) 100%,11px 100%,0 50%);
+  background:var(--h5-next-art),var(--mint-grain),var(--h5-plate);
+  color:var(--mint-text);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -1px #000a;
+  text-align:left;
+}
+#mainScroll.home-compact #homeNextCoin {
+  position:relative;z-index:1;
+  width:clamp(39px,7.5cqh,62px);
+  max-height:62px;filter:drop-shadow(0 2px 4px #000a);
+}
+#mainScroll.home-compact #homeNextPreview>span:last-child {
+  z-index:1;min-width:0;flex:1;
+  padding-left:clamp(7px,2.5vw,12px);
+  border-left:1px solid var(--mint-edge);
+}
+#mainScroll.home-compact #homeNextPreview>span:last-child::before {
+  content:"—  NEXT RANK  —";
+  display:block;
+  width:max-content;max-width:100%;
+  margin-bottom:2px;
+  color:var(--mint-highlight);
+  font:650 clamp(8px,2.15cqw,11px)/1.2 system-ui,sans-serif;
+  letter-spacing:.21em;
+}
+#mainScroll.home-compact #homeNextPreview[data-rank-complete="true"]>span:last-child::before {
+  content:"—  MAX RANK  —";
+}
+#mainScroll.home-compact #homeNextPreview[data-loading="true"]>span:last-child::before {display:none;}
+#mainScroll.home-compact #homeNextPreview #homeGoal {
+  text-align:left;font-size:clamp(11px,3.55cqw,18px);
+  line-height:1.15;white-space:normal;
+  text-shadow:0 1px 2px #000a;
+}
+#mainScroll.home-compact #homeNextPreview #homeGoalCaption {
+  text-align:left;font-size:clamp(9px,2.55cqw,12px);
+  line-height:1.2;margin-top:2px;
+  color:var(--mint-text);opacity:.85;
+}
+#mainScroll.home-compact #homeNextPreview:focus-visible {
+  outline:2px solid var(--mint-highlight);outline-offset:-2px;
+}
+/* Energy and Today become matched, compact instruments; refill remains operable. */
+#mainScroll.home-compact #mintPressCard .tap-metrics {
+  grid-template-columns:minmax(0,1.26fr) minmax(102px,1fr);
+  gap:5px;margin:0 10px;
+  min-height:clamp(52px,7.1cqh,65px);
+  background:none;box-shadow:none;border:0;clip-path:none;
+}
+#mainScroll.home-compact #homeEnergyMetric,
+#mainScroll.home-compact #homeTodayMetric {
+  min-width:0;min-height:clamp(52px,7.1cqh,65px);
+  padding:6px clamp(7px,2vw,12px);
+  border:1px solid var(--mint-edge);
+  clip-path:var(--home-bevel);
+  border-radius:var(--mint-corner);
+  background:var(--mint-grain),var(--home-steel);
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+#mainScroll.home-compact #homeEnergyMetric {
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+#mainScroll.home-compact #homeEnergyMetric .home-energy-gauge {gap:6px;}
+#mainScroll.home-compact #homeEnergyMetric .energy-readout {
+  display:flex;justify-content:space-between;align-items:center;gap:4px;
+}
+#mainScroll.home-compact #homeEnergyMetric .metric-label {
+  display:inline-flex;align-items:center;gap:4px;
+}
+#mainScroll.home-compact #homeEnergyMetric .metric-label::before {
+  content:"";width:clamp(12px,3vw,16px);height:clamp(13px,3.3vw,18px);flex:none;
+  background-color:var(--mint-highlight);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M13%201%204%2013h7l-1%2010%2010-14h-7V1z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M13%201%204%2013h7l-1%2010%2010-14h-7V1z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+}
+#mainScroll.home-compact #energyText {
+  color:var(--mint-text);white-space:nowrap;
+  font:650 clamp(11px,3.2vw,15px)/1.15 system-ui,sans-serif;
+}
+#mainScroll.home-compact #homeEnergyMetric .energy-bar {
+  margin:0;height:clamp(5px,1.2cqh,8px);
+  border-radius:12px;
+}
+#mainScroll.home-compact #homeEnergyMetric .energy-fill {
+  border-radius:12px;
+}
+#mainScroll.home-compact #homeRefillOpen:not([hidden]) {
+  flex:none;width:clamp(50px,12vw,72px);
+  padding:3px 2px;
+  min-height:44px;font-size:clamp(8px,2.1vw,10px);
+}
+#mainScroll.home-compact #homeTodayMetric {
+  position:relative;isolation:isolate;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:1px;
+  padding-inline:clamp(13px,3.9vw,21px);
+}
+#mainScroll.home-compact #homeTodayMetric .metric-label {
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:4px;line-height:1.1;
+}
+#mainScroll.home-compact #homeTodayMetric .metric-label::before {
+  content:"";display:block;flex:none;width:clamp(11px,3vw,15px);height:clamp(11px,3vw,15px);
+  background-color:var(--mint-highlight);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2021h8M12%2017v4M7%204h10v6a5%205%200%200%201-10%200V4ZM7%206H4v3a4%204%200%200%200%204%204M17%206h3v3a4%204%200%200%201-4%204%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2021h8M12%2017v4M7%204h10v6a5%205%200%200%201-10%200V4ZM7%206H4v3a4%204%200%200%200%204%204M17%206h3v3a4%204%200%200%201-4%204%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;
+}
+#mainScroll.home-compact #homeTodayMetric .metric-value {
+  font:760 clamp(17px,5.2cqw,26px)/1.1 system-ui,sans-serif;
+  color:var(--mint-text);font-variant-numeric:tabular-nums;
+}
+#mainScroll.home-compact #homeTodayMetric::before,
+#mainScroll.home-compact #homeTodayMetric::after {
+  content:"";position:absolute;z-index:-1;top:50%;pointer-events:none;
+  width:clamp(9px,2.7vw,15px);height:clamp(29px,6.8cqh,40px);
+  background-color:var(--mint-accent);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2028%2037%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M21%202C10%208%205%2018%2012%2035%22%2F%3E%3Cpath%20d%3D%22M17%208C10%205%209%202%209%201C15%202%2017%205%2017%208ZM13%2013C7%2012%204%209%203%206C9%207%2012%209%2013%2013ZM10%2019C4%2018%202%2015%201%2012C8%2013%2010%2016%2010%2019ZM9%2026C3%2025%201%2022%201%2019C7%2020%209%2023%209%2026ZM11%2032C5%2032%202%2029%201%2026C7%2027%2010%2029%2011%2032ZM19%209C24%207%2025%204%2025%202C19%204%2018%206%2019%209ZM14%2015C20%2014%2022%2011%2023%209C17%2010%2015%2012%2014%2015ZM12%2022C17%2021%2021%2018%2022%2016C16%2016%2013%2019%2012%2022ZM10%2028C16%2029%2019%2026%2021%2023C15%2023%2012%2025%2010%2028Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2028%2037%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M21%202C10%208%205%2018%2012%2035%22%2F%3E%3Cpath%20d%3D%22M17%208C10%205%209%202%209%201C15%202%2017%205%2017%208ZM13%2013C7%2012%204%209%203%206C9%207%2012%209%2013%2013ZM10%2019C4%2018%202%2015%201%2012C8%2013%2010%2016%2010%2019ZM9%2026C3%2025%201%2022%201%2019C7%2020%209%2023%209%2026ZM11%2032C5%2032%202%2029%201%2026C7%2027%2010%2029%2011%2032ZM19%209C24%207%2025%204%2025%202C19%204%2018%206%2019%209ZM14%2015C20%2014%2022%2011%2023%209C17%2010%2015%2012%2014%2015ZM12%2022C17%2021%2021%2018%2022%2016C16%2016%2013%2019%2012%2022ZM10%2028C16%2029%2019%2026%2021%2023C15%2023%2012%2025%2010%2028Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/contain no-repeat;
+  opacity:.83;
+}
+#mainScroll.home-compact #homeTodayMetric::before {left:2px;transform:translateY(-50%);}
+#mainScroll.home-compact #homeTodayMetric::after {right:2px;transform:translateY(-50%) scaleX(-1);}
+/* Daily streak remains its own one-tap gateway. */
+#mainScroll.home-compact .home-shortcuts {
+  margin:3px 10px 1px;
+}
+#mainScroll.home-compact .home-shortcuts .home-streak-strip {
+  border:1px solid var(--h5-edge);
+  border-radius:var(--mint-corner);
+  background:var(--mint-grain),var(--home-steel);
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+#mainScroll.home-compact .home-shortcuts .daily-summary {
+  gap:clamp(5px,1.7vw,9px);
+  padding-inline:clamp(4px,1.5vw,9px);
+  min-height:clamp(39px,5.7cqh,46px);
+}
+#mainScroll.home-compact .streak-strip-copy {gap:clamp(4px,1.5vw,9px);}
+#mainScroll.home-compact .streak-strip-copy strong,
+#mainScroll.home-compact .streak-strip-copy #hubDailyProgress {
+  font-size:clamp(8px,2.55cqw,12px);
+  letter-spacing:.025em;
+}
+#mainScroll.home-compact .streak-strip-arrow {
+  margin-left:auto;color:var(--mint-highlight);
+  font-size:20px;
+}
+#mainScroll.home-compact .bottom-nav .nav-btn.active {
+  color:var(--mint-highlight);
+}
+/* Fit smaller Telegram viewports before any content requires manual scrolling. */
+@media(max-width:360px){
+  #mainScroll.home-compact #homeNextPreview {padding-inline:14px;gap:6px;}
+  #mainScroll.home-compact #homeNextCoin {width:38px;}
+  #mainScroll.home-compact #mintPressCard .tap-metrics {grid-template-columns:minmax(0,1.15fr) minmax(97px,1fr);}
+  #mainScroll.home-compact #homeLeaderboard::before,#mainScroll.home-compact #homeLeaderboard::after {width:11px;}
+  #mainScroll.home-compact #homeLeaderboard {padding-left:15px!important;padding-right:12px!important;}
+  #mainScroll.home-compact #homeTodayMetric {padding-inline:10px;}
+  #mainScroll.home-compact #homeTodayMetric::before,#mainScroll.home-compact #homeTodayMetric::after {width:8px;}
+}
+@media(max-height:650px) {
+  #mainScroll.home-compact .mint-dashboard {gap:2px;}
+  #mainScroll.home-compact #homeNextPreview {min-height:43px;padding-block:3px;margin-block:1px;}
+  #mainScroll.home-compact #homeNextCoin {width:clamp(34px,6cqh,42px);}
+  #mainScroll.home-compact #homeNextPreview>span:last-child::before {font-size:8px;margin-bottom:0;}
+  #mainScroll.home-compact #mintPressCard .tap-metrics {min-height:44px;}
+  #mainScroll.home-compact #homeEnergyMetric,#mainScroll.home-compact #homeTodayMetric {min-height:44px;padding-block:3px;}
+  #mainScroll.home-compact .home-shortcuts {margin-top:1px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #mainScroll.home-compact #homeRace {transition:none;}
+}
