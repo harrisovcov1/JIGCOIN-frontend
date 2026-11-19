@@ -207,3 +207,60 @@
   }
   #mainScroll .home-shortcuts .daily-summary { min-height:35px; }
 }
+
+/* v16 Home header alignment: preserve existing rank, race and contextual refill handlers. */
+#mainScroll #homeSessionControls.mint-instruments {
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(6px,2vw,12px);
+  padding-inline:clamp(8px,3vw,16px);
+  align-items:center;
+}
+#mainScroll #homeJourneyOpen {
+  grid-column:1;grid-row:1;justify-self:stretch;
+  min-width:0;max-width:100%;min-height:44px;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:7px 8px;font-size:clamp(11px,3.1vw,14px);
+  letter-spacing:.015em;
+}
+#mainScroll #homeJourneyOpen::after {
+  content:"›";font-size:17px;font-weight:800;line-height:1;
+}
+#mainScroll #homeJourneyOpen #rankName::before {
+  content:"Rank · ";font-weight:600;letter-spacing:0;
+}
+#mainScroll #homeJourneyOpen #rankName {
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#mainScroll #homeBoostAction {
+  grid-column:2;grid-row:1;justify-self:stretch;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  width:100%;min-width:0;max-width:none;min-height:44px;
+  padding:7px 8px;border:1px solid #b9985e;border-radius:8px;
+  background:linear-gradient(180deg,#34383e,#171a20);
+  color:#f3dfb6;font:700 clamp(11px,3vw,13px)/1.2 system-ui,sans-serif;
+  box-shadow:inset 0 1px #ffffff20,0 2px 4px #0006;
+  text-shadow:0 1px 1px #000;
+  cursor:pointer;white-space:normal;
+}
+#mainScroll #homeBoostAction[data-focus="weekly"]::before {
+  content:"🏆";font-size:13px;line-height:1;
+}
+#mainScroll #homeBoostAction[data-focus="weekly"]::after {
+  content:"›";font-size:17px;line-height:1;
+}
+#mainScroll #homeBoostAction[data-focus="sp_emergency_energy"] {
+  border-color:#d8b66b;background:linear-gradient(180deg,#594a2b,#29241b);
+  color:#ffe6a8;
+}
+#mainScroll #homeBoostAction:active:not(:disabled) {
+  transform:translateY(1px);filter:brightness(1.13);
+}
+#mainScroll #homeBoostAction:disabled {opacity:.65;cursor:default;}
+#mainScroll #homeSaveStatus:not([hidden]) {
+  grid-column:1/-1;grid-row:2;justify-self:center;
+  min-height:32px;max-width:100%;
+}
+@media(max-width:350px) {
+  #mainScroll #homeJourneyOpen,#mainScroll #homeBoostAction {padding-inline:5px;font-size:11px;}
+  #mainScroll #homeSessionControls.mint-instruments {gap:5px;padding-inline:5px;}
+}
