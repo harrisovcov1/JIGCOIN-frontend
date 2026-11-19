@@ -127,6 +127,7 @@
 #weeklySheet .pilot-hero { flex: 0 0 auto; }
 /* The active refill and the coin preview share the available middle space.
    Keep the daily/activity cards and footer steady when the refill state changes. */
+#boostSheet .sheet-body { scrollbar-width: none; }
 #boostSheet #rewardChoices { display: flex; flex-direction: column; flex: 0 0 auto; gap: 6px; }
 #boostSheet #rewardChoices:has(> .boost-card:not(.boost-streak):not([hidden])) { flex-grow: 1; }
 #boostSheet #rewardChoices > .boost-card:not(.boost-streak):not([hidden]) { flex: 1 0 auto; align-content: center; }
