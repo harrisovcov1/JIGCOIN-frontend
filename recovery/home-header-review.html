@@ -3343,11 +3343,12 @@ function renderHomeRefillEntry(energy,ready) {
 function fixtureText(id,value){const node=E(id);if(node)node.textContent=value;}
 function fixtureRect(id){const r=E(id)?.getBoundingClientRect();return r?{x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height),right:Math.round(r.right),bottom:Math.round(r.bottom)}:null;}
 function fixtureReport(action){
- const rank=fixtureRect('homeJourneyOpen'),shortcut=fixtureRect('homeBoostAction');
+ const rank=fixtureRect('homeJourneyOpen'),shortcut=fixtureRect('homeBoostAction'),sync=fixtureRect('homeSaveStatus');
  const report={synthetic:true,case:fixtureCase,viewport:[innerWidth,innerHeight],focus:E('homeBoostAction').dataset.focus,
   shortcutText:E('homeBoostAction').textContent.trim().replace(/\s+/g,' '),shortcutDisabled:E('homeBoostAction').disabled,
-  syncVisible:!E('homeSaveStatus').hidden,rank,shortcut,header:document.querySelector('.mint-masthead').getBoundingClientRect().toJSON(),
+  syncVisible:!E('homeSaveStatus').hidden,rank,shortcut,sync,header:document.querySelector('.mint-masthead').getBoundingClientRect().toJSON(),
   overlap:rank&&shortcut?rank.right>shortcut.x&&rank.x<shortcut.right&&rank.bottom>shortcut.y&&rank.y<shortcut.bottom:false,
+  syncOverlap:!E('homeSaveStatus').hidden&&rank&&sync?rank.right>sync.x&&rank.x<sync.right&&rank.bottom>sync.y&&rank.y<sync.bottom:false,
   horizontalOverflow:document.documentElement.scrollWidth>innerWidth,
   action:action||null};
  window.fixtureReportData=report;
