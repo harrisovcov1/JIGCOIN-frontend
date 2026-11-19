@@ -13,12 +13,16 @@ test('an already confirmed reward takes priority over new ads and the free daily
 test('free daily claim takes priority over available adverts',()=>{
  assert.equal(modelContext().rewardRecommendation(all(),{dailyReady:true,energy:50}),'daily');
 });
-test('only low energy highlights a new refill and leaves the input order intact',()=>{
+test('only a prepared advert highlights a new refill and leaves the input order intact',()=>{
  const c=modelContext(),rows=all(),before=JSON.stringify(rows);
- assert.equal(c.rewardRecommendation(rows,{energy:10,cap:50}),refill);
+ assert.equal(c.rewardRecommendation(rows,{energy:10,cap:50}),null);
  assert.equal(c.rewardRecommendation(rows,{energy:11,cap:50}),null);
- assert.equal(c.rewardRecommendation(rows,{energy:15,cap:100}),refill);
+ assert.equal(c.rewardRecommendation([view(refill,'prepare')],{energy:0,cap:50}),null);
  assert.equal(JSON.stringify(rows),before);
+ rows[1]=view(refill,'show');const ready=JSON.stringify(rows);
+ assert.equal(c.rewardRecommendation(rows,{energy:10,cap:50}),refill);
+ assert.equal(c.rewardRecommendation(rows,{energy:14,cap:55}),refill);
+ assert.equal(JSON.stringify(rows),ready);
 });
 test('an unavailable refill keeps free play open without recommending retired coin ads',()=>{
  const c=modelContext();assert.equal(c.rewardRecommendation([view(coin),view(refill,'none',true),view(double,'play')],{energy:0}),null);

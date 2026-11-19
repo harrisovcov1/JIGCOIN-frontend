@@ -23,7 +23,11 @@ function setup({status='available',confirm=false,energy=3}={}) {
     card.dataset.boostCode=code;
     element(button).closest=()=>card;
   }
-  const ctx={Date:ClockDate,performance:{now:()=>now},Promise,console,navigator:{onLine:true},openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true}},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
+  const ctx={Date:ClockDate,performance:{now:()=>now},Promise,console,navigator:{onLine:true},openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true},addEventListener(){}},document:{hidden:false,getElementById:element,addEventListener(){}},hubMissions:missions,hubMissionLoadedAt:now,
+    refillPreparation:{status:'idle',owner:101},refillPreparationFlight:null,monetagProviderFlight:null,refillRearmAfterCooldown:false,preparationUsed:false,
+    preparedRefillFor:(mission=missions[0])=>!ctx.preparationUsed&&ctx.window.JigPilot.canRefill()&&mission.provider==='monetag'&&mission.status==='available'&&ctx.state.energy<ctx.maxEnergy?{attemptId}:null,
+    reconcileRefillPreparation(){if(ctx.window.__rewardActionBusy)ctx.preparationUsed=true;},refillTapsSettled:()=>true,
+    invalidateRefillPreparation(){ctx.preparationUsed=true;},requestRefillPreparation(){},prepareMonetagRefill:async()=>calls.push(['prepare']),
     homeIdentity:101,homeConfirmedBalance:49000,formatNumber:n=>n.toLocaleString('en-GB'),setCoinArtwork:(el,tier)=>{el.dataset.artwork=String(tier);},
     dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
     boostSheet:{classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
@@ -119,32 +123,6 @@ test('leaving a stalled advert releases the lock; a later receipt remains claima
   assert.equal(h.calls.length,1);
   assert.equal(h.calls[0][1].attempt_id,'confirmed-after-close');
   assert.equal(h.refreshes(),1);
-});
-test('canceling a real pending preload records one outcome even when its watchdog fires later',async()=>{
-  const h=setup(),timers=new Map();let sequence=0;
-  h.ctx.setTimeout=(fn,delay)=>{const id=++sequence;timers.set(id,{fn,delay});return id;};
-  h.ctx.clearTimeout=id=>timers.delete(id);
-  h.missions[0].zone_id='123';
-  h.ctx.window.show_123=options=>{h.calls.push(['sdk',options]);return new Promise(()=>{});};
-  const api=h.ctx.apiPost;
-  h.ctx.apiPost=async(path,body)=>{
-    if(path==='/api/mission/start'){
-      h.missions[0].status='pending';
-      return {ok:true,provider:'monetag',zone_id:'123',ymid:attemptId,request_var:body.code};
-    }
-    return api(path,body);
-  };
-  vm.runInContext(html.slice(html.indexOf('const rewardedSDKs ='),html.indexOf('// Unified Rewards.')),h.ctx);
-  const action=h.ctx.performBoostAction('sp_emergency_energy');
-  for(let i=0;i<20;i++)await Promise.resolve();
-  h.advance(9000);h.setVisible(false);h.ctx.stopRewardWait();await action;
-  assert.equal(h.outcomes.length,1);assert.equal(h.outcomes[0].error_code,'FLOW_CANCELLED');
-  assert.equal(h.outcomes[0].stage,'preload');assert.equal(h.outcomes[0].attempt_id,attemptId);assert.equal(h.outcomes[0].elapsed_ms,9000);
-  h.advance(9000);for(const timer of [...timers.values()])if(timer.delay===18000)timer.fn();
-  for(let i=0;i<20;i++)await Promise.resolve();
-  assert.equal(h.outcomes.length,1,'the abandoned preload watchdog must not report another failure');
-  assert.equal(h.calls.filter(call=>call[0]==='sdk'&&call[1].type==='end').length,0);
-  assert.equal(h.ctx.window.__rewardActionBusy,false);assert.equal(h.ctx.state.energy,3);
 });
 test('full energy, active double points and cooldown expiry cannot authorize an advert',async()=>{
   const h=setup({energy:50});await h.ctx.performBoostAction('sp_emergency_energy');

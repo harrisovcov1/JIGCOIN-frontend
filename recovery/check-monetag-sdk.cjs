@@ -3,158 +3,159 @@ const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),asse
 const html=fs.readFileSync('index.html','utf8');
 const source=html.slice(html.indexOf('const rewardedSDKs ='),html.indexOf('// Unified Rewards.'));
 const code='sp_emergency_energy',ymid='12345678-1234-4123-8123-123456789abc';
-function setup({result={reward_event_type:'valued'},failure,loadFailure=false,failureStage='preload'}={}) {
-  const calls=[],scripts=[],stages=[];
-  let owner=101,visible=true;
-  const ctx={Map,Error,Promise,setTimeout,clearTimeout,performance:{now:()=>0},
-    homeUserId:()=>owner,accountIsReady:()=>true,missionsOwner:101,
-    hubMissions:[{code,provider:'monetag',status:'available',zone_id:'123'}],window:{},
-    apiPost:async(path,body)=>{calls.push({path,body});return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:code};},
-    document:{createElement:()=>({dataset:{},remove(){this.removed=true;}}),head:{appendChild(script){
-      scripts.push(script);
-      queueMicrotask(()=>{
-        if(loadFailure){script.onerror();return;}
-        ctx.window.show_123=async options=>{
-          calls.push({options});
-          if(failure && options.type===failureStage)throw Error(failure);
-          return options.type==='preload'?undefined:result;
-        };
-        script.onload();
-      });
-    }}}
+const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
+function setup({failure,loadFailure=false,result={reward_event_type:'valued'},sdkLoaded=true}={}){
+  let at=0,sequence=0,owner=101,visible=true;const timers=new Map(),calls=[],scripts=[];
+  class ClockDate extends Date {static now(){return 1000000+at;}}
+  const mission={code,provider:'monetag',status:'available',zone_id:'123'};
+  const handler=async options=>{calls.push({options});if(failure&&options.type==='preload')throw Error(failure);return options.type==='preload'?undefined:result;};
+  const ctx={Map,Error,Promise,Date:ClockDate,queueMicrotask,performance:{now:()=>at},navigator:{onLine:true},
+    setTimeout:(fn,delay)=>{const id=++sequence;timers.set(id,{fn,at:at+delay});return id;},clearTimeout:id=>timers.delete(id),
+    homeUserId:()=>owner,accountIsReady:()=>true,missionsOwner:101,hubMissions:[mission],state:{energy:3},maxEnergy:55,
+    __tapFlushing:false,getPendingTaps:()=>0,getTapQueue:()=>[],readRecoveryQueue:()=>({pending:0,packet:null}),homeEnergyLow:(energy,max)=>energy<=max*.2,
+    window:{JigPilot:{canRefill:()=>true}},boostSheet:{classList:{contains:()=>visible}},
+    document:{hidden:false,getElementById:()=>({inert:!visible}),querySelector:()=>visible?null:{},createElement:()=>({dataset:{},remove(){this.removed=true;}}),head:{appendChild(script){scripts.push(script);queueMicrotask(()=>{if(loadFailure)script.onerror();else{ctx.window.show_123=handler;script.onload();}});}}},
+    useMissionOwner(){},syncStateIfIdle:async()=>{calls.push({sync:true});},refreshBoostMissions:async()=>{calls.push({missions:true});return [mission];},
+    renderBoostCards(){},renderHomeSession(){},
+    apiPost:async(path,body)=>{calls.push({path,body});return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:code};}
   };
-  vm.createContext(ctx);vm.runInContext(source,ctx);
-  return {ctx,calls,scripts,stages,run:()=>ctx.runMonetagQuest(code,()=>visible,(stage,attempt)=>stages.push({stage,attempt})),
-    setVisible:value=>visible=value,setOwner:value=>owner=value,setLoadFailure:value=>loadFailure=value};
+  if(sdkLoaded)ctx.window.show_123=handler;
+  vm.createContext(ctx);vm.runInContext('let adNotice=null;'+source,ctx);vm.runInContext('refillPreparation={status:"idle",owner:101};',ctx);
+  return {ctx,calls,scripts,mission,prepare:manual=>ctx.prepareMonetagRefill(manual),watch:()=>ctx.runMonetagQuest(code,()=>visible),
+    prepared:()=>vm.runInContext('refillPreparation',ctx),outcomes:()=>calls.filter(x=>x.path==='/api/mission/outcome').map(x=>x.body),
+    setVisible:v=>visible=v,setOwner:v=>owner=v,
+    advance(ms){at+=ms;for(const [id,item] of [...timers])if(item.at<=at){timers.delete(id);item.fn();}}
+  };
 }
-test('SDK loads before an attempt; preload and display share the server-issued reward identity',async()=>{
-  const h=setup();const result=await h.run();
-  assert.equal(result.reward_event_type,'valued');
+test('preparation loads the SDK and makes one server attempt/preload but never displays or grants',async()=>{
+  const h=setup({sdkLoaded:false});await h.prepare();
   assert.equal(h.scripts.length,1);assert.equal(h.scripts[0].dataset.zone,'123');
-  assert.equal(h.calls[0].path,'/api/mission/start');
-  assert.deepEqual(h.calls.filter(x=>x.options).map(x=>x.options.type),['preload','end']);
-  for(const {options} of h.calls.filter(x=>x.options)){assert.equal(options.ymid,ymid);assert.equal(options.requestVar,code);assert.equal(options.timeout,15);}
-  assert.ok(h.calls.every(x=>x.path!=='/api/mission/complete'),'SDK results never authorize a client-side grant');
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  assert.deepEqual(h.calls.filter(x=>x.options).map(x=>x.options.type),['preload']);
+  assert.equal(h.calls.find(x=>x.options).options.timeout,15);assert.equal(h.prepared().status,'ready');
+  assert.equal(h.mission.status,'pending');assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
 });
-test('an unavailable advert never proceeds from preload to display or reports a reward',async()=>{
-  const h=setup({failure:'Empty feed'});
-  await assert.rejects(h.run(),/AD_NO_FILL/);
-  assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
-});
-test('an explicitly unpaid or early-closed advert is distinct from a delayed receipt',async()=>{
-  const h=setup({result:{reward_event_type:'non_valued'}});
-  await assert.rejects(h.run(),/AD_NOT_REWARDED/);
-  assert.ok(h.calls.every(x=>x.path!=='/api/mission/complete'));
-  const legacy=setup({result:null});
-  assert.equal(await legacy.run(),null,'missing frontend result still requires checking the server receipt');
-});
-test('a failed SDK load creates no backend attempt and can recover on retry',async()=>{
-  const h=setup({loadFailure:true});
-  await assert.rejects(h.run(),/AD_SDK_UNAVAILABLE/);
-  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,0);assert.equal(h.scripts[0].removed,true);
-  assert.equal(h.calls[0].body.error_code,'SDK_LOAD_FAILED');assert.equal(h.calls[0].body.attempt_id,null);
-  h.setLoadFailure(false);await h.run();
-  assert.equal(h.scripts.length,2);assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
-});
-test('leaving the panel before display prevents opening a late advert',async()=>{
-  const h=setup();
-  h.ctx.apiPost=async()=>{h.setVisible(false);return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:code};};
-  await assert.rejects(h.run(),/AD_EXIT/);
-  assert.equal(h.calls.length,0);
-});
-test('wrong account or placement from an attempt cannot be passed to the ad provider',async()=>{
-  for(const change of ['account','placement']){
-    const h=setup();
-    h.ctx.apiPost=async()=>{
-      if(change==='account')h.setOwner(202);
-      return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:change==='placement'?'sp_double_points':code};
-    };
-    await assert.rejects(h.run(),change==='account'?/ACCOUNT_CHANGED/:/AD_INVALID_ATTEMPT/);assert.equal(h.calls.length,0);
-  }
-});
-const settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
-function useClock(ctx){
-  let at=0,sequence=0;const timers=new Map();
-  ctx.performance={now:()=>at};
-  ctx.setTimeout=(fn,delay)=>{const id=++sequence;timers.set(id,{fn,at:at+delay});return id;};
-  ctx.clearTimeout=id=>timers.delete(id);
-  return {advance(ms){at+=ms;for(const [id,item] of [...timers])if(item.at<=at){timers.delete(id);item.fn();}}};
-}
-test('preload failures retain the verified attempt and report only a bounded failure code',async()=>{
-  for(const [failure,errorCode] of [['Network error','NETWORK_ERROR'],['Timeout','SDK_TIMEOUT'],['Ad is not ready','AD_NOT_READY'],['Rejected','DISPLAY_REJECTED'],['unexpected provider data https://private.test/?secret=x','UNKNOWN']]){
-    const h=setup({failure});await assert.rejects(h.run(),e=>e.adStage==='preload'&&e.adAttempt===ymid&&e.adCode===errorCode);
-    const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-    assert.deepEqual(JSON.parse(JSON.stringify(report)),{code,attempt_id:ymid,stage:'preload',error_code:errorCode,elapsed_ms:0});
-    assert.equal(h.calls.some(x=>x.options?.type==='end'),false);
-  }
-});
-test('a display failure is distinguishable from a load failure and does not authorize a claim',async()=>{
-  const h=setup({failure:'Failed to render Telegram banner',failureStage:'end'});
-  await assert.rejects(h.run(),e=>e.adStage==='display'&&e.adCode==='DISPLAY_FAILED');
-  assert.equal(h.calls.find(x=>x.path==='/api/mission/outcome').body.stage,'display');
+test('Watch invokes end synchronously with the same identity and no preceding API/preload/SDK load',async()=>{
+  const h=setup();await h.prepare();h.calls.length=0;
+  const watching=h.watch();
+  assert.equal(h.calls.length,1);assert.equal(h.calls[0].options.type,'end');
+  assert.deepEqual(JSON.parse(JSON.stringify(h.calls[0].options)),{ymid,requestVar:code,type:'end',timeout:2});
+  assert.equal(h.prepared().status,'consumed');await watching;
+  await assert.rejects(h.watch(),/AD_NOT_READY/);
   assert.equal(h.calls.filter(x=>x.options?.type==='end').length,1);
-  assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
 });
-test('a stalled preload stops after its bounded preparation deadline and cannot later open an advert',async()=>{
-  const h=setup(),clock=useClock(h.ctx);let finish;
-  h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(resolve=>{finish=resolve;});};
-  const running=h.run();await settle();clock.advance(17999);await settle();
-  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false);
-  clock.advance(1);
-  await assert.rejects(running,e=>e.adStage==='preload'&&e.adCode==='PRELOAD_DEADLINE');
-  finish();await settle();assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
-  const outcome=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-  assert.equal(outcome.attempt_id,ymid);assert.equal(outcome.elapsed_ms,18000);
-});
-test('a slow preload that finishes after eight seconds displays once within the new loading budget',async()=>{
-  const h=setup(),clock=useClock(h.ctx);let finishPreload,finishDisplay;
-  h.ctx.window.show_123=options=>{
-    h.calls.push({options});
-    return new Promise(resolve=>{if(options.type==='preload')finishPreload=resolve;else finishDisplay=resolve;});
-  };
-  const running=h.run();await settle();clock.advance(14000);finishPreload();await settle();
-  assert.deepEqual(h.calls.filter(x=>x.options).map(x=>x.options.type),['preload','end']);
-  clock.advance(75000);await settle();
-  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false,'the preparation watchdog is removed before viewing');
-  finishDisplay({reward_event_type:'valued'});await running;
-  const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-  assert.equal(report.stage,'display');assert.equal(report.elapsed_ms,75000,'elapsed time resets when display starts');
-});
-test('a provider timeout remains distinct from the application preparation deadline',async()=>{
-  const h=setup(),clock=useClock(h.ctx);let rejectPreload;
-  h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise((_,reject)=>{rejectPreload=reject;});};
-  const running=h.run();await settle();clock.advance(15000);rejectPreload(Error('Timeout'));
-  await assert.rejects(running,e=>e.adCode==='SDK_TIMEOUT'&&e.adElapsedMs===15000);
-  const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-  assert.equal(report.error_code,'SDK_TIMEOUT');assert.equal(report.elapsed_ms,15000);
-  clock.advance(3000);await settle();assert.equal(h.calls.filter(x=>x.path==='/api/mission/outcome').length,1);
-});
-test('an advert displayed for more than 45 seconds has no application display deadline',async()=>{
-  const h=setup(),clock=useClock(h.ctx);let finish,completed=false;
-  h.ctx.window.show_123=options=>{h.calls.push({options});return options.type==='preload'?Promise.resolve():new Promise(resolve=>{finish=resolve;});};
-  const running=h.run().then(result=>{completed=true;return result;});await settle();
-  assert.equal(h.stages.at(-1).stage,'display');clock.advance(75000);await settle();
-  assert.equal(completed,false);assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false);
-  finish({reward_event_type:'valued'});await running;
-  assert.equal(h.calls.find(x=>x.path==='/api/mission/outcome').body.error_code,'SDK_RETURNED');
-});
-test('late cancelled preload cannot display or duplicate the action cancellation outcome',async()=>{
-  const h=setup();let finish;
-  h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(resolve=>{finish=resolve;});};
-  const running=h.run();await settle();h.setVisible(false);finish();
-  await assert.rejects(running,/AD_EXIT/);
-  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false,'the outer action records its own cancellation');
-  assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
-});
-test('diagnostic elapsed time is a bounded integer and absent for legacy callers',async()=>{
-  for(const [elapsed,expected] of [[15000.8,15000],[-1,0],[400000,300000],[undefined,undefined],[NaN,undefined],['15000',undefined]]){
-    const h=setup();h.ctx.reportAdOutcome(code,101,ymid,'preload','SDK_TIMEOUT',elapsed);await settle();
-    const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-    assert.equal(report.elapsed_ms,expected);assert.equal(Object.hasOwn(report,'elapsed_ms'),expected!==undefined);
+test('no-fill and provider timeout leave no enabled or late display; automatic preparation never retries',async()=>{
+  for(const [failure,expected] of [['Empty feed','NO_FILL'],['Timeout','SDK_TIMEOUT'],['Network error','NETWORK_ERROR']]){
+    const h=setup({failure});await h.prepare();assert.equal(h.prepared().status,'failed');
+    assert.equal(h.outcomes()[0].error_code,expected);assert.equal(h.outcomes()[0].attempt_id,ymid);
+    h.mission.status='available';await h.prepare();h.ctx.requestRefillPreparation();await settle();
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);await assert.rejects(h.watch(),/AD_NOT_READY/);
   }
 });
-test('diagnostics fail silently and never turn a provider result into a reward or user-visible error',async()=>{
-  const h=setup(),api=h.ctx.apiPost;h.ctx.apiPost=(path,body)=>path==='/api/mission/outcome'?Promise.reject(Error('offline')):api(path,body);
-  const result=await h.run();await settle();assert.equal(result.reward_event_type,'valued');
-  assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
+test('manual retry waits for server availability and never turns pending into a second start',async()=>{
+  const h=setup({failure:'Timeout'});await h.prepare();await h.prepare(true);
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  h.advance(60000);h.mission.status='available';await h.prepare(true);
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
+});
+test('a fresh prepared refill survives expected pending and natural regeneration above20%',async()=>{
+  const h=setup();await h.prepare();h.ctx.state.energy=14;h.ctx.reconcileRefillPreparation();
+  assert.equal(h.ctx.preparedRefillFor(),h.prepared());assert.equal(h.prepared().status,'ready');
+  await h.watch();assert.equal(h.calls.filter(x=>x.options?.type==='end').length,1);
+});
+test('ready state expires locally after30s with no auto-refresh or late display',async()=>{
+  const h=setup();await h.prepare();h.advance(29999);assert.ok(h.ctx.preparedRefillFor());
+  h.advance(1);assert.equal(h.ctx.preparedRefillFor(),null);assert.equal(h.prepared().status,'expired');
+  await assert.rejects(h.watch(),/AD_NOT_READY/);assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+});
+test('claimable receipts, cooldown, unavailable, changed zone and full energy supersede a prepared advert',async()=>{
+  for(const condition of ['claimable','cooldown','unavailable','zone','full']){
+    const h=setup();await h.prepare();
+    if(condition==='zone')h.mission.zone_id='456';else if(condition==='full')h.ctx.state.energy=55;else h.mission.status=condition;
+    h.ctx.reconcileRefillPreparation();assert.equal(h.ctx.preparedRefillFor(),null);await assert.rejects(h.watch(),/AD_NOT_READY/);
+  }
+});
+test('preparation waits for ordinary and recovery tap commits without consuming its automatic opportunity',async()=>{
+  for(const kind of ['ordinary','recovery']){
+    const h=setup();if(kind==='ordinary')h.ctx.getPendingTaps=()=>2;else{h.ctx.window.__lastState={recovery_gameplay:true};h.ctx.readRecoveryQueue=()=>({pending:2});}
+    await h.prepare();assert.equal(h.calls.length,0);
+    h.ctx.getPendingTaps=()=>0;h.ctx.readRecoveryQueue=()=>({pending:0});await h.prepare();assert.equal(h.prepared().status,'ready');
+  }
+});
+test('server energy threshold race is ordinary unavailability with manual recovery and no provider call',async()=>{
+  const h=setup(),api=h.ctx.apiPost;h.ctx.apiPost=(path,body)=>path==='/api/mission/start'?Promise.resolve({ok:false,error:'ENERGY_ABOVE_REFILL_THRESHOLD'}):api(path,body);
+  await h.prepare();assert.equal(h.prepared().status,'failed');assert.equal(h.outcomes().length,0);assert.equal(h.calls.some(x=>x.options),false);
+});
+test('parallel requests create one preload and abandoned context cannot enable a late advert or remain loading',async()=>{
+  const h=setup();let finish;h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(r=>finish=r);};
+  const preparing=h.prepare();await settle();const second=h.prepare(true);h.setVisible(false);finish();await Promise.all([preparing,second]);
+  assert.equal(h.prepared().status,'cancelled');assert.equal(h.calls.filter(x=>x.options).length,1);h.setVisible(true);await assert.rejects(h.watch(),/AD_NOT_READY/);
+});
+test('account change invalidates a ready token and late preparation cannot cross owners',async()=>{
+  const h=setup();await h.prepare();h.setOwner(202);h.ctx.reconcileRefillPreparation();await assert.rejects(h.watch(),/AD_NOT_READY/);
+  assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
+});
+test('stalled preload reaches18s watchdog, stays fenced until SDK settles, and never auto-displays',async()=>{
+  const h=setup();let finish;h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(r=>finish=r);};
+  const preparing=h.prepare();await settle();h.advance(17999);await settle();assert.equal(h.outcomes().length,0);
+  h.advance(1);await preparing;assert.equal(h.outcomes()[0].error_code,'PRELOAD_DEADLINE');assert.equal(h.outcomes()[0].elapsed_ms,18000);
+  h.mission.status='available';await h.prepare(true);assert.equal(h.calls.filter(x=>x.options).length,1);
+  finish();await settle();assert.equal(h.prepared().status,'failed');await assert.rejects(h.watch(),/AD_NOT_READY/);
+});
+test('a14s preload becomes ready without displaying;75s viewing has no application deadline',async()=>{
+  const h=setup();let finishPreload,finishDisplay;
+  h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(r=>{if(options.type==='preload')finishPreload=r;else finishDisplay=r;});};
+  const preparing=h.prepare();await settle();h.advance(14000);finishPreload();await preparing;
+  assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);const watching=h.watch();
+  h.advance(75000);await settle();assert.equal(h.outcomes().length,0);
+  finishDisplay({reward_event_type:'valued'});await watching;assert.equal(h.outcomes()[0].elapsed_ms,75000);
+});
+test('cache-loading timeout after Watch is reported at display and never starts another preload',async()=>{
+  const h=setup();await h.prepare();h.prepared().show=options=>{h.calls.push({options});return Promise.reject(Error('Timeout'));};
+  await assert.rejects(h.watch(),e=>e.adStage==='display'&&e.adCode==='SDK_TIMEOUT');
+  assert.equal(h.calls.filter(x=>x.options?.type==='preload').length,1);assert.equal(h.outcomes()[0].stage,'display');
+});
+test('unpaid or absent SDK results never grant a reward',async()=>{
+  for(const result of [{reward_event_type:'non_valued'},undefined]){
+    const h=setup({result});await h.prepare();
+    if(result)await assert.rejects(h.watch(),/AD_NOT_REWARDED/);else await h.watch();
+    assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
+  }
+});
+test('failed SDK load creates no attempt and needs an explicit new preparation',async()=>{
+  const h=setup({sdkLoaded:false,loadFailure:true});await h.prepare();
+  assert.equal(h.outcomes()[0].error_code,'SDK_LOAD_FAILED');assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false);
+  await h.prepare();assert.equal(h.scripts.length,1);
+});
+test('wrong placement returned by start never reaches provider',async()=>{
+  const h=setup();h.ctx.apiPost=async(path,body)=>{h.calls.push({path,body});return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:'wrong'};};
+  await h.prepare();assert.equal(h.calls.some(x=>x.options),false);assert.equal(h.outcomes()[0].error_code,'INVALID_ATTEMPT');
+});
+test('diagnostic duration remains bounded and optional',async()=>{
+  for(const [duration,expected] of [[15000.8,15000],[-1,0],[400000,300000],[undefined,undefined],[NaN,undefined],['15000',undefined]]){
+    const h=setup();h.ctx.reportAdOutcome(code,101,ymid,'preload','SDK_TIMEOUT',duration);await settle();assert.equal(h.outcomes()[0].elapsed_ms,expected);
+  }
+});
+test('observed claim cooldown rearms one automatic preparation but a failed retry window does not',async()=>{
+  const h=setup();await h.prepare();await h.watch();
+  h.mission.status='cooldown';h.ctx.reconcileRefillPreparation();h.ctx.requestRefillPreparation();await settle();
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  h.advance(300000);h.mission.status='available';h.ctx.reconcileRefillPreparation();h.ctx.requestRefillPreparation();await settle();
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
+  h.ctx.requestRefillPreparation();await settle();assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
+});
+test('being in cooldown does not spend the next automatic preparation opportunity',async()=>{
+  const h=setup();h.mission.status='cooldown';h.ctx.requestRefillPreparation();await settle();assert.equal(h.calls.length,0);
+  h.mission.status='available';h.ctx.requestRefillPreparation();await settle();assert.equal(h.prepared().status,'ready');
+});
+test('a late SDK return after the player cancels viewing produces no trailing outcome',async()=>{
+  const h=setup();await h.prepare();let finish;
+  h.prepared().show=options=>{h.calls.push({options});return new Promise(r=>finish=r);};
+  const watching=h.watch();h.setVisible(false);h.ctx.invalidateRefillPreparation();finish({reward_event_type:'valued'});await watching;
+  assert.equal(h.outcomes().length,0);assert.equal(h.calls.filter(x=>x.options?.type==='end').length,1);
+});
+test('eligibility reason fields are handled without classifying them as provider failure',async()=>{
+  const h=setup(),api=h.ctx.apiPost;
+  h.ctx.apiPost=(path,body)=>path==='/api/mission/start'?Promise.resolve({ok:false,reason:'ENERGY_ABOVE_REFILL_THRESHOLD'}):api(path,body);
+  await h.prepare();assert.equal(h.outcomes().length,0);assert.equal(h.prepared().status,'failed');
 });

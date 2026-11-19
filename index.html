@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v14-refill-recovery-3">
+<meta name="jigcoin-build" content="v14-ready-refill-4">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3921,7 +3921,7 @@ function renderHomeSession() {
   document.getElementById("homeCoinWrap").dataset.double=String(remaining>0);
   const projected=recoveryTapView(state);
   const low=homeEnergyLow(projected.energy,maxEnergy);
-  const ready=accountIsReady(), refill=low && window.JigPilot?.canRefill();
+  const ready=accountIsReady(), refill=(low || !!preparedRefillFor()) && window.JigPilot?.canRefill();
   action.dataset.focus=refill?'sp_emergency_energy':'weekly';
   action.setAttribute('aria-controls',refill?'boostSheet':'weeklySheet');
   action.dataset.active=String(!refill);
@@ -3930,6 +3930,7 @@ function renderHomeSession() {
   action.ariaLabel=refill?'View optional energy refill':'Open weekly friend race';
   action.title=action.ariaLabel;
   action.disabled=!ready;
+  requestRefillPreparation();
 }
 async function refreshHomeRefillStatus(){
   if(!accountIsReady()||document.hidden||navigator.onLine===false||document.getElementById('mainScroll').inert||
@@ -4456,6 +4457,7 @@ function setAccountPhase(phase) {
   }
   // An old open overlay must not hide a connection/maintenance message.
   if (phase !== "ready") {
+    invalidateRefillPreparation();
     window.JigStreakReminder?.reset();
     const review=document.getElementById('purchaseReview');
     if(review?.open)review.close('cancel');
@@ -5909,7 +5911,7 @@ function showAppSheet(sheet, tab) {
   if (!accountIsReady()) return;
   hideDailyNotice();
   document.getElementById('mainScroll').inert=false;
-  if(sheet!==boostSheet)stopRewardWait();
+  if(sheet!==boostSheet){stopRewardWait();invalidateRefillPreparation();}
   const leaderboard=document.getElementById('leaderboardScreen');if(leaderboard)leaderboard.style.display='none';document.body.style.overflow='';
   document.querySelectorAll('.sheet.show').forEach(el => el.classList.remove('show'));
   if (window.__sponsorCountdownTick) { clearInterval(window.__sponsorCountdownTick); window.__sponsorCountdownTick=null; }
@@ -6228,7 +6230,7 @@ async function loadMomentumShields() {
 }
 
 
-// Loaded on an explicit rewarded-quest action, once per page. The private
+// Loaded only for an eligible refill preparation, once per page. The private
 // postback secret is never present in this client or its API responses.
 const rewardedSDKs = new Map();
 // Allow a slower provider load while keeping preparation bounded. This budget
@@ -6288,52 +6290,165 @@ async function ensureMonetagSDK(zone) {
   }
   return rewardedSDKs.get(zone);
 }
-async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
-  const owner=homeUserId(),mission=hubMissions.find(m=>m.code===code);
-  if(!owner||missionsOwner!==owner||mission?.provider!=='monetag'||mission.status!=='available')throw Error('AD_REWARDS_UNAVAILABLE');
-  const zone=String(mission.zone_id||'');
-  let stage='sdk_load',attemptId=null,preloadTimer,stageStartedAt=performance.now();
-  const enter=value=>{stage=value;stageStartedAt=performance.now();onStage(stage,attemptId);};
-  try{
-    enter('sdk_load');
-    const show=await ensureMonetagSDK(zone);
-    if(homeUserId()!==owner||!accountIsReady())throw Error('ACCOUNT_CHANGED');
-    if(!stillHere())throw Error('AD_EXIT');
-    enter('start');
-    const attempt=await apiPost('/api/mission/start',{code},{tapOwner:owner,timeoutMs:9000});
-    if(!attempt?.ok)throw Error(attempt?.error||'AD_REWARDS_UNAVAILABLE');
-    if(homeUserId()!==owner||!accountIsReady())throw Error('ACCOUNT_CHANGED');
-    if(attempt.provider!=='monetag'||String(attempt.zone_id)!==zone||
+// A preparation is local, single-use and short-lived. A server attempt is not
+// an impression or a reward; only the existing provider receipt can authorize a claim.
+const MONETAG_READY_MS = 30000;
+const MONETAG_DISPLAY_LOAD_SECONDS = 2;
+let refillPreparation={status:'idle',owner:null},refillPreparationFlight=null;
+let refillPreparationEpoch=0,refillAutoPrepared=false,refillPreparationScheduled=false,refillReadyTimer=null;
+let refillRearmAfterCooldown=false;
+let monetagProviderFlight=null;
+function refillTapsSettled() {
+  if(window.__lastState?.recovery_gameplay){
+    const q=readRecoveryQueue();
+    return !window.__recoveryTapBusy && !q.pending && !q.packet;
+  }
+  return !__tapFlushing && !getPendingTaps() && !getTapQueue().length;
+}
+function refillContextVisible() {
+  return !document.hidden && (boostSheet.classList.contains('show') ||
+    (!document.getElementById('mainScroll').inert && !document.querySelector('.sheet.show')));
+}
+function preparedRefillFor(mission=hubMissions.find(m=>m.code==='sp_emergency_energy')) {
+  const p=refillPreparation;
+  return p.status==='ready' && p.owner===homeUserId() && accountIsReady() &&
+    window.JigPilot?.canRefill() && navigator.onLine!==false && !document.hidden &&
+    Number(state.energy)<Number(maxEnergy) && performance.now()<p.readyUntil &&
+    mission?.provider==='monetag' && String(mission.zone_id)===p.zone &&
+    ['available','pending','waiting','started'].includes(mission.status) ? p : null;
+}
+function invalidateRefillPreparation(resetAuto=false) {
+  refillPreparationEpoch++;clearTimeout(refillReadyTimer);refillReadyTimer=null;
+  refillPreparation={status:resetAuto?'idle':'cancelled',owner:homeUserId()};
+  if(resetAuto){refillAutoPrepared=false;refillRearmAfterCooldown=false;}
+}
+function reconcileRefillPreparation() {
+  const p=refillPreparation,mission=hubMissions.find(m=>m.code==='sp_emergency_energy');
+  if(p.owner!==homeUserId()){invalidateRefillPreparation(true);return;}
+  if(mission?.status==='cooldown')refillRearmAfterCooldown=true;
+  if(mission?.status==='available' && refillRearmAfterCooldown){
+    refillRearmAfterCooldown=false;refillAutoPrepared=false;
+    if(!['loading','ready'].includes(p.status))refillPreparation={status:'idle',owner:homeUserId()};
+  }
+  if(!['loading','ready'].includes(p.status))return;
+  if(!accountIsReady() || !window.JigPilot?.canRefill() || Number(state.energy)>=Number(maxEnergy) ||
+    !mission || mission.provider!=='monetag' || String(mission.zone_id)!==p.zone ||
+    ['claimable','cooldown','unavailable'].includes(mission.status))invalidateRefillPreparation();
+}
+function callMonetag(show,options) {
+  if(monetagProviderFlight)throw Error('AD_PROVIDER_BUSY');
+  const pending=Promise.resolve(show(options));
+  monetagProviderFlight=pending;
+  const release=()=>{if(monetagProviderFlight===pending)monetagProviderFlight=null;};
+  pending.then(release,release);
+  return pending;
+}
+function requestRefillPreparation() {
+  const mission=hubMissions.find(m=>m.code==='sp_emergency_energy');
+  if(refillAutoPrepared || refillPreparationScheduled || refillPreparationFlight || monetagProviderFlight ||
+    missionsOwner!==homeUserId() || mission?.provider!=='monetag' || mission.status!=='available' ||
+    !accountIsReady() || !window.JigPilot?.canRefill() || !refillContextVisible() ||
+    navigator.onLine===false || !homeEnergyLow(Number(state.energy),Number(maxEnergy)) || !refillTapsSettled())return;
+  refillPreparationScheduled=true;
+  queueMicrotask(()=>{refillPreparationScheduled=false;void prepareMonetagRefill();});
+}
+async function prepareMonetagRefill(manual=false) {
+  if(refillPreparationFlight)return refillPreparationFlight;
+  if(monetagProviderFlight || window.__rewardActionBusy || (!manual&&refillAutoPrepared) ||
+    !accountIsReady() || !window.JigPilot?.canRefill() || !refillContextVisible() ||
+    navigator.onLine===false || !refillTapsSettled())return;
+  const owner=homeUserId(),code='sp_emergency_energy';
+  useMissionOwner(owner);
+  const epoch=refillPreparationEpoch;
+  if(preparedRefillFor())return;
+  const current=()=>epoch===refillPreparationEpoch && owner===homeUserId() && accountIsReady() && refillContextVisible();
+  const request=(async()=>{
+    let stage='start',stageStartedAt=performance.now(),attemptId=null,preloadTimer;
+    try{
+      // syncStateIfIdle alone does not wait for tap packets. Recheck the queues
+      // after this refresh so a projected low-energy view cannot spend a start.
+      await syncStateIfIdle();
+      await refreshBoostMissions(false);
+      if(!current() || !refillTapsSettled() || !window.JigPilot?.canRefill() ||
+        !homeEnergyLow(Number(state.energy),Number(maxEnergy)))return;
+      const mission=hubMissions.find(m=>m.code===code);
+      if(mission?.provider!=='monetag' || mission.status!=='available')return;
+      refillAutoPrepared=true;
+      const zone=String(mission.zone_id||'');
+      refillPreparation={status:'loading',owner,zone};
+      adNotice=null;renderBoostCards();
+      stage='sdk_load';stageStartedAt=performance.now();
+      const show=await ensureMonetagSDK(zone);
+      if(!current())throw Error('AD_EXIT');
+      stage='start';stageStartedAt=performance.now();
+      const attempt=await apiPost('/api/mission/start',{code},{tapOwner:owner,timeoutMs:9000});
+      if(!attempt?.ok)throw Error(attempt?.error||attempt?.reason||'AD_REWARDS_UNAVAILABLE');
+      if(!current())throw Error('AD_EXIT');
+      if(attempt.provider!=='monetag'||String(attempt.zone_id)!==zone||
         !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(attempt.ymid||'')||attempt.request_var!==code)
-      throw Error('AD_INVALID_ATTEMPT');
-    attemptId=attempt.ymid;
-    enter('preload');
-    if(!stillHere())throw Error('AD_EXIT');
-    const options={ymid:attemptId,requestVar:code,timeout:MONETAG_LOAD_TIMEOUT_SECONDS};
-    // Bound preparation even if the SDK does not settle its own load timeout.
-    // Never apply that deadline to the time a player spends watching an advert.
-    const loadDeadline=new Promise((_,reject)=>{preloadTimer=setTimeout(()=>reject(Error('AD_PRELOAD_TIMEOUT')),MONETAG_PRELOAD_DEADLINE_MS);});
-    await Promise.race([show({...options,type:'preload'}),loadDeadline]);
-    clearTimeout(preloadTimer);preloadTimer=null;
-    if(!stillHere())throw Error('AD_EXIT');
-    enter('display');
-    const result=await show({...options,type:'end'});
-    // Closing an advert also resolves the SDK promise. Only the server receipt
-    // can grant energy; an explicitly non-valued result is not a pending reward.
+        throw Error('AD_INVALID_ATTEMPT');
+      attemptId=attempt.ymid;
+      const options={ymid:attemptId,requestVar:code};
+      refillPreparation={status:'loading',owner,zone,attemptId,options,show};
+      // The server's pending state is expected: this attempt has not displayed.
+      const startedAt=Date.now();
+      Object.assign(mission,{status:'pending',retry_after_seconds:60,countdown_as_of_ms:startedAt});
+      stage='preload';stageStartedAt=performance.now();
+      const deadline=new Promise((_,reject)=>{preloadTimer=setTimeout(()=>reject(Error('AD_PRELOAD_TIMEOUT')),MONETAG_PRELOAD_DEADLINE_MS);});
+      await Promise.race([callMonetag(show,{...options,type:'preload',timeout:MONETAG_LOAD_TIMEOUT_SECONDS}),deadline]);
+      clearTimeout(preloadTimer);preloadTimer=null;
+      if(!current())throw Error('AD_EXIT');
+      reconcileRefillPreparation();
+      if(epoch!==refillPreparationEpoch)throw Error('AD_EXIT');
+      refillPreparation={status:'ready',owner,zone,attemptId,options,show,readyUntil:performance.now()+MONETAG_READY_MS};
+      const prepared=refillPreparation;
+      refillReadyTimer=setTimeout(()=>{
+        if(refillPreparation!==prepared)return;
+        refillPreparation={...prepared,status:'expired'};renderBoostCards();renderHomeSession();
+      },MONETAG_READY_MS);
+    }catch(error){
+      if(!current())return;
+      refillPreparation={status:'failed',owner};
+      if(['ENERGY_ABOVE_REFILL_THRESHOLD','ENERGY_FULL','AD_RETRY_LATER','MISSION_COOLDOWN','REWARD_ALREADY_READY'].includes(error.message))return;
+      const errorCode=monetagOutcomeCode(error,stage);
+      if(errorCode!=='FLOW_CANCELLED'){
+        reportAdOutcome(code,owner,attemptId,stage,errorCode,adElapsedMs(stageStartedAt));
+        adNotice={owner,code,kind:'error',at:Date.now(),attempt_id:attemptId,stage,error_code:errorCode,
+          text:'No advert is ready right now. Energy keeps refilling; you can check availability again shortly.'};
+      }
+    }finally{
+      clearTimeout(preloadTimer);
+      if(!current() && epoch===refillPreparationEpoch && refillPreparation.owner===owner && refillPreparation.status==='loading')
+        refillPreparation={status:'cancelled',owner};
+    }
+  })().finally(()=>{
+    if(refillPreparationFlight===request)refillPreparationFlight=null;
+    if(owner===homeUserId()&&accountIsReady()){renderBoostCards();renderHomeSession();void refreshBoostMissions().catch(()=>{});}
+  });
+  refillPreparationFlight=request;
+  return request;
+}
+async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
+  const owner=homeUserId(),prepared=code==='sp_emergency_energy'?preparedRefillFor():null;
+  if(!prepared || monetagProviderFlight || !stillHere())throw Error('AD_NOT_READY');
+  const attemptId=prepared.attemptId,stage='display',startedAt=performance.now();
+  // Consume before invocation. No API, SDK loading or preload may precede this
+  // call in the Watch click stack. The SDK timeout limits cache loading only.
+  refillPreparation={...prepared,status:'consumed'};clearTimeout(refillReadyTimer);refillReadyTimer=null;
+  onStage(stage,attemptId);
+  try{
+    const shown=callMonetag(prepared.show,{...prepared.options,type:'end',timeout:MONETAG_DISPLAY_LOAD_SECONDS});
+    const result=await shown;
     if(result?.reward_event_type==='non_valued')throw Error('AD_NOT_REWARDED');
-    if(stillHere())reportAdOutcome(code,owner,attemptId,'display','SDK_RETURNED',adElapsedMs(stageStartedAt));
+    if(stillHere())reportAdOutcome(code,owner,attemptId,stage,'SDK_RETURNED',adElapsedMs(startedAt));
     return result;
-  }catch(e){
-    const errorCode=monetagOutcomeCode(e,stage);
-    const failure=Error(errorCode==='NO_FILL'?'AD_NO_FILL':String(e?.message||e||'AD_UNKNOWN'));
-    failure.adStage=stage;failure.adCode=errorCode;failure.adAttempt=attemptId;
-    failure.adElapsedMs=adElapsedMs(stageStartedAt);
-    // The action owns cancellation reporting. A late SDK failure must not
-    // turn that single cancellation into a second apparent failed attempt.
-    failure.adReported=stillHere();
-    if(failure.adReported)reportAdOutcome(code,owner,attemptId,stage,errorCode,failure.adElapsedMs);
+  }catch(error){
+    const failure=Error(String(error?.message||error||'AD_UNKNOWN'));
+    failure.adStage=stage;failure.adCode=monetagOutcomeCode(error,stage);failure.adAttempt=attemptId;
+    failure.adElapsedMs=adElapsedMs(startedAt);failure.adReported=stillHere();
+    if(failure.adReported)reportAdOutcome(code,owner,attemptId,stage,failure.adCode,failure.adElapsedMs);
     throw failure;
-  }finally{clearTimeout(preloadTimer);}
+  }
 }
 
 // Unified Rewards. Legacy coin receipts remain claimable through this one card.
@@ -6374,14 +6489,30 @@ function getBoostView(code, mission, now=Date.now()) {
   if (mission.status==='cooldown' || cooldown>0)
     return {...blocked(cooldown>0?`Available in ${msToCountdown(cooldown*1000)}`:'Checking availability…'),detail:rewardCooldownLabel(mission)?`Cooldown · ${rewardCooldownLabel(mission)}`:'Available again when this cooldown ends.'};
   if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
+  if(code==='sp_emergency_energy'){
+    if(!window.JigPilot?.canRefill())return blocked('Refill unavailable');
+    const policy=rewardCooldownLabel(mission);
+    if(preparedRefillFor(mission))return {action:'show',disabled:false,label:'Watch ad to refill',
+      detail:`+${Math.max(0,Math.floor(maxEnergy)-Math.floor(state.energy||0))} energy now · Fill to ${Math.floor(maxEnergy)}${policy?' · Every '+policy:''}`};
+    if(refillPreparation.owner===homeUserId() && refillPreparation.status==='loading')
+      return {...blocked('Checking ad availability…'),detail:'Keep playing while we prepare an optional advert.'};
+  }
   if (['pending','waiting','started'].includes(mission.status)) {
     const retry=Math.max(0,Number(mission.retry_after_seconds||0)-age);
+    const unshown=code==='sp_emergency_energy' && refillPreparation.owner===homeUserId() &&
+      ['failed','expired','cancelled'].includes(refillPreparation.status);
     return {...blocked(retry>0?`Try again in ${msToCountdown(retry*1000)}`:'Checking availability…'),
-      detail:'Last advert not yet confirmed. Any confirmed refill will stay available.'};
+      detail:unshown?'No advert is ready. You can check availability again after this short wait.':
+        'Last advert not yet confirmed. Any confirmed refill will stay available.'};
   }
   if (mission.status==='unavailable' && mission.availability_reason==='paused') return blocked('Ads paused');
   if (mission.status==='unavailable' && mission.availability_reason==='provider_setup') return blocked('Ads offline');
   if (mission.status!=='available') return blocked('Temporarily unavailable');
+  if(code==='sp_emergency_energy'){
+    const waiting=!!refillPreparationFlight || !!monetagProviderFlight || !refillTapsSettled();
+    return {action:'prepare',disabled:waiting,label:waiting?'Checking availability…':'Check ad availability',
+      detail:'Watch ad becomes available only when an advert is ready.'};
+  }
   let benefit='Coins added to your balance';
   if(code==='sp_emergency_energy') {
     benefit=`+${Math.max(0,Math.floor(maxEnergy)-Math.floor(state.energy||0))} energy now · Fill to ${Math.floor(maxEnergy)}`;
@@ -6397,7 +6528,7 @@ function rewardRecommendation(views,{dailyReady=false,busy=false,energy=0,cap=50
   const confirmed=available.find(v=>v.view.action==='claim');
   if(confirmed)return confirmed.code;
   if(dailyReady)return 'daily';
-  return energy<=cap*.2 && available.some(v=>v.code==='sp_emergency_energy' && v.view.action==='start')?'sp_emergency_energy':null;
+  return available.some(v=>v.code==='sp_emergency_energy' && v.view.action==='show')?'sp_emergency_energy':null;
 }
 function updateRewardRecommendation() {
   const c=dailyCheckinModel();
@@ -6498,6 +6629,7 @@ function currentAdNotice() {
   return adNotice;
 }
 function renderBoostCards() {
+  reconcileRefillPreparation();
   const coinMission=hubMissions.find(m=>m.code==='sp_visit_partner');
   document.getElementById('coinRewardAmount').textContent=coinMission?`+${Number(coinMission.payout_amount)||200}`:'';
   for (const [code,placement] of Object.entries(BOOST_PLACEMENTS)) {
@@ -6505,12 +6637,12 @@ function renderBoostCards() {
     const button=document.getElementById(placement.button),status=document.getElementById(placement.status);
     const receipt=mission?.status==='claimable' && !!mission.attempt_id;
     const refill=code==='sp_emergency_energy' && window.JigPilot?.canRefill() &&
-      homeEnergyLow(Number(state.energy),Number(maxEnergy));
+      (homeEnergyLow(Number(state.energy),Number(maxEnergy)) || !!preparedRefillFor(mission));
     button.closest('article').hidden=!(refill || receipt || (window.__rewardActionBusy && boostBusyCode===code));
     button.textContent=view.label; button.disabled=view.disabled; button.dataset.action=view.action;
     button.setAttribute('aria-label',`${view.label}: ${placement.name}`);
     let description=view.detail===view.label?'':view.detail;
-    if(refill && view.action==='start'){
+    if(refill && view.action==='show'){
       description = `${view.detail}. Optional advert; energy also refills automatically.`;
     }
     if(code==='sp_double_points' && view.action==='start' && rewardsOfferOwner!==null && rewardsOfferOwner===homeUserId()) {
@@ -6550,6 +6682,7 @@ function renderBoostCards() {
 }
 function useMissionOwner(owner) {
   if(owner===missionsOwner)return;
+  invalidateRefillPreparation(true);
   stopRewardWait();adNotice=null;missionsOwner=owner;
   hubMissions=[];hubMissionLoadedAt=0;boostLoadError=false;boostRefreshInFlight=null;
   boostCheckedAt=0;boostNextPoll=0;
@@ -6596,6 +6729,7 @@ async function openBoostSheet(focusCode) {
   await Promise.allSettled(requests);
   if(!boostSheet.classList.contains('show')) return;
   renderBoostCards(); updateBoostHub();
+  requestRefillPreparation();
 }
 function pollBoostStatus() {
   if (document.hidden || !boostSheet.classList.contains('show') || navigator.onLine===false ||
@@ -6613,6 +6747,7 @@ async function claimBoostReward(code, mission) {
   const result=await apiPost('/api/mission/complete',{code:claimCode,attempt_id:mission.attempt_id},{tapOwner:owner,timeoutMs:9000});
   if(owner!==homeUserId())return;
   if (!result?.ok) throw new Error(result?.error||'REWARD_SERVICE_UNAVAILABLE');
+  if(code==='sp_emergency_energy')refillRearmAfterCooldown=true;
   void refreshBalance().catch(()=>{});
   showToast(result.already_claimed?'This reward has already been applied.':`${result.reward_label||BOOST_PLACEMENTS[code].name} received!`);
 }
@@ -6622,6 +6757,7 @@ async function performBoostAction(code) {
   const owner=homeUserId(),mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
   if(view.disabled || window.__rewardActionBusy || !owner)return;
   if(view.action==='play'){backToHome();return;}
+  if(view.action==='prepare'){await prepareMonetagRefill(true);return;}
   if(view.action==='start' && (code!=='sp_emergency_energy' || !window.JigPilot?.canRefill() ||
       !homeEnergyLow(Number(state.energy),Number(maxEnergy))))return;
   let active=true,stage=view.action==='claim'?'confirmation':'sdk_load',attemptId=view.action==='claim'?mission.attempt_id:null,stageStartedAt=performance.now();
@@ -6709,6 +6845,8 @@ document.getElementById('boostClose').addEventListener('click',()=>{
   boostSheet.classList.remove('show'); sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);
 });
 document.getElementById('boostRefresh').addEventListener('click',()=>{void refreshBoostMissions().catch(()=>{});});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)invalidateRefillPreparation();});
+window.addEventListener('offline',()=>invalidateRefillPreparation());
 
 async function loadSponsorMissions(owner) {
   const res=await apiPost('/api/mission/list',{kind:'sponsor',include_boost_sponsor_missions:true});
