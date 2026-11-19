@@ -2808,7 +2808,7 @@ body{justify-content:flex-start}
 #pilotMedalList{white-space:pre-line;font-size:13px;padding:8px}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
-  <link rel="stylesheet" href="./assets/mint.css?v=rewards-compact-2">
+  <link rel="stylesheet" href="./assets/mint.css?v=rewards-next-finish-1">
   <link rel="stylesheet" href="./assets/mint-world.css?v=phone-fit-2">
   <link rel="stylesheet" href="./assets/mint-home.css?v=tap-perks-2">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
@@ -3156,6 +3156,12 @@ body{justify-content:flex-start}
         <button type="button" class="reward-upgrade" id="rewardBoostVip" hidden>See VIP</button>
       </article>
       </div>
+      <article id="rewardsCollectionCard" class="reward-collection" aria-labelledby="rewardsCollectionTitle" hidden>
+        <span id="rewardsCollectionArt" class="reward-collection-art" aria-hidden="true"></span>
+        <div class="reward-collection-copy"><small id="rewardsCollectionEyebrow">Next coin finish</small><h3 id="rewardsCollectionTitle">Loading your collection…</h3><p id="rewardsCollectionProgress">Your saved progress appears after sync.</p></div>
+        <progress id="rewardsCollectionMeter" max="1" value="0" aria-label="Progress to next coin finish"></progress>
+        <button id="rewardsCollectionAction" type="button" class="reward-collection-action" aria-haspopup="dialog" disabled>Preview finish ›</button>
+      </article>
       <p class="boost-footnote" id="boostCooldownNote">Daily streak is free. Optional ad rewards unlock after confirmation.</p>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
@@ -6261,7 +6267,11 @@ async function runMonetagQuest(code,stillHere) {
   try{
     await show({...options,type:'preload'});
     if(!stillHere())throw Error('AD_EXIT');
-    await show(options);
+    const result=await show({...options,type:'end'});
+    // Closing an advert also resolves the SDK promise. Only the server receipt
+    // can grant energy; an explicitly non-valued result is not a pending reward.
+    if(result?.reward_event_type==='non_valued')throw Error('AD_NOT_REWARDED');
+    return result;
   }catch(e){
     if(/empty feed|no fill/i.test(String(e?.message||e)))throw Error('AD_NO_FILL');
     throw e;
@@ -6303,8 +6313,11 @@ function getBoostView(code, mission, now=Date.now()) {
   if (mission.status==='cooldown' || cooldown>0)
     return {...blocked(cooldown>0?`Available in ${msToCountdown(cooldown*1000)}`:'Checking availability…'),detail:rewardCooldownLabel(mission)?`Cooldown · ${rewardCooldownLabel(mission)}`:'Available again when this cooldown ends.'};
   if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
-  if (['pending','waiting','started'].includes(mission.status))
-    return {...blocked('Confirming advert…'),detail:'Your reward will appear here once confirmed.'};
+  if (['pending','waiting','started'].includes(mission.status)) {
+    const retry=Math.max(0,Number(mission.retry_after_seconds||0)-age);
+    return {...blocked(retry>0?`Check again in ${msToCountdown(retry*1000)}`:'Checking availability…'),
+      detail:'Waiting for advert confirmation. A confirmed refill stays claimable; a failed advert can be retried after this short wait.'};
+  }
   if (mission.status==='unavailable' && mission.availability_reason==='paused') return blocked('Ads paused');
   if (mission.status==='unavailable' && mission.availability_reason==='provider_setup') return blocked('Ads offline');
   if (mission.status!=='available') return blocked('Temporarily unavailable');
@@ -6384,6 +6397,30 @@ function rewardAvailabilityNeedsRetry() {
   return !!window.JigPilot?.canRefill() && homeEnergyLow(Number(state.energy),Number(maxEnergy)) &&
     (!mission || mission.provider!=='monetag' || mission.status==='unavailable');
 }
+function renderRewardCollection() {
+  const card=document.getElementById('rewardsCollectionCard');
+  const rewardVisible=Object.values(BOOST_PLACEMENTS).some(placement=>
+    !document.getElementById(placement.button).closest('article').hidden);
+  card.hidden=rewardVisible;
+  if(rewardVisible)return;
+  const goal=accountIsReady() && homeIdentity===homeUserId()?homeGoalModel(homeConfirmedBalance):null;
+  const art=document.getElementById('rewardsCollectionArt');
+  const action=document.getElementById('rewardsCollectionAction');
+  const meter=document.getElementById('rewardsCollectionMeter');
+  action.disabled=!goal;
+  action.dataset.finish=goal?'rank-'+(goal.complete?goal.tier:goal.tier+1):'';
+  document.getElementById('rewardsCollectionEyebrow').textContent=goal?.complete?'Rank collection complete':'Next coin finish';
+  document.getElementById('rewardsCollectionTitle').textContent=goal?mintFinishName(action.dataset.finish):'Loading your collection…';
+  document.getElementById('rewardsCollectionProgress').textContent=goal
+    ? goal.complete?'All eight rank finishes unlocked. Explore your collection.':`${goal.nextName} · ${formatNumber(goal.remaining)} coins to go`
+    : 'Your saved progress appears after sync.';
+  meter.hidden=!goal || goal.complete;
+  meter.value=goal?.progress||0;
+  meter.setAttribute('aria-label',goal&&!goal.complete?`Progress from ${goal.current.name} to ${goal.nextName}`:'Rank collection progress');
+  action.textContent=goal?.complete?'View collection ›':'Preview finish ›';
+  if(goal)setCoinArtwork(art,goal.complete?goal.tier:goal.tier+1);
+  else{art.replaceChildren();delete art.dataset.artwork;}
+}
 function renderBoostCards() {
   const coinMission=hubMissions.find(m=>m.code==='sp_visit_partner');
   document.getElementById('coinRewardAmount').textContent=coinMission?`+${Number(coinMission.payout_amount)||200}`:'';
@@ -6398,7 +6435,7 @@ function renderBoostCards() {
     button.setAttribute('aria-label',`${view.label}: ${placement.name}`);
     let description=view.detail===view.label?'':view.detail;
     if(refill && view.action==='start'){
-      description = 'Refill now with an optional advert, or wait for energy to return automatically.';
+      description = `${view.detail}. Optional advert; energy also refills automatically.`;
     }
     if(code==='sp_double_points' && view.action==='start' && rewardsOfferOwner!==null && rewardsOfferOwner===homeUserId()) {
       const rate=effectiveTapRate(state);
@@ -6409,6 +6446,7 @@ function renderBoostCards() {
     status.hidden=!description;
     if(status.textContent!==description) status.textContent=description;
   }
+  renderRewardCollection();
   updateRewardRecommendation();
   const retry=document.getElementById('boostRefresh');
   retry.hidden=!rewardAvailabilityNeedsRetry();
@@ -6422,6 +6460,8 @@ function renderBoostCards() {
     else text='Some ad rewards are unavailable. You can check again here.';
   }
   if(adNotice && adNotice.owner===homeUserId())text=adNotice.text;
+  if(!window.__rewardActionBusy && !boostLoadError && hubMissions.some(m=>m.provider==='monetag' && m.status==='claimable' && m.attempt_id))
+    text='Your advert is confirmed. Claim your reward above without watching another advert.';
   if(note.textContent!==text)note.textContent=text;
 }
 function useMissionOwner(owner) {
@@ -6521,9 +6561,16 @@ async function performBoostAction(code) {
     if(here())adNotice=null;
   }catch(error){
     if(owner!==homeUserId())return;
-    adNotice={owner,text:error.message==='AD_NO_FILL'?'No advert is available right now. You can keep playing while energy refills.':error.message==='AD_EXIT' || error.message==='AD_WAIT_ENDED'?
-      'Back to play whenever you like. Any confirmed reward stays available here.':
-      'The advert or reward could not be confirmed. Free energy keeps refilling. Check again here later.'};
+    const notices={
+      AD_NO_FILL:'No advert is available right now. You can keep playing while energy refills.',
+      AD_NOT_REWARDED:'This advert did not qualify for a refill. You can try again after the short retry timer; free energy keeps refilling.',
+      AD_RETRY_LATER:'The last advert is still being checked. Try again when the retry timer ends; any confirmed refill will be kept here.',
+      AD_SDK_UNAVAILABLE:'The advert could not load. Check your connection and try again, or keep playing while energy refills.',
+      AD_ZONE_UNAVAILABLE:'The advert service is unavailable. Free energy keeps refilling.',
+      AD_EXIT:'Back to play whenever you like. Any confirmed reward stays available here.',
+      AD_WAIT_ENDED:'The advert took too long to respond. You can return to playing; any confirmed reward stays available here.'
+    };
+    adNotice={owner,text:notices[error.message]||'The advert or reward could not be confirmed. Free energy keeps refilling. Check again here later.'};
   }finally{
     active=false;clearTimeout(timer);rewardWait=null;
     window.__rewardActionBusy=false;boostBusyCode=null;
@@ -6536,6 +6583,13 @@ for (const [code,placement] of Object.entries(BOOST_PLACEMENTS))
     return performBoostAction(code);
   });
 document.getElementById('rewardCoinPacks').addEventListener('click',()=>openCoinShopSheet());
+document.getElementById('rewardsCollectionAction').addEventListener('click',()=>{
+  if(!accountIsReady() || homeIdentity!==homeUserId())return;
+  const goal=homeGoalModel(homeConfirmedBalance);
+  if(!goal)return;
+  if(goal.complete)openHomeJourney();
+  else previewMint('rank-'+(goal.tier+1));
+});
 for(const id of ['rewardRefillVip','rewardBoostVip'])
   document.getElementById(id).addEventListener('click',()=>openVault());
 document.getElementById('pilotDailyChallenge').addEventListener('click', () => {

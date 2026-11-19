@@ -62,6 +62,19 @@ test('an ad promise alone never grants a refill',async()=>{
   const h=setup();await h.ctx.performBoostAction('sp_emergency_energy');
   assert.equal(h.calls.length,1);assert.equal(h.refreshes(),0);assert.equal(h.ctx.state.energy,3);
 });
+test('an unqualified advert releases the lock and explains the retry without granting energy',async()=>{
+  const h=setup();h.ctx.runMonetagQuest=async()=>{throw Error('AD_NOT_REWARDED');};
+  await h.ctx.performBoostAction('sp_emergency_energy');
+  assert.equal(h.ctx.window.__rewardActionBusy,false);assert.equal(h.calls.length,0);
+  assert.equal(h.ctx.state.energy,3);assert.match(vm.runInContext('adNotice.text',h.ctx),/did not qualify/);
+});
+test('pending adverts show the server retry timer but never authorize a retry locally',()=>{
+  const h=setup({status:'pending'}),mission=h.missions[0];
+  const now=Date.now();mission.countdown_as_of_ms=now;mission.retry_after_seconds=60;
+  assert.equal(h.ctx.getBoostView(mission.code,mission,now+10000).label,'Check again in 50s');
+  const expired=h.ctx.getBoostView(mission.code,mission,now+61000);
+  assert.equal(expired.label,'Checking availability…');assert.equal(expired.disabled,true);
+});
 test('ad holdout blocks new refills including at zero energy',async()=>{
   const h=setup({energy:0});
   h.ctx.window.JigPilot.canRefill=()=>false;

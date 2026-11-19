@@ -127,6 +127,45 @@
 #weeklySheet .pilot-hero { flex: 0 0 auto; }
 #boostSheet #rewardChoices { flex: 0 0 auto; align-content: start; gap: 6px; }
 #boostSheet #rewardsDailyCard { padding: clamp(12px, 2.8cqh, 21px); }
+#boostSheet .reward-collection {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-areas: "art copy" "meter meter" "action action";
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 9px 12px;
+  padding: 12px;
+  border: 1px solid var(--mint-rim, #53627a);
+  border-radius: var(--mint-corner, 8px);
+  background: var(--mint-grain), var(--mint-plate);
+  box-shadow: inset 0 1px var(--mint-seam, #ffffff20);
+}
+#boostSheet .reward-collection[hidden] { display: none; }
+.reward-collection-art { grid-area: art; width: 58px; aspect-ratio: 1; }
+.reward-collection-art :is(img, svg) { display: block; width: 100%; height: 100%; object-fit: contain; }
+.reward-collection-copy { grid-area: copy; min-width: 0; }
+.reward-collection-copy small { color: var(--mint-muted, #c0ccdb); font-size: 11px; }
+.reward-collection-copy h3 { margin: 2px 0 4px; color: var(--mint-text, #f5e4bf); font: 20px/1.1 Georgia, serif; }
+.reward-collection-copy p { margin: 0; color: var(--mint-muted, #c0ccdb); font-size: 12px; line-height: 1.4; }
+#rewardsCollectionMeter { grid-area: meter; display: block; width: 100%; height: 6px; accent-color: var(--mint-accent, #e9bd67); }
+#rewardsCollectionMeter[hidden] { display: none; }
+#boostSheet .reward-collection-action {
+  grid-area: action;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--mint-text, #f5e4bf);
+  background: transparent;
+  border: 1px solid var(--mint-rim, #53627a);
+  border-radius: var(--mint-corner, 8px);
+  font-size: 13px;
+  font-weight: 650;
+}
+#boostSheet .reward-collection-action:disabled { opacity: .6; }
+@container game-panel (max-height: 540px) {
+  #boostSheet .reward-collection { grid-template-columns: 42px minmax(0, 1fr); gap: 5px 9px; padding: 9px; }
+  .reward-collection-art { width: 42px; }
+  .reward-collection-copy h3 { font-size: 18px; }
+}
 #rewardWeekStrip {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
