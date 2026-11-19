@@ -10,15 +10,15 @@ const fixture=(id=10001,count=0)=>{
 };
 const deferred=()=>{let resolve;return{promise:new Promise(r=>resolve=r),resolve:v=>resolve(v)};};
 function setup(){
-  const nodes=new Map(),calls=[],shared=[],copied=[],toasts=[];let owner=10001,ready=true,now=Date.now(),response=async()=>fixture(owner);
-  const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,disabled:false,attrs:{},focus(){this.focused=true;},setAttribute(k,v){this.attrs[k]=v;}});return nodes.get(id);};
+  const nodes=new Map(),calls=[],shared=[],copied=[],toasts=[],storage=new Map();let owner=10001,ready=true,now=Date.now(),response=async()=>fixture(owner);
+  const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,disabled:false,attrs:{},style:{},listeners:{},focus(){this.focused=true;},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,f){this.listeners[k]=f;}});return nodes.get(id);};
   class Clock extends Date{static now(){return now;}}
-  const c={setCoinArtwork(){},Date:Clock,URL,console,homeUserId:()=>owner,accountIsReady:()=>ready,document:{getElementById:el},formatNumber:n=>n.toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),
+  const c={setCoinArtwork(){},Date:Clock,URL,console,homeUserId:()=>owner,accountIsReady:()=>ready,document:{getElementById:el},formatNumber:n=>n.toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),appStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},backToHome(){},openLeaderboard:mode=>calls.push({action:'leaderboard',mode}),
     friendsJoinedText:el('friendsJoinedText'),referralPointsText:el('referralPointsText'),inviteLinkText:el('inviteLinkText'),shareTelegramBtn:el('shareTelegramBtn'),copyInviteBtn:el('copyInviteBtn'),copyShareTextBtn:el('copyShareTextBtn'),downloadShareCardBtn:el('downloadShareCardBtn'),
     window:{Telegram:{WebApp:{openTelegramLink:url=>shared.push(url)}},open:url=>{shared.push(url);return {}; }},navigator:{clipboard:{writeText:async value=>copied.push(value)}},showToast:text=>toasts.push(text),
     showAppSheet:(sheet,tab)=>{c.opened={sheet,tab};},tabFriends:'Invite',apiPost:async(...args)=>{calls.push(args);return response(...args);}};
   vm.createContext(c);vm.runInContext(code,c);
-  return{c,el,calls,shared,copied,toasts,respond:fn=>response=fn,owner:value=>owner=value,ready:value=>ready=value,advance:ms=>now+=ms};
+  return{c,el,calls,shared,copied,toasts,storage,respond:fn=>response=fn,owner:value=>owner=value,ready:value=>ready=value,advance:ms=>now+=ms};
 }
 test('all inline scripts parse; HTML has no duplicate IDs',()=>{
   for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
@@ -54,8 +54,8 @@ test('qualification displays the real activity threshold and both valid earning 
   const x=setup();x.respond(async()=>({...fixture(),qualification:{mode:'activity',min_taps:250}}));await x.c.loadInviteSummary();assert.match(x.el('inviteQualification').textContent,/250 taps in one UTC day/);assert.match(x.el('inviteQualification').textContent,/or claims one confirmed ad reward/);assert.doesNotMatch(x.el('inviteQualification').textContent,/purchase|pay/);
 });
 test('next milestone is explicit and max tier has no impossible extra target',async()=>{
-  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteNextBadge').textContent,'1 more to Bronze');assert.equal(x.el('inviteRewardAmount').textContent,'500');assert.equal(x.el('inviteProgress').max,1);
-  x.respond(async()=>fixture(10001,200));await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteProgress').value,1);assert.match(x.el('inviteNextTitle').textContent,/Top referral tier/);assert.doesNotMatch(x.el('inviteNextText').textContent,/more/);
+  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteNextBadge').textContent,'Your next successful invite');assert.equal(x.el('inviteNextTitle').textContent,'1 more to Bronze inviter');assert.equal(x.el('inviteRewardAmount').textContent,'500');assert.equal(x.el('inviteProgress').max,1);
+  x.respond(async()=>fixture(10001,200));await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteProgress').value,1);assert.match(x.el('inviteNextTitle').textContent,/Top inviter level/);assert.doesNotMatch(x.el('inviteNextText').textContent,/more/);
 });
 test('Telegram sharing opens an editable share chooser with a correctly encoded account link',async()=>{
   const x=setup();await x.c.loadInviteSummary();x.c.shareInviteOnTelegram();const url=new URL(x.shared[0]);assert.equal(url.pathname,'/share/url');assert.equal(url.searchParams.get('url'),fixture().invite_link);assert.match(url.searchParams.get('text'),/daily rewards/);assert.doesNotMatch(url.searchParams.get('text'),/airdrop|guarantee|cash/i);await x.c.copyInviteLink();assert.equal(x.copied[0],fixture().invite_link);
@@ -78,10 +78,10 @@ test('details opens in the Invite tab and focuses its Back control',async()=>{
 });
 
 test('zero invites shows no earned tier or misleading zero-reward milestone',async()=>{
- const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteTierName').textContent,'Get started');
+ const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteTierName').textContent,'No level yet');
  assert.match(x.el('inviteTierList').innerHTML,/Bronze · 1–4 invites/);assert.match(x.el('inviteTierList').innerHTML,/200\+ invites/);
  assert.doesNotMatch(x.el('inviteTierList').innerHTML,/Starter|0 rewarded/);
- assert.match(x.el('inviteWelcome').textContent,/They start with 1,000 free in-game coins/);
+ assert.match(x.el('inviteWelcome').textContent,/All new players start with 1,000 free in-game coins/);
  x.c.shareInviteOnTelegram();assert.match(new URL(x.shared[0]).searchParams.get('text'),/New players start with 1,000 free coins/);
 });
 test('the milestone invite itself shows the higher rate before it joins',async()=>{
@@ -90,8 +90,8 @@ test('the milestone invite itself shows the higher rate before it joins',async()
   assert.equal(x.el('inviteRewardAmount').textContent,amount.toLocaleString('en-GB'));
   if(count<200){
    const next=tiers.find(row=>row.at>count);
-   assert.equal(x.el('inviteNextBadge').textContent,(next.at-count)+' more to '+next.name);
-   if(next.reward_coins!==amount)assert.match(x.el('inviteNextText').textContent,new RegExp(next.reward_coins.toLocaleString('en-GB')+' coins per invite'));
+   assert.equal(x.el('inviteNextTitle').textContent,(next.at-count)+' more to '+next.name+' inviter');
+   if(next.reward_coins!==amount)assert.match(x.el('inviteNextText').textContent,new RegExp('earns '+next.reward_coins.toLocaleString('en-GB')+' coins'));
   }
  }
 });
@@ -99,4 +99,44 @@ test('stale policy versions, broken ranges and mismatched next reward are reject
  for(const data of [{...fixture(),policy_version:'v8'},{...fixture(),welcome_coins:800},{...fixture(),reward_coins:840},{...fixture(),tiers:[...tiers.slice(1)]},{...fixture(),next_tier_name:'Diamond'}]){
   const x=setup();x.respond(async()=>data);await x.c.loadInviteSummary();assert.equal(x.el('shareTelegramBtn').disabled,true);
  }
+});
+
+const cumulativeFixture=()=>({...fixture(),policy_version:'referrals_cumulative_v16',qualification:{mode:'cumulative_taps',min_taps:100,period:'lifetime',ad_qualifies:false,purchase_required:false},friends_joined:1,friends_pending:1,friends_qualified:0,friends_on_hold:0,friend_progress:[{id:'r1',display_name:'Player',status:'playing',verified_taps:32,min_taps:100,qualification_mode:'cumulative_taps',policy_version:'referrals_cumulative_v16',joined_at:null,rewarded_at:null,reward_coins:null}]});
+test('new invite contract describes cumulative verified activity, general welcome and actual progress',async()=>{
+ const x=setup();x.respond(async()=>cumulativeFixture());await x.c.loadInviteSummary();
+ assert.match(x.el('inviteQualification').textContent,/100 verified taps in total/);assert.doesNotMatch(x.el('inviteQualification').textContent,/one UTC day|ad reward/);
+ assert.match(x.el('inviteWelcome').textContent,/All new players/);assert.match(x.el('inviteFriendProgress').innerHTML,/32 \/ 100 verified taps in total/);assert.match(x.el('invitePendingSummary').textContent,/1 joined/);assert.equal(x.el('shareTelegramBtn').disabled,false);
+});
+test('friend rows retain original qualification and only confirmed rewards show credited coins',async()=>{
+ const x=setup(),d=cumulativeFixture();d.friend_progress=[{...d.friend_progress[0],qualification_mode:'daily_taps_or_ad',min_taps:250,display_name:'<img src=x onerror=bad()>'},{...d.friend_progress[0],status:'rewarded',reward_coins:1000}];x.respond(async()=>d);await x.c.loadInviteSummary();
+ const rendered=x.el('inviteFriendProgress').innerHTML;assert.match(rendered,/250 taps in one UTC day or a confirmed ad reward/);assert.match(rendered,/1,000 coins credited/);assert.match(rendered,/&lt;img/);assert.doesNotMatch(rendered,/<img src=x/);
+});
+test('unknown cumulative rules or fabricated friend status fail validation',async()=>{
+ for(const mutate of [d=>d.qualification.ad_qualifies=true,d=>d.qualification.min_taps=1,d=>d.friend_progress[0].status='paid_cash',d=>d.friend_progress[0].verified_taps=-1]){
+  const x=setup(),d=cumulativeFixture();mutate(d);x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(x.el('shareTelegramBtn').disabled,true);assert.equal(x.el('inviteLoadStatus').hidden,false);
+ }
+});
+
+const incoming=()=>({display_name:'River',policy_version:'referrals_cumulative_v16',qualification_mode:'cumulative_taps',verified_taps:12,min_taps:100,status:'playing',joined_at:'2026-11-19T17:00:00Z',rewarded_at:null});
+function welcomeDialog(x){const dialog=x.el('inviteWelcomeDialog');dialog.opens=0;dialog.showModal=function(){this.open=true;this.opens++;};dialog.close=function(){this.open=false;this.listeners.close?.();};return dialog;}
+test('an invited player sees the actual inviter and cumulative goal, with a separate general welcome',async()=>{
+ const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:incoming()};x.respond(async()=>d);await x.c.loadInviteSummary();
+ assert.equal(x.el('incomingInviteTitle').textContent,'Invited by River');assert.equal(dialog.open,true);assert.match(x.el('incomingInviteWelcome').textContent,/All new players start with 1,000/);assert.match(x.el('incomingInviteRule').textContent,/100 verified taps in total/);assert.match(x.el('incomingInviteRule').textContent,/inviter’s reward/);assert.equal(x.el('incomingInviteTaps').value,12);
+ x.el('inviteWelcomePlay').listeners.click();assert.equal(dialog.open,false);await x.c.loadInviteSummary({force:true});assert.equal(dialog.opens,1);
+ x.el('incomingInviteCard').listeners.click();assert.equal(dialog.opens,2);x.el('inviteWelcomeFriends').listeners.click();assert.deepEqual(x.calls.at(-1),{action:'leaderboard',mode:'friends'});
+});
+test('welcome waits behind an open panel and legacy invitations retain their original goal',async()=>{
+ const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:incoming()};x.c.document.querySelector=()=>({});x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(dialog.opens,0);assert.equal(x.el('incomingInviteCard').hidden,false);
+ d.incoming_referral={...incoming(),qualification_mode:'daily_taps_or_ad',policy_version:'referrals_activity_v9',min_taps:250};await x.c.loadInviteSummary({force:true});assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteRule').textContent,/250 verified taps in one UTC day/);assert.doesNotMatch(x.el('incomingInviteRule').textContent,/100 verified taps/);
+ x.el('incomingInviteCard').listeners.click();assert.equal(dialog.open,true);assert.equal(x.el('incomingInviteMeter').hidden,true);
+});
+test('rewarded incoming invitations never replay onboarding or imply a second welcome payment',async()=>{
+ const x=setup(),dialog=welcomeDialog(x);x.respond(async()=>({...cumulativeFixture(),incoming_referral:{...incoming(),status:'rewarded',verified_taps:100}}));await x.c.loadInviteSummary();assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteProgress').textContent,/Invitation complete/);assert.match(x.el('incomingInviteRule').textContent,/inviter’s reward has been credited/);assert.equal(x.el('incomingInviteMeter').hidden,true);
+});
+test('legacy incoming records may lack a date but never receive the new cumulative promise',async()=>{
+ const x=setup(),dialog=welcomeDialog(x);x.respond(async()=>({...cumulativeFixture(),incoming_referral:{...incoming(),policy_version:'legacy_unknown',qualification_mode:'legacy_unknown',joined_at:null,min_taps:null,verified_taps:null,status:'on_hold'}}));await x.c.loadInviteSummary();assert.equal(x.el('shareTelegramBtn').disabled,false);assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteRule').textContent,/eligibility needs checking/);assert.doesNotMatch(x.el('incomingInviteRule').textContent,/100/);
+});
+test('incoming attribution is account scoped and its display name is assigned as text',async()=>{
+ const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:{...incoming(),display_name:'<svg onload=bad()>'}};x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(x.el('inviteWelcomeTitle').textContent,'<svg onload=bad()> invited you');assert.equal(x.el('inviteWelcomeTitle').innerHTML,'');
+ x.owner(10002);x.respond(async()=>fixture(10002));await x.c.loadInviteSummary();assert.equal(dialog.open,false);assert.equal(x.el('incomingInviteCard').hidden,true);assert.equal(x.storage.size,0);
 });

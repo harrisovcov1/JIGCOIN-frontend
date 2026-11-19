@@ -35,8 +35,8 @@ test('only the pack with the highest ratio gets the best-value label when a lowe
 test('equal value packs and starter offers do not receive unsupported best-value claims',()=>{
  const packs=[{sku:'JC_SMALL',coins:1000,stars:100},{sku:'JC_LARGE',coins:5000,stars:500}];
  const {c,markup}=cards(packs);
- assert.doesNotMatch(markup,/Best value/);
- assert.doesNotMatch(c.starsProductCard({...packs[0],coins:99999,starter:true},true,false,null,999.99),/Best value/);
+ assert.doesNotMatch(markup,/Most coins per Star/);
+ assert.doesNotMatch(c.starsProductCard({...packs[0],coins:99999,starter:true},true,false,null,999.99),/Most coins per Star/);
 });
 test('share text uses the confirmed invite link and share image uses saved balance',()=>{
  const drawn=[];const noop=()=>{};const canvasContext={clearRect:noop,createLinearGradient:()=>({addColorStop:noop}),fillRect:noop,fillText:t=>drawn.push(t),measureText:()=>({width:30}),fill:noop,stroke:noop};
@@ -47,20 +47,28 @@ test('starter allocation counts are not presented as limited referral places',()
  assert.doesNotMatch(html,/id="launchBoostInvite"|refreshReferralPromotion|places remaining.*coins per eligible referral/);
 });
 
-test('one pack is featured; all four other packs are listed by price in the disclosure',()=>{
+test('all five packs are visible in ascending price order with one accurate value badge',()=>{
  const p=[{sku:'JC_MAX_700K',title:'Maximum coin pack',coins:700000,stars:35000},
  {sku:'JC_SMALL',title:'Small',coins:1000,stars:100},{sku:'JC_GROWTH',title:'Growth',coins:37500,stars:2500},
  {sku:'JC_MEDIUM',title:'Medium',coins:3000,stars:250},{sku:'JC_LARGE',title:'Large',coins:7000,stars:500}];
  const {markup:rendered,classes}=cards(p);
- const details=rendered.indexOf('<details');
- assert.ok(rendered.indexOf('JC_SMALL')<details);
- assert.ok(rendered.indexOf('JC_MEDIUM')>details);
- assert.match(rendered,/<summary>All other coin packs<\/summary>/);
+ assert.doesNotMatch(rendered,/<details|All other coin packs|hub-pack-stage/);
  assert.equal((rendered.match(/data-stars-sku=/g)||[]).length,5);
  assert.ok(rendered.indexOf('JC_SMALL')<rendered.indexOf('JC_MEDIUM'));
  assert.ok(rendered.indexOf('JC_LARGE')<rendered.indexOf('JC_GROWTH'));
  assert.ok(rendered.indexOf('JC_GROWTH')<rendered.indexOf('JC_MAX_700K'));
  assert.match(rendered,/700,000/);assert.match(rendered,/35,000/);assert.match(rendered,/20 coins per Star/);
- assert.equal((rendered.match(/Best value/g)||[]).length,1);
+ assert.equal((rendered.match(/Most coins per Star/g)||[]).length,1);
  assert.ok(classes.has('hub-catalog-dense'));
+});
+test('the compact first pack cannot inherit the retired display-case row or artwork',()=>{
+ const world=fs.readFileSync('assets/mint-world.css','utf8'),compact=fs.readFileSync('assets/integrated.css','utf8');
+ assert.doesNotMatch(world,/#coinPackList[^{}]*\.hub-product:first-child/);
+ const allRows='#coinPackList > :is(.hub-product,.hub-product:first-child)';
+ assert.ok(compact.includes(allRows+',')&&compact.includes('grid-template-rows:auto auto;'));
+ assert.ok(compact.includes(allRows+'::before,')&&compact.includes('#coinPackList > :is(.hub-product,.hub-product:first-child:not(.hub-goal))::after {content:none;display:none}'));
+ for(const [child,row] of [['hub-product-label','1'],['hub-product-coins','2'],['hub-unit-value','3']]){
+  const rule=compact.slice(compact.indexOf(allRows+' .'+child)).split('}')[0];assert.ok(rule.includes('grid-row:'+row+';'),child);
+ }
+ assert.ok(compact.includes('#coinPackList>:is(.hub-product,.hub-product:first-child) {grid-template-columns:'));
 });

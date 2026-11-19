@@ -4,7 +4,7 @@ const html=fs.readFileSync('index.html','utf8');
 const code=html.slice(html.indexOf('let hubCatalog = null'),html.indexOf('// ------------ Momentum Shield UI'));
 function setup({enabled=true,products=[{sku:'JC_SMALL',title:'Small pack',coins:1000,stars:100}],expires=null,openInvoice,replies=[]}={}){
  const calls=[],toasts=[];let syncs=0;
- const ctx={reviewGamePurchase:async()=>true,Date,console,progressionCurrent:()=>null,renderDailyRewards(){},accountIsReady:()=>true,homeUserId:()=>10001,setTimeout:(fn)=>fn(),document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>[]},window:{addEventListener(){},Telegram:{WebApp:openInvoice?{openInvoice}:{} }},
+ const ctx={homeIdentity:null,homeConfirmedBalance:null,homeGoalModel:()=>null,reviewGamePurchase:async()=>true,Date,console,progressionCurrent:()=>null,renderDailyRewards(){},accountIsReady:()=>true,homeUserId:()=>10001,setTimeout:(fn)=>fn(),document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>[]},window:{addEventListener(){},Telegram:{WebApp:openInvoice?{openInvoice}:{} }},
  escapeHtml:s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;'),formatNumber:n=>n.toLocaleString('en-GB'),showToast:s=>toasts.push(s),
  syncStateIfIdle:async()=>{syncs++;},apiPost:async(...args)=>{calls.push(args);const r=replies.shift();return typeof r==='function'?r():r;}};
  vm.createContext(ctx);vm.runInContext(code,ctx);
@@ -43,6 +43,14 @@ test('network errors keep balance untouched and allow a later retry',async()=>{
 test('catalogue validates quantities and escapes product labels',()=>{
  const c=setup();assert.equal(c.validStarsProduct({sku:'bad"',coins:1,stars:1}),false);assert.equal(c.validStarsProduct({sku:'JC_X',coins:1,stars:0}),false);
  assert.match(c.starsProductCard({sku:'JC_X',title:'<script>',coins:1000,stars:100}),/&lt;script&gt;/);
+});
+test('every pack purchase review includes its exact saved-balance and rank outcome',async()=>{
+ const products=[{sku:'JC_SMALL',title:'Small',coins:1000,stars:100},{sku:'JC_MEDIUM',title:'Medium',coins:3000,stars:250},{sku:'JC_LARGE',title:'Large',coins:7000,stars:500},{sku:'JC_GROWTH',title:'Growth',coins:37500,stars:2500},{sku:'JC_MAX',title:'Maximum',coins:700000,stars:35000}];
+ const c=setup({products,openInvoice(){throw Error('review not accepted');}});c.homeIdentity=10001;c.homeConfirmedBalance=49000;
+ const start=html.indexOf('function homeTierIndex('),end=html.indexOf('function advanceHomeMilestone(',start);vm.runInContext(html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+html.slice(start,end),c);
+ const reviews=[];c.reviewGamePurchase=async(title,grant,stars)=>{reviews.push({title,grant,stars});return false;};
+ for(const p of products){await c.buyStarsPack(p.sku);const r=reviews.at(-1);assert.equal(r.stars,p.stars);assert.ok(r.grant.includes((49000+p.coins).toLocaleString('en-GB')+' coins.'));assert.match(r.grant,/unlocked\./);}
+ assert.match(reviews[0].grant,/100,000 coins to Commander/);assert.match(reviews.at(-1).grant,/751,000 coins to JigCoin Elite/);assert.equal(c.calls.length,0);
 });
 
 test('shop refresh delegates daily display and expired offers disable checkout',()=>{
