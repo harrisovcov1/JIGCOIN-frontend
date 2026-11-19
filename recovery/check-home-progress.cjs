@@ -4,6 +4,40 @@ const html=fs.readFileSync('index.html','utf8');
 const ladder=html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='));
 const code=ladder+html.slice(html.indexOf('const HOME_SEASON_KEY'),html.indexOf('// End of pure Home models.'));
 const model=()=>{const c={};vm.createContext(c);vm.runInContext(code,c);return c;};
+function collectionHarness(){
+ const c=model(),nodes=new Map(),cards=['energy','coins','double'].map(()=>({hidden:true}));
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{dataset:{},setAttribute(k,v){this[k]=v;},replaceChildren(){this.cleared=true;}});return nodes.get(id);};
+ Object.assign(c,{homeIdentity:101,homeConfirmedBalance:49000,homeUserId:()=>101,accountIsReady:()=>true,
+  BOOST_PLACEMENTS:Object.fromEntries(['energy','coins','double'].map((button,i)=>{node(button).closest=()=>cards[i];return[button,{button}];})),
+  document:{getElementById:node},formatNumber:n=>n.toLocaleString('en-GB'),setCoinArtwork:(el,tier)=>el.dataset.artwork=String(tier)});
+ vm.runInContext(html.slice(html.indexOf('function renderRewardCollection('),html.indexOf('function renderBoostCards(')),c);
+ return {c,node,cards};
+}
+test('healthy energy has the next real finish and progress from the saved balance',()=>{
+ const {c,node}=collectionHarness();c.renderRewardCollection();
+ assert.equal(node('rewardsCollectionCard').hidden,false);assert.equal(node('rewardsCollectionTitle').textContent,'Aurora Glass');
+ assert.equal(node('rewardsCollectionProgress').textContent,'Operator · 1,000 coins to go');
+ assert.equal(node('rewardsCollectionMeter').value,.975);assert.equal(node('rewardsCollectionAction').dataset.finish,'rank-2');
+ assert.equal(node('rewardsCollectionAction').disabled,false);assert.equal(c.homeConfirmedBalance,49000);
+});
+test('a visible refill or pending legacy reward has priority over the collection panel',()=>{
+ const {c,node,cards}=collectionHarness();
+ for(const card of cards){card.hidden=false;c.renderRewardCollection();assert.equal(node('rewardsCollectionCard').hidden,true);card.hidden=true;}
+ c.renderRewardCollection();assert.equal(node('rewardsCollectionCard').hidden,false);
+});
+test('collection goal clears a previous account and cannot preview stale progress while loading',()=>{
+ const {c,node}=collectionHarness();c.renderRewardCollection();c.homeIdentity=202;c.renderRewardCollection();
+ assert.equal(node('rewardsCollectionTitle').textContent,'Loading your collection…');assert.equal(node('rewardsCollectionAction').disabled,true);
+ assert.equal(node('rewardsCollectionAction').dataset.finish,'');assert.equal(node('rewardsCollectionArt').cleared,true);
+ assert.equal(node('rewardsCollectionArt').dataset.artwork,undefined);assert.equal(node('rewardsCollectionMeter').hidden,true);
+ c.homeIdentity=101;c.accountIsReady=()=>false;c.renderRewardCollection();assert.equal(node('rewardsCollectionAction').disabled,true);
+});
+test('top-rank collection shows completion without inventing a further unlock',()=>{
+ const {c,node}=collectionHarness();c.homeConfirmedBalance=10000000;c.renderRewardCollection();
+ assert.equal(node('rewardsCollectionTitle').textContent,'Platinum Sovereign');assert.equal(node('rewardsCollectionEyebrow').textContent,'Rank collection complete');
+ assert.equal(node('rewardsCollectionMeter').hidden,true);assert.equal(node('rewardsCollectionAction').textContent,'View collection ›');
+ assert.equal(node('rewardsCollectionAction').dataset.finish,'rank-7');
+});
 test('12,961 targets Operator at 50,000 rather than an unrelated 13,000 milestone',()=>{
  const c=model(),m=c.homeGoalModel(12961);assert.equal(m.next,50000);assert.equal(m.nextName,'Operator');assert.equal(m.remaining,37039);assert.equal(m.progress,2961/40000);assert.equal(m.current.name,'Grinder');
 });
