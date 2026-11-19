@@ -3007,7 +3007,7 @@ body{justify-content:flex-start}
         <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
         <p id="inviteQualification">Checking your reward and invite link…</p>
         <p id="inviteWelcome"></p>
-        <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <span aria-hidden="true">↗</span></button>
+        <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <svg class="invite-share-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7 17 10-10M7 7h10v10"/></svg></button>
         <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button></div>
         <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
       </section>
@@ -7175,7 +7175,7 @@ function renderVault(){
  consent.hidden=!canReview||!vaultReviewing;
  vipBuyBtn.hidden=canReview&&!vaultReviewing;
  vipBuyBtn.disabled=!ready||!d||vaultError||!d.product.enabled||vaultBusy||!!pending||!document.getElementById('vipTermsAccepted').checked;
- vipBuyBtn.textContent=vaultBusy?'Checking payment…':!d?(vaultError?'VIP temporarily unavailable':'Loading VIP offer…'):!d.product.enabled?'VIP currently unavailable':`${active?'Extend':'Activate'} VIP · ★ ${d.product.stars}`;
+ vipBuyBtn.textContent=vaultBusy?'Checking payment…':pending?'Payment pending':!d?(vaultError?'VIP temporarily unavailable':'Loading VIP offer…'):!d.product.enabled?'VIP currently unavailable':`${active?'Extend':'Activate'} VIP · ★ ${d.product.stars}`;
  document.getElementById('vipFeedback').textContent=vaultMessage||(vaultError?(vaultFailure||'Could not refresh VIP. Please retry.'):pending?'Payment confirmation pending. Check again shortly.':'');
  const retry=document.getElementById('vipRetry');retry.hidden=!(vaultError||pending)||vaultBusy;retry.textContent=pending?'Check payment':'Retry';
  renderVipSummaries();renderVaultCollection(goal);
@@ -7207,7 +7207,7 @@ function renderVaultMedals(){
  const awards=data?.my_awards;
  box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):awards.length?awards.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
  if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
- document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medals shown`:'Daily & weekly achievements';
+ document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medal${awards.length===1?'':'s'} shown`:'Daily & weekly achievements';
  const retry=document.getElementById('vaultMedalRetry');if(retry)retry.disabled=!!vaultMedalsRequest;
 }
 async function loadVaultMedals(force=false){
@@ -7784,13 +7784,13 @@ initFromBackend();
   sheet.innerHTML = `<div class="sheet-header"><div><div class="sheet-title" id="weeklyTitle" tabindex="-1">Weekly Race</div>
     <div class="sheet-subtitle" id="weeklyDates">Free ranked runs · 45 seconds</div></div>
     <button class="sheet-close" type="button" id="weeklyClose" aria-label="Back to Home">×</button></div>
-    <div class="sheet-body"><div id="weeklyStatus" role="status" aria-live="polite"></div>
+    <div class="sheet-body" id="weeklyScroll"><div id="weeklyStatus" role="status" aria-live="polite"></div>
     <div id="weeklyBoard"></div></div>`;
   document.body.append(sheet);
   let owner = null, data = null, profileRequest = null, checkedAt = 0, profileEpoch = 0;
   let standings = null, run = null, generation = 0, busy = false, busyStyle = false, selected = [];
   let timeAt = 0, timeRead = 0, reachedEnd = false, deepOpened = false, offline = false;
-  let raceTarget='', pinnedCard='',weeklyScope='global',practiceMode=false,lobbyCanStart=null;
+  let raceTarget='', pinnedCard='',weeklyScope='global',practiceMode=false,lobbyCanStart=null,runViewKey='';
   function raceInvitation() {
     const tg = window.Telegram?.WebApp;
     const param = tg?.initDataUnsafe?.start_param || new URLSearchParams(tg?.initData).get('start_param') ||
@@ -7824,7 +7824,7 @@ initFromBackend();
     const id = homeUserId();
     if (owner!==id || !accountIsReady()) {
       generation++;profileEpoch++;owner=id;data=null;profileRequest=null;checkedAt=0;busy=false;busyStyle=false;
-      standings=null;run=null;deepOpened=false;raceTarget='';pinnedCard='';practiceMode=false;weeklyScope='global';
+      standings=null;run=null;deepOpened=false;raceTarget='';pinnedCard='';practiceMode=false;weeklyScope='global';runViewKey='';
       if (sheet.classList.contains('show')) backToHome();
       renderCoin();
     }
@@ -7899,6 +7899,8 @@ initFromBackend();
   function rankedReady(){return !!standings&&standings.runs_left>0&&standings.can_start!==false&&Date.parse(standings.closes_at)-now()>=standings.seconds*1000;}
   function renderRun() {
     const box=el('weeklyBoard'),practice=run.mode==='practice';
+    const viewKey=(practice?'practice:':'ranked:')+run.id,entering=runViewKey!==viewKey;
+    runViewKey=viewKey;
     box.innerHTML=`<div class="pilot-clock"><span>${practice?'Practice · unranked':'Ranked run '+run.slot+' of 3'+(run.allowance_day?' · '+fmtDate(run.allowance_day+'T00:00:00Z'):'')}</span><strong id="weeklyClock"></strong></div>
       ${practice?'<div class="weekly-practice-note">Practise as often as you like. This score stays outside the leaderboard and medal race.</div>':''}
       <section class="pilot-target"><small>Choose two coins that add up to</small><strong>${run.board.target}</strong>
@@ -7907,6 +7909,7 @@ initFromBackend();
         `<button type="button" data-tile="${i}" aria-pressed="${selected.includes(i)}" ${busy?'disabled':''}>${n}</button>`).join('')}</div>
       <button type="button" class="pilot-text" data-race-action="close">Back to game · clock keeps running</button>`;
     el('weeklyClock').textContent=secondsLeft()+'s';
+    if(entering)el('weeklyScroll').scrollTop=0;
   }
   function resultLine(result) {
     if(!result.margin) return 'Draw · '+result.players[0].score+' each';
@@ -7929,9 +7932,11 @@ initFromBackend();
       <button type="button" class="pilot-text" data-race-action="image">View image</button></footer></section>`;
   }
   function renderPracticeResult(){
+    runViewKey='';
     el('weeklyBoard').innerHTML=`<div class="pilot-hero"><span class="pilot-medal" aria-hidden="true">✦</span><div><small>Practice complete · unranked</small><strong>${run?.score??0} <em>pairs</em></strong><span>Ranked attempts unchanged</span></div></div><p class="pilot-instructions">Keep practising, or take your next ranked run when you are ready.</p><button type="button" class="pilot-primary" data-race-action="practice">Practise again</button><button type="button" class="pilot-secondary" data-race-action="lobby">Weekly standings &amp; ranked runs</button>`;
   }
   function renderLobby() {
+    runViewKey='';
     const s=standings;
     if (!s) {el('weeklyBoard').innerHTML='<button class="pilot-primary" data-race-action="reload">Check race</button>';return;}
     const canStart=rankedReady();lobbyCanStart=canStart;
@@ -7990,13 +7995,13 @@ initFromBackend();
   async function openRace() {
     if(!accountIsReady())return;
     if(owner!==homeUserId())void sync();
-    practiceMode=false;
+    practiceMode=false;runViewKey='';
     showAppSheet(sheet,tabFarm);
     el('mainScroll').inert=true;el('weeklyTitle').focus({preventScroll:true});
     await loadRace();
   }
   function closeRace(){
-    generation++;busy=false;standings=null;run=null;selected=[];practiceMode=false;
+    generation++;busy=false;standings=null;run=null;selected=[];practiceMode=false;runViewKey='';
     backToHome();el('homeBoostAction').focus({preventScroll:true});
   }
   async function startRun(isRematch=false){
