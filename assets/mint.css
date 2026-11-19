@@ -138,7 +138,7 @@
   grid-template-areas: "art copy" "meter meter" "action action";
   align-items: center;
   flex: 1 0 auto;
-  gap: 9px 12px;
+  gap: 8px 12px;
   padding: 12px;
   border: 1px solid var(--mint-rim, #53627a);
   border-radius: var(--mint-corner, 8px);
