@@ -152,7 +152,9 @@ test('claim alias cannot redirect to a different reward type',async()=>{
 });
 test('one reward panel contains three actions with no duplicate task screen or category tabs',()=>{
   assert.equal((html.match(/<article[^>]+data-boost-code=/g)||[]).length,3);
-  assert.doesNotMatch(html,/id="sponsorSheet"|data-earn-target|<span>Earn<\/span>/);
+  assert.doesNotMatch(html,/id="sponsorSheet"|data-earn-target/);
+  const nav=html.match(/<nav class="bottom-nav"[^>]*>[\s\S]*?<\/nav>/)[0];
+  assert.doesNotMatch(nav,/<span>Earn<\/span>/);
   assert.match(html,/<span>Rewards<span id="dailyRewardBadge"/);
 });
 

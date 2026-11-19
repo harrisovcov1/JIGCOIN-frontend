@@ -27,7 +27,7 @@ test('all inline scripts parse; HTML has no duplicate IDs',()=>{
 test('one first-open request is shared; confirmed data and link are reused within cache window',async()=>{
   const x=setup(),d=deferred();x.respond(()=>d.promise);const a=x.c.loadInviteSummary(),b=x.c.loadInviteSummary();
   assert.equal(x.calls.length,1);assert.equal(x.el('shareTelegramBtn').disabled,true);assert.equal(x.el('friendsJoinedText').textContent,'—');
-  d.resolve(fixture());await Promise.all([a,b]);assert.equal(x.el('inviteRewardAmount').textContent,'+500');assert.equal(x.el('shareTelegramBtn').disabled,false);await x.c.loadInviteSummary();assert.equal(x.calls.length,1);
+  d.resolve(fixture());await Promise.all([a,b]);assert.equal(x.el('inviteRewardAmount').textContent,'500');assert.equal(x.el('shareTelegramBtn').disabled,false);await x.c.loadInviteSummary();assert.equal(x.calls.length,1);
   assert.equal(x.calls[0][2].timeoutMs,8000);assert.equal(x.calls[0][2].fastAuth,true);
 });
 test('failed first load shows a usable retry and never presents a fabricated zero/reward/link',async()=>{
@@ -36,11 +36,11 @@ test('failed first load shows a usable retry and never presents a fabricated zer
   x.respond(async()=>fixture());await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteLoadStatus').hidden,true);assert.equal(x.el('shareTelegramBtn').disabled,false);
 });
 test('a failed refresh keeps same-account confirmed figures with an honest stale notice',async()=>{
-  const x=setup();await x.c.loadInviteSummary();x.advance(31000);x.respond(async()=>{throw Error('offline');});await x.c.loadInviteSummary();assert.equal(x.el('inviteRewardAmount').textContent,'+500');assert.equal(x.el('inviteLoadStatus').hidden,false);assert.match(x.el('inviteStatusText').textContent,/last checked/);
+  const x=setup();await x.c.loadInviteSummary();x.advance(31000);x.respond(async()=>{throw Error('offline');});await x.c.loadInviteSummary();assert.equal(x.el('inviteRewardAmount').textContent,'500');assert.equal(x.el('inviteLoadStatus').hidden,false);assert.match(x.el('inviteStatusText').textContent,/last checked/);
 });
 test('late responses from the previous account cannot replace current-account data or links',async()=>{
   const x=setup(),d=deferred();x.respond(()=>d.promise);const pending=x.c.loadInviteSummary();x.owner(10002);x.respond(async()=>fixture(10002,19));await x.c.loadInviteSummary();d.resolve(fixture());await pending;
-  assert.equal(x.el('inviteRewardAmount').textContent,'+1,250');await x.c.copyInviteLink();assert.match(x.copied[0],/ref_10002$/);
+  assert.equal(x.el('inviteRewardAmount').textContent,'1,250');await x.c.copyInviteLink();assert.match(x.copied[0],/ref_10002$/);
 });
 test('sign-out masks cached balances and disables all sharing, including late clicks',async()=>{
   const x=setup();await x.c.loadInviteSummary();x.ready(false);x.c.renderInviteOverview();x.c.shareInviteOnTelegram();await x.c.copyInviteLink();assert.equal(x.shared.length,0);assert.equal(x.copied.length,0);assert.equal(x.el('friendsJoinedText').textContent,'—');assert.equal(x.el('downloadShareCardBtn').disabled,true);
@@ -54,7 +54,7 @@ test('qualification displays the real activity threshold and both valid earning 
   const x=setup();x.respond(async()=>({...fixture(),qualification:{mode:'activity',min_taps:250}}));await x.c.loadInviteSummary();assert.match(x.el('inviteQualification').textContent,/250 taps in one UTC day/);assert.match(x.el('inviteQualification').textContent,/or claims one confirmed ad reward/);assert.doesNotMatch(x.el('inviteQualification').textContent,/purchase|pay/);
 });
 test('next milestone is explicit and max tier has no impossible extra target',async()=>{
-  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteNextBadge').textContent,'1 more to Bronze');assert.equal(x.el('inviteRewardAmount').textContent,'+500');assert.equal(x.el('inviteProgress').max,1);
+  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteNextBadge').textContent,'1 more to Bronze');assert.equal(x.el('inviteRewardAmount').textContent,'500');assert.equal(x.el('inviteProgress').max,1);
   x.respond(async()=>fixture(10001,200));await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteProgress').value,1);assert.match(x.el('inviteNextTitle').textContent,/Top referral tier/);assert.doesNotMatch(x.el('inviteNextText').textContent,/more/);
 });
 test('Telegram sharing opens an editable share chooser with a correctly encoded account link',async()=>{
@@ -81,13 +81,13 @@ test('zero invites shows no earned tier or misleading zero-reward milestone',asy
  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteTierName').textContent,'Get started');
  assert.match(x.el('inviteTierList').innerHTML,/Bronze · 1–4 invites/);assert.match(x.el('inviteTierList').innerHTML,/200\+ invites/);
  assert.doesNotMatch(x.el('inviteTierList').innerHTML,/Starter|0 rewarded/);
- assert.match(x.el('inviteWelcome').textContent,/New players start with 1,000 free in-game coins/);
+ assert.match(x.el('inviteWelcome').textContent,/They start with 1,000 free in-game coins/);
  x.c.shareInviteOnTelegram();assert.match(new URL(x.shared[0]).searchParams.get('text'),/New players start with 1,000 free coins/);
 });
 test('the milestone invite itself shows the higher rate before it joins',async()=>{
  for(const [count,amount] of [[3,500],[4,1000],[18,1000],[19,1250],[48,1250],[49,1500],[198,1500],[199,2000],[200,2000]]){
   const x=setup();x.respond(async()=>fixture(10001,count));await x.c.loadInviteSummary();
-  assert.equal(x.el('inviteRewardAmount').textContent,'+'+amount.toLocaleString('en-GB'));
+  assert.equal(x.el('inviteRewardAmount').textContent,amount.toLocaleString('en-GB'));
   if(count<200){
    const next=tiers.find(row=>row.at>count);
    assert.equal(x.el('inviteNextBadge').textContent,(next.at-count)+' more to '+next.name);

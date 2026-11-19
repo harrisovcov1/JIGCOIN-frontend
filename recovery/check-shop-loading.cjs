@@ -72,12 +72,23 @@ test('cold Home has neutral artwork until a rank is confirmed and recovers witho
   assert.deepEqual(themes,[null,1,null]);
 });
 
-test('the featured pack promises a milestone only when it reaches that balance',()=>{
+test('featured pack states the quantity, resulting balance and real rank threshold',()=>{
   const c=setup();
-  c.ctx.homeConfirmedBalance=18231;
-  c.ctx.homeGoalModel=()=>({next:50000,nextName:'Operator',remaining:31769});
-  const small={coins:1000,stars:100},medium={coins:3000,stars:250};
-  assert.equal(c.ctx.packGoal([small]).goal.label,'Work towards 20,000 coins');
-  assert.equal(c.ctx.packGoal([small,medium]).goal.label,'Reach 20,000 coins');
+  c.ctx.homeConfirmedBalance=18890;
+  c.ctx.homeGoalModel=()=>({tier:1,next:50000,nextName:'Operator',remaining:50000-c.ctx.homeConfirmedBalance});
+  c.ctx.coinArtwork=()=>'<img>';
+  const small={title:'Small coin pack',coins:1000,stars:100},medium={title:'Medium coin pack',coins:3000,stars:250};
+  const card=()=>{const choice=c.ctx.packGoal([small,medium]);return c.ctx.starsProductCard(choice.product,false,true,choice.goal);};
   assert.equal(c.ctx.packGoal([small,medium]).product,medium);
+  assert.match(card(),/Add 3,000 coins/);
+  assert.match(card(),/Your balance after purchase · 21,890/);
+  assert.match(card(),/Operator at 50,000/);
+  assert.doesNotMatch(card(),/Unlock|Reach|Work towards/);
+  c.ctx.homeConfirmedBalance=49000;
+  assert.match(card(),/Add 1,000 coins/);
+  assert.match(card(),/Unlock Operator at 50,000/);
+  c.ctx.homeConfirmedBalance=11500000;
+  c.ctx.homeGoalModel=()=>({tier:7,complete:true});
+  assert.match(card(),/Your balance after purchase · 11,501,000/);
+  assert.doesNotMatch(card(),/Operator|Unlock|undefined/);
 });

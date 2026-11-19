@@ -21,3 +21,19 @@ test('VIP, streak and ad stack; expiry clamps local energy and preserves coins',
 test('pending orders survive reload but remain account scoped',async()=>{const h=setup(),d=data();d.recent_orders=[{payload:order,status:'approved',stars:500,created_at:new Date().toISOString()}];h.setReply(d);await h.ctx.refreshVipStatus();assert.equal(h.ctx.vaultPending(),order);h.owner(999);assert.equal(h.ctx.vaultPending(),null);});
 test('history uses text nodes; smaller screens retain scroll and have no duplicate VIP sales sheet',async()=>{const h=setup(),d=data();d.recent_orders=[{payload:'<img onerror=bad()>',status:'paid',stars:500,created_at:new Date().toISOString()}];h.setReply(d);await h.ctx.refreshVipStatus();assert.equal(h.el('vipOrderHistory').children[0].children[2].textContent,'Order: <img onerror=bad()>');assert.match(html,/\.vault-content\{[^}]*display:flex/);assert.ok(!/\.vault-content\{[^}]*overflow:hidden/.test(html));assert.doesNotMatch(html,/id="vipSheet"/);});
 test('VIP failure distinguishes session, timeout, missing endpoint and invalid offer',async()=>{for(const [response,expected] of [[{ok:false,status:401},/Session expired/],[{ok:false,status:404},/service needs updating/],[{ok:false,reason:'TIMEOUT'},/too long/],[{ok:false,reason:'NETWORK'},/Connection interrupted/],[{...data(),product:{...data().product,stars:1}},/could not be verified/]]){const h=setup();h.setReply(response);await h.ctx.refreshVipStatus();assert.match(h.el('vipFeedback').textContent,expected);assert.equal(h.el('vipBuyBtn').disabled,true);h.setReply(data());await h.ctx.refreshVipStatus(true);assert.equal(h.el('vipFeedback').textContent,'');}});
+
+test('Vault compares a confirmed streak with VIP, including expired VIP and a broken streak',async()=>{
+ const h=setup(),d=data();
+ d.streak_day=4;
+ Object.assign(d.benefits,{standard_tap:1.05,vip_tap:2.1,standard_energy:55,vip_energy:110});
+ h.setReply(d);await h.ctx.refreshVipStatus();
+ assert.equal(h.el('vipPerksText').textContent,'Your Day 4 streak earns 105 coins per 100 taps before VIP.');
+ assert.equal(h.el('vaultVipTitle').textContent,'With VIP · 210 coins per 100 taps');
+ const activePass={...d,vip_active:true,vip_until:new Date(Date.now()+86400000).toISOString()};
+ h.setReply(activePass);await h.ctx.refreshVipStatus(true);
+ assert.match(h.el('vaultVipTitle').textContent,/VIP active · 210/);
+ h.setReply({...activePass,vip_until:new Date(Date.now()-60000).toISOString()});await h.ctx.refreshVipStatus(true);
+ assert.match(h.el('vaultVipTitle').textContent,/With VIP · 210/);
+ h.setReply({...data(),streak_day:0});await h.ctx.refreshVipStatus(true);
+ assert.equal(h.el('vipPerksText').textContent,'Your standard rate earns 100 coins per 100 taps before VIP.');
+});
