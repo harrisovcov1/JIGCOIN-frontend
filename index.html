@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v14-live-sdk-handler-5">
+<meta name="jigcoin-build" content="v14-refill-layout-6">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2808,9 +2808,9 @@ body{justify-content:flex-start}
 #pilotMedalList{white-space:pre-line;font-size:13px;padding:8px}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
-  <link rel="stylesheet" href="./assets/mint.css?v=rewards-refill-recovery-2">
+  <link rel="stylesheet" href="./assets/mint.css?v=refill-layout-3">
   <link rel="stylesheet" href="./assets/mint-world.css?v=phone-fit-2">
-  <link rel="stylesheet" href="./assets/mint-home.css?v=tap-perks-2">
+  <link rel="stylesheet" href="./assets/mint-home.css?v=energy-refill-1">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
 <style>
 #purchaseReview{box-sizing:border-box;width:min(92vw,380px);max-height:85vh;max-height:85dvh;overflow:auto;margin:auto;padding:18px;border:1px solid var(--press-light,#e5c88e);border-radius:12px;background:#1b2028;color:#f4f1e9;overflow-wrap:anywhere}
@@ -2890,11 +2890,14 @@ body{justify-content:flex-start}
         <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
         <div class="tap-metrics">
           <div class="tap-metric" id="homeEnergyMetric">
-            <div class="energy-readout"><span class="metric-label" id="energyLabel">Energy</span><span id="energyText">0 / 50</span></div>
-            <div class="energy-bar" aria-hidden="true">
-              <div class="energy-fill" id="energyFill"></div>
+            <div class="home-energy-gauge">
+              <div class="energy-readout"><span class="metric-label" id="energyLabel">Energy</span><span id="energyText">0 / 50</span></div>
+              <div class="energy-bar" aria-hidden="true">
+                <div class="energy-fill" id="energyFill"></div>
+              </div>
+              <div id="energySubText" class="metric-subtext"></div>
             </div>
-            <div id="energySubText" class="metric-subtext"></div>
+            <button id="homeRefillOpen" type="button" aria-controls="boostSheet" hidden><strong>Refill</strong><span id="homeRefillState">Check ads</span></button>
           </div>
           <div class="tap-metric" id="homeTodayMetric">
             <div class="metric-label">Today</div>
@@ -3930,7 +3933,35 @@ function renderHomeSession() {
   action.ariaLabel=refill?'View optional energy refill':'Open weekly friend race';
   action.title=action.ariaLabel;
   action.disabled=!ready;
+  renderHomeRefillEntry(projected.energy,ready);
   requestRefillPreparation();
+}
+function renderHomeRefillEntry(energy,ready) {
+  const button=document.getElementById('homeRefillOpen');if(!button)return;
+  const owner=homeUserId(),code='sp_emergency_energy';
+  const mission=missionsOwner===owner?hubMissions.find(m=>m.code===code):null;
+  const prepared=ready&&preparedRefillFor(mission);
+  const claimable=mission?.provider==='monetag'&&mission.status==='claimable'&&!!mission.attempt_id;
+  const preparing=refillPreparation.owner===owner&&refillPreparation.status==='loading';
+  // Offer the route while energy is still usable. An in-progress or confirmed
+  // refill stays reachable if natural regeneration crosses the low threshold.
+  const visible=ready&&energy<maxEnergy&&(claimable||window.JigPilot?.canRefill()&&
+    (homeEnergyLow(energy,maxEnergy)||prepared||preparing));
+  button.hidden=!visible;button.disabled=!visible;
+  if(!visible)return;
+  const view=getBoostView(code,mission),wait=view.label.match(/^(Available in|Try again in) (.+)$/);
+  let label='Unavailable',phase='unavailable',detail=view.label;
+  if(navigator.onLine===false){label='Offline';detail='Reconnect to check refill availability.';}
+  else if(view.action==='claim'){label='Claim ready';phase='ready';}
+  else if(view.action==='show'){label='Ad ready';phase='ready';}
+  else if(wait){label='In '+wait[2];phase='waiting';}
+  else if(preparing){label='Preparing';phase='preparing';}
+  else if(view.action==='prepare'&&!view.disabled){label='Check ads';phase='check';}
+  else if(/Checking|Loading|Preparing|Opening|Confirming/.test(view.label)){label='Checking';phase='preparing';}
+  document.getElementById('homeRefillState').textContent=label;
+  button.dataset.state=phase;
+  button.setAttribute('aria-label',`Refill energy. ${detail}. Open Rewards for details.`);
+  button.title=navigator.onLine===false?detail:view.detail||detail;
 }
 async function refreshHomeRefillStatus(){
   if(!accountIsReady()||document.hidden||navigator.onLine===false||document.getElementById('mainScroll').inert||
@@ -4016,6 +4047,7 @@ document.getElementById('homeSaveStatus').addEventListener('click',openTapSaveDe
 document.getElementById('journeySaveOpen').addEventListener('click',openTapSaveDetails);
 document.getElementById('homeJourneyClose').addEventListener('click',()=>{document.getElementById('homeJourneySheet').classList.remove('show');sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);document.getElementById('homeJourneyOpen').focus();});
 document.getElementById('homeBoostAction').addEventListener('click',()=>document.getElementById('homeBoostAction').dataset.focus==='weekly'?window.JigPilot?.openRace():openBoostSheet('sp_emergency_energy'));
+document.getElementById('homeRefillOpen').addEventListener('click',()=>openBoostSheet('sp_emergency_energy'));
 document.getElementById('homeHaptics').addEventListener('change',e=>appStorage.setItem('jigcoin_home_haptics',e.target.checked?'on':'off'));
 window.addEventListener('jigcoin:account-ready',()=>setTimeout(refreshHomeRace,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderHomeRace();refreshHomeRace();}});
@@ -5751,7 +5783,7 @@ function onTapPress(ev) {
 
   updateProjectedEnergy();
   if (state.energy <= 0) {
-    showToast("⚡ Out of energy – come back later.");
+    showToast("⚡ Energy is refilling. Open Rewards for options.");
     return;
   }
 
@@ -6583,7 +6615,9 @@ function arrangeRewardCards(code) {
   const cards=[document.getElementById('rewardsDailyCard'),
     ...Object.keys(BOOST_PLACEMENTS).map(key=>list.querySelector(`[data-boost-code="${key}"]`))];
   const chosen=code==='daily'?cards[0]:cards.find(card=>code && card.dataset.boostCode===code);
-  const ordered=chosen?[chosen,...cards.filter(card=>card!==chosen)]:cards;
+  // Keep the daily card anchored above the interchangeable refill/coin area.
+  const ordered=chosen && chosen!==cards[0]
+    ? [cards[0],chosen,...cards.slice(1).filter(card=>card!==chosen)] : cards;
   ordered.forEach((card,i)=>{
     card.dataset.selected=String(card===chosen);
     if(list.children[i]!==card) list.insertBefore(card,list.children[i]||null);

@@ -125,15 +125,21 @@
 #weeklySheet { transition: none; }
 #weeklySheet .sheet-body { flex: 1; min-height: 0; }
 #weeklySheet .pilot-hero { flex: 0 0 auto; }
-#boostSheet #rewardChoices { flex: 0 0 auto; align-content: start; gap: 6px; }
-#boostSheet #rewardsDailyCard { padding: clamp(12px, 2.8cqh, 21px); }
+/* The active refill and the coin preview share the available middle space.
+   Keep the daily/activity cards and footer steady when the refill state changes. */
+#boostSheet .sheet-body { scrollbar-width: none; }
+#boostSheet #rewardChoices { display: flex; flex-direction: column; flex: 0 0 auto; gap: 6px; }
+#boostSheet #rewardChoices:has(> .boost-card:not(.boost-streak):not([hidden])) { flex-grow: 1; }
+#boostSheet #rewardChoices > .boost-card:not(.boost-streak):not([hidden]) { flex: 1 0 auto; align-content: center; }
+#boostSheet #rewardsDailyCard { flex: 0 0 auto; padding: clamp(12px, 2.8cqh, 21px); }
+#boostSheet .boost-footnote, #boostSheet .reward-footer { flex: 0 0 auto; }
 #boostSheet .reward-collection {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
   grid-template-areas: "art copy" "meter meter" "action action";
   align-items: center;
-  flex: 0 0 auto;
-  gap: 9px 12px;
+  flex: 1 0 auto;
+  gap: 8px 12px;
   padding: 12px;
   border: 1px solid var(--mint-rim, #53627a);
   border-radius: var(--mint-corner, 8px);
