@@ -1,0 +1,204 @@
+/* Integrated Shop, Invite, Vault and competition surfaces. Home/refill geometry stays owned by mint-home.css. */
+html body :is(#coinShopSheet,#friendsSheet,#withdrawSheet,#vipOfferSheet,#weeklySheet) .sheet-body {
+  min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable;
+  padding:12px; padding-bottom:16px;
+}
+html body :is(#coinShopSheet,#withdrawSheet,#vipOfferSheet) [hidden] {display:none!important}
+html body :is(#coinShopSheet,#friendsSheet,#withdrawSheet,#vipOfferSheet) .sheet-header {flex:none;min-height:56px;padding:8px 12px}
+html body :is(#coinShopSheet,#friendsSheet,#withdrawSheet,#vipOfferSheet) .sheet-title {font-size:25px;line-height:1.15}
+html body :is(#coinShopSheet,#friendsSheet,#vipOfferSheet) .sheet-subtitle {font-size:12px;line-height:1.4;margin-top:3px}
+html body .sheet .vip-summary {
+  display:grid; grid-template-columns:58px minmax(0,1fr) 16px; align-items:center; gap:9px;
+  flex:none; width:100%; min-height:100px; padding:12px; margin:0; text-align:left;
+  background:var(--mint-mark),var(--mint-grain),var(--mint-feature); color:var(--mint-text);
+  border:1px solid var(--mint-inlay); border-radius:var(--mint-corner); box-shadow:inset 0 1px var(--mint-seam);
+  font:inherit; cursor:pointer;
+}
+html body .sheet .vip-summary img {width:58px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 3px #0007)}
+html body .sheet .vip-summary strong {display:block;font-size:17px;line-height:1.25;color:var(--mint-highlight)}
+html body .sheet .vip-summary small {display:block;font-size:12px;line-height:1.4;margin-top:3px;color:var(--mint-muted)}
+html body .sheet .vip-summary .vip-summary-state {color:var(--mint-accent);font-weight:650}
+.vip-summary .summary-chevron {font-size:25px;color:var(--mint-accent)}
+html body .sheet .vip-summary[data-active=true] {border-color:#8cba9c}
+html body .sheet .vip-summary[data-pending=true] .vip-summary-state {color:#f9d695}
+/* Every pack stays exposed, with one compact and truthful suggestion. */
+html body #coinShopSheet .sheet-body {display:flex;flex-direction:column;gap:10px;justify-content:flex-start}
+.shop-balance-strip {font-size:12px;line-height:1.5;color:var(--mint-muted);padding:0 2px}
+.shop-balance-strip strong {color:var(--mint-text)}
+.shop-section-heading {display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.shop-section-heading h2 {margin:0;font-size:16px;line-height:1.3}
+.shop-section-heading span {font-size:10px;line-height:1.3;text-align:right;color:var(--mint-muted)}
+html body #coinShopSheet #coinPackList {display:flex;flex:0 0 auto;flex-direction:column;gap:7px;margin:0}
+html body #coinShopSheet #coinPackList > .hub-product,
+html body #coinShopSheet .hub-catalog-dense .hub-product {
+  display:grid;flex:none;grid-template-columns:minmax(0,1fr) 100px;grid-template-rows:auto auto;
+  min-height:72px;gap:3px 8px;margin:0;padding:9px 11px;align-content:center;overflow:visible;
+}
+html body #coinShopSheet #coinPackList > .hub-product::before,
+html body #coinShopSheet #coinPackList > .hub-product::after {content:none;display:none}
+html body #coinShopSheet #coinPackList > .hub-product .hub-product-label {grid-column:1;grid-row:1;font-size:11px;line-height:1.3;color:var(--mint-muted)}
+html body #coinShopSheet #coinPackList > .hub-product .hub-product-coins {grid-column:1;grid-row:2;font-size:24px;line-height:1.1;letter-spacing:-.4px}
+html body #coinShopSheet .hub-product-coins span {font-size:12px;letter-spacing:0}
+html body #coinShopSheet #coinPackList > .hub-product .hub-unit-value {grid-column:1;grid-row:3;font-size:11px;line-height:1.3}
+html body #coinShopSheet #coinPackList > .hub-product .hub-buy {grid-column:2;grid-row:1 / span 3;min-height:48px;width:100%;padding:5px;align-self:center}
+html body #coinShopSheet .hub-buy strong {font-size:17px;white-space:nowrap}
+html body #coinShopSheet .hub-buy span {font-size:10px}
+html body #coinShopSheet #coinPackList > .hub-product .pack-goal {display:block;grid-column:1 / -1;grid-row:4;align-self:auto;margin:5px 0 0;padding:6px 0 0;border:0;border-top:1px solid var(--mint-rim);background:none;box-shadow:none;border-radius:0}
+html body #coinShopSheet #coinPackList > .hub-product .pack-goal small {display:block;font-size:11px;line-height:1.4;color:var(--mint-muted)}
+html body #coinShopSheet .value-badge {display:inline-block;margin:0 0 2px 5px;font-size:9px;line-height:1.3;padding:2px 4px;vertical-align:middle;white-space:normal;background:var(--mint-accent);color:var(--mint-ink)}
+html body #coinShopSheet .hub-product.hub-best:not(.hub-goal) {border-color:var(--mint-rim);box-shadow:inset 0 1px var(--mint-seam);background:var(--mint-grain),var(--mint-plate)}
+html body #coinShopSheet .hub-history {margin:0;padding:0;border-top:1px solid var(--mint-rim)}
+html body #coinShopSheet .hub-history summary {min-height:44px;padding:10px 0;font-size:12px}
+html body #coinShopSheet #hubShopNotice {margin:0;font-size:11px;line-height:1.4}
+/* Shared VIP offer; Shop and Vault use the same verified offer and checkout. */
+html body #vipOfferSheet .vip-offer-content {display:flex;flex-direction:column;gap:12px}
+html body #vipOfferSheet .vault-vip {display:flex;flex:none;flex-direction:column;gap:13px;padding:16px;background:var(--mint-mark),var(--mint-grain),var(--mint-feature);border:1px solid var(--mint-inlay);border-radius:var(--mint-corner)}
+.vip-offer-identity {display:flex;align-items:center;gap:14px}
+.vip-offer-identity img {width:78px;height:68px;object-fit:contain}
+.vip-offer-identity .vault-eyebrow {font-size:16px;letter-spacing:0;color:var(--mint-highlight)}
+.vip-offer-identity p {margin:4px 0 0;font-size:12px;color:var(--mint-muted)}
+html body #vipOfferSheet .vault-vip h2 {font-size:23px;line-height:1.2;margin:0;color:var(--mint-text)}
+html body #vipOfferSheet .vault-benefits {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html body #vipOfferSheet .vault-benefits>div {padding:12px 9px;gap:5px;background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);border-radius:var(--mint-corner)}
+html body #vipOfferSheet .vault-benefits strong {font-size:13px}
+html body #vipOfferSheet .vault-benefits>div>span:last-child {font-size:12px;color:var(--mint-muted)}
+html body #vipOfferSheet .vault-vip-note,.vip-offer-note {font-size:12px;line-height:1.5;margin:0;color:var(--mint-muted)}
+html body #vipOfferSheet .pilot-coin-row {border-top:1px solid var(--mint-rim);padding-top:10px;margin:0;min-height:60px}
+html body #vipOfferSheet #pilotCoinPreview {width:46px;height:46px;min-width:46px}
+html body #vipOfferSheet #pilotPreviewOpen {gap:10px}
+html body #vipOfferSheet #pilotPreviewOpen strong {font-size:14px}
+html body #vipOfferSheet #pilotPreviewOpen small {font-size:11px}
+html body #vipOfferSheet .vault-buy {min-height:48px;margin:0;font-size:15px}
+html body #vipOfferSheet .vault-terms-consent {font-size:12px;line-height:1.5;min-height:44px}
+html body #vipOfferSheet .vault-terms-consent input {width:20px;height:20px;flex:none}
+html body #vipOfferSheet .vault-live-status {font-size:12px;line-height:1.5}
+html body #vipOfferSheet .vault-expiry {font-size:12px}
+/* Vault is a collection and account overview, with a clear route to the shared VIP offer. */
+html body #withdrawSheet .vault-content {display:flex;flex-direction:column;justify-content:flex-start;gap:10px}
+html body #withdrawSheet .vault-summary {display:block;flex:none;padding:13px}
+html body #withdrawSheet .vault-total {margin:7px 0;gap:10px}
+html body #withdrawSheet .vault-total strong {font-size:35px;line-height:1.1}
+html body #withdrawSheet .vault-rank-art {width:44px;height:44px}
+html body #withdrawSheet .vault-goal {display:block;font-size:12px;line-height:1.5}
+html body #withdrawSheet #vaultProgressLabel {display:block;color:var(--mint-muted);font-size:11px;margin-top:3px}
+html body #withdrawSheet .vault-progress {margin-top:7px}
+.vault-collection {flex:none;background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);border-radius:var(--mint-corner);padding:11px}
+.vault-collection h2 {font-size:15px;margin:0 0 8px}
+.vault-finish-link {display:grid;grid-template-columns:91px minmax(0,1fr) 12px;gap:9px;align-items:center;text-align:left;width:100%;padding:6px 0 11px;border:0;background:none;color:var(--mint-text);font:inherit}
+.vault-finish-link strong {font-size:13px;display:block}.vault-finish-link small {font-size:11px;line-height:1.4;color:var(--mint-muted);display:block;margin-top:3px}
+.vault-finish-pair {display:flex;gap:3px;align-items:center}.vault-finish-pair>span:not(.finish-arrow){display:block;width:39px;height:39px}.vault-finish-pair :is(img,svg){width:100%;height:100%;object-fit:contain}.finish-arrow {color:var(--mint-accent)}
+.vault-medals {border-top:1px solid var(--mint-rim)}
+.vault-medals summary {display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:13px}
+.vault-medals summary>span:last-child {font-size:11px;color:var(--mint-accent)}
+.vault-medals h3 {font-size:12px;margin:10px 0 5px;color:var(--mint-highlight)}
+.vault-medals :is(#vaultDailyMedalList,#pilotMedalList) {font-size:12px;line-height:1.5;color:var(--mint-muted);white-space:pre-line}
+.vault-medal-item {padding:6px 0;border-bottom:1px solid var(--mint-rim)}
+.vault-account-links {display:flex;flex-direction:column;border-top:1px solid var(--mint-rim);flex:none}
+.vault-account-links button {display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;font:inherit;font-size:13px;color:var(--mint-text);border:0;border-bottom:1px solid var(--mint-rim);padding:8px 2px;background:none;text-align:left}
+.vault-airdrop {flex:none;border:1px solid var(--mint-rim);border-radius:var(--mint-corner);padding:0 11px;background:var(--mint-grain),var(--mint-plate)}
+.vault-airdrop summary {display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:62px;font-size:13px;cursor:pointer}.vault-airdrop summary small {display:block;margin-top:4px;font-size:11px;color:var(--mint-muted)}
+.vault-airdrop p {font-size:12px;line-height:1.5;color:var(--mint-muted);margin:0 0 12px}
+/* Invite has a community emblem; it never borrows a rank coin as its level badge. */
+html body #friendsSheet .invite-overview {display:flex;flex-direction:column;gap:10px;justify-content:flex-start}
+html body #friendsSheet .invite-reward-card {display:grid;grid-template-columns:minmax(0,1fr) 70px;grid-template-areas:'tier art' 'reward art' 'terms terms' 'welcome welcome' 'actions actions' 'message message';flex:0 0 auto;align-content:start;gap:9px;padding:15px}
+html body #friendsSheet .invite-emblem {grid-area:art;float:none;width:70px;height:65px;aspect-ratio:auto;margin:0}
+html body #friendsSheet .invite-emblem img {display:block;width:100%;height:100%;object-fit:contain}
+html body #friendsSheet .invite-eyebrow {grid-area:tier;font-size:11px;letter-spacing:0;min-height:0}
+html body #friendsSheet h2 {grid-area:reward;gap:4px;margin:0}
+html body #friendsSheet h2 strong {font-size:38px;line-height:1.1}
+html body #friendsSheet h2 span {font-size:15px}
+html body #friendsSheet #inviteQualification {grid-area:terms;max-width:none;margin:0;font-size:13px;line-height:1.45}
+html body #friendsSheet #inviteWelcome {grid-area:welcome;margin:0;font-size:12px;line-height:1.45}
+html body #friendsSheet .invite-actions {grid-area:actions;display:grid;grid-template-columns:minmax(0,1fr) 83px;gap:8px;margin:3px 0 0}
+html body #friendsSheet .invite-actions button {min-height:48px;font-size:13px;padding:7px;margin:0}
+html body #friendsSheet .invite-actions .friends-share-btn {gap:5px}
+html body #friendsSheet .invite-actions .friends-share-btn span {font-size:17px}
+html body #friendsSheet .invite-status {grid-area:message}
+html body #friendsSheet .friends-summary-col {display:flex;flex-direction:column;align-items:flex-start;padding:11px;gap:3px}
+html body #friendsSheet .friends-summary-col span {font-size:12px}
+html body #friendsSheet .friends-summary-col strong {font-size:25px;line-height:1.2}
+html body #friendsSheet .invite-milestone {padding:12px}
+html body #friendsSheet .invite-milestone-top {font-size:13px;align-items:start}
+html body #friendsSheet #inviteTierName {max-width:45%;text-align:right;font-size:11px}
+.invite-pending {padding:9px 11px;font-size:12px;line-height:1.5;background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim)}
+.invite-play-links {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.invite-play-links button {font:inherit;font-size:12px;line-height:1.3;display:flex;align-items:center;justify-content:space-between;gap:5px;text-align:left;min-height:48px;padding:9px;background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);border-radius:var(--mint-corner);color:var(--mint-text)}
+.invite-friend-progress {list-style:none;padding:0;margin:0}
+.invite-friend-progress li {padding:10px 0;border-bottom:1px solid var(--mint-rim)}
+.invite-friend-progress .friend-heading {display:flex;justify-content:space-between;gap:8px;font-size:13px}.friend-heading strong {overflow-wrap:anywhere}.friend-heading span {font-size:11px;color:var(--mint-accent);flex:none}
+.invite-friend-progress small {display:block;font-size:11px;line-height:1.45;margin-top:4px;color:var(--mint-muted)}
+.invite-friend-progress progress {width:100%;height:5px;margin-top:6px;accent-color:var(--mint-accent)}
+/* Podiums are bounded even when there are only one or two real participants. */
+html body #leaderboardScreen {gap:7px}
+html body #leaderboardScreen .leaderboard-heading p {font-size:12px;line-height:1.4}
+html body #leaderboardScreen #lbContent {display:block;flex:1;min-height:0;overflow:auto;padding:2px 1px 8px}
+html body #leaderboardScreen #lbContent .lb-podium {display:grid;flex:none;min-height:0;max-height:none;gap:7px;align-items:end}
+html body #leaderboardScreen #lbContent .lb-podium > div {min-height:120px;height:auto;max-height:none;margin-top:0;padding:12px 6px;gap:6px}
+html body #leaderboardScreen #lbContent .lb-podium[data-count='1'] > div {display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;justify-items:start;min-height:78px;padding:12px;text-align:left}
+html body #leaderboardScreen #lbContent .lb-podium[data-count='2'] > div {min-height:114px}
+html body #leaderboardScreen #lbContent .lb-podium[data-count='3'] [data-place='1'] {min-height:145px}
+html body #leaderboardScreen #lbContent .lb-podium[data-count='3'] [data-place='2'] {min-height:128px}
+html body #leaderboardScreen #lbContent .lb-podium[data-count='3'] [data-place='3'] {min-height:116px}
+html body #leaderboardScreen .podium-medallion {filter:none;width:42px;height:42px;position:relative}
+html body #leaderboardScreen .podium-medallion :is(img,svg) {width:100%;height:100%;object-fit:contain;filter:none}
+html body #leaderboardScreen .lb-podium .podium-name {font-size:12px;line-height:1.3;white-space:normal;overflow-wrap:anywhere}
+html body #leaderboardScreen .lb-podium strong {font-size:18px}
+.vip-player-badge {display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin-left:4px;font-size:9px;color:var(--mint-accent);white-space:nowrap}
+.vip-player-badge img {display:inline-block;width:18px;height:16px;object-fit:contain}
+.lb-score-context {font-size:11px;line-height:1.5;color:var(--mint-muted);margin:9px 1px 0}
+html body #leaderboardScreen .lb-race-card {padding:13px;flex:none}
+html body #leaderboardScreen .lb-race-card p {font-size:13px;line-height:1.4}
+html body #leaderboardScreen .lb-race-value>strong {font-size:29px}
+html body #leaderboardScreen .lb-actions {flex:none;margin:0;padding:6px 0 0;gap:8px}
+html body #leaderboardScreen .lb-actions>button {min-height:46px}
+html body #leaderboardScreen .lb-footer {flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+html body #leaderboardScreen .lb-footer>button {min-height:46px;font-size:11px;line-height:1.3;padding:5px 2px}
+/* Ranked and practice play keep separate, unambiguous entry points. */
+html body #weeklySheet #weeklyBoard {flex:none;gap:11px}
+.weekly-scopes {display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.weekly-scopes button {min-height:44px;font:inherit;font-size:13px;color:var(--mint-text);background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);border-radius:var(--mint-corner)}
+.weekly-scopes button[aria-pressed=true] {border-color:var(--mint-accent);background:var(--mint-feature);color:var(--mint-highlight);font-weight:750}
+html body #weeklySheet .pilot-hero {padding:15px;gap:13px;min-height:100px}
+html body #weeklySheet .pilot-hero strong {font-size:34px}
+html body #weeklySheet .pilot-medal {width:48px;height:48px;font-size:30px}
+html body #weeklySheet .pilot-hero small {font-size:12px}
+html body #weeklySheet .pilot-hero div>span {font-size:12px;line-height:1.4}
+html body #weeklySheet .pilot-instructions {font-size:13px;line-height:1.5;margin:0}
+.weekly-times {font-size:12px;line-height:1.55;color:var(--mint-muted)}
+.weekly-times span {display:block}
+.weekly-practice {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px;border:1px solid var(--mint-rim);background:var(--mint-grain),var(--mint-plate);border-radius:var(--mint-corner)}
+.weekly-practice strong {display:block;font-size:14px}.weekly-practice small {display:block;font-size:11px;line-height:1.4;margin-top:3px;color:var(--mint-muted)}
+.weekly-practice button {flex:none;min-height:44px;font:inherit;font-size:12px;background:none;color:var(--mint-accent);border:1px solid var(--mint-edge);border-radius:var(--mint-corner);padding:8px}
+.weekly-practice-note {padding:10px;border:1px solid var(--mint-rim);font-size:12px;line-height:1.5;color:var(--mint-muted)}
+.weekly-award {font-size:12px;line-height:1.5;color:var(--mint-accent);padding:10px;border:1px solid var(--mint-rim)}
+html body #weeklySheet .pilot-standings {margin:0}
+html body #weeklySheet .pilot-standings li {min-height:48px;font-size:13px}
+html body #weeklySheet .pilot-standings li>span {min-width:0;overflow-wrap:anywhere}
+html body #weeklySheet .pilot-rules {margin-top:2px}
+html body #weeklySheet .pilot-rules summary {min-height:44px;font-size:13px}
+html body #weeklySheet .pilot-rules p {font-size:12px;line-height:1.5}
+html body #weeklySheet .pilot-target {padding:14px}
+html body #weeklySheet .pilot-tiles {gap:9px}
+html body #weeklySheet .pilot-tiles button {min-height:63px;font-size:27px}
+html body #weeklySheet .pilot-clock {font-size:13px}
+html body #weeklySheet .pilot-clock strong {font-size:24px}
+@media(max-width:350px){
+  html body :is(#coinShopSheet,#friendsSheet,#withdrawSheet,#vipOfferSheet,#weeklySheet) .sheet-body{padding:9px;padding-bottom:14px}
+  html body .sheet .vip-summary {grid-template-columns:43px minmax(0,1fr) 12px;padding:10px;gap:7px}
+  html body .sheet .vip-summary img {width:43px;height:40px}
+  html body .sheet .vip-summary strong {font-size:15px}
+  html body .sheet .vip-summary small {font-size:11px}
+  html body #coinShopSheet #coinPackList>.hub-product {grid-template-columns:minmax(0,1fr) 89px;padding:8px;gap:2px 7px}
+  html body #coinShopSheet #coinPackList>.hub-product .hub-product-coins {font-size:22px}
+  html body #coinShopSheet .hub-buy strong {font-size:15px}
+  .shop-section-heading {display:block}.shop-section-heading span {display:block;text-align:left;margin-top:2px}
+  html body #friendsSheet .invite-reward-card {padding:11px;grid-template-columns:minmax(0,1fr) 55px}
+  html body #friendsSheet .invite-emblem {width:55px;height:52px}
+  html body #friendsSheet h2 strong {font-size:32px}
+  html body #friendsSheet h2 span {font-size:13px}
+  html body #vipOfferSheet .vault-vip {padding:12px;gap:11px}
+  html body #vipOfferSheet .vault-vip h2 {font-size:21px}
+  .vip-offer-identity img {width:60px;height:54px}
+  html body #leaderboardScreen .lb-race-value {align-items:start;gap:5px;flex-wrap:wrap}
+  html body #leaderboardScreen .lb-race-value>span {font-size:12px}
+}

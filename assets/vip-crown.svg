@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 104" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="22" y1="18" x2="94" y2="92" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1ba"/><stop offset=".27" stop-color="#d6aa58"/><stop offset=".49" stop-color="#fff0ae"/><stop offset=".72" stop-color="#aa7830"/><stop offset="1" stop-color="#e7c782"/></linearGradient>
+    <linearGradient id="edge" x1="60" y1="64" x2="60" y2="96" gradientUnits="userSpaceOnUse"><stop stop-color="#fff3c6"/><stop offset=".45" stop-color="#be8a3c"/><stop offset=".65" stop-color="#edcd84"/><stop offset="1" stop-color="#72501f"/></linearGradient>
+    <radialGradient id="gem"><stop stop-color="#fff6b5"/><stop offset=".5" stop-color="#ffc85f"/><stop offset="1" stop-color="#a85d10"/></radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity=".6"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="m14 31 25 20L60 14l21 37 25-20-12 49H26L14 31Z" fill="url(#gold)" stroke="#6c4a22" stroke-width="3" stroke-linejoin="round"/>
+    <path d="m22 41 17 14L60 22l21 33 17-14-8 32H30l-8-32Z" stroke="#fff4ca" stroke-opacity=".7" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="m39 55 6 20M81 55l-6 20M60 25v49" stroke="#815320" stroke-opacity=".45" stroke-width="2"/>
+    <rect x="26" y="76" width="68" height="16" rx="4" fill="url(#edge)" stroke="#835823" stroke-width="2"/>
+    <path d="M30 80h60M30 88h60" stroke="#fff0bf" stroke-opacity=".7"/>
+    <path d="m60 49 8 11-8 11-8-11 8-11Z" fill="url(#gem)" stroke="#98632a" stroke-width="2"/>
+    <circle cx="14" cy="29" r="6" fill="url(#gold)" stroke="#8b612a" stroke-width="2"/>
+    <circle cx="60" cy="13" r="6" fill="url(#gold)" stroke="#8b612a" stroke-width="2"/>
+    <circle cx="106" cy="29" r="6" fill="url(#gold)" stroke="#8b612a" stroke-width="2"/>
+    <circle cx="38" cy="84" r="2" fill="#47361f"/><circle cx="82" cy="84" r="2" fill="#47361f"/>
+  </g>
+</svg>
