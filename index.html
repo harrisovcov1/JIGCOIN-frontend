@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v14-ready-refill-4">
+<meta name="jigcoin-build" content="v14-live-sdk-handler-5">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -6272,7 +6272,14 @@ function reportAdOutcome(code,owner,attemptId,stage,errorCode,elapsedMs) {
 async function ensureMonetagSDK(zone) {
   if(!/^[1-9][0-9]{0,14}$/.test(zone))throw Error('AD_ZONE_UNAVAILABLE');
   const method='show_'+zone;
-  if(typeof window[method]==='function')return window[method].bind(window);
+  // The SDK replaces its bootstrap queue after initialization. Resolve the
+  // live handler on every call, including the synchronous Watch click stack.
+  const show=options=>{
+    const handler=window[method];
+    if(typeof handler!=='function')throw Error('AD_SDK_FUNCTION_MISSING');
+    return handler.call(window,options);
+  };
+  if(typeof window[method]==='function')return show;
   if(!rewardedSDKs.has(zone)){
     const request=new Promise((resolve,reject)=>{
       const script=document.createElement('script');
@@ -6282,7 +6289,7 @@ async function ensureMonetagSDK(zone) {
       script.dataset.zone=zone;script.dataset.sdk=method;script.async=true;
       script.onload=()=>{
         if(typeof window[method]!=='function'){failed('AD_SDK_FUNCTION_MISSING');return;}
-        clearTimeout(timer);resolve(window[method].bind(window));
+        clearTimeout(timer);resolve(show);
       };
       script.onerror=()=>failed();document.head.appendChild(script);
     }).catch(error=>{rewardedSDKs.delete(zone);throw error;});

@@ -35,6 +35,55 @@ test('preparation loads the SDK and makes one server attempt/preload but never d
   assert.equal(h.calls.find(x=>x.options).options.timeout,15);assert.equal(h.prepared().status,'ready');
   assert.equal(h.mission.status,'pending');assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
 });
+test('SDK bootstrap handoff during mission start uses the current handler for preload',async()=>{
+  const h=setup({sdkLoaded:false}),bootstrapCalls=[],liveCalls=[];let finishStart;
+  // The real SDK exposes a queue stub before onload, then replaces that global
+  // after initialization. Calls added to the old, already-drained queue stall.
+  function bootstrap(options){bootstrapCalls.push(options);return new Promise(()=>{});}
+  function live(options){liveCalls.push({options,receiver:this});return Promise.resolve();}
+  h.ctx.document.head.appendChild=script=>{
+    h.scripts.push(script);queueMicrotask(()=>{h.ctx.window.show_123=bootstrap;script.onload();});
+  };
+  const api=h.ctx.apiPost;
+  h.ctx.apiPost=(path,body)=>{
+    const response=api(path,body);
+    return path==='/api/mission/start'?new Promise(resolve=>{finishStart=()=>resolve(response);}):response;
+  };
+  const preparing=h.prepare();await settle();assert.equal(typeof finishStart,'function');
+  h.ctx.window.show_123=live;finishStart();await settle();
+  h.advance(18000);await preparing;
+  assert.equal(bootstrapCalls.length,0);
+  assert.deepEqual(liveCalls.map(x=>x.options.type),['preload']);
+  assert.equal(liveCalls[0].receiver,h.ctx.window);assert.equal(h.prepared().status,'ready');
+});
+test('SDK bootstrap queued preload drains once and Watch synchronously uses the replacement handler',async()=>{
+  const h=setup(),queued=[],bootstrapCalls=[],liveCalls=[];
+  function bootstrap(options){bootstrapCalls.push(options);return new Promise((resolve,reject)=>queued.push({options,resolve,reject}));}
+  function live(options){liveCalls.push({options,receiver:this});return Promise.resolve(options.type==='preload'?undefined:{reward_event_type:'valued'});}
+  h.ctx.window.show_123=bootstrap;
+  const preparing=h.prepare();await settle();assert.equal(queued.length,1);assert.equal(queued[0].options.type,'preload');
+  h.ctx.window.show_123=live;
+  for(const item of queued.splice(0))Promise.resolve(live.call(h.ctx.window,item.options)).then(item.resolve,item.reject);
+  await preparing;h.calls.length=0;
+  const watching=h.watch(),immediateCalls=liveCalls.map(x=>x.options.type);
+  // Settle an incorrectly queued end as cleanup so the pre-fix regression
+  // reports an assertion failure instead of leaving an unfinished test.
+  for(const item of queued.splice(0))item.resolve({reward_event_type:'valued'});
+  await watching;
+  assert.deepEqual(bootstrapCalls.map(x=>x.type),['preload']);
+  assert.deepEqual(immediateCalls,['preload','end']);
+  assert.ok(liveCalls.every(x=>x.receiver===h.ctx.window));
+  assert.deepEqual(JSON.parse(JSON.stringify(liveCalls[1].options)),{ymid,requestVar:code,type:'end',timeout:2});
+  assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false);
+});
+test('SDK live handler lookup fails clearly if the global disappears after either loader path',async()=>{
+  for(const sdkLoaded of [true,false]){
+    const h=setup({sdkLoaded}),show=await h.ctx.ensureMonetagSDK('123');
+    delete h.ctx.window.show_123;
+    assert.throws(()=>show({ymid,requestVar:code,type:'preload'}),/AD_SDK_FUNCTION_MISSING/);
+    assert.equal(h.calls.some(x=>x.options),false);
+  }
+});
 test('Watch invokes end synchronously with the same identity and no preceding API/preload/SDK load',async()=>{
   const h=setup();await h.prepare();h.calls.length=0;
   const watching=h.watch();
