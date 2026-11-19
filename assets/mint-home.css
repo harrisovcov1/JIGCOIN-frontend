@@ -17,35 +17,34 @@
 }
 .mint-masthead {
   position:relative; isolation:isolate; display:grid; place-items:center; width:calc(100% + 24px);
-  align-self:center; padding:3px 13px 2px;
+  align-self:center; padding:3px 13px 1px;
   background-color:var(--mint-panel,#25272b);
   background-image:var(--mint-fascia,none),var(--home-steel);
   background-repeat:no-repeat; background-position:center; background-size:100% 100%;
   box-shadow:inset 0 -1px #ffffff19,inset 0 -5px 8px #0006;
 }
 .mint-wordmark {
-  display:flex; align-items:center; justify-content:center; gap:13px; width:76%; margin:0;
+  display:flex; align-items:center; justify-content:center; gap:9px; width:80%; margin:0;
   color:var(--mint-text,#eee9dd); text-shadow:0 1px 0 #000,0 2px 3px #000a,0 -1px #fff5;
-  font:600 clamp(23px,min(8cqw,4.8cqh),38px)/1.06 Georgia,"Times New Roman",serif; letter-spacing:.012em;
+  font:600 clamp(36px,11.6cqw,48px)/1 Georgia,"Times New Roman",serif; letter-spacing:.012em;
 }
 .mint-wordmark::before,.mint-wordmark::after { content:""; width:clamp(12px,8vw,39px); height:1px; background:linear-gradient(90deg,transparent,var(--mint-metal,#9d9688)); }
 .mint-wordmark::after { transform:rotate(180deg); }
 #mainScroll #homeSessionControls.mint-instruments {
-  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; width:calc(100% - 64px); margin:0;
-  min-height:44px; gap:8px; padding:0; container-type:normal;
+  display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; width:100%; margin:0;
+  min-height:44px; gap:6px; padding:0; container-type:normal;
 }
 #mainScroll #homeJourneyOpen {
-  grid-column:1; grid-row:1; justify-self:start; display:grid; grid-template-columns:minmax(0,1fr) 9px; grid-template-rows:10px minmax(0,1fr); column-gap:4px; align-items:center;
-  position:relative; isolation:isolate; width:100%; height:44px; min-width:0; min-height:44px; padding:4px 9px;
+  grid-column:2; grid-row:1; justify-self:center; display:grid; place-items:center;
+  position:relative; isolation:isolate; width:max-content; max-width:min(156px,46cqw); height:44px; min-width:96px; min-height:44px; padding:6px 20px;
   border:0; border-radius:0; background:transparent; box-shadow:none; color:var(--mint-ink,#181614);
-  font:750 clamp(11.5px,3.3cqw,14px)/1.08 system-ui,sans-serif; letter-spacing:.02em; text-shadow:0 1px #ffffff70;
-  cursor:pointer; text-align:left; white-space:normal; touch-action:manipulation;
+  font:750 clamp(12px,3.7cqw,16px)/1.1 system-ui,sans-serif; letter-spacing:.06em; text-shadow:0 1px #ffffff70;
+  cursor:pointer; text-align:center; white-space:nowrap; touch-action:manipulation;
 }
-#homeJourneyOpen .mint-rank-label { grid-column:1; grid-row:1; font:700 8px/10px system-ui,sans-serif; letter-spacing:.15em; text-transform:uppercase; opacity:.8; }
-#homeJourneyOpen #rankName { grid-column:1; grid-row:2; min-width:0; overflow-wrap:normal; }
-#homeJourneyOpen .mint-rank-chevron { grid-column:2; grid-row:1 / 3; justify-self:end; font:400 21px/1 system-ui,sans-serif; }
+#homeJourneyOpen #rankName { min-width:0; }
+#homeJourneyOpen .mint-rank-chevron { position:absolute; right:8px; top:50%; transform:translateY(-50%); font:400 15px/1 system-ui,sans-serif; opacity:.8; }
 #homeJourneyOpen::before {
-  content:""; z-index:-1; position:absolute; inset:2px 0; clip-path:var(--home-bevel);
+  content:""; z-index:-1; position:absolute; inset:7px 0; clip-path:var(--home-bevel);
   background:var(--home-satin),linear-gradient(180deg,var(--mint-highlight,#e9cc99),var(--mint-accent,#c99a62) 32%,color-mix(in srgb,var(--mint-accent,#c99a62) 65%,var(--mint-ink,#211b14)) 92%,var(--mint-highlight,#e9cc99));
   box-shadow:inset 0 1px #fff9,inset 0 -2px #0009;
 }
@@ -56,24 +55,24 @@
 #mainScroll #homeSaveStatus[hidden] { display:none; }
 #homeSaveStatus svg { width:22px; height:22px; filter:drop-shadow(0 1px 1px #000); }
 #mainScroll #homeBoostAction {
-  grid-column:2; grid-row:1; justify-self:end; position:relative; align-self:center; display:grid; place-items:center; width:100%; max-width:100%; height:44px; min-height:44px; margin:0;
-  padding:3px 17px 3px 27px; border:1px solid color-mix(in srgb,var(--mint-accent,#bc956a) 70%,var(--mint-panel,#292b30)); border-radius:4px;
-  background:var(--home-satin),linear-gradient(125deg,color-mix(in srgb,var(--mint-accent,#bc956a) 13%,var(--mint-panel,#292b30)),var(--mint-ink,#131417)); box-shadow:var(--home-inlay);
-  color:var(--mint-text,#eee9dd); font:650 clamp(10.5px,2.85cqw,12px)/1.2 system-ui,sans-serif;
-  letter-spacing:0; text-align:left; text-shadow:0 1px 1px #000; white-space:normal; cursor:pointer; touch-action:manipulation;
+  grid-column:3; grid-row:1; justify-self:end; position:relative; align-self:center; display:grid; place-items:center; width:100%; max-width:108px; height:44px; min-height:44px; margin:0;
+  padding:3px 12px 3px 19px; border:0; border-radius:4px;
+  background:transparent; box-shadow:none;
+  color:var(--mint-muted,#c4beb4); font:550 clamp(10px,2.6cqw,11px)/1.2 system-ui,sans-serif;
+  letter-spacing:0; text-align:center; text-shadow:0 1px 2px #000; white-space:normal; cursor:pointer; touch-action:manipulation;
 }
 #mainScroll #homeBoostAction::before {
-  content:""; display:block; position:absolute; left:8px; top:50%; width:14px; height:17px; transform:translateY(-50%); background:var(--mint-highlight,#ebcd9c); clip-path:none;
+  content:""; display:block; position:absolute; left:3px; top:50%; width:11px; height:13px; transform:translateY(-50%); background:currentColor; clip-path:none;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4m-5 2v6m-4 0h8m-9 2h10'/%3E%3C/svg%3E") center / contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4m-5 2v6m-4 0h8m-9 2h10'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 #mainScroll #homeBoostAction[data-focus="sp_emergency_energy"]::before {
   -webkit-mask:none; mask:none; clip-path:polygon(44% 0,100% 0,66% 40%,100% 40%,17% 100%,38% 54%,5% 54%);
 }
-#mainScroll #homeBoostAction::after { content:""; position:absolute; right:7px; top:50%; width:5px; height:5px; border-right:1.5px solid var(--mint-highlight,#ebcd9c); border-top:1.5px solid var(--mint-highlight,#ebcd9c); transform:translateY(-50%) rotate(45deg); }
+#mainScroll #homeBoostAction::after { content:""; position:absolute; right:3px; top:50%; width:4px; height:4px; border-right:1px solid currentColor; border-top:1px solid currentColor; transform:translateY(-50%) rotate(45deg); }
 #mainScroll #homeBoostAction::first-line { color:inherit; font:inherit; }
 #mainScroll #homeBoostAction[data-focus="sp_emergency_energy"],#mainScroll #homeSaveStatus[data-state="error"] { color:var(--mint-highlight,#ebcd9c); }
-#mainScroll #homeBoostAction:not(:disabled):active { box-shadow:inset 0 2px 5px #000b; filter:brightness(.88); }
+#mainScroll #homeBoostAction:not(:disabled):active { background:#0005; }
 #mainScroll #homeJourneyOpen:active::before { filter:brightness(.88); }
 #mainScroll #homeSaveStatus:active { background:#0007; }
 #mainScroll.home-compact .mint-dashboard .home-balance-card {
@@ -200,14 +199,14 @@
 #mainScroll .streak-strip-copy #hubDailyProgress {border-left:1px solid var(--mint-edge,#666);padding-left:8px;margin:0;font-weight:480;color:var(--mint-muted,#c4c1bb);}
 #mainScroll :is(button,a):focus-visible {outline:2px solid var(--mint-highlight,#f1d093);outline-offset:-3px; }
 @container (min-height:720px) {
-  .mint-masthead {padding-block:6px 3px;}
+  .mint-masthead {padding-block:5px 2px;}
   #mainScroll #homeSessionControls.mint-instruments,#mainScroll #homeJourneyOpen,#mainScroll #homeSaveStatus,#mainScroll #homeBoostAction {min-height:44px;}
   #mainScroll .home-shortcuts .daily-summary {min-height:46px;}
   #mainScroll #mintPressCard .mint-chamber-caption {min-height:40px;}
 }
 @container (max-height:520px) {
   .mint-masthead {padding-block:1px 0;}
-  #mainScroll .mint-masthead .mint-wordmark {font-size:22px;}
+  #mainScroll .mint-masthead .mint-wordmark {font-size:34px;}
   #mainScroll .mint-dashboard {gap:2px;padding-bottom:4px!important;}
   #mainScroll #homeSessionControls.mint-instruments,#mainScroll #homeSaveStatus,#mainScroll #homeJourneyOpen,#mainScroll #homeBoostAction {min-height:44px;}
   #mainScroll #mintPressCard .mint-chamber-caption {top:3%;min-height:25px;}
