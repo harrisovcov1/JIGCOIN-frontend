@@ -10,7 +10,7 @@ function harness({touch=true,storage=new Map(),energy=50}={}) {
  const ctx = {window:{__lastState:{recovery_test:true,recovery_gameplay:true},Telegram:{WebApp:{initDataUnsafe:{user:{id:123}}}},PointerEvent: function(){},addEventListener(){}},
  perTapBase:1,maxEnergy:50,setInterval(){},navigator:{maxTouchPoints:touch?5:0,get onLine(){return online;}},document:{hidden:false,addEventListener(){},getElementById:()=>el},
  tg:null,state:{energy,bal:100,today:0},Date:{now:()=>clock,parse:Date.parse},vaultNow:()=>clock,__lastPointerTapAt:0,__stateRequestVersion:0,
- accountIsReady:()=>true,safeParseJSON:(v,f)=>v?JSON.parse(v):f,
+ accountIsReady:()=>true,homeUserId:()=>ctx.window.Telegram.WebApp.initDataUnsafe.user.id,safeParseJSON:(v,f)=>v?JSON.parse(v):f,
  appStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>(storage.set(k,v),true)},
  setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},
  makePacketId:()=>`packet_${clock}_${++id}`,showToast(){},render(){ctx.updateRecoveryTapFeedback();},updateTaskCardStates(){},
@@ -55,7 +55,7 @@ test('response lost after commit retries identical ID and never doubles credit',
 });
 test('transient failure retries automatically without another touch',async()=>{const h=harness();h.touch();h.fail();await h.flush();assert.equal(h.total(),0);await h.tick();assert.equal(h.total(),1);});
 test('reload preserves pending packet and received counter',async()=>{const h=harness();h.touch();h.fail();await h.flush();const q=h.ctx.readRecoveryQueue();const re=harness({storage:h.storage});await re.flush();assert.equal(re.calls[0].packet_id,q.packet.packet_id);assert.equal(re.ctx.readRecoveryQueue().confirmed,1);});
-test('energy capacity excludes queued taps; no invisible over-credit',async()=>{const h=harness({energy:8});for(let i=0;i<10;i++)h.touch();assert.equal(h.ctx.readRecoveryQueue().received,8);assert.match(h.el.textContent,/Energy/);await h.flush();assert.equal(h.total(),8);});
+test('energy capacity excludes queued taps; no invisible over-credit',async()=>{const h=harness({energy:8});for(let i=0;i<10;i++)h.touch();assert.equal(h.ctx.readRecoveryQueue().received,8);assert.match(h.el.textContent,/pending taps/);await h.flush();assert.equal(h.total(),8);});
 test('server partial acceptance is explicitly counted as limited',async()=>{const h=harness();for(let i=0;i<10;i++)h.touch();h.limit(6);await h.flush();assert.equal(h.ctx.readRecoveryQueue().confirmed,6);assert.equal(h.ctx.readRecoveryQueue().limited,4);assert.match(h.el.textContent,/4 limited/);});
 test('mouse pointer clicks count once and keyboard remains usable',async()=>{const h=harness({touch:false});for(let i=0;i<10;i++){h.pointer();h.click();}h.advance(1000);h.click(0);await h.flush();assert.equal(h.total(),11);});
 test('disabled countdown has explicit foreground and WebKit text colour',()=>{assert.match(html,/\.boost-action:disabled[^}]*opacity:1[^}]*color:#cbd5e1;[^}]*-webkit-text-fill-color:#cbd5e1/s);});
@@ -89,4 +89,20 @@ test('server rejection corrects projected balance instead of persisting fake poi
  const h=harness();for(let i=0;i<10;i++)h.touch();h.limit(6);
  assert.equal(h.ctx.recoveryTapView(h.ctx.state).bal,110);await h.flush();
  assert.equal(h.ctx.recoveryTapView(h.ctx.state).bal,106);
+});
+
+test('zero-energy touches stay quiet in both gameplay paths and do not create queued taps',()=>{
+ for(const recovery of [true,false]){
+  const h=harness({energy:0}),toasts=[];h.ctx.showToast=message=>toasts.push(message);
+  if(!recovery)h.ctx.window.__lastState={};
+  h.touch();assert.deepEqual(toasts,[]);assert.equal(h.storage.size,0);assert.equal(h.calls.length,0);
+  if(recovery)assert.doesNotMatch(h.el.textContent,/reserved|wait for confirmation or refill/);
+ }
+});
+test('recovery refill handoff follows durable acknowledgement with the busy flag released',async()=>{
+ const h=harness(),handoffs=[];
+ h.ctx.resumeRefillAfterTapAck=owner=>handoffs.push({owner,pending:h.ctx.readRecoveryQueue().pending,packet:h.ctx.readRecoveryQueue().packet,busy:h.ctx.window.__recoveryTapBusy});
+ h.touch();h.fail();await h.flush();assert.equal(handoffs.length,0);
+ await h.tick();assert.deepEqual(handoffs,[{owner:123,pending:0,packet:null,busy:false}]);
+ assert.equal(h.ctx.readRecoveryQueue().confirmed,1);
 });
