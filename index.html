@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v14-refill-recovery-2">
+<meta name="jigcoin-build" content="v14-refill-recovery-3">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -6231,6 +6231,10 @@ async function loadMomentumShields() {
 // Loaded on an explicit rewarded-quest action, once per page. The private
 // postback secret is never present in this client or its API responses.
 const rewardedSDKs = new Map();
+// Allow a slower provider load while keeping preparation bounded. This budget
+// never limits the time spent viewing an advert and does not schedule retries.
+const MONETAG_LOAD_TIMEOUT_SECONDS = 15;
+const MONETAG_PRELOAD_DEADLINE_MS = 18000;
 function monetagOutcomeCode(error,stage) {
   const message=String(error?.message||error||'');
   if(message==='AD_EXIT'||message==='ACCOUNT_CHANGED')return 'FLOW_CANCELLED';
@@ -6239,7 +6243,8 @@ function monetagOutcomeCode(error,stage) {
   if(stage==='start')return message==='AD_INVALID_ATTEMPT'?'INVALID_ATTEMPT':'START_FAILED';
   if(stage==='confirmation')return 'CLAIM_FAILED';
   if(message==='AD_NOT_REWARDED')return 'NOT_REWARDED';
-  if(message==='AD_PRELOAD_TIMEOUT'||/^Timeout$/i.test(message))return 'SDK_TIMEOUT';
+  if(message==='AD_PRELOAD_TIMEOUT')return 'PRELOAD_DEADLINE';
+  if(/^Timeout$/i.test(message))return 'SDK_TIMEOUT';
   if(/^(Empty feed|No fill)$/i.test(message))return 'NO_FILL';
   if(/^Network error$/i.test(message))return 'NETWORK_ERROR';
   if(/^Ad is not ready$/i.test(message))return 'AD_NOT_READY';
@@ -6247,15 +6252,19 @@ function monetagOutcomeCode(error,stage) {
   if(/^Failed to (render Telegram banner|open pop|verify the ad show)$/i.test(message))return 'DISPLAY_FAILED';
   return 'UNKNOWN';
 }
-function reportAdOutcome(code,owner,attemptId,stage,errorCode) {
+function adElapsedMs(startedAt) {
+  return Math.min(300000,Math.max(0,Math.floor(performance.now()-startedAt)));
+}
+function reportAdOutcome(code,owner,attemptId,stage,errorCode,elapsedMs) {
   if(code!=='sp_emergency_energy'||owner!==homeUserId()||!accountIsReady())return;
   const validAttempt=typeof attemptId==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(attemptId);
   if(!validAttempt&&!['sdk_load','start'].includes(stage))return;
   // Diagnostics are best-effort. Neither this request nor an SDK result grants energy.
   void Promise.resolve().then(()=>{
     if(owner!==homeUserId()||!accountIsReady())return;
-    return apiPost('/api/mission/outcome',{code,attempt_id:validAttempt?attemptId:null,stage,error_code:errorCode},
-      {tapOwner:owner,silent:true,timeoutMs:4000});
+    const outcome={code,attempt_id:validAttempt?attemptId:null,stage,error_code:errorCode};
+    if(Number.isFinite(elapsedMs))outcome.elapsed_ms=Math.min(300000,Math.max(0,Math.floor(elapsedMs)));
+    return apiPost('/api/mission/outcome',outcome,{tapOwner:owner,silent:true,timeoutMs:4000});
   }).catch(()=>{});
 }
 async function ensureMonetagSDK(zone) {
@@ -6283,8 +6292,8 @@ async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
   const owner=homeUserId(),mission=hubMissions.find(m=>m.code===code);
   if(!owner||missionsOwner!==owner||mission?.provider!=='monetag'||mission.status!=='available')throw Error('AD_REWARDS_UNAVAILABLE');
   const zone=String(mission.zone_id||'');
-  let stage='sdk_load',attemptId=null,preloadTimer;
-  const enter=value=>{stage=value;onStage(stage,attemptId);};
+  let stage='sdk_load',attemptId=null,preloadTimer,stageStartedAt=performance.now();
+  const enter=value=>{stage=value;stageStartedAt=performance.now();onStage(stage,attemptId);};
   try{
     enter('sdk_load');
     const show=await ensureMonetagSDK(zone);
@@ -6300,10 +6309,10 @@ async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
     attemptId=attempt.ymid;
     enter('preload');
     if(!stillHere())throw Error('AD_EXIT');
-    const options={ymid:attemptId,requestVar:code,timeout:8};
+    const options={ymid:attemptId,requestVar:code,timeout:MONETAG_LOAD_TIMEOUT_SECONDS};
     // Bound preparation even if the SDK does not settle its own load timeout.
     // Never apply that deadline to the time a player spends watching an advert.
-    const loadDeadline=new Promise((_,reject)=>{preloadTimer=setTimeout(()=>reject(Error('AD_PRELOAD_TIMEOUT')),12000);});
+    const loadDeadline=new Promise((_,reject)=>{preloadTimer=setTimeout(()=>reject(Error('AD_PRELOAD_TIMEOUT')),MONETAG_PRELOAD_DEADLINE_MS);});
     await Promise.race([show({...options,type:'preload'}),loadDeadline]);
     clearTimeout(preloadTimer);preloadTimer=null;
     if(!stillHere())throw Error('AD_EXIT');
@@ -6312,14 +6321,17 @@ async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
     // Closing an advert also resolves the SDK promise. Only the server receipt
     // can grant energy; an explicitly non-valued result is not a pending reward.
     if(result?.reward_event_type==='non_valued')throw Error('AD_NOT_REWARDED');
-    reportAdOutcome(code,owner,attemptId,'display','SDK_RETURNED');
+    if(stillHere())reportAdOutcome(code,owner,attemptId,'display','SDK_RETURNED',adElapsedMs(stageStartedAt));
     return result;
   }catch(e){
     const errorCode=monetagOutcomeCode(e,stage);
     const failure=Error(errorCode==='NO_FILL'?'AD_NO_FILL':String(e?.message||e||'AD_UNKNOWN'));
     failure.adStage=stage;failure.adCode=errorCode;failure.adAttempt=attemptId;
-    reportAdOutcome(code,owner,attemptId,stage,errorCode);
-    failure.adReported=true;
+    failure.adElapsedMs=adElapsedMs(stageStartedAt);
+    // The action owns cancellation reporting. A late SDK failure must not
+    // turn that single cancellation into a second apparent failed attempt.
+    failure.adReported=stillHere();
+    if(failure.adReported)reportAdOutcome(code,owner,attemptId,stage,errorCode,failure.adElapsedMs);
     throw failure;
   }finally{clearTimeout(preloadTimer);}
 }
@@ -6478,8 +6490,11 @@ function currentAdNotice() {
   const healthy=adNotice.code==='sp_emergency_energy' && !homeEnergyLow(Number(state.energy),Number(maxEnergy));
   const refreshed=hubMissionLoadedAt>adNotice.at;
   const reset=refreshed && adNotice.attempt_id && ['available','cooldown'].includes(mission?.status);
-  if(adNotice.owner!==homeUserId() || (!active && !claimable &&
-    (healthy || reset || (adNotice.kind==='error' && Date.now()-adNotice.at>=60000))))adNotice=null;
+  // Regeneration can make the refill card disappear during a failed load.
+  // Keep its explanation/help readable below rank progress for one minute.
+  const freshError=adNotice.kind==='error' && Date.now()-adNotice.at<60000;
+  if(adNotice.owner!==homeUserId() || (!active && claimable) || (!active && !freshError &&
+    (healthy || reset || adNotice.kind==='error')))adNotice=null;
   return adNotice;
 }
 function renderBoostCards() {
@@ -6609,12 +6624,12 @@ async function performBoostAction(code) {
   if(view.action==='play'){backToHome();return;}
   if(view.action==='start' && (code!=='sp_emergency_energy' || !window.JigPilot?.canRefill() ||
       !homeEnergyLow(Number(state.energy),Number(maxEnergy))))return;
-  let active=true,stage=view.action==='claim'?'confirmation':'sdk_load',attemptId=view.action==='claim'?mission.attempt_id:null;
+  let active=true,stage=view.action==='claim'?'confirmation':'sdk_load',attemptId=view.action==='claim'?mission.attempt_id:null,stageStartedAt=performance.now();
   const cancelled=new Promise((_,reject)=>{rewardWait=()=>{active=false;reject(Error('AD_EXIT'));};});
   const here=()=>active && homeUserId()===owner && accountIsReady() && boostSheet.classList.contains('show');
   window.__rewardActionBusy=true;boostBusyCode=code;
   const setStage=(value,id=attemptId)=>{
-    stage=value;attemptId=id;
+    stage=value;attemptId=id;stageStartedAt=performance.now();
     if(!here())return;
     boostStage=stage;
     const messages={sdk_load:'Loading the advert service…',start:'Preparing your optional refill…',preload:'Loading an advert. You can return to play at any time.',display:'Opening the advert. Your refill follows provider confirmation.',confirmation:'Checking your refill confirmation…'};
@@ -6633,7 +6648,7 @@ async function performBoostAction(code) {
       if(here() && confirmed?.status==='claimable')await Promise.race([claimBoostReward(code,confirmed),cancelled]);
       else {
         adNotice={owner,code,kind:'pending',at:Date.now(),attempt_id:attemptId,stage,text:'Refill not confirmed yet. You can play while we check.'};
-        reportAdOutcome(code,owner,attemptId,'confirmation','RECEIPT_PENDING');
+        reportAdOutcome(code,owner,attemptId,'confirmation','RECEIPT_PENDING',adElapsedMs(stageStartedAt));
         return;
       }
     }
@@ -6642,7 +6657,7 @@ async function performBoostAction(code) {
     if(owner!==homeUserId())return;
     stage=error.adStage||stage;attemptId=error.adAttempt??attemptId;
     const errorCode=error.adCode||monetagOutcomeCode(error,stage);
-    if(!error.adReported)reportAdOutcome(code,owner,attemptId,stage,errorCode);
+    if(!error.adReported)reportAdOutcome(code,owner,attemptId,stage,errorCode,error.adElapsedMs??adElapsedMs(stageStartedAt));
     const notices={
       SDK_LOAD_FAILED:'The advert service could not load. Check your connection and try again.',
       SDK_LOAD_TIMEOUT:'The advert service took too long to load. Please try again shortly.',
@@ -6652,6 +6667,7 @@ async function performBoostAction(code) {
       NO_FILL:'No advert is available right now. Energy keeps refilling automatically.',
       NETWORK_ERROR:stage==='display'?'The advert could not open. Check your connection and try again.':'The advert could not load. Check your connection and try again.',
       SDK_TIMEOUT:'No advert loaded in time. You can try again after the short wait.',
+      PRELOAD_DEADLINE:'The advert service did not finish loading. You can try again after the short wait.',
       AD_NOT_READY:'The advert is not ready yet. Please try again shortly.',
       DISPLAY_REJECTED:'The advert could not open. Please try again after the short wait.',
       DISPLAY_FAILED:'The advert could not open or finish. Please try again after the short wait.',

@@ -8,6 +8,7 @@ const goalCode=html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const
 const attemptId='12345678-1234-4123-8123-123456789abc';
 function setup({status='available',confirm=false,energy=3}={}) {
   const elements={},events={},calls=[],toasts=[],outcomes=[];let refreshes=0,visible=true,now=Date.now();
+  class ClockDate extends Date {static now(){return now;}}
   const element=id=>elements[id]||(elements[id]={dataset:{},classList:{remove(){},add(){},toggle(){}},setAttribute(){},replaceChildren(){},addEventListener(n,fn){events[id+':'+n]=fn;},scrollIntoView(){}});
   const missions=['sp_emergency_energy','sp_double_points','sp_visit_partner'].map(code=>({code,provider:'monetag',status,payout_amount:code==='sp_visit_partner'?200:0,cooldown_seconds:code==='sp_double_points'?1800:300,cooldown_hours:1,countdown_as_of_ms:now,attempt_id:status==='claimable'?'verified-attempt':null}));
   const list=element('rewardChoices');
@@ -22,7 +23,7 @@ function setup({status='available',confirm=false,energy=3}={}) {
     card.dataset.boostCode=code;
     element(button).closest=()=>card;
   }
-  const ctx={Date,Promise,console,navigator:{onLine:true},openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true}},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
+  const ctx={Date:ClockDate,performance:{now:()=>now},Promise,console,navigator:{onLine:true},openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true}},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
     homeIdentity:101,homeConfirmedBalance:49000,formatNumber:n=>n.toLocaleString('en-GB'),setCoinArtwork:(el,tier)=>{el.dataset.artwork=String(tier);},
     dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
     boostSheet:{classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
@@ -36,7 +37,7 @@ function setup({status='available',confirm=false,energy=3}={}) {
   };
   vm.createContext(ctx);vm.runInContext(goalCode+diagnosticCode+html.slice(html.indexOf('function homeEnergyLow('),html.indexOf('function homeCoinUnlock('))+code,ctx);
   vm.runInContext('missionsOwner=101;',ctx);
-  return {ctx,calls,toasts,events,elements,missions,outcomes,refreshes:()=>refreshes,setVisible:v=>visible=v};
+  return {ctx,calls,toasts,events,elements,missions,outcomes,refreshes:()=>refreshes,setVisible:v=>visible=v,advance:ms=>{now+=ms;}};
 }
 test('a low-energy refill requires a verified provider receipt to claim',async()=>{
   const h=setup({confirm:true});
@@ -119,6 +120,32 @@ test('leaving a stalled advert releases the lock; a later receipt remains claima
   assert.equal(h.calls[0][1].attempt_id,'confirmed-after-close');
   assert.equal(h.refreshes(),1);
 });
+test('canceling a real pending preload records one outcome even when its watchdog fires later',async()=>{
+  const h=setup(),timers=new Map();let sequence=0;
+  h.ctx.setTimeout=(fn,delay)=>{const id=++sequence;timers.set(id,{fn,delay});return id;};
+  h.ctx.clearTimeout=id=>timers.delete(id);
+  h.missions[0].zone_id='123';
+  h.ctx.window.show_123=options=>{h.calls.push(['sdk',options]);return new Promise(()=>{});};
+  const api=h.ctx.apiPost;
+  h.ctx.apiPost=async(path,body)=>{
+    if(path==='/api/mission/start'){
+      h.missions[0].status='pending';
+      return {ok:true,provider:'monetag',zone_id:'123',ymid:attemptId,request_var:body.code};
+    }
+    return api(path,body);
+  };
+  vm.runInContext(html.slice(html.indexOf('const rewardedSDKs ='),html.indexOf('// Unified Rewards.')),h.ctx);
+  const action=h.ctx.performBoostAction('sp_emergency_energy');
+  for(let i=0;i<20;i++)await Promise.resolve();
+  h.advance(9000);h.setVisible(false);h.ctx.stopRewardWait();await action;
+  assert.equal(h.outcomes.length,1);assert.equal(h.outcomes[0].error_code,'FLOW_CANCELLED');
+  assert.equal(h.outcomes[0].stage,'preload');assert.equal(h.outcomes[0].attempt_id,attemptId);assert.equal(h.outcomes[0].elapsed_ms,9000);
+  h.advance(9000);for(const timer of [...timers.values()])if(timer.delay===18000)timer.fn();
+  for(let i=0;i<20;i++)await Promise.resolve();
+  assert.equal(h.outcomes.length,1,'the abandoned preload watchdog must not report another failure');
+  assert.equal(h.calls.filter(call=>call[0]==='sdk'&&call[1].type==='end').length,0);
+  assert.equal(h.ctx.window.__rewardActionBusy,false);assert.equal(h.ctx.state.energy,3);
+});
 test('full energy, active double points and cooldown expiry cannot authorize an advert',async()=>{
   const h=setup({energy:50});await h.ctx.performBoostAction('sp_emergency_energy');
   h.ctx.state.doubleBoostUntil=new Date(Date.now()+300000).toISOString();await h.ctx.performBoostAction('sp_double_points');
@@ -182,9 +209,9 @@ test('one reward panel contains three actions with no duplicate task screen or c
   h.missions[0].status='claimable';h.missions[0].attempt_id='confirmed';h.ctx.state.energy=55;
   assert.match(h.ctx.getBoostView('sp_emergency_energy',h.missions[0]).detail,/\+5 energy now \(up to 60\)/);
 });
-test('healthy energy hides an unconfirmed failed attempt and obsolete help without losing late receipt polling',async()=>{
+test('healthy energy hides an expired failed-ad notice without losing late receipt polling',async()=>{
   const h=setup({status:'pending',energy:13});h.ctx.maxEnergy=55;
-  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now(),attempt_id:'${attemptId}',stage:'preload',error_code:'SDK_TIMEOUT',text:'Old error'};boostNextPoll=0;`,h.ctx);
+  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-60001,attempt_id:'${attemptId}',stage:'preload',error_code:'SDK_TIMEOUT',text:'Old error'};boostNextPoll=0;`,h.ctx);
   h.ctx.renderBoostCards();
   assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,true);
   assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.elements.boostHelp.hidden,true);
@@ -195,20 +222,37 @@ test('healthy energy hides an unconfirmed failed attempt and obsolete help witho
   assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,false);
   assert.equal(h.elements.rewardsCollectionCard.hidden,true);assert.equal(h.elements.energyBoostAction.dataset.action,'claim');
 });
-test('a fresh available state clears old attempted-ad errors and their support reference',()=>{
+test('an available state clears expired attempted-ad errors and their support reference',()=>{
   const h=setup();
-  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-5000,attempt_id:'${attemptId}',stage:'preload',error_code:'NO_FILL',text:'Old error'};`,h.ctx);
+  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-60001,attempt_id:'${attemptId}',stage:'preload',error_code:'NO_FILL',text:'Old error'};`,h.ctx);
   h.ctx.renderBoostCards();assert.equal(vm.runInContext('adNotice',h.ctx),null);assert.equal(h.elements.boostHelp.hidden,true);
 });
-test('current failed preload shows a safe support reference, then clears when energy recovers',async()=>{
-  const h=setup();h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{onStage('preload',attemptId);h.missions[0].status='pending';throw Error('Network error');};
+test('a fresh preload timeout survives natural regeneration and a status refresh while rank progress fills the card',async()=>{
+  const h=setup({energy:11});h.ctx.maxEnergy=55;
+  h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{
+    onStage('preload',attemptId);h.missions[0].status='pending';
+    h.advance(10000);h.ctx.state.energy=14;throw Error('Timeout');
+  };
   await h.ctx.performBoostAction('sp_emergency_energy');
-  assert.match(h.elements.boostCooldownNote.textContent,/could not load/);
-  assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostHelpText.textContent,/PRELOAD \/ NETWORK_ERROR/);
+  assert.match(h.elements.boostCooldownNote.textContent,/No advert loaded in time/);
+  assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostHelpText.textContent,/PRELOAD \/ SDK_TIMEOUT/);
   assert.equal(h.outcomes.length,1);assert.equal(h.outcomes[0].attempt_id,attemptId);
-  h.ctx.state.energy=13;h.ctx.maxEnergy=55;h.ctx.renderBoostCards();
-  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.elements.boostHelp.hidden,true);
-  assert.doesNotMatch(h.elements.boostCooldownNote.textContent,/could not load/);
+  assert.equal(h.outcomes[0].elapsed_ms,10000);
+  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,true);
+  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.calls.length,0);
+  h.advance(1000);h.missions[0].status='available';await h.ctx.refreshBoostMissions();
+  assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostCooldownNote.textContent,/No advert loaded in time/);
+  h.advance(59000);h.ctx.renderBoostCards();
+  assert.equal(h.elements.boostHelp.hidden,true);assert.doesNotMatch(h.elements.boostCooldownNote.textContent,/No advert loaded in time/);
+});
+test('a later confirmed receipt supersedes a fresh error and remains claimable at healthy energy',async()=>{
+  const h=setup({status:'pending',energy:14});h.ctx.maxEnergy=55;
+  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now(),attempt_id:'${attemptId}',stage:'preload',error_code:'SDK_TIMEOUT',text:'No advert loaded in time'};`,h.ctx);
+  h.ctx.renderBoostCards();assert.equal(h.elements.boostHelp.hidden,false);
+  h.missions[0].status='claimable';h.missions[0].attempt_id=attemptId;await h.ctx.refreshBoostMissions();
+  assert.equal(h.elements.boostHelp.hidden,true);assert.match(h.elements.boostCooldownNote.textContent,/advert is confirmed/);
+  assert.equal(h.elements.energyBoostAction.dataset.action,'claim');assert.equal(h.elements.rewardsCollectionCard.hidden,true);
+  assert.equal(h.calls.length,0,'rendering a receipt does not grant energy');assert.equal(h.ctx.state.energy,14);
 });
 test('a long displayed advert stays active beyond 45 seconds and claims only the later verified receipt',async()=>{
   const h=setup();let finish;const timers=[];

@@ -6,7 +6,7 @@ const code='sp_emergency_energy',ymid='12345678-1234-4123-8123-123456789abc';
 function setup({result={reward_event_type:'valued'},failure,loadFailure=false,failureStage='preload'}={}) {
   const calls=[],scripts=[],stages=[];
   let owner=101,visible=true;
-  const ctx={Map,Error,Promise,setTimeout,clearTimeout,
+  const ctx={Map,Error,Promise,setTimeout,clearTimeout,performance:{now:()=>0},
     homeUserId:()=>owner,accountIsReady:()=>true,missionsOwner:101,
     hubMissions:[{code,provider:'monetag',status:'available',zone_id:'123'}],window:{},
     apiPost:async(path,body)=>{calls.push({path,body});return {ok:true,provider:'monetag',zone_id:'123',ymid,request_var:code};},
@@ -33,7 +33,7 @@ test('SDK loads before an attempt; preload and display share the server-issued r
   assert.equal(h.scripts.length,1);assert.equal(h.scripts[0].dataset.zone,'123');
   assert.equal(h.calls[0].path,'/api/mission/start');
   assert.deepEqual(h.calls.filter(x=>x.options).map(x=>x.options.type),['preload','end']);
-  for(const {options} of h.calls.filter(x=>x.options)){assert.equal(options.ymid,ymid);assert.equal(options.requestVar,code);}
+  for(const {options} of h.calls.filter(x=>x.options)){assert.equal(options.ymid,ymid);assert.equal(options.requestVar,code);assert.equal(options.timeout,15);}
   assert.ok(h.calls.every(x=>x.path!=='/api/mission/complete'),'SDK results never authorize a client-side grant');
 });
 test('an unavailable advert never proceeds from preload to display or reports a reward',async()=>{
@@ -75,6 +75,7 @@ test('wrong account or placement from an attempt cannot be passed to the ad prov
 const settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
 function useClock(ctx){
   let at=0,sequence=0;const timers=new Map();
+  ctx.performance={now:()=>at};
   ctx.setTimeout=(fn,delay)=>{const id=++sequence;timers.set(id,{fn,at:at+delay});return id;};
   ctx.clearTimeout=id=>timers.delete(id);
   return {advance(ms){at+=ms;for(const [id,item] of [...timers])if(item.at<=at){timers.delete(id);item.fn();}}};
@@ -83,7 +84,7 @@ test('preload failures retain the verified attempt and report only a bounded fai
   for(const [failure,errorCode] of [['Network error','NETWORK_ERROR'],['Timeout','SDK_TIMEOUT'],['Ad is not ready','AD_NOT_READY'],['Rejected','DISPLAY_REJECTED'],['unexpected provider data https://private.test/?secret=x','UNKNOWN']]){
     const h=setup({failure});await assert.rejects(h.run(),e=>e.adStage==='preload'&&e.adAttempt===ymid&&e.adCode===errorCode);
     const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-    assert.deepEqual(JSON.parse(JSON.stringify(report)),{code,attempt_id:ymid,stage:'preload',error_code:errorCode});
+    assert.deepEqual(JSON.parse(JSON.stringify(report)),{code,attempt_id:ymid,stage:'preload',error_code:errorCode,elapsed_ms:0});
     assert.equal(h.calls.some(x=>x.options?.type==='end'),false);
   }
 });
@@ -97,10 +98,36 @@ test('a display failure is distinguishable from a load failure and does not auth
 test('a stalled preload stops after its bounded preparation deadline and cannot later open an advert',async()=>{
   const h=setup(),clock=useClock(h.ctx);let finish;
   h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(resolve=>{finish=resolve;});};
-  const running=h.run();await settle();clock.advance(12000);
-  await assert.rejects(running,e=>e.adStage==='preload'&&e.adCode==='SDK_TIMEOUT');
+  const running=h.run();await settle();clock.advance(17999);await settle();
+  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false);
+  clock.advance(1);
+  await assert.rejects(running,e=>e.adStage==='preload'&&e.adCode==='PRELOAD_DEADLINE');
   finish();await settle();assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
-  assert.equal(h.calls.find(x=>x.path==='/api/mission/outcome').body.attempt_id,ymid);
+  const outcome=h.calls.find(x=>x.path==='/api/mission/outcome').body;
+  assert.equal(outcome.attempt_id,ymid);assert.equal(outcome.elapsed_ms,18000);
+});
+test('a slow preload that finishes after eight seconds displays once within the new loading budget',async()=>{
+  const h=setup(),clock=useClock(h.ctx);let finishPreload,finishDisplay;
+  h.ctx.window.show_123=options=>{
+    h.calls.push({options});
+    return new Promise(resolve=>{if(options.type==='preload')finishPreload=resolve;else finishDisplay=resolve;});
+  };
+  const running=h.run();await settle();clock.advance(14000);finishPreload();await settle();
+  assert.deepEqual(h.calls.filter(x=>x.options).map(x=>x.options.type),['preload','end']);
+  clock.advance(75000);await settle();
+  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false,'the preparation watchdog is removed before viewing');
+  finishDisplay({reward_event_type:'valued'});await running;
+  const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
+  assert.equal(report.stage,'display');assert.equal(report.elapsed_ms,75000,'elapsed time resets when display starts');
+});
+test('a provider timeout remains distinct from the application preparation deadline',async()=>{
+  const h=setup(),clock=useClock(h.ctx);let rejectPreload;
+  h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise((_,reject)=>{rejectPreload=reject;});};
+  const running=h.run();await settle();clock.advance(15000);rejectPreload(Error('Timeout'));
+  await assert.rejects(running,e=>e.adCode==='SDK_TIMEOUT'&&e.adElapsedMs===15000);
+  const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
+  assert.equal(report.error_code,'SDK_TIMEOUT');assert.equal(report.elapsed_ms,15000);
+  clock.advance(3000);await settle();assert.equal(h.calls.filter(x=>x.path==='/api/mission/outcome').length,1);
 });
 test('an advert displayed for more than 45 seconds has no application display deadline',async()=>{
   const h=setup(),clock=useClock(h.ctx);let finish,completed=false;
@@ -111,14 +138,20 @@ test('an advert displayed for more than 45 seconds has no application display de
   finish({reward_event_type:'valued'});await running;
   assert.equal(h.calls.find(x=>x.path==='/api/mission/outcome').body.error_code,'SDK_RETURNED');
 });
-test('late cancelled preload cannot display; it retains the validated attempt in the outcome',async()=>{
+test('late cancelled preload cannot display or duplicate the action cancellation outcome',async()=>{
   const h=setup();let finish;
   h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(resolve=>{finish=resolve;});};
   const running=h.run();await settle();h.setVisible(false);finish();
   await assert.rejects(running,/AD_EXIT/);
-  const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
-  assert.equal(report.attempt_id,ymid);assert.equal(report.stage,'preload');assert.equal(report.error_code,'FLOW_CANCELLED');
+  assert.equal(h.calls.some(x=>x.path==='/api/mission/outcome'),false,'the outer action records its own cancellation');
   assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
+});
+test('diagnostic elapsed time is a bounded integer and absent for legacy callers',async()=>{
+  for(const [elapsed,expected] of [[15000.8,15000],[-1,0],[400000,300000],[undefined,undefined],[NaN,undefined],['15000',undefined]]){
+    const h=setup();h.ctx.reportAdOutcome(code,101,ymid,'preload','SDK_TIMEOUT',elapsed);await settle();
+    const report=h.calls.find(x=>x.path==='/api/mission/outcome').body;
+    assert.equal(report.elapsed_ms,expected);assert.equal(Object.hasOwn(report,'elapsed_ms'),expected!==undefined);
+  }
 });
 test('diagnostics fail silently and never turn a provider result into a reward or user-visible error',async()=>{
   const h=setup(),api=h.ctx.apiPost;h.ctx.apiPost=(path,body)=>path==='/api/mission/outcome'?Promise.reject(Error('offline')):api(path,body);
