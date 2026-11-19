@@ -6368,7 +6368,7 @@ let refillPreparation={status:'idle',owner:null},refillPreparationFlight=null;
 let refillPreparationEpoch=0,refillAutoPrepared=false,refillPreparationScheduled=false,refillReadyTimer=null;
 let refillRearmAfterCooldown=false;
 let monetagProviderFlight=null;
-let refillAckRefreshFlight=null,refillAckCheckedAt=-Infinity,refillAckOwner=null;
+let refillAckRefreshFlight=null,refillAckCheckedAt=-Infinity,refillAckOwner=null,refillAckTimer=null;
 let refillPromptOwner=null,refillPromptReported=false,refillPromptAt=-Infinity;
 function recordRefillPrompt(mission,surface) {
   const owner=homeUserId();
@@ -6403,6 +6403,7 @@ function preparedRefillFor(mission=hubMissions.find(m=>m.code==='sp_emergency_en
 }
 function invalidateRefillPreparation(resetAuto=false) {
   refillPreparationEpoch++;clearTimeout(refillReadyTimer);refillReadyTimer=null;
+  clearTimeout(refillAckTimer);refillAckTimer=null;
   refillPreparation={status:resetAuto?'idle':'cancelled',owner:homeUserId()};
   if(resetAuto){
     refillAutoPrepared=false;refillRearmAfterCooldown=false;
@@ -6440,7 +6441,7 @@ function requestRefillPreparation() {
   refillPreparationScheduled=true;
   queueMicrotask(()=>{refillPreparationScheduled=false;void prepareMonetagRefill();});
 }
-function resumeRefillAfterTapAck(owner) {
+function resumeRefillAfterTapAck(owner,allowDeferred=true) {
   const mission=hubMissions.find(m=>m.code==='sp_emergency_energy');
   if(owner!==homeUserId()||!accountIsReady()||!window.JigPilot?.canRefill()||navigator.onLine===false||
     !refillContextVisible()||!refillTapsSettled()||refillAutoPrepared||refillAckRefreshFlight||
@@ -6449,12 +6450,27 @@ function resumeRefillAfterTapAck(owner) {
     !homeEnergyLow(Number(state.energy),Number(maxEnergy),homeRefillPolicy(mission).prepare_threshold_pct))return;
   if(mission?.status==='cooldown'&&Number(mission.cooldown_remaining_seconds||0)-
     Math.max(0,(Date.now()-Number(mission.countdown_as_of_ms||Date.now()))/1000)>0)return;
-  if(refillAckOwner!==owner){refillAckOwner=owner;refillAckCheckedAt=-Infinity;}
-  if(performance.now()-refillAckCheckedAt<5000)return;
+  if(refillAckOwner!==owner){
+    refillAckOwner=owner;refillAckCheckedAt=-Infinity;clearTimeout(refillAckTimer);refillAckTimer=null;
+  }
+  const wait=5000-(performance.now()-refillAckCheckedAt);
+  if(wait>0){
+    // The last saved tap can arrive during the refresh throttle. Retain one
+    // follow-up, then recheck every guard; the timer never schedules itself.
+    if(allowDeferred&&refillAckTimer===null){
+      const epoch=refillPreparationEpoch;
+      refillAckTimer=setTimeout(()=>{
+        refillAckTimer=null;
+        if(epoch===refillPreparationEpoch)resumeRefillAfterTapAck(owner,false);
+      },Math.ceil(wait));
+    }
+    return;
+  }
+  clearTimeout(refillAckTimer);refillAckTimer=null;
   refillAckCheckedAt=performance.now();
   // A mission fetched at full energy has stale prepare_available=false. Refresh
   // only after the final durable tap receipt; never consume or rewrite the queue.
-  const request=Promise.resolve().then(()=>refreshBoostMissions(true)).then(()=>{
+  const request=Promise.resolve().then(()=>owner===homeUserId()&&accountIsReady()?refreshBoostMissions(true):[]).then(()=>{
     if(owner===homeUserId()&&accountIsReady()&&refillTapsSettled())requestRefillPreparation();
   }).catch(()=>{}).finally(()=>{if(refillAckRefreshFlight===request)refillAckRefreshFlight=null;});
   refillAckRefreshFlight=request;

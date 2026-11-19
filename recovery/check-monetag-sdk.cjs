@@ -276,3 +276,43 @@ test('attempt policy controls retry and shorter ready lifetime without extending
     h.advance(expected-1);assert.ok(h.ctx.preparedRefillFor());h.advance(1);assert.equal(h.ctx.preparedRefillFor(),null);
   }
 });
+
+test('a final tap ACK inside the refresh throttle gets exactly one delayed eligibility refresh before the30s poll',async()=>{
+  for(const failure of [undefined,'Timeout']){
+    const h=setup({failure});let refreshes=0;h.ctx.state.energy=22;h.mission.prepare_available=false;
+    h.ctx.refreshBoostMissions=async force=>{
+      h.calls.push({missions:true,force});if(force)refreshes++;
+      h.mission.prepare_available=refreshes>=2;return[h.mission];
+    };
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(1000);h.ctx.state.energy=16;
+    h.ctx.resumeRefillAfterTapAck(101);h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(3999);await settle();assert.equal(refreshes,1);
+    h.advance(1);await settle();assert.equal(refreshes,2);
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+    assert.equal(h.prepared().status,failure?'failed':'ready');
+    h.advance(60000);await settle();assert.equal(refreshes,2,'the follow-up is not a polling or failed-ad retry loop');
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  }
+});
+test('a deferred tap-ACK refresh rechecks account, visibility, connectivity, pending taps, cooldown and energy',async()=>{
+  for(const reason of ['owner','hidden','covered','offline','pending','cooldown','full','holdout','cancelled']){
+    const h=setup(),q={pending:0,packet:null};let refreshes=0;h.ctx.state.energy=22;h.mission.prepare_available=false;
+    h.ctx.getPendingTaps=()=>q.pending;
+    h.ctx.refreshBoostMissions=async()=>{refreshes++;return[h.mission];};
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(1000);h.ctx.state.energy=16;h.ctx.resumeRefillAfterTapAck(101);
+    if(reason==='owner')h.setOwner(202);
+    if(reason==='hidden')h.ctx.document.hidden=true;
+    if(reason==='covered')h.setVisible(false);
+    if(reason==='offline')h.ctx.navigator.onLine=false;
+    if(reason==='pending')q.pending=1;
+    if(reason==='cooldown')Object.assign(h.mission,{status:'cooldown',cooldown_remaining_seconds:120,countdown_as_of_ms:h.ctx.Date.now()});
+    if(reason==='full')h.ctx.state.energy=55;
+    if(reason==='holdout')h.ctx.window.JigPilot.canRefill=()=>false;
+    if(reason==='cancelled')h.ctx.invalidateRefillPreparation();
+    h.advance(4000);await settle();h.advance(60000);await settle();
+    assert.equal(refreshes,1,reason);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false,reason);
+    assert.equal(q.pending,reason==='pending'?1:0,'the timer does not touch saved taps');
+  }
+});
