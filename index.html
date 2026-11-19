@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v14-revenue-pilot">
+<meta name="jigcoin-build" content="v14-refill-recovery-2">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2808,7 +2808,7 @@ body{justify-content:flex-start}
 #pilotMedalList{white-space:pre-line;font-size:13px;padding:8px}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
-  <link rel="stylesheet" href="./assets/mint.css?v=rewards-next-finish-1">
+  <link rel="stylesheet" href="./assets/mint.css?v=rewards-refill-recovery-2">
   <link rel="stylesheet" href="./assets/mint-world.css?v=phone-fit-2">
   <link rel="stylesheet" href="./assets/mint-home.css?v=tap-perks-2">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
@@ -3163,6 +3163,7 @@ body{justify-content:flex-start}
         <button id="rewardsCollectionAction" type="button" class="reward-collection-action" aria-haspopup="dialog" disabled>Preview finish ›</button>
       </article>
       <p class="boost-footnote" id="boostCooldownNote">Daily streak is free. Optional ad rewards unlock after confirmation.</p>
+      <details id="boostHelp" class="reward-ad-help" hidden><summary>Advert help</summary><p id="boostHelpText"></p></details>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
         <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly friend race</strong><small>3 free runs · 45s each</small><span>Race for gold ›</span></button>
@@ -6230,6 +6231,33 @@ async function loadMomentumShields() {
 // Loaded on an explicit rewarded-quest action, once per page. The private
 // postback secret is never present in this client or its API responses.
 const rewardedSDKs = new Map();
+function monetagOutcomeCode(error,stage) {
+  const message=String(error?.message||error||'');
+  if(message==='AD_EXIT'||message==='ACCOUNT_CHANGED')return 'FLOW_CANCELLED';
+  if(stage==='sdk_load')return message==='AD_SDK_LOAD_TIMEOUT'?'SDK_LOAD_TIMEOUT':
+    message==='AD_SDK_FUNCTION_MISSING'?'SDK_FUNCTION_MISSING':'SDK_LOAD_FAILED';
+  if(stage==='start')return message==='AD_INVALID_ATTEMPT'?'INVALID_ATTEMPT':'START_FAILED';
+  if(stage==='confirmation')return 'CLAIM_FAILED';
+  if(message==='AD_NOT_REWARDED')return 'NOT_REWARDED';
+  if(message==='AD_PRELOAD_TIMEOUT'||/^Timeout$/i.test(message))return 'SDK_TIMEOUT';
+  if(/^(Empty feed|No fill)$/i.test(message))return 'NO_FILL';
+  if(/^Network error$/i.test(message))return 'NETWORK_ERROR';
+  if(/^Ad is not ready$/i.test(message))return 'AD_NOT_READY';
+  if(/^Rejected$/i.test(message)||/^Ad can only be opened directly in response to a user's click$/i.test(message))return 'DISPLAY_REJECTED';
+  if(/^Failed to (render Telegram banner|open pop|verify the ad show)$/i.test(message))return 'DISPLAY_FAILED';
+  return 'UNKNOWN';
+}
+function reportAdOutcome(code,owner,attemptId,stage,errorCode) {
+  if(code!=='sp_emergency_energy'||owner!==homeUserId()||!accountIsReady())return;
+  const validAttempt=typeof attemptId==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(attemptId);
+  if(!validAttempt&&!['sdk_load','start'].includes(stage))return;
+  // Diagnostics are best-effort. Neither this request nor an SDK result grants energy.
+  void Promise.resolve().then(()=>{
+    if(owner!==homeUserId()||!accountIsReady())return;
+    return apiPost('/api/mission/outcome',{code,attempt_id:validAttempt?attemptId:null,stage,error_code:errorCode},
+      {tapOwner:owner,silent:true,timeoutMs:4000});
+  }).catch(()=>{});
+}
 async function ensureMonetagSDK(zone) {
   if(!/^[1-9][0-9]{0,14}$/.test(zone))throw Error('AD_ZONE_UNAVAILABLE');
   const method='show_'+zone;
@@ -6237,45 +6265,63 @@ async function ensureMonetagSDK(zone) {
   if(!rewardedSDKs.has(zone)){
     const request=new Promise((resolve,reject)=>{
       const script=document.createElement('script');
-      const failed=()=>{clearTimeout(timer);script.remove();reject(Error('AD_SDK_UNAVAILABLE'));};
-      const timer=setTimeout(failed,10000);
+      const failed=(reason='AD_SDK_UNAVAILABLE')=>{clearTimeout(timer);script.remove();reject(Error(reason));};
+      const timer=setTimeout(()=>failed('AD_SDK_LOAD_TIMEOUT'),10000);
       script.src='https://libtl.com/sdk.js';
       script.dataset.zone=zone;script.dataset.sdk=method;script.async=true;
       script.onload=()=>{
-        if(typeof window[method]!=='function'){failed();return;}
+        if(typeof window[method]!=='function'){failed('AD_SDK_FUNCTION_MISSING');return;}
         clearTimeout(timer);resolve(window[method].bind(window));
       };
-      script.onerror=failed;document.head.appendChild(script);
+      script.onerror=()=>failed();document.head.appendChild(script);
     }).catch(error=>{rewardedSDKs.delete(zone);throw error;});
     rewardedSDKs.set(zone,request);
   }
   return rewardedSDKs.get(zone);
 }
-async function runMonetagQuest(code,stillHere) {
+async function runMonetagQuest(code,stillHere,onStage=()=>{}) {
   const owner=homeUserId(),mission=hubMissions.find(m=>m.code===code);
   if(!owner||missionsOwner!==owner||mission?.provider!=='monetag'||mission.status!=='available')throw Error('AD_REWARDS_UNAVAILABLE');
   const zone=String(mission.zone_id||'');
-  const show=await ensureMonetagSDK(zone);
-  if(homeUserId()!==owner||!accountIsReady())throw Error('ACCOUNT_CHANGED');
-  if(!stillHere())throw Error('AD_EXIT');
-  const attempt=await apiPost('/api/mission/start',{code},{tapOwner:owner,timeoutMs:9000});
-  if(!attempt?.ok)throw Error(attempt?.error||'AD_REWARDS_UNAVAILABLE');
-  if(homeUserId()!==owner||attempt.provider!=='monetag'||String(attempt.zone_id)!==zone||
-      !/^[a-f0-9-]{36}$/.test(attempt.ymid||'')||attempt.request_var!==code)throw Error('AD_REWARDS_UNAVAILABLE');
-  if(!stillHere())throw Error('AD_EXIT');
-  const options={ymid:attempt.ymid,requestVar:code,timeout:8};
+  let stage='sdk_load',attemptId=null,preloadTimer;
+  const enter=value=>{stage=value;onStage(stage,attemptId);};
   try{
-    await show({...options,type:'preload'});
+    enter('sdk_load');
+    const show=await ensureMonetagSDK(zone);
+    if(homeUserId()!==owner||!accountIsReady())throw Error('ACCOUNT_CHANGED');
     if(!stillHere())throw Error('AD_EXIT');
+    enter('start');
+    const attempt=await apiPost('/api/mission/start',{code},{tapOwner:owner,timeoutMs:9000});
+    if(!attempt?.ok)throw Error(attempt?.error||'AD_REWARDS_UNAVAILABLE');
+    if(homeUserId()!==owner||!accountIsReady())throw Error('ACCOUNT_CHANGED');
+    if(attempt.provider!=='monetag'||String(attempt.zone_id)!==zone||
+        !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(attempt.ymid||'')||attempt.request_var!==code)
+      throw Error('AD_INVALID_ATTEMPT');
+    attemptId=attempt.ymid;
+    enter('preload');
+    if(!stillHere())throw Error('AD_EXIT');
+    const options={ymid:attemptId,requestVar:code,timeout:8};
+    // Bound preparation even if the SDK does not settle its own load timeout.
+    // Never apply that deadline to the time a player spends watching an advert.
+    const loadDeadline=new Promise((_,reject)=>{preloadTimer=setTimeout(()=>reject(Error('AD_PRELOAD_TIMEOUT')),12000);});
+    await Promise.race([show({...options,type:'preload'}),loadDeadline]);
+    clearTimeout(preloadTimer);preloadTimer=null;
+    if(!stillHere())throw Error('AD_EXIT');
+    enter('display');
     const result=await show({...options,type:'end'});
     // Closing an advert also resolves the SDK promise. Only the server receipt
     // can grant energy; an explicitly non-valued result is not a pending reward.
     if(result?.reward_event_type==='non_valued')throw Error('AD_NOT_REWARDED');
+    reportAdOutcome(code,owner,attemptId,'display','SDK_RETURNED');
     return result;
   }catch(e){
-    if(/empty feed|no fill/i.test(String(e?.message||e)))throw Error('AD_NO_FILL');
-    throw e;
-  }
+    const errorCode=monetagOutcomeCode(e,stage);
+    const failure=Error(errorCode==='NO_FILL'?'AD_NO_FILL':String(e?.message||e||'AD_UNKNOWN'));
+    failure.adStage=stage;failure.adCode=errorCode;failure.adAttempt=attemptId;
+    reportAdOutcome(code,owner,attemptId,stage,errorCode);
+    failure.adReported=true;
+    throw failure;
+  }finally{clearTimeout(preloadTimer);}
 }
 
 // Unified Rewards. Legacy coin receipts remain claimable through this one card.
@@ -6285,7 +6331,7 @@ const BOOST_PLACEMENTS = Object.freeze({
   sp_emergency_energy: {button:'energyBoostAction',status:'energyBoostStatus',name:'Energy refill'},
   sp_double_points: {button:'doubleBoostAction',status:'doubleBoostStatus',name:'Double tap coins'},
 });
-let boostLoadError=false, boostBusyCode=null, boostRefreshInFlight=null, boostNextPoll=0, boostCheckedAt=0;
+let boostLoadError=false, boostBusyCode=null, boostStage=null, boostRefreshInFlight=null, boostNextPoll=0, boostCheckedAt=0;
 let missionsOwner=null;
 let requestedReward=null, rewardsOfferOwner=null, lastUsedReward=null;
 function rewardCooldownLabel(mission) {
@@ -6298,7 +6344,10 @@ function rewardCooldownLabel(mission) {
 function getBoostView(code, mission, now=Date.now()) {
   const blocked = text => ({action:'none',disabled:true,label:text,detail:text});
   if (!BOOST_PLACEMENTS[code]) return blocked('Unavailable');
-  if (window.__rewardActionBusy) return blocked(boostBusyCode===code?'Checking advert…':'Checking reward…');
+  if (window.__rewardActionBusy) {
+    const label={sdk_load:'Loading ad service…',start:'Preparing refill…',preload:'Loading advert…',display:'Opening advert…',confirmation:'Confirming refill…'}[boostStage]||'Checking reward…';
+    return blocked(boostBusyCode===code?label:'Checking reward…');
+  }
   if (code==='sp_emergency_energy' && Number(state.energy||0)>=Number(maxEnergy||50))
     return {...blocked('Energy is full'),detail:'Use some energy before watching a refill advert.'};
   const until=Date.parse(state.doubleBoostUntil||'');
@@ -6315,8 +6364,8 @@ function getBoostView(code, mission, now=Date.now()) {
   if (mission.provider!=='monetag') return blocked('Temporarily unavailable');
   if (['pending','waiting','started'].includes(mission.status)) {
     const retry=Math.max(0,Number(mission.retry_after_seconds||0)-age);
-    return {...blocked(retry>0?`Check again in ${msToCountdown(retry*1000)}`:'Checking availability…'),
-      detail:'Waiting for advert confirmation. A confirmed refill stays claimable; a failed advert can be retried after this short wait.'};
+    return {...blocked(retry>0?`Try again in ${msToCountdown(retry*1000)}`:'Checking availability…'),
+      detail:'Last advert not yet confirmed. Any confirmed refill will stay available.'};
   }
   if (mission.status==='unavailable' && mission.availability_reason==='paused') return blocked('Ads paused');
   if (mission.status==='unavailable' && mission.availability_reason==='provider_setup') return blocked('Ads offline');
@@ -6421,13 +6470,25 @@ function renderRewardCollection() {
   if(goal)setCoinArtwork(art,goal.complete?goal.tier:goal.tier+1);
   else{art.replaceChildren();delete art.dataset.artwork;}
 }
+function currentAdNotice() {
+  if(!adNotice)return null;
+  const mission=hubMissions.find(m=>m.code===adNotice.code);
+  const claimable=mission?.status==='claimable' && !!mission.attempt_id;
+  const active=window.__rewardActionBusy && boostBusyCode===adNotice.code;
+  const healthy=adNotice.code==='sp_emergency_energy' && !homeEnergyLow(Number(state.energy),Number(maxEnergy));
+  const refreshed=hubMissionLoadedAt>adNotice.at;
+  const reset=refreshed && adNotice.attempt_id && ['available','cooldown'].includes(mission?.status);
+  if(adNotice.owner!==homeUserId() || (!active && !claimable &&
+    (healthy || reset || (adNotice.kind==='error' && Date.now()-adNotice.at>=60000))))adNotice=null;
+  return adNotice;
+}
 function renderBoostCards() {
   const coinMission=hubMissions.find(m=>m.code==='sp_visit_partner');
   document.getElementById('coinRewardAmount').textContent=coinMission?`+${Number(coinMission.payout_amount)||200}`:'';
   for (const [code,placement] of Object.entries(BOOST_PLACEMENTS)) {
     const mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
     const button=document.getElementById(placement.button),status=document.getElementById(placement.status);
-    const receipt=['pending','waiting','started','claimable'].includes(mission?.status);
+    const receipt=mission?.status==='claimable' && !!mission.attempt_id;
     const refill=code==='sp_emergency_energy' && window.JigPilot?.canRefill() &&
       homeEnergyLow(Number(state.energy),Number(maxEnergy));
     button.closest('article').hidden=!(refill || receipt || (window.__rewardActionBusy && boostBusyCode===code));
@@ -6459,10 +6520,18 @@ function renderBoostCards() {
     else if(hubMissions.some(m=>m.availability_reason==='provider_setup')) text='Ad service is offline. We’ll check again automatically.';
     else text='Some ad rewards are unavailable. You can check again here.';
   }
-  if(adNotice && adNotice.owner===homeUserId())text=adNotice.text;
+  const notice=currentAdNotice();
+  if(notice)text=notice.text;
   if(!window.__rewardActionBusy && !boostLoadError && hubMissions.some(m=>m.provider==='monetag' && m.status==='claimable' && m.attempt_id))
     text='Your advert is confirmed. Claim your reward above without watching another advert.';
   if(note.textContent!==text)note.textContent=text;
+  const help=document.getElementById('boostHelp');
+  const reference=notice?.kind==='error' && notice.stage && notice.error_code
+    ? `${notice.stage.toUpperCase()} / ${notice.error_code}`:'';
+  help.hidden=!reference;
+  if(help.dataset.reference!==reference){help.open=false;help.dataset.reference=reference;}
+  document.getElementById('boostHelpText').textContent=reference
+    ? `Reference: ${reference}. If this happens again, share this reference with support. Energy continues to refill automatically.`:'';
 }
 function useMissionOwner(owner) {
   if(owner===missionsOwner)return;
@@ -6540,40 +6609,60 @@ async function performBoostAction(code) {
   if(view.action==='play'){backToHome();return;}
   if(view.action==='start' && (code!=='sp_emergency_energy' || !window.JigPilot?.canRefill() ||
       !homeEnergyLow(Number(state.energy),Number(maxEnergy))))return;
-  let active=true,timer;
+  let active=true,stage=view.action==='claim'?'confirmation':'sdk_load',attemptId=view.action==='claim'?mission.attempt_id:null;
   const cancelled=new Promise((_,reject)=>{rewardWait=()=>{active=false;reject(Error('AD_EXIT'));};});
   const here=()=>active && homeUserId()===owner && accountIsReady() && boostSheet.classList.contains('show');
   window.__rewardActionBusy=true;boostBusyCode=code;
-  adNotice={owner,text:view.action==='start'?'Opening advert… You can return to playing at any time.':'Checking your confirmed reward…'};
-  renderBoostCards();
+  const setStage=(value,id=attemptId)=>{
+    stage=value;attemptId=id;
+    if(!here())return;
+    boostStage=stage;
+    const messages={sdk_load:'Loading the advert service…',start:'Preparing your optional refill…',preload:'Loading an advert. You can return to play at any time.',display:'Opening the advert. Your refill follows provider confirmation.',confirmation:'Checking your refill confirmation…'};
+    adNotice={owner,code,kind:'active',at:Date.now(),attempt_id:attemptId,stage,text:messages[stage]};
+    renderBoostCards();
+  };
+  setStage(stage);
   try{
     if(view.action==='claim')await Promise.race([claimBoostReward(code,mission),cancelled]);
     else{
-      const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('AD_WAIT_ENDED')),45000);});
-      await Promise.race([runMonetagQuest(code,here),timeout,cancelled]);
+      await Promise.race([runMonetagQuest(code,here,setStage),cancelled]);
       if(!here())return;
-      adNotice={owner,text:'Checking the provider’s confirmation…'};
+      setStage('confirmation');
       const refreshed=await Promise.race([refreshBoostMissions(),cancelled]);
       const confirmed=refreshed.find(m=>m.code===code);
       if(here() && confirmed?.status==='claimable')await Promise.race([claimBoostReward(code,confirmed),cancelled]);
-      else {adNotice={owner,text:'Confirmation pending. You can play now and collect here when it arrives.'};return;}
+      else {
+        adNotice={owner,code,kind:'pending',at:Date.now(),attempt_id:attemptId,stage,text:'Refill not confirmed yet. You can play while we check.'};
+        reportAdOutcome(code,owner,attemptId,'confirmation','RECEIPT_PENDING');
+        return;
+      }
     }
     if(here())adNotice=null;
   }catch(error){
     if(owner!==homeUserId())return;
+    stage=error.adStage||stage;attemptId=error.adAttempt??attemptId;
+    const errorCode=error.adCode||monetagOutcomeCode(error,stage);
+    if(!error.adReported)reportAdOutcome(code,owner,attemptId,stage,errorCode);
     const notices={
-      AD_NO_FILL:'No advert is available right now. You can keep playing while energy refills.',
-      AD_NOT_REWARDED:'This advert did not qualify for a refill. You can try again after the short retry timer; free energy keeps refilling.',
-      AD_RETRY_LATER:'The last advert is still being checked. Try again when the retry timer ends; any confirmed refill will be kept here.',
-      AD_SDK_UNAVAILABLE:'The advert could not load. Check your connection and try again, or keep playing while energy refills.',
-      AD_ZONE_UNAVAILABLE:'The advert service is unavailable. Free energy keeps refilling.',
-      AD_EXIT:'Back to play whenever you like. Any confirmed reward stays available here.',
-      AD_WAIT_ENDED:'The advert took too long to respond. You can return to playing; any confirmed reward stays available here.'
+      SDK_LOAD_FAILED:'The advert service could not load. Check your connection and try again.',
+      SDK_LOAD_TIMEOUT:'The advert service took too long to load. Please try again shortly.',
+      SDK_FUNCTION_MISSING:'The advert service is not ready. Reopen the game and try again.',
+      START_FAILED:error.message==='AD_RETRY_LATER'?'Try again when the short retry timer ends.': 'The refill could not be prepared. Please try again shortly.',
+      INVALID_ATTEMPT:'The refill could not be prepared. Reopen Rewards and try again.',
+      NO_FILL:'No advert is available right now. Energy keeps refilling automatically.',
+      NETWORK_ERROR:stage==='display'?'The advert could not open. Check your connection and try again.':'The advert could not load. Check your connection and try again.',
+      SDK_TIMEOUT:'No advert loaded in time. You can try again after the short wait.',
+      AD_NOT_READY:'The advert is not ready yet. Please try again shortly.',
+      DISPLAY_REJECTED:'The advert could not open. Please try again after the short wait.',
+      DISPLAY_FAILED:'The advert could not open or finish. Please try again after the short wait.',
+      NOT_REWARDED:'This advert did not qualify for a refill. Energy keeps refilling automatically.',
+      CLAIM_FAILED:'The refill could not be saved yet. Check again; confirmed rewards stay available.',
+      UNKNOWN:stage==='preload'?'The advert could not load. Please try again shortly.':stage==='display'?'The advert could not open or finish. Please try again shortly.':'The refill could not be confirmed. Please check again shortly.'
     };
-    adNotice={owner,text:notices[error.message]||'The advert or reward could not be confirmed. Free energy keeps refilling. Check again here later.'};
+    adNotice=errorCode==='FLOW_CANCELLED'?null:{owner,code,kind:'error',at:Date.now(),attempt_id:attemptId,stage,error_code:errorCode,text:notices[errorCode]||notices.UNKNOWN};
   }finally{
-    active=false;clearTimeout(timer);rewardWait=null;
-    window.__rewardActionBusy=false;boostBusyCode=null;
+    active=false;rewardWait=null;
+    window.__rewardActionBusy=false;boostBusyCode=null;boostStage=null;
     if(homeUserId()===owner){renderBoostCards();void refreshBoostMissions().catch(()=>{});}
   }
 }

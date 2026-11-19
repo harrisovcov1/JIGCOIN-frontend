@@ -2,9 +2,13 @@
 const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8');
 const code=html.slice(html.indexOf('const COIN_REWARD_CODES ='),html.indexOf('async function loadSponsorMissions'));
+const diagnosticCode=html.slice(html.indexOf('function monetagOutcomeCode('),html.indexOf('async function ensureMonetagSDK('));
+const goalCode=html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+
+  html.slice(html.indexOf('const HOME_SEASON_KEY'),html.indexOf('// End of pure Home models.'));
+const attemptId='12345678-1234-4123-8123-123456789abc';
 function setup({status='available',confirm=false,energy=3}={}) {
-  const elements={},events={},calls=[],toasts=[];let refreshes=0,visible=true,now=Date.now();
-  const element=id=>elements[id]||(elements[id]={dataset:{},classList:{remove(){},add(){},toggle(){}},setAttribute(){},addEventListener(n,fn){events[id+':'+n]=fn;},scrollIntoView(){}});
+  const elements={},events={},calls=[],toasts=[],outcomes=[];let refreshes=0,visible=true,now=Date.now();
+  const element=id=>elements[id]||(elements[id]={dataset:{},classList:{remove(){},add(){},toggle(){}},setAttribute(){},replaceChildren(){},addEventListener(n,fn){events[id+':'+n]=fn;},scrollIntoView(){}});
   const missions=['sp_emergency_energy','sp_double_points','sp_visit_partner'].map(code=>({code,provider:'monetag',status,payout_amount:code==='sp_visit_partner'?200:0,cooldown_seconds:code==='sp_double_points'?1800:300,cooldown_hours:1,countdown_as_of_ms:now,attempt_id:status==='claimable'?'verified-attempt':null}));
   const list=element('rewardChoices');
   list.children=[];
@@ -19,6 +23,7 @@ function setup({status='available',confirm=false,energy=3}={}) {
     element(button).closest=()=>card;
   }
   const ctx={Date,Promise,console,navigator:{onLine:true},openHomeQuests(){},homeUserId:()=>101,setTimeout,clearTimeout,window:{JigPilot:{canRefill:()=>true}},document:{hidden:false,getElementById:element},hubMissions:missions,hubMissionLoadedAt:now,
+    homeIdentity:101,homeConfirmedBalance:49000,formatNumber:n=>n.toLocaleString('en-GB'),setCoinArtwork:(el,tier)=>{el.dataset.artwork=String(tier);},
     dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
     boostSheet:{classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
     sheetBackdrop:{classList:{remove(){}}},tabTasks:{},tabFarm:{},setActiveTab(){},showAppSheet(){visible=true;},updateBoostHub(){},syncStateIfIdle:async()=>{},
@@ -26,12 +31,12 @@ function setup({status='available',confirm=false,energy=3}={}) {
     backToHome:()=>calls.push(["home"]),showToast:s=>toasts.push(s),
     loadSponsorMissions:async()=>missions,
     refreshBalance:async()=>{refreshes++;},
-    runMonetagQuest:async code=>{calls.push(['ad',code]);if(confirm){const m=missions.find(m=>m.code===code);m.status='claimable';m.attempt_id='verified-attempt';}},
-    apiPost:async(path,body)=>{calls.push([path,body]);missions.find(m=>m.code===body.code).status='cooldown';return {ok:true,reward_label:'Test boost'};},
+    runMonetagQuest:async(code,_here,onStage)=>{onStage('display',attemptId);calls.push(['ad',code]);if(confirm){const m=missions.find(m=>m.code===code);m.status='claimable';m.attempt_id='verified-attempt';}},
+    apiPost:async(path,body)=>{if(path==='/api/mission/outcome'){outcomes.push(body);return {ok:true};}calls.push([path,body]);missions.find(m=>m.code===body.code).status='cooldown';return {ok:true,reward_label:'Test boost'};},
   };
-  vm.createContext(ctx);vm.runInContext(html.slice(html.indexOf('function homeEnergyLow('),html.indexOf('function homeCoinUnlock('))+code,ctx);
+  vm.createContext(ctx);vm.runInContext(goalCode+diagnosticCode+html.slice(html.indexOf('function homeEnergyLow('),html.indexOf('function homeCoinUnlock('))+code,ctx);
   vm.runInContext('missionsOwner=101;',ctx);
-  return {ctx,calls,toasts,events,elements,missions,refreshes:()=>refreshes,setVisible:v=>visible=v};
+  return {ctx,calls,toasts,events,elements,missions,outcomes,refreshes:()=>refreshes,setVisible:v=>visible=v};
 }
 test('a low-energy refill requires a verified provider receipt to claim',async()=>{
   const h=setup({confirm:true});
@@ -63,7 +68,7 @@ test('an ad promise alone never grants a refill',async()=>{
   assert.equal(h.calls.length,1);assert.equal(h.refreshes(),0);assert.equal(h.ctx.state.energy,3);
 });
 test('an unqualified advert releases the lock and explains the retry without granting energy',async()=>{
-  const h=setup();h.ctx.runMonetagQuest=async()=>{throw Error('AD_NOT_REWARDED');};
+  const h=setup();h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{onStage('display',attemptId);throw Error('AD_NOT_REWARDED');};
   await h.ctx.performBoostAction('sp_emergency_energy');
   assert.equal(h.ctx.window.__rewardActionBusy,false);assert.equal(h.calls.length,0);
   assert.equal(h.ctx.state.energy,3);assert.match(vm.runInContext('adNotice.text',h.ctx),/did not qualify/);
@@ -71,7 +76,7 @@ test('an unqualified advert releases the lock and explains the retry without gra
 test('pending adverts show the server retry timer but never authorize a retry locally',()=>{
   const h=setup({status:'pending'}),mission=h.missions[0];
   const now=Date.now();mission.countdown_as_of_ms=now;mission.retry_after_seconds=60;
-  assert.equal(h.ctx.getBoostView(mission.code,mission,now+10000).label,'Check again in 50s');
+  assert.equal(h.ctx.getBoostView(mission.code,mission,now+10000).label,'Try again in 50s');
   const expired=h.ctx.getBoostView(mission.code,mission,now+61000);
   assert.equal(expired.label,'Checking availability…');assert.equal(expired.disabled,true);
 });
@@ -176,4 +181,43 @@ test('one reward panel contains three actions with no duplicate task screen or c
   assert.match(h.ctx.getBoostView('sp_emergency_energy',h.missions[0]).detail,/\+17 energy now · Fill to 60/);
   h.missions[0].status='claimable';h.missions[0].attempt_id='confirmed';h.ctx.state.energy=55;
   assert.match(h.ctx.getBoostView('sp_emergency_energy',h.missions[0]).detail,/\+5 energy now \(up to 60\)/);
+});
+test('healthy energy hides an unconfirmed failed attempt and obsolete help without losing late receipt polling',async()=>{
+  const h=setup({status:'pending',energy:13});h.ctx.maxEnergy=55;
+  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now(),attempt_id:'${attemptId}',stage:'preload',error_code:'SDK_TIMEOUT',text:'Old error'};boostNextPoll=0;`,h.ctx);
+  h.ctx.renderBoostCards();
+  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,true);
+  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.elements.boostHelp.hidden,true);
+  assert.doesNotMatch(h.elements.boostCooldownNote.textContent,/Old error/);assert.equal(vm.runInContext('adNotice',h.ctx),null);
+  let polls=0;h.ctx.loadSponsorMissions=async()=>{polls++;return h.missions;};h.ctx.pollBoostStatus();
+  for(let i=0;i<10;i++)await Promise.resolve();assert.equal(polls,1);
+  h.missions[0].status='claimable';h.missions[0].attempt_id=attemptId;await h.ctx.refreshBoostMissions();
+  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,false);
+  assert.equal(h.elements.rewardsCollectionCard.hidden,true);assert.equal(h.elements.energyBoostAction.dataset.action,'claim');
+});
+test('a fresh available state clears old attempted-ad errors and their support reference',()=>{
+  const h=setup();
+  vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-5000,attempt_id:'${attemptId}',stage:'preload',error_code:'NO_FILL',text:'Old error'};`,h.ctx);
+  h.ctx.renderBoostCards();assert.equal(vm.runInContext('adNotice',h.ctx),null);assert.equal(h.elements.boostHelp.hidden,true);
+});
+test('current failed preload shows a safe support reference, then clears when energy recovers',async()=>{
+  const h=setup();h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{onStage('preload',attemptId);h.missions[0].status='pending';throw Error('Network error');};
+  await h.ctx.performBoostAction('sp_emergency_energy');
+  assert.match(h.elements.boostCooldownNote.textContent,/could not load/);
+  assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostHelpText.textContent,/PRELOAD \/ NETWORK_ERROR/);
+  assert.equal(h.outcomes.length,1);assert.equal(h.outcomes[0].attempt_id,attemptId);
+  h.ctx.state.energy=13;h.ctx.maxEnergy=55;h.ctx.renderBoostCards();
+  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.elements.boostHelp.hidden,true);
+  assert.doesNotMatch(h.elements.boostCooldownNote.textContent,/could not load/);
+});
+test('a long displayed advert stays active beyond 45 seconds and claims only the later verified receipt',async()=>{
+  const h=setup();let finish;const timers=[];
+  h.ctx.setTimeout=(fn,delay)=>{timers.push({fn,delay});return timers.length;};h.ctx.clearTimeout=()=>{};
+  h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{onStage('display',attemptId);await new Promise(resolve=>{finish=resolve;});};
+  const running=h.ctx.performBoostAction('sp_emergency_energy');
+  for(const timer of timers)if(timer.delay<=75000)timer.fn();
+  await Promise.resolve();assert.equal(h.ctx.window.__rewardActionBusy,true);assert.equal(h.calls.length,0);
+  assert.equal(h.elements.energyBoostAction.textContent,'Opening advert…');
+  h.missions[0].status='claimable';h.missions[0].attempt_id=attemptId;finish();await running;
+  assert.equal(h.ctx.window.__rewardActionBusy,false);assert.equal(h.calls.filter(x=>x[0]==='/api/mission/complete').length,1);
 });

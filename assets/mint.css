@@ -161,6 +161,9 @@
   font-weight: 650;
 }
 #boostSheet .reward-collection-action:disabled { opacity: .6; }
+#boostSheet .reward-ad-help { flex: 0 0 auto; margin: -3px 2px 0; color: var(--mint-muted, #c0ccdb); font-size: 11px; line-height: 1.4; }
+#boostSheet .reward-ad-help summary { cursor: pointer; padding: 5px 0; }
+#boostSheet .reward-ad-help p { margin: 3px 0 5px; overflow-wrap: anywhere; }
 @container game-panel (max-height: 540px) {
   #boostSheet .reward-collection { grid-template-columns: 42px minmax(0, 1fr); gap: 5px 9px; padding: 9px; }
   .reward-collection-art { width: 42px; }
