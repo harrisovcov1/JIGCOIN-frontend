@@ -222,7 +222,7 @@ html body :is(#withdrawSheet,#friendsSheet,#coinShopSheet,#homeJourneySheet,#boo
   border-radius:var(--mint-corner);
   box-shadow:inset 0 1px var(--mint-seam),inset 0 -2px #0005,0 2px 4px #0004;
 }
-html body :is(#withdrawSheet,#friendsSheet,#friendsDetailsSheet,#coinShopSheet,#boostSheet,#weeklySheet,#homeJourneySheet,#vaultDetailsSheet,#leaderboardScreen) :is(
+html body :is(#withdrawSheet,#friendsSheet,#inviteDetailsSheet,#coinShopSheet,#boostSheet,#weeklySheet,#homeJourneySheet,#vaultDetailsSheet,#leaderboardScreen) :is(
   .vault-benefits > div,.friends-summary,.invite-milestone,.invite-detail-section,.hub-product,.shop-vip-pass,
   .pilot-link,.boost-card,.coin-tier,.lb-list .lb-row,.lb-podium > div,.vip-box,.pilot-tiles button
 ),
@@ -401,4 +401,23 @@ html body #coinShopSheet #coinPackList > .hub-product:first-child .hub-buy {grid
   html body #coinShopSheet #coinPackList > .hub-product:first-child {grid-template-rows:minmax(72px,1fr) auto auto auto;padding-bottom:7px;}
   html body #coinShopSheet #coinPackList > .hub-product:first-child::before {min-height:72px;margin-bottom:5px;}
   html body #coinShopSheet #coinPackList > .hub-product:first-child:not(.hub-goal)::after {height:60px;}
+}
+
+/* Telegram display names can be a single unbroken word, including in the race target. */
+#leaderboardScreen .lb-race-card p {
+  overflow-wrap: anywhere;
+}
+
+
+@container game-panel (max-height: 520px) {
+  #withdrawSheet .vault-content { padding-block: 3px; gap: 3px; }
+  #withdrawSheet .vault-summary { padding-block: 5px; }
+  #withdrawSheet .vault-progress { margin-block-start: 4px; }
+  #withdrawSheet .vault-vip { gap: 2px; }
+}
+
+@media (max-width: 375px) {
+  #homeDailySheet .daily-calendar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

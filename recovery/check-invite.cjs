@@ -13,7 +13,7 @@ function setup(){
   const nodes=new Map(),calls=[],shared=[],copied=[],toasts=[];let owner=10001,ready=true,now=Date.now(),response=async()=>fixture(owner);
   const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,disabled:false,attrs:{},focus(){this.focused=true;},setAttribute(k,v){this.attrs[k]=v;}});return nodes.get(id);};
   class Clock extends Date{static now(){return now;}}
-  const c={Date:Clock,URL,console,homeUserId:()=>owner,accountIsReady:()=>ready,document:{getElementById:el},formatNumber:n=>n.toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),
+  const c={setCoinArtwork(){},Date:Clock,URL,console,homeUserId:()=>owner,accountIsReady:()=>ready,document:{getElementById:el},formatNumber:n=>n.toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),
     friendsJoinedText:el('friendsJoinedText'),referralPointsText:el('referralPointsText'),inviteLinkText:el('inviteLinkText'),shareTelegramBtn:el('shareTelegramBtn'),copyInviteBtn:el('copyInviteBtn'),copyShareTextBtn:el('copyShareTextBtn'),downloadShareCardBtn:el('downloadShareCardBtn'),
     window:{Telegram:{WebApp:{openTelegramLink:url=>shared.push(url)}},open:url=>{shared.push(url);return {}; }},navigator:{clipboard:{writeText:async value=>copied.push(value)}},showToast:text=>toasts.push(text),
     showAppSheet:(sheet,tab)=>{c.opened={sheet,tab};},tabFriends:'Invite',apiPost:async(...args)=>{calls.push(args);return response(...args);}};
@@ -54,8 +54,8 @@ test('qualification displays the real activity threshold and both valid earning 
   const x=setup();x.respond(async()=>({...fixture(),qualification:{mode:'activity',min_taps:250}}));await x.c.loadInviteSummary();assert.match(x.el('inviteQualification').textContent,/250 taps in one UTC day/);assert.match(x.el('inviteQualification').textContent,/or claims one confirmed ad reward/);assert.doesNotMatch(x.el('inviteQualification').textContent,/purchase|pay/);
 });
 test('next milestone is explicit and max tier has no impossible extra target',async()=>{
-  const x=setup();await x.c.loadInviteSummary();assert.match(x.el('inviteNextText').textContent,/first successful invite earns 500 coins and unlocks Bronze/);assert.equal(x.el('inviteProgress').max,1);
-  x.respond(async()=>fixture(10001,200));await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteProgress').value,1);assert.match(x.el('inviteNextTitle').textContent,/Top referral rate/);assert.doesNotMatch(x.el('inviteNextText').textContent,/more/);
+  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteNextBadge').textContent,'1 more to Bronze');assert.equal(x.el('inviteRewardAmount').textContent,'+500');assert.equal(x.el('inviteProgress').max,1);
+  x.respond(async()=>fixture(10001,200));await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteProgress').value,1);assert.match(x.el('inviteNextTitle').textContent,/Top referral tier/);assert.doesNotMatch(x.el('inviteNextText').textContent,/more/);
 });
 test('Telegram sharing opens an editable share chooser with a correctly encoded account link',async()=>{
   const x=setup();await x.c.loadInviteSummary();x.c.shareInviteOnTelegram();const url=new URL(x.shared[0]);assert.equal(url.pathname,'/share/url');assert.equal(url.searchParams.get('url'),fixture().invite_link);assert.match(url.searchParams.get('text'),/daily rewards/);assert.doesNotMatch(url.searchParams.get('text'),/airdrop|guarantee|cash/i);await x.c.copyInviteLink();assert.equal(x.copied[0],fixture().invite_link);
@@ -81,14 +81,18 @@ test('zero invites shows no earned tier or misleading zero-reward milestone',asy
  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteTierName').textContent,'Get started');
  assert.match(x.el('inviteTierList').innerHTML,/Bronze · 1–4 invites/);assert.match(x.el('inviteTierList').innerHTML,/200\+ invites/);
  assert.doesNotMatch(x.el('inviteTierList').innerHTML,/Starter|0 rewarded/);
- assert.match(x.el('inviteWelcome').textContent,/1,000 coins.*every new player/);
+ assert.match(x.el('inviteWelcome').textContent,/New players start with 1,000 free in-game coins/);
  x.c.shareInviteOnTelegram();assert.match(new URL(x.shared[0]).searchParams.get('text'),/New players start with 1,000 free coins/);
 });
 test('the milestone invite itself shows the higher rate before it joins',async()=>{
  for(const [count,amount] of [[3,500],[4,1000],[18,1000],[19,1250],[48,1250],[49,1500],[198,1500],[199,2000],[200,2000]]){
   const x=setup();x.respond(async()=>fixture(10001,count));await x.c.loadInviteSummary();
   assert.equal(x.el('inviteRewardAmount').textContent,'+'+amount.toLocaleString('en-GB'));
-  if(count<200)assert.match(x.el('inviteNextText').textContent,/starting with invite #/);
+  if(count<200){
+   const next=tiers.find(row=>row.at>count);
+   assert.equal(x.el('inviteNextBadge').textContent,(next.at-count)+' more to '+next.name);
+   if(next.reward_coins!==amount)assert.match(x.el('inviteNextText').textContent,new RegExp(next.reward_coins.toLocaleString('en-GB')+' coins per invite'));
+  }
  }
 });
 test('stale policy versions, broken ranges and mismatched next reward are rejected',async()=>{

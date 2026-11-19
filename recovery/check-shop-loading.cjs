@@ -9,16 +9,17 @@ function setup(){
   function node(){return {innerHTML:'',textContent:'',hidden:false,dataset:{},children:[],attrs:{},classList:{add(){},toggle(){},contains:()=>true},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(){this.children=[];this.innerHTML='';},append(x){this.children.push(x);},addEventListener(){},querySelector:()=>({addEventListener(){}}),querySelectorAll:()=>[]};}
   const el=id=>{if(!els.has(id))els.set(id,node());return els.get(id);};
   class Clock extends Date{static now(){return now;}}
-  const ctx={Date:Clock,console,homeUserId:()=>id,accountIsReady:()=>ready,window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout:fn=>fn(),
+  const ctx={Date:Clock,console,homeUserId:()=>id,homeIdentity:id,homeConfirmedBalance:null,homeGoalModel:()=>null,accountIsReady:()=>ready,window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout:fn=>fn(),
     document:{getElementById:el,createElement:node},coinPackList:el('coinPackList'),coinShopSheet:node(),escapeHtml:String,formatNumber:n=>n.toLocaleString('en-GB'),
     renderHubOrders(){},updateBoostHub(){},buyStarsPack(){},apiPost:async(...args)=>{calls.push(args);return reply(...args);}};
   vm.createContext(ctx);vm.runInContext(code,ctx);
   return {ctx,calls,els,events,advance:ms=>now+=ms,identity:v=>id=v,ready:v=>ready=v,response:fn=>reply=fn,run:s=>vm.runInContext(s,ctx)};
 }
-test('first open reserves five cards, duplicate opens share one request; repeat visit renders without a request',async()=>{
+test('first open shows five disabled price previews, duplicate opens share one request; repeat visit renders without a request',async()=>{
   const c=setup(),d=deferred();c.response(()=>d.promise);
   const a=c.ctx.loadCoinPacks(),b=c.ctx.loadCoinPacks();
-  assert.equal(c.calls.length,1);assert.equal((c.ctx.coinPackList.innerHTML.match(/hub-skeleton/g)||[]).length,5);
+  assert.equal(c.calls.length,1);assert.equal((c.ctx.coinPackList.innerHTML.match(/data-preview="true"/g)||[]).length,5);
+  assert.equal((c.ctx.coinPackList.innerHTML.match(/ disabled/g)||[]).length,5);
   d.resolve(fixture());await Promise.all([a,b]);assert.match(c.ctx.coinPackList.innerHTML,/1,000/);
   await c.ctx.loadCoinPacks();assert.equal(c.calls.length,1);assert.doesNotMatch(c.ctx.coinPackList.innerHTML,/hub-skeleton/);
 });
@@ -41,7 +42,7 @@ test('stale cache remains visible but cannot be bought while refresh is pending 
 });
 test('a failed first request offers retry without invented packs or prices',async()=>{
   const c=setup();c.response(async()=>{throw Error('offline');});await c.ctx.loadCoinPacks();
-  assert.match(c.ctx.coinPackList.innerHTML,/Try again/);assert.doesNotMatch(c.ctx.coinPackList.innerHTML,/data-stars-sku|1,000/);assert.equal(c.ctx.coinPackList.attrs['aria-busy'],'false');
+  assert.equal(c.els.get('hubCatalogStatus').children.at(-1).textContent,'Retry');assert.doesNotMatch(c.ctx.coinPackList.innerHTML,/data-stars-sku/);assert.match(c.ctx.coinPackList.innerHTML,/data-preview/);assert.equal(c.ctx.coinPackList.attrs['aria-busy'],'false');
 });
 test('different-account and malformed responses are discarded without enabling checkout',async()=>{
   for(const response of [fixture(10002),{...fixture(),products:null},{...fixture(),server_now:'invalid'}]){
@@ -69,4 +70,14 @@ test('cold Home has neutral artwork until a rank is confirmed and recovers witho
   c.ready(true);c.ctx.renderCollectibleCoin({tier:1,nextName:'Operator'});assert.deepEqual(rendered,[1,2]);assert.equal(c.els.get('homeCoinWrap').dataset.loading,'false');
   c.ready(false);c.ctx.renderCollectibleCoin({tier:1});assert.equal(c.els.get('homeCoinArtwork').innerHTML,'');assert.equal(c.els.get('homeCoinArtwork').dataset.artwork,undefined);
   assert.deepEqual(themes,[null,1,null]);
+});
+
+test('the featured pack promises a milestone only when it reaches that balance',()=>{
+  const c=setup();
+  c.ctx.homeConfirmedBalance=18231;
+  c.ctx.homeGoalModel=()=>({next:50000,nextName:'Operator',remaining:31769});
+  const small={coins:1000,stars:100},medium={coins:3000,stars:250};
+  assert.equal(c.ctx.packGoal([small]).goal.label,'Work towards 20,000 coins');
+  assert.equal(c.ctx.packGoal([small,medium]).goal.label,'Reach 20,000 coins');
+  assert.equal(c.ctx.packGoal([small,medium]).product,medium);
 });
