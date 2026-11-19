@@ -128,6 +128,19 @@ html body #friendsSheet #inviteTierName {max-width:45%;text-align:right;font-siz
 .invite-friend-progress .friend-heading {display:flex;justify-content:space-between;gap:8px;font-size:13px}.friend-heading strong {overflow-wrap:anywhere}.friend-heading span {font-size:11px;color:var(--mint-accent);flex:none}
 .invite-friend-progress small {display:block;font-size:11px;line-height:1.45;margin-top:4px;color:var(--mint-muted)}
 .invite-friend-progress progress {width:100%;height:5px;margin-top:6px;accent-color:var(--mint-accent)}
+.incoming-invite-card {display:flex;align-items:center;justify-content:space-between;gap:9px;flex:none;min-height:64px;padding:10px 12px;text-align:left;font:inherit;color:var(--mint-text);border:1px solid var(--mint-inlay);border-radius:var(--mint-corner);background:var(--mint-grain),var(--mint-feature)}
+.incoming-invite-card[hidden] {display:none!important}
+.incoming-invite-card strong {display:block;font-size:13px;overflow-wrap:anywhere}.incoming-invite-card small {display:block;font-size:11px;line-height:1.4;margin-top:4px;color:var(--mint-muted)}
+#inviteWelcomeDialog {box-sizing:border-box;width:min(92vw,380px);max-height:85vh;max-height:85dvh;overflow:auto;margin:auto;padding:20px;border:1px solid var(--mint-inlay);border-radius:var(--mint-corner);background:var(--mint-grain),var(--mint-plate);color:var(--mint-text);text-align:center}
+#inviteWelcomeDialog::backdrop {background:#080b10cc}
+#inviteWelcomeDialog>img {display:block;margin:0 auto 10px;max-width:100%;object-fit:contain}
+#inviteWelcomeDialog h2 {font:600 24px/1.2 Georgia,serif;margin:0 0 12px;color:var(--mint-highlight);overflow-wrap:anywhere}
+#inviteWelcomeDialog p {font:400 13px/1.5 system-ui,sans-serif;margin:10px 0;color:var(--mint-muted)}
+#incomingInviteMeter {padding:8px 0}#incomingInviteMeter[hidden] {display:none!important}
+#incomingInviteMeter progress {width:100%;height:7px;accent-color:var(--mint-accent)}#incomingInviteMeter small {display:block;font-size:12px;margin-top:4px}
+.invite-welcome-actions {display:flex;flex-direction:column;gap:8px;margin-top:15px}
+.invite-welcome-actions button {min-height:46px;margin:0;padding:9px;font:650 14px/1.3 system-ui,sans-serif;border:1px solid var(--mint-inlay);border-radius:var(--mint-corner);color:var(--mint-text);background:var(--mint-grain),var(--mint-plate)}
+.invite-welcome-actions .pilot-primary {background:var(--mint-gold);color:var(--mint-ink)}
 /* Podiums are bounded even when there are only one or two real participants. */
 html body #leaderboardScreen {gap:7px}
 html body #leaderboardScreen .leaderboard-heading p {font-size:12px;line-height:1.4}

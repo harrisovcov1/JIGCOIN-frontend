@@ -3001,6 +3001,7 @@ body{justify-content:flex-start}
   <div class="sheet" id="friendsSheet">
     <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
+      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
         <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
@@ -3081,6 +3082,13 @@ body{justify-content:flex-start}
       <button type="button" class="vault-text-button" id="vipOfferHistory">VIP purchases &amp; terms ›</button>
     </div>
   </section>
+  <dialog id="inviteWelcomeDialog" aria-labelledby="inviteWelcomeTitle">
+    <img src="./assets/invite-people.svg" width="94" height="80" alt="">
+    <h2 id="inviteWelcomeTitle">Welcome to JigCoin</h2>
+    <p id="incomingInviteWelcome"></p><p id="incomingInviteRule"></p>
+    <div id="incomingInviteMeter" hidden><progress id="incomingInviteTaps" value="0" max="100" aria-label="Your verified taps towards the invitation goal"></progress><small id="incomingInviteTapLabel"></small></div>
+    <div class="invite-welcome-actions"><button type="button" class="pilot-primary" id="inviteWelcomePlay">Start tapping</button><button type="button" id="inviteWelcomeFriends">Friends leaderboard</button></div>
+  </dialog>
   <dialog id="purchaseReview" aria-labelledby="purchaseReviewTitle" aria-describedby="purchaseReviewItem purchaseReviewPrice">
     <h2 id="purchaseReviewTitle">Review purchase</h2>
     <p id="purchaseReviewItem"></p>
@@ -3135,7 +3143,7 @@ body{justify-content:flex-start}
       <section><h2>VIP purchases</h2><div id="vipOrderHistory">No purchase history loaded.</div></section>
       <button type="button" class="vault-details-link" id="vipPacksBtn">Coin pack purchase history ›</button>
       <button type="button" class="vault-details-link" id="vaultPaySupport">Payment help · /paysupport ›</button>
-      <p class="hub-small">App version 14</p><div id="hubOwnedShield" hidden class="vip-box"><strong>Momentum Shield</strong><p>One eligible shield covers one missed day and is consumed when used.</p><div id="momentumShieldStatus"></div><div id="momentumShieldList" hidden></div></div>
+      <p class="hub-small">App version 16</p><div id="hubOwnedShield" hidden class="vip-box"><strong>Momentum Shield</strong><p>One eligible shield covers one missed day and is consumed when used.</p><div id="momentumShieldStatus"></div><div id="momentumShieldList" hidden></div></div>
     </div>
   </div>
 
@@ -3247,14 +3255,17 @@ body{justify-content:flex-start}
 const fixtureParams=new URLSearchParams(location.search),fixturePanel=fixtureParams.get('panel')||'shop';
 const fixtureCase=fixtureParams.get('case')||'default';
 const fixtureOwner=123;
+const fixtureName=name=>fixtureCase==='long'?(name+'SilverFalconRiverstone'.repeat(3)).slice(0,48):name;
+const fixturePendingOrder='vp_'+'a'.repeat(48);
 const E=id=>document.getElementById(id);
 const apiCalls=[];
 let homeIdentity=fixtureOwner,homeConfirmedBalance=20635,maxEnergy=55;
-let state={bal:20635,energy:17,vipUntil:fixtureCase==='active'?new Date(Date.now()+86400000*25).toISOString():null,streakDays:4};
+let state={bal:20635,energy:17,vipUntil:fixtureCase==='active'?new Date(Date.now()+86400000*25).toISOString():fixtureCase==='expired'?new Date(Date.now()-86400000).toISOString():null,streakDays:4};
 const accountIsReady=()=>true,homeUserId=()=>fixtureOwner,formatNumber=n=>Number(n).toLocaleString('en-GB'),launchEquipped=()=>false;
-const syncMintWorld=()=>{},renderCollectibleCoin=()=>{},renderHomeSession=()=>{},renderBoostCards=()=>{},render=()=>{},renderDailyRewards=()=>{},updateBoostHub=()=>{},refreshState=async()=>{},syncStateIfIdle=async()=>{},hideDailyNotice=()=>{},stopRewardWait=()=>{},invalidateRefillPreparation=()=>{},showToast=console.log,reviewGamePurchase=async()=>false,progressionCurrent=()=>null;
+const syncMintWorld=()=>{},renderCollectibleCoin=()=>{},renderHomeSession=()=>{},renderBoostCards=()=>{},render=()=>{},renderDailyRewards=()=>{},renderShareCardCanvas=()=>{},refreshState=async()=>{},syncStateIfIdle=async()=>{},hideDailyNotice=()=>{},stopRewardWait=()=>{},invalidateRefillPreparation=()=>{},showToast=console.log,reviewGamePurchase=async()=>false,progressionCurrent=()=>null;
 const appStorage={_data:new Map(),getItem(k){return this._data.get(k)},setItem(k,v){this._data.set(k,v);return true},removeItem(k){this._data.delete(k)}};
-const coinShopSheet=E('coinShopSheet'),coinPackList=E('coinPackList'),withdrawSheet=E('withdrawSheet'),vipSheet=E('vaultDetailsSheet'),friendsSheet=E('friendsSheet'),sheetBackdrop=E('sheetBackdrop');
+if(fixtureCase==='pending')appStorage.setItem('jigcoin_vip_pending_v11:'+fixtureOwner,fixturePendingOrder);
+const coinShopSheet=E('coinShopSheet'),coinPackList=E('coinPackList'),withdrawSheet=E('withdrawSheet'),vipSheet=E('vaultDetailsSheet'),friendsSheet=E('friendsSheet'),sheetBackdrop=E('sheetBackdrop'),boostSheet=E('boostSheet');
 const tabShop=E('tabShop'),tabWithdraw=E('tabWithdraw'),tabFarm=E('tabFarm'),tabFriends=E('tabFriends'),tabTasks=E('tabTasks');
 const withdrawBalanceText=E('withdrawBalanceText'),vipBuyBtn=E('vipBuyBtn'),vipStatusText=E('vipStatusText'),friendsJoinedText=E('friendsJoinedText'),referralPointsText=E('referralPointsText'),inviteLinkText=E('inviteLinkText'),shareTelegramBtn=E('shareTelegramBtn'),copyInviteBtn=E('copyInviteBtn'),copyShareTextBtn=E('copyShareTextBtn'),downloadShareCardBtn=E('downloadShareCardBtn');
 function dailyCosmeticMarkup(keys,name){return escapeHtml(name)}
@@ -3266,21 +3277,26 @@ function openFriendsSheet(){showAppSheet(friendsSheet,tabFriends);renderInviteOv
 const fixtureTiers=[{at:1,through:4,name:'Bronze',reward_coins:500},{at:5,through:19,name:'Silver',reward_coins:1000},{at:20,through:49,name:'Gold',reward_coins:1250},{at:50,through:199,name:'Platinum',reward_coins:1500},{at:200,through:null,name:'Diamond',reward_coins:2000}];
 const fixturePacks=[{sku:'JC_SMALL',title:'Small coin pack',coins:1000,stars:100},{sku:'JC_MEDIUM',title:'Medium coin pack',coins:3000,stars:250},{sku:'JC_LARGE',title:'Large coin pack',coins:7000,stars:500},{sku:'JC_GROWTH',title:'Growth coin pack',coins:37500,stars:2500},{sku:'JC_MAX',title:'Maximum coin pack',coins:700000,stars:35000}];
 function fixtureBoard(mode,page=0){
- const solo=fixtureCase==='solo',count=solo?1:3,me={telegram_id:fixtureOwner,display_name:'You',score:mode==='daily'?2022:20635,rank:solo?1:2,finish:'rank-1',rank_finish:'rank-1',vip_active:fixtureCase==='active'};
- const first={telegram_id:321,display_name:'JadeFox',score:mode==='daily'?2400:31879,rank:1,finish:'rank-2',rank_finish:'rank-2',vip_active:true};
- const third={telegram_id:456,display_name:'CopperCraft',score:mode==='daily'?1750:16450,rank:3,finish:'rank-0',rank_finish:'rank-0',vip_active:false};
- const rows=solo?[me]:[first,me,third],day=new Date().toISOString().slice(0,10);
+ const solo=fixtureCase==='solo',count=solo?1:fixtureCase==='two'?2:3,me={telegram_id:fixtureOwner,display_name:'You',score:mode==='daily'?2022:20635,rank:solo?1:2,finish:'rank-1',rank_finish:'rank-1',vip_active:fixtureCase==='active'};
+ const first={telegram_id:321,display_name:fixtureName('JadeFox'),score:mode==='daily'?2400:31879,rank:1,finish:'rank-2',rank_finish:'rank-2',vip_active:true};
+ const third={telegram_id:456,display_name:fixtureName('CopperCraft'),score:mode==='daily'?1750:16450,rank:3,finish:'rank-0',rank_finish:'rank-0',vip_active:false};
+ const rows=solo?[me]:count===2?[first,me]:[first,me,third],day=new Date().toISOString().slice(0,10);
  return {ok:true,version:12,telegram_id:String(fixtureOwner),mode,page,total:count,server_now:new Date().toISOString(),day,ends_at:new Date(Date.parse(day+'T00:00:00Z')+86400000).toISOString(),award_start_day:'2026-11-17',awards_enabled:true,me,podium:rows,nearby:rows,entries:rows,has_more:false,overtake:solo?null:{target_telegram_id:first.telegram_id,need_points:first.score-me.score+1}};
 }
 function fixtureWeekly(body={}){
  const daily=fixtureCase!=='legacy',date=daily?'2026-11-24T12:00:00.000Z':'2026-11-19T17:00:00.000Z',week=daily?'2026-11-23':'2026-11-16',closes=daily?'2026-11-30T00:00:00.000Z':'2026-11-23T00:00:00.000Z';
- return {ok:true,telegram_id:String(fixtureOwner),server_now:date,week,closes_at:closes,scope:body.scope||'global',total:1,best:8,place:1,global_place:1,runs_left:fixtureCase==='used'?0:2,seconds:45,share_code:'a'.repeat(20),run:null,practice_run:null,can_start:fixtureCase!=='used',allowance_day:daily?'2026-11-24':'2026-11-19',resets_at:daily?'2026-11-25T00:00:00.000Z':closes,policy:{version:daily?'daily-v16':'weekly-v14',period:daily?'day':'week',limit:3,activates_at:'2026-11-23T00:00:00.000Z'},leaders:[{name:'You',place:1,score:8,me:true,finish:'rank-1',rank_finish:'rank-1',vip_active:fixtureCase==='active'}],last_award:null,finalized_through_week:null,result:null,rival:null};
+ const total=fixtureCase==='two'?2:fixtureCase==='long'?3:1,place=total>1?2:1;
+ const leaders=[{name:'You',place,score:8,me:true,finish:'rank-1',rank_finish:'rank-1',vip_active:fixtureCase==='active'}];
+ if(total>1)leaders.unshift({name:fixtureName('JadeFox'),place:1,score:9,me:false,finish:'rank-2',rank_finish:'rank-2',vip_active:true});
+ if(total>2)leaders.push({name:fixtureName('CopperCraft'),place:3,score:7,me:false,finish:'rank-0',rank_finish:'rank-0',vip_active:false});
+ return {ok:true,telegram_id:String(fixtureOwner),server_now:date,week,closes_at:closes,scope:body.scope||'global',total,best:8,place,global_place:place,runs_left:fixtureCase==='used'?0:2,seconds:45,share_code:'a'.repeat(20),run:null,practice_run:null,can_start:fixtureCase!=='used',allowance_day:daily?'2026-11-24':'2026-11-19',resets_at:daily?'2026-11-25T00:00:00.000Z':closes,policy:{version:daily?'daily-v16':'weekly-v14',period:daily?'day':'week',limit:3,activates_at:'2026-11-23T00:00:00.000Z'},leaders,last_award:null,finalized_through_week:null,result:null,rival:null};
 }
 async function apiPost(path,body={}){
  apiCalls.push({path,body});
- if(path.includes('/vip/overview'))return {ok:true,telegram_id:String(fixtureOwner),server_now:new Date().toISOString(),vip_active:!!state.vipUntil,vip_until:state.vipUntil,benefits:{standard_tap:1.05,vip_tap:2.1,standard_energy:55,vip_energy:110},vip_bonus_coins:state.vipUntil?1265:0,streak_day:4,product:{sku:'VIP_30D_V11',stars:500,days:30,currency:'XTR',auto_renew:false,terms:'vip-v11-20261117',enabled:true},recent_orders:[]};
- if(path.includes('/stars/catalog'))return {ok:true,telegram_id:fixtureOwner,server_now:new Date().toISOString(),products:fixturePacks,enabled:true,recent_orders:[],support_contact:'support@jigcoin.app'};
- if(path==='/api/invite/summary')return {ok:true,telegram_id:String(fixtureOwner),server_now:new Date().toISOString(),invite_link:'https://t.me/JIGCOINBOT?startapp=ref_'+fixtureOwner,policy_version:'referrals_cumulative_v16',welcome_coins:1000,reward_coins:500,friends_rewarded:0,coins_earned:0,tier_name:'Get started',next_at:1,previous_at:0,next_reward_coins:500,next_tier_name:'Bronze',qualification:{mode:'cumulative_taps',min_taps:100,period:'lifetime',ad_qualifies:false,purchase_required:false},tiers:fixtureTiers,friends_joined:2,friends_pending:2,friends_qualified:0,friends_on_hold:0,friend_progress:[{id:'ref_fixture_a',display_name:'River',status:'playing',verified_taps:42,min_taps:100,qualification_mode:'cumulative_taps',policy_version:'referrals_cumulative_v16',joined_at:new Date().toISOString(),rewarded_at:null,reward_coins:null},{id:'ref_fixture_b',display_name:'Morgan',status:'joined',verified_taps:0,min_taps:100,qualification_mode:'cumulative_taps',policy_version:'referrals_cumulative_v16',joined_at:new Date().toISOString(),rewarded_at:null,reward_coins:null}]};
+ if(path.includes('/vip/overview'))return {ok:true,telegram_id:String(fixtureOwner),server_now:new Date().toISOString(),vip_active:Date.parse(state.vipUntil)>Date.now(),vip_until:state.vipUntil,benefits:{standard_tap:1.05,vip_tap:2.1,standard_energy:55,vip_energy:110},vip_bonus_coins:state.vipUntil?1265:0,streak_day:4,product:{sku:'VIP_30D_V11',stars:500,days:30,currency:'XTR',auto_renew:false,terms:'vip-v11-20261117',enabled:true},recent_orders:fixtureCase==='pending'?[{payload:fixturePendingOrder,status:'approved',stars:500,created_at:new Date().toISOString()}]:[]};
+ if(path==='/api/vip/order-status'&&fixtureCase==='pending')return {ok:true,order:{payload:fixturePendingOrder,status:'approved'}};
+ if(path.includes('/stars/catalog'))return {ok:true,telegram_id:fixtureOwner,server_now:new Date().toISOString(),products:fixturePacks,enabled:true,recent_orders:[],support_contact:'support@example.invalid'};
+ if(path==='/api/invite/summary')return {ok:true,telegram_id:String(fixtureOwner),server_now:new Date().toISOString(),invite_link:'https://t.me/JIGCOINBOT?startapp=ref_'+fixtureOwner,policy_version:'referrals_cumulative_v16',welcome_coins:1000,reward_coins:500,friends_rewarded:0,coins_earned:0,tier_name:'Get started',next_at:1,previous_at:0,next_reward_coins:500,next_tier_name:'Bronze',qualification:{mode:'cumulative_taps',min_taps:100,period:'lifetime',ad_qualifies:false,purchase_required:false},incoming_referral:fixtureCase==='referred'||fixturePanel==='welcome'?{display_name:fixtureName('River'),policy_version:'referrals_cumulative_v16',qualification_mode:'cumulative_taps',verified_taps:12,min_taps:100,status:'playing',joined_at:'2026-11-19T17:00:00Z',rewarded_at:null,reward_coins:null}:null,tiers:fixtureTiers,friends_joined:2,friends_pending:2,friends_qualified:0,friends_on_hold:0,friend_progress:[{id:'ref_fixture_a',display_name:fixtureName('River'),status:'playing',verified_taps:42,min_taps:100,qualification_mode:'cumulative_taps',policy_version:'referrals_cumulative_v16',joined_at:new Date().toISOString(),rewarded_at:null,reward_coins:null},{id:'ref_fixture_b',display_name:fixtureName('Morgan'),status:'joined',verified_taps:0,min_taps:100,qualification_mode:'cumulative_taps',policy_version:'referrals_cumulative_v16',joined_at:new Date().toISOString(),rewarded_at:null,reward_coins:null}]};
  if(path==='/api/invite/history')return {ok:true,telegram_id:String(fixtureOwner),credits:[]};
  if(path==='/api/leaderboard/history')return {ok:true,version:12,telegram_id:String(fixtureOwner),page:body.page,my_awards:fixtureCase==='active'?[{day:'2026-11-18',place:1,score:2022}]:[],podiums:[],has_more:false};
  if(path==='/api/leaderboard/event')return {ok:true};
@@ -3455,6 +3471,13 @@ function shopLoadError(element, result, retry) {
 function validStarsProduct(p) {
   return p && /^JC_[A-Z0-9_]{1,40}$/.test(p.sku) && Number.isSafeInteger(p.coins) && p.coins>0 && Number.isSafeInteger(p.stars) && p.stars>0;
 }
+function packOutcome(product){
+  if(homeIdentity!==homeUserId()||!Number.isSafeInteger(homeConfirmedBalance))return '';
+  const after=homeConfirmedBalance+product.coins,goal=homeGoalModel(after),current=homeGoalModel(homeConfirmedBalance);
+  if(!Number.isSafeInteger(after)||!goal)return '';
+  const rank=goal.tier>current.tier?` ${goal.current.name} unlocked.`:'';
+  return ` At your current saved balance, this gives ${formatNumber(after)} coins.${rank} ${goal.complete?'Highest coin rank reached.':`${formatNumber(goal.remaining)} coins to ${goal.nextName}.`}`;
+}
 function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0) {
   const label = starter ? 'One-time starter offer' : p.title;
   const disabled = preview || !shopCatalogFresh() || !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
@@ -3601,7 +3624,7 @@ async function buyStarsPack(sku) {
   if(product.starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow())){showToast('This starter offer has ended.');return;}
   const tg=window.Telegram?.WebApp;
   if(typeof tg?.openInvoice!=='function'){showToast('Open JigCoin in an up-to-date Telegram app to purchase.');return;}
-  const accepted=await reviewGamePurchase('Review coin pack',`${product.title} · ${formatNumber(product.coins)} in-game coins after payment confirmation.`,product.stars);
+  const accepted=await reviewGamePurchase('Review coin pack',`${product.title} · ${formatNumber(product.coins)} in-game coins after payment confirmation.${packOutcome(product)}`,product.stars);
   if(!accepted || owner!==homeUserId() || !accountIsReady() || hubPurchaseBusy)return;
   const current=(hubCatalog?.products||[]).find(p=>p.sku===sku && validStarsProduct(p));
   if(!hubCatalog?.enabled || !shopCatalogFresh() || !current || current.coins!==product.coins || current.stars!==product.stars ||
@@ -3655,9 +3678,12 @@ document.getElementById('sharePreviewDetails')?.addEventListener('toggle',render
 let inviteData=null,inviteOwner=null,inviteCheckedAt=0,invitePending=null,inviteVersion=0,inviteError=false;
 let inviteCredits=null,inviteHistoryPending=null,inviteHistoryCheckedAt=0,inviteHistoryError=false;
 let inviteRenderedView=null;
+let incomingWelcomeOwner=null,incomingWelcomeKey=null;
 const INVITE_CACHE_MS=30000;
 function inviteSnapshot(){return accountIsReady()&&inviteOwner===homeUserId()?inviteData:null;}
 function inviteReset(owner){
+  const welcome=document.getElementById('inviteWelcomeDialog');if(welcome?.open)welcome.close();
+  incomingWelcomeOwner=null;incomingWelcomeKey=null;
   inviteOwner=owner;inviteData=null;inviteCheckedAt=0;invitePending=null;inviteVersion++;
   inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;
 }
@@ -3679,10 +3705,11 @@ function validInviteData(data,owner){
     (data.qualification.mode!=='cumulative_taps'||data.qualification.min_taps!==100||data.qualification.period!=='lifetime'||data.qualification.ad_qualifies!==false||data.qualification.purchase_required!==false||
      !['friends_joined','friends_pending','friends_qualified','friends_on_hold'].every(key=>integer(data[key]))||
      !Array.isArray(data.friend_progress)||data.friend_progress.length>20||!data.friend_progress.every(row=>row&&
-       ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&typeof row.display_name==='string'&&row.display_name.length<=48&&
+       ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&typeof row.display_name==='string'&&[...row.display_name].length<=48&&
        ['cumulative_taps','daily_taps_or_ad','join','legacy_unknown'].includes(row.qualification_mode)&&
        (row.verified_taps===null||integer(row.verified_taps))&&(row.min_taps===null||integer(row.min_taps))&&
        (row.reward_coins===null||integer(row.reward_coins)))))return false;
+  if(data.incoming_referral!==undefined&&!validIncomingReferral(data.incoming_referral))return false;
   if(data.next_at!==null&&(!integer(data.next_at)||data.next_at<=data.friends_rewarded||
     !integer(data.next_reward_coins)||data.next_reward_coins<1||typeof data.next_tier_name!=='string'))return false;
   if(!Array.isArray(data.tiers)||data.tiers.length!==5)return false;
@@ -3696,6 +3723,57 @@ function validInviteData(data,owner){
     data.next_at===(upcoming?.at??null)&&data.next_reward_coins===(upcoming?.reward_coins??null)&&
     data.next_tier_name===(upcoming?.name??null)&&data.reward_coins===nextRate?.reward_coins;
 }
+function validIncomingReferral(row){
+  const integer=n=>Number.isSafeInteger(n)&&n>=0;
+  return row===null||!!row&&typeof row.display_name==='string'&&[...row.display_name].length<=48&&
+    ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&
+    ['cumulative_taps','daily_taps_or_ad','join','legacy_unknown'].includes(row.qualification_mode)&&
+    typeof row.policy_version==='string'&&(row.verified_taps===null||integer(row.verified_taps))&&(row.min_taps===null||integer(row.min_taps))&&
+    (row.qualification_mode!=='cumulative_taps'||row.min_taps===100)&&
+    (Number.isFinite(Date.parse(row.joined_at))||(row.joined_at===null&&row.qualification_mode!=='cumulative_taps'));
+}
+function incomingInviteRule(row){
+  if(row.status==='rewarded')return 'Your invitation is complete. Your inviter’s reward has been credited.';
+  if(row.status==='qualified')return 'Your invitation qualifies. Your inviter’s reward is awaiting confirmation.';
+  if(row.status==='on_hold')return 'This invitation’s eligibility needs checking. You can still play and keep your coins.';
+  if(row.qualification_mode==='cumulative_taps')return 'Make 100 verified taps in total to complete this invitation and unlock your inviter’s reward. Your progress carries across days. No purchase needed.';
+  if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Your original invitation goal: ${formatNumber(row.min_taps)} verified taps in one UTC day, or one confirmed ad reward. No purchase needed.`:'Your original invitation uses daily tap activity or a confirmed ad reward. No purchase needed.';
+  if(row.qualification_mode==='join')return 'This invitation keeps its original joining rule. Confirmation is pending.';
+  return 'This earlier invitation keeps its original reward rules. You can continue playing while they are checked.';
+}
+function renderIncomingInvite(data){
+  const row=data?.incoming_referral,el=id=>document.getElementById(id),card=el('incomingInviteCard');
+  if(!card)return;card.hidden=!row;
+  if(!row)return;
+  el('incomingInviteTitle').textContent='Invited by '+(row.display_name||'a friend');
+  const active=['joined','playing'].includes(row.status),cumulative=row.qualification_mode==='cumulative_taps',taps=cumulative?Math.min(row.verified_taps||0,row.min_taps):0;
+  const progress=active&&cumulative?`${formatNumber(taps)} / 100 verified taps · View your goal`:row.status==='rewarded'?'Invitation complete':row.status==='qualified'?'Goal complete · confirmation pending':row.status==='on_hold'?'Invitation eligibility to check':'View your original invitation goal';
+  el('incomingInviteProgress').textContent=progress;
+  el('inviteWelcomeTitle').textContent=(row.display_name||'A friend')+' invited you';
+  el('incomingInviteWelcome').textContent=`All new players start with ${formatNumber(data.welcome_coins)} free in-game coins. Build your collection and compete with friends.`;
+  el('incomingInviteRule').textContent=incomingInviteRule(row);
+  el('incomingInviteMeter').hidden=!active||!cumulative;
+  el('incomingInviteTaps').value=taps;el('incomingInviteTapLabel').textContent=`${formatNumber(taps)} / 100 verified taps saved`;
+  el('inviteWelcomePlay').textContent=taps>0?'Continue tapping':'Start tapping';
+  maybeShowInviteWelcome();
+}
+function maybeShowInviteWelcome(manual=false){
+  const data=inviteSnapshot(),row=data?.incoming_referral,dialog=document.getElementById('inviteWelcomeDialog');
+  if(!row||!dialog||typeof dialog.showModal!=='function'||dialog.open||!accountIsReady()||document.hidden)return;
+  const key='jc_invite_welcome:'+homeUserId(),value=row.policy_version+':'+row.joined_at;
+  if(!manual){
+    if(row.qualification_mode!=='cumulative_taps'||!['joined','playing'].includes(row.status)||appStorage.getItem(key)===value)return;
+    const board=document.getElementById('leaderboardScreen');
+    if(document.querySelector?.('.sheet.show, dialog[open]')||(board&&board.style.display&&board.style.display!=='none'))return;
+  }
+  incomingWelcomeOwner=homeUserId();incomingWelcomeKey={key,value};
+  dialog.showModal();
+}
+function dismissInviteWelcome(){
+  if(incomingWelcomeOwner===homeUserId()&&incomingWelcomeKey)appStorage.setItem(incomingWelcomeKey.key,incomingWelcomeKey.value);
+  const dialog=document.getElementById('inviteWelcomeDialog');if(dialog?.open)dialog.close();
+  incomingWelcomeOwner=null;incomingWelcomeKey=null;
+}
 function inviteRule(data){
   if(data.qualification.mode==='cumulative_taps')return `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} verified taps in total. No purchase needed.`;
   return data.qualification.mode==='activity'
@@ -3707,7 +3785,7 @@ function inviteFriendProgressText(row){
   if(row.status==='qualified')return 'Qualified · reward confirmation pending';
   if(row.status==='on_hold')return 'Eligibility needs checking. Earlier credited rewards stay unchanged.';
   if(row.qualification_mode==='cumulative_taps'&&row.min_taps>0)return `${formatNumber(Math.min(row.verified_taps||0,row.min_taps))} / ${formatNumber(row.min_taps)} verified taps in total`;
-  if(row.qualification_mode==='daily_taps_or_ad')return `Earlier invite rules · ${formatNumber(row.min_taps||250)} taps in one UTC day or a confirmed ad reward`;
+  if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Earlier invite rules · ${formatNumber(row.min_taps)} taps in one UTC day or a confirmed ad reward`:'Earlier invite rules · daily tap activity or a confirmed ad reward';
   if(row.qualification_mode==='join')return 'Earlier invite rules · joining confirmation pending';
   return 'Earlier invite · checking its original reward rules';
 }
@@ -3716,7 +3794,7 @@ function renderInviteFriends(data){
   const pending=document.getElementById('invitePendingSummary');
   pending.hidden=!Array.isArray(rows);
   pending.textContent=Array.isArray(rows)?`${formatNumber(data.friends_joined)} joined · ${formatNumber(data.friends_pending)} working towards a reward${data.friends_on_hold?' · '+formatNumber(data.friends_on_hold)+' to check':''}`:'';
-  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?'Latest attributed friends. Each friend keeps the rules in effect when they joined.':'No attributed friends yet. Send your link to start your group.';
+  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Each friend keeps the rules in effect when they joined.`:'No attributed friends yet. Send your link to start your group.';
   const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'To check'};
   document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${labels[row.status]}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
 }
@@ -3747,6 +3825,7 @@ function renderInviteOverview(){
   el('inviteRewardTitle').setAttribute('aria-busy',String(!!invitePending));
   el('inviteRuleDetail').textContent=data?inviteRule(data):'Refresh Invite to check the current reward rules.';
   renderInviteFriends(data);
+  renderIncomingInvite(data);
   el('inviteTierList').innerHTML=data?data.tiers.map(row=>`<div class="invite-tier-row" data-current="${row.at===data.previous_at}"><span>${escapeHtml(row.name)} · ${row.through===null?`${formatNumber(row.at)}+`:`${formatNumber(row.at)}–${formatNumber(row.through)}`} invites</span><strong>${formatNumber(row.reward_coins)} each</strong></div>`).join(''):'';
 }
 async function loadInviteSummary({force=false}={}){
@@ -3807,6 +3886,10 @@ async function copyInviteLink(){
   try{await navigator.clipboard.writeText(data.invite_link);showToast('Invite link copied');}
   catch(_){showToast('Could not copy. Try Invite on Telegram.');}
 }
+document.getElementById('incomingInviteCard')?.addEventListener('click',()=>maybeShowInviteWelcome(true));
+document.getElementById('inviteWelcomeDialog')?.addEventListener('close',dismissInviteWelcome);
+document.getElementById('inviteWelcomePlay')?.addEventListener('click',()=>{dismissInviteWelcome();backToHome();});
+document.getElementById('inviteWelcomeFriends')?.addEventListener('click',()=>{dismissInviteWelcome();openLeaderboard('friends');});
 
 // Vault v11: confirmed, account-scoped data. Invoice callbacks never grant VIP.
 let vaultData=null,vaultOwner=null,vaultRequest=null,vaultEpoch=0,vaultError=false,vaultFailure='',vaultBusy=false,vaultChecked=0,vaultClockOffset=0,vaultMessage='',vaultPolling=false;
@@ -3894,6 +3977,7 @@ function renderVaultMedals(){
  if(!box)return;
  const awards=data?.my_awards;
  box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):awards.length?awards.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
+ if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
  document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medals shown`:'Daily & weekly achievements';
  const retry=document.getElementById('vaultMedalRetry');if(retry)retry.disabled=!!vaultMedalsRequest;
 }
@@ -4162,14 +4246,15 @@ function renderLeaderboard(){
    lbMode==='daily'?'Your first confirmed tap puts you in today’s race.':'Your position appears when your account is eligible.';
   const cushion=me?.rank>1 && behind && lead!==null
     ? (lead===0 ? `Tied with #${behind.rank} on score` : `${formatNumber(lead)} ${units} ahead of #${formatNumber(behind.rank)}`) : '';
-  const hero=`<div class="lb-race-card" data-mode="${lbMode}"><div class="lb-eyebrow">YOUR ${lbMode==='daily'?'TODAY’S':lbMode==='global'?'GLOBAL':'FRIENDS'} POSITION</div><div class="lb-race-value"><strong>${title}</strong><span>${formatNumber(me?.score||0)} ${lbMode==='daily'?'tap coins':'coins'}</span></div><p>${escapeHtml(targetText)}</p>${cushion?`<small class="lb-cushion">${escapeHtml(cushion)}</small>`:''}</div>`;
+  const hero=`<div class="lb-race-card" data-mode="${lbMode}"><div class="lb-eyebrow">${lbMode==='daily'?'YOUR POSITION TODAY':'YOUR '+(lbMode==='global'?'GLOBAL':'FRIENDS')+' POSITION'}</div><div class="lb-race-value"><strong>${title}</strong><span>${formatNumber(me?.score||0)} ${lbMode==='daily'?'tap coins':'coins'}</span></div><p>${escapeHtml(targetText)}</p>${cushion?`<small class="lb-cushion">${escapeHtml(cushion)}</small>`:''}</div>`;
   if(lbView==='full')content.innerHTML=hero+`<div class="lb-list">${d.entries.map(lbRow).join('')||'<p>No ranked players yet.</p>'}</div>`+lbPager(lbPage,d.has_more);
   else{
    const podium=d.podium.length?`<div class="lb-section-label">${d.total<3?'CURRENT LEADERS':'PODIUM'}</div><div class="lb-podium" data-count="${d.podium.length}" style="--places:${d.podium.length}">${d.podium.map(r=>`<div data-place="${r.rank}"><b class="podium-medallion" aria-label="Place ${r.rank}">${(r.finish||r.rank_finish||r.vip_coin) ? mintFinishArtwork(r.vip_coin?'midnight':String(r.telegram_id)===lbOwner&&launchEquipped()?'launch':r.finish||r.rank_finish) + `<i class="podium-place">${r.rank}</i>` : r.rank}</b><span class="podium-name">${escapeHtml(String(r.telegram_id)===lbOwner?'You':r.display_name)}${lbVipBadge(r)}</span><strong>${formatNumber(r.score)}</strong></div>`).join('')}</div>`:'';
    // Your position is already pinned in the hero; show the adjacent rivals once.
    const near=d.nearby.filter(r=>r.rank!==me?.rank&&Math.abs(r.rank-(me?.rank||0))<=1&&!d.podium.some(p=>p.rank===r.rank));
    const raceNote=lbMode==='daily'?(d.awards_enabled?'Top three eligible players at the UTC finish earn a dated medal.':'Tap coins set today’s standings.'):lbMode==='global'?'Saved balances include purchased packs.':'Your inviter and players who joined through your link · saved balances.';
-   const context=lbMode==='daily'?`${formatNumber(d.total)} players with saved taps today. VIP, streak and ad multipliers count; packs and invite rewards do not.`:`${formatNumber(d.total)} eligible ${lbMode==='friends'?'players in your referral group':'players'}.`;
+   const players=d.total===1?'player':'players';
+   const context=lbMode==='daily'?`${formatNumber(d.total)} ${players} with saved taps today. VIP, streak and ad multipliers count; packs and invite rewards do not.`:`${formatNumber(d.total)} eligible ${players}${lbMode==='friends'?' in your referral group':''}.`;
    content.innerHTML=hero+podium+(near.length?`<div class="lb-section-label">NEAREST RIVALS</div><div class="lb-list">${near.map(lbRow).join('')}</div>`:'')+`<p class="lb-race-note">${raceNote}</p><p class="lb-score-context">${context}</p>`;
   }
  }
@@ -4186,7 +4271,7 @@ function lbTick(){
   const seconds=Math.max(0,Math.ceil((Date.parse(d.ends_at)-Date.now()-lbClockOffset)/1000));
   const label=d.awards_enabled?'Medal race ends in':'Daily reset in';
   el.textContent=seconds?`${label} ${Math.floor(seconds/3600)}h ${Math.floor(seconds%3600/60)}m ${seconds%60}s · UTC`:'New UTC day · updating…';
- }else el.textContent=`${formatNumber(d.total)} players · ${lbMode==='friends'?'referral connections':'saved coins'}`;
+ }else el.textContent=`${formatNumber(d.total)} ${d.total===1?'player':'players'} · ${lbMode==='friends'?'referral connections':'saved coins'}`;
  el.title=lbLoadedAt?'Last loaded '+new Date(lbLoadedAt).toLocaleTimeString('en-GB'):'';
 }
 lbEl('lbCloseBtn').addEventListener('click',()=>{closeLeaderboard();backToHome();});
@@ -4232,7 +4317,7 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
   let owner = null, data = null, profileRequest = null, checkedAt = 0, profileEpoch = 0;
   let standings = null, run = null, generation = 0, busy = false, busyStyle = false, selected = [];
   let timeAt = 0, timeRead = 0, reachedEnd = false, deepOpened = false, offline = false;
-  let raceTarget='', pinnedCard='',weeklyScope='global',practiceMode=false;
+  let raceTarget='', pinnedCard='',weeklyScope='global',practiceMode=false,lobbyCanStart=null;
   function raceInvitation() {
     const tg = window.Telegram?.WebApp;
     const param = tg?.initDataUnsafe?.start_param || new URLSearchParams(tg?.initData).get('start_param') ||
@@ -4301,20 +4386,36 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
   function validRun(value,mode='ranked'){
     if(value===null)return true;
     const integer=n=>Number.isSafeInteger(n)&&n>=0;
-    return !!value&&typeof value.id==='string'&&integer(value.turn)&&integer(value.score)&&typeof value.live==='boolean'&&Number.isFinite(Date.parse(value.ends_at))&&
+    return !!value&&typeof value.id==='string'&&value.id.length>0&&integer(value.turn)&&integer(value.score)&&typeof value.live==='boolean'&&Number.isFinite(Date.parse(value.ends_at))&&
       (value.mode===mode||(mode==='ranked'&&value.mode===undefined))&&
       (mode==='practice'?value.slot===null:[1,2,3].includes(value.slot))&&
       (!value.live||(value.board&&Array.isArray(value.board.tiles)&&value.board.tiles.length===6&&value.board.tiles.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&Number.isInteger(value.board.target)));
   }
   function validStandings(value){
     const integer=n=>Number.isSafeInteger(n)&&n>=0;
+    const day=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')&&Number.isFinite(Date.parse(d+'T00:00:00Z'));
+    const place=p=>p===null||(Number.isSafeInteger(p)&&p>0);
+    const player=p=>p&&typeof p.name==='string'&&[...p.name].length<=48&&integer(p.score)&&[1,2,3].includes(p.slot)&&typeof p.me==='boolean';
     const policy=value?.policy;
-    return valid(value)&&/^\d{4}-\d{2}-\d{2}$/.test(value.week||'')&&Number.isFinite(Date.parse(value.server_now))&&Number.isFinite(Date.parse(value.closes_at))&&
+    return valid(value)&&day(value.week)&&Number.isFinite(Date.parse(value.server_now))&&Number.isFinite(Date.parse(value.closes_at))&&
       integer(value.runs_left)&&value.runs_left<=3&&integer(value.best)&&Number.isInteger(value.seconds)&&value.seconds>0&&value.seconds<=90&&
       (value.scope===weeklyScope||(value.scope===undefined&&weeklyScope==='global'))&&
-      (!policy||(['weekly-v14','daily-v16'].includes(policy.version)&&policy.limit===3&&policy.period===(policy.version==='daily-v16'?'day':'week')&&Number.isFinite(Date.parse(value.resets_at))))&&
-      Array.isArray(value.leaders)&&value.leaders.length<=100&&value.leaders.every(row=>Number.isSafeInteger(row.place)&&row.place>0&&integer(row.score)&&typeof row.name==='string')&&
+      (!policy||(['weekly-v14','daily-v16'].includes(policy.version)&&policy.limit===3&&policy.period===(policy.version==='daily-v16'?'day':'week')&&day(value.allowance_day)&&Number.isFinite(Date.parse(value.resets_at))))&&
+      (value.total===undefined||integer(value.total))&&(value.place===undefined||place(value.place))&&(value.can_start===undefined||typeof value.can_start==='boolean')&&
+      Array.isArray(value.leaders)&&value.leaders.length<=100&&value.leaders.every(row=>Number.isSafeInteger(row.place)&&row.place>0&&integer(row.score)&&typeof row.name==='string'&&[...row.name].length<=48)&&
+      (!value.rival||(typeof value.rival.name==='string'&&[...value.rival.name].length<=48&&integer(value.rival.score)&&day(value.rival.week)))&&
+      (!value.result||(/^[a-f0-9]{32}$/.test(value.result.code||'')&&day(value.result.week)&&integer(value.result.margin)&&Array.isArray(value.result.players)&&value.result.players.length===2&&value.result.players.every(player)&&value.result.margin===value.result.players[0].score-value.result.players[1].score))&&
+      (!value.last_award||(day(value.last_award.week)&&integer(value.last_award.score)&&value.last_award.place===1&&Number.isFinite(Date.parse(value.last_award.awarded_at))))&&
       validRun(value.run)&&validRun(value.practice_run??null,'practice');
+  }
+  function validRunResponse(value,mode='ranked'){
+    return valid(value)&&Number.isFinite(Date.parse(value.server_now))&&!!value.run&&validRun(value.run,mode);
+  }
+  function settlePracticeKey(value,fromStart=false){
+    if(!value||value.mode!=='practice')return;
+    const key='jc_weekly_practice:'+owner,runKey=key+':run';
+    if(fromStart&&value.live)appStorage.setItem(runKey,value.id);
+    if(!value.live&&(fromStart||appStorage.getItem(runKey)===value.id)){appStorage.removeItem(key);appStorage.removeItem(runKey);}
   }
   const allowanceLabel=()=>standings?.policy?.period==='day'?'today':'this week';
   function durationLabel(target){
@@ -4322,7 +4423,7 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
     const days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);
     return days?days+'d '+hours+'h':hours?hours+'h '+minutes+'m':minutes?minutes+'m '+seconds%60+'s':seconds+'s';
   }
-  function rankedReady(){return !!standings&&(standings.can_start===true||(standings.can_start===undefined&&standings.runs_left>0&&Date.parse(standings.closes_at)-now()>=standings.seconds*1000));}
+  function rankedReady(){return !!standings&&standings.runs_left>0&&standings.can_start!==false&&Date.parse(standings.closes_at)-now()>=standings.seconds*1000;}
   function renderRun() {
     const box=el('weeklyBoard'),practice=run.mode==='practice';
     box.innerHTML=`<div class="pilot-clock"><span>${practice?'Practice · unranked':'Ranked run '+run.slot+' of 3'+(run.allowance_day?' · '+fmtDate(run.allowance_day+'T00:00:00Z'):'')}</span><strong id="weeklyClock"></strong></div>
@@ -4360,10 +4461,10 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
   function renderLobby() {
     const s=standings;
     if (!s) {el('weeklyBoard').innerHTML='<button class="pilot-primary" data-race-action="reload">Check race</button>';return;}
+    const canStart=rankedReady();lobbyCanStart=canStart;
     if(practiceMode&&run&&!run.live){renderPracticeResult();return;}
     const opponent=s.rival && !s.rival.me ? `<div class="pilot-rival"><strong>${escapeHtml(s.rival.name)}</strong>
       ${s.rival.week===s.week?'scored '+s.rival.score+' this week':'shared a race from '+fmtDate(s.rival.week+'T00:00:00Z')+'. Play this week’s race below.'}</div>` : '';
-    const canStart=rankedReady();
     const result=s.result;
     const total=Number.isSafeInteger(s.total)?s.total:null;
     const leaderList=s.leaders.map(r=>`<li><b>#${r.place}</b><span>${(r.finish||r.rank_finish||r.vip_coin)?'<i class="pilot-mini-coin">'+mintFinishArtwork(r.vip_coin?'midnight':r.finish||r.rank_finish)+'</i>':''}
@@ -4399,6 +4500,7 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
     busy=false;
     if(!validStandings(result)){standings=null;run=null;offline=true;status('Race standings could not be loaded. Your saved results are unchanged.');renderLobby();return;}
     clockAt(result.server_now);standings=result;run=practiceMode?(result.practice_run??null):result.run;reachedEnd=false;
+    settlePracticeKey(result.practice_run);
     el('weeklyDates').textContent='Week of '+fmtDate(result.week+'T00:00:00Z')+' · UTC';
     status(pinnedCard && !result.result?'This result could not be found. You can still play this week’s race.':'');
     if(run?.live && secondsLeft()>0 && (practiceMode||!(pinnedCard && result.result))){
@@ -4441,10 +4543,10 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
     let ticket=appStorage.getItem(key);
     if(!ticket){ticket=crypto.randomUUID();appStorage.setItem(key,ticket);}
     const result=await apiPost('/api/weekly/start',{request_key:ticket,launch_equipped:launchEquipped()},{tapOwner:id,timeoutMs:9000});
-    if(valid(result)&&owner===id&&validRun(result.run))appStorage.removeItem(key);
+    if(owner===id&&validRunResponse(result))appStorage.removeItem(key);
     if(stamp!==generation||!visible())return;
     busy=false;
-    if(!valid(result)||!validRun(result.run)){await loadRace();if(visible()&&!run?.live)status('Could not open a ranked run. Check the number remaining before retrying.');return;}
+    if(!validRunResponse(result)){await loadRace();if(visible()&&!run?.live)status('Could not open a ranked run. Check the number remaining before retrying.');return;}
     clockAt(result.server_now);run=result.run;selected=[];reachedEnd=false;
     if(!run?.live){await loadRace();return;}
     status('');renderRun();
@@ -4457,10 +4559,10 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
     let ticket=appStorage.getItem(key);
     if(!ticket){ticket=crypto.randomUUID();appStorage.setItem(key,ticket);}
     const result=await apiPost('/api/weekly/practice/start',{request_key:ticket},{tapOwner:id,timeoutMs:9000});
-    if(valid(result)&&owner===id&&validRun(result.run,'practice'))appStorage.removeItem(key);
+    if(owner===id&&validRunResponse(result,'practice'))settlePracticeKey(result.run,true);
     if(stamp!==generation||!visible())return;
     busy=false;
-    if(!valid(result)||!validRun(result.run,'practice')){practiceMode=false;status('Practice could not be opened. Your ranked attempts are unchanged.');renderLobby();return;}
+    if(!validRunResponse(result,'practice')){practiceMode=false;status('Practice could not be opened. Your ranked attempts are unchanged.');renderLobby();return;}
     clockAt(result.server_now);run=result.run;selected=[];reachedEnd=false;
     status('');run?.live?renderRun():renderPracticeResult();
   }
@@ -4474,8 +4576,9 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
     const result=await apiPost(practice?'/api/weekly/practice/answer':'/api/weekly/answer',{id:old.id,turn:old.turn,picks:[...selected]},{tapOwner:owner,timeoutMs:7000});
     if(stamp!==generation||!visible())return;
     busy=false;selected=[];
-    if(!valid(result)||!validRun(result.run,practice?'practice':'ranked')){await loadRace();if(visible()&&!offline)status('Race refreshed from your saved score.');return;}
+    if(!validRunResponse(result,practice?'practice':'ranked')){await loadRace();if(visible()&&!offline)status('Race refreshed from your saved score.');return;}
     clockAt(result.server_now);run=result.run;
+    if(practice)settlePracticeKey(run);
     if(!run?.live){if(practice)renderPracticeResult();else await loadRace();return;}
     status(result.correct===false?'Try the next pair.':result.correct?'Pair scored.':'Score synced.');renderRun();
   }
@@ -4559,13 +4662,13 @@ document.addEventListener('visibilitychange',()=>{if(lbVisible()&&accountIsReady
       const remaining=secondsLeft(), label=el('weeklyClock');
       if(label)label.textContent=remaining+'s';
       if(!remaining&&!reachedEnd){reachedEnd=true;void loadRace();}
-    }else if(standings){tickLobby();if(now()>=Date.parse(standings.closes_at)||(standings.policy?.period==='day'&&now()>=Date.parse(standings.resets_at)))void loadRace();}
+    }else if(standings){if(lobbyCanStart!==rankedReady())renderLobby();else tickLobby();if(now()>=Date.parse(standings.closes_at)||(standings.policy?.period==='day'&&now()>=Date.parse(standings.resets_at)))void loadRace();}
   },250);
   void sync();
 })();
 
 for(const [id,action] of [['tabShop',openCoinShopSheet],['tabFriends',openFriendsSheet],['tabWithdraw',openVault],['tabFarm',()=>openLeaderboard('daily')],['tabTasks',()=>window.JigPilot.openRace()],['inviteDetailsOpen',openInviteDetails],['inviteDetailsClose',openFriendsSheet],['inviteFriendsBoard',()=>openLeaderboard('friends')]])E(id).addEventListener('click',action);
 window.fixtureReady=false;
-(async()=>{await refreshVipStatus();if(fixturePanel==='vault')openVault();else if(fixturePanel==='vip')openVipOffer('shop');else if(fixturePanel==='invite')openFriendsSheet();else if(fixturePanel==='invite-details'){await loadInviteSummary();openInviteDetails();}else if(fixturePanel==='leaderboard')openLeaderboard(fixtureParams.get('mode')||'daily');else if(fixturePanel==='weekly')await window.JigPilot.openRace();else openCoinShopSheet();await new Promise(r=>setTimeout(r,100));window.fixtureReady=true;})();
+(async()=>{await refreshVipStatus();if(fixturePanel==='vault')openVault();else if(fixturePanel==='vip')openVipOffer('shop');else if(fixturePanel==='invite')openFriendsSheet();else if(fixturePanel==='invite-details'){await loadInviteSummary();openInviteDetails();}else if(fixturePanel==='leaderboard')openLeaderboard(fixtureParams.get('mode')||'daily');else if(fixturePanel==='weekly')await window.JigPilot.openRace();else if(fixturePanel==='welcome')await loadInviteSummary();else openCoinShopSheet();await new Promise(r=>setTimeout(r,100));window.fixtureReady=true;})();
 </script></body>
 </html>
