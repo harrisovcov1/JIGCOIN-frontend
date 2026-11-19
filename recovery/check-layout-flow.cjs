@@ -12,9 +12,32 @@ function route(ready){
 }
 test('navigation refuses an unready account without touching panels',()=>{const r=route(false);assert.equal(r.old.classList.contains('show'),true);assert.equal(r.next.classList.contains('show'),false);assert.equal(r.active,null);assert.equal(r.cleared,null)});
 test('switching section closes previous panel and leaderboard, cancels old countdown and resets scroll',()=>{const r=route(true);assert.equal(r.old.classList.contains('show'),false);assert.equal(r.next.classList.contains('show'),true);assert.equal(r.backdrop.classList.contains('show'),true);assert.equal(r.leaderboard.style.display,'none');assert.equal(r.ctx.document.body.style.overflow,'');assert.equal(r.cleared,12);assert.equal(r.body.scrollTop,0);assert.equal(r.active,'Shop');assert.equal(r.cancelled,true)});
-function cards(products){const c={hubCatalog:{products,enabled:true},hubPurchaseBusy:false,shopCatalogFresh:()=>true,hubCatalogOwner:10001,homeUserId:()=>10001,hubNow:Date.now,escapeHtml:String,formatNumber:x=>x.toLocaleString('en-GB')};vm.createContext(c);vm.runInContext(slice('function validStarsProduct(', 'function renderStarsCatalog'),c);return c;}
-test('best-value label follows valid catalogue ratios rather than pack size or price',()=>{const p=[{sku:'JC_SMALL',title:'Small',coins:1000,stars:100},{sku:'JC_MEDIUM',title:'Medium',coins:3000,stars:250},{sku:'JC_LARGE',title:'Large',coins:7000,stars:500}];const c=cards(p);assert.doesNotMatch(c.starsProductCard(p[0]),/Best value/);assert.match(c.starsProductCard(p[2]),/Best value/);p[0].coins=2000;assert.match(c.starsProductCard(p[0]),/Best value/);assert.doesNotMatch(c.starsProductCard(p[2]),/Best value/)});
-test('equal value packs and starter offers do not receive unsupported best-value claims',()=>{const p=[{sku:'JC_SMALL',coins:1000,stars:100},{sku:'JC_LARGE',coins:5000,stars:500}];const c=cards(p);for(const x of p)assert.doesNotMatch(c.starsProductCard(x),/Best value/);assert.doesNotMatch(c.starsProductCard({...p[0],coins:99999,starter:true},true),/Best value/)});
+function cards(products) {
+ const elements={hubStarter:{},hubShopNotice:{},hubSupport:{}};
+ const classes=new Set();
+ const coinPackList={innerHTML:'',querySelector:()=>null,classList:{toggle(name,value){if(value)classes.add(name);else classes.delete(name);}}};
+ const c={hubCatalog:{products,enabled:true},hubPurchaseBusy:false,shopCatalogFresh:()=>true,
+  hubCatalogOwner:10001,homeIdentity:10001,homeUserId:()=>10001,homeGoalModel:()=>null,homeConfirmedBalance:0,
+  document:{getElementById:id=>elements[id]},coinPackList,coinShopSheet:{querySelectorAll:()=>[]},renderHubOrders(){},updateBoostHub(){},
+  hubNow:Date.now,escapeHtml:String,formatNumber:x=>x.toLocaleString('en-GB')};
+ vm.createContext(c);
+ vm.runInContext(slice('function packGoal(', 'async function loadCoinPacks('),c);
+ c.renderStarsCatalog();
+ return {c,markup:coinPackList.innerHTML,classes};
+}
+test('only the pack with the highest ratio gets the best-value label when a lower rate exists',()=>{
+ const packs=[{sku:'JC_SMALL',title:'Small',coins:1000,stars:100},{sku:'JC_LARGE',title:'Large',coins:7000,stars:500}];
+ const badgeOwner=()=>cards(packs).markup.match(/<article [^>]*hub-best[^>]*>[\s\S]*?<div class="hub-product-label">([^<]+)/)?.[1];
+ assert.equal(badgeOwner(),'Large');
+ packs[0].coins=2000;
+ assert.equal(badgeOwner(),'Small');
+});
+test('equal value packs and starter offers do not receive unsupported best-value claims',()=>{
+ const packs=[{sku:'JC_SMALL',coins:1000,stars:100},{sku:'JC_LARGE',coins:5000,stars:500}];
+ const {c,markup}=cards(packs);
+ assert.doesNotMatch(markup,/Best value/);
+ assert.doesNotMatch(c.starsProductCard({...packs[0],coins:99999,starter:true},true,false,null,999.99),/Best value/);
+});
 test('share text uses the confirmed invite link and share image uses saved balance',()=>{
  const drawn=[];const noop=()=>{};const canvasContext={clearRect:noop,createLinearGradient:()=>({addColorStop:noop}),fillRect:noop,fillText:t=>drawn.push(t),measureText:()=>({width:30}),fill:noop,stroke:noop};
  const c={formatNumber:n=>n.toLocaleString('en-GB'),inviteSnapshot:()=>({invite_link:'https://t.me/JIGCOINBOT?startapp=ref_10001',welcome_coins:1000}),state:{bal:12784,balance:0,today:238,streakDays:1},document:{getElementById:id=>id==='rankName'?{textContent:'Grinder'}:id==='shareCardCanvas'?{width:960,height:540,getContext:()=>canvasContext}:null},inviteLinkText:{textContent:'https://t.me/JIGCOINBOT?startapp=ref_test'},FALLBACK_REF_LINK:'fallback',roundRect:noop};
@@ -24,20 +47,20 @@ test('starter allocation counts are not presented as limited referral places',()
  assert.doesNotMatch(html,/id="launchBoostInvite"|refreshReferralPromotion|places remaining.*coins per eligible referral/);
 });
 
-test('all five catalogue packs are visible in price order, including the maximum, with no More menu',()=>{
+test('one pack is featured; all four other packs are listed by price in the disclosure',()=>{
  const p=[{sku:'JC_MAX_700K',title:'Maximum coin pack',coins:700000,stars:35000},
  {sku:'JC_SMALL',title:'Small',coins:1000,stars:100},{sku:'JC_GROWTH',title:'Growth',coins:37500,stars:2500},
  {sku:'JC_MEDIUM',title:'Medium',coins:3000,stars:250},{sku:'JC_LARGE',title:'Large',coins:7000,stars:500}];
- const c=cards(p);let dense=false;const els={hubStarter:{},hubShopNotice:{},hubSupport:{}};
- c.document={getElementById:id=>els[id]};c.coinPackList={innerHTML:'',classList:{toggle:(name,value)=>{dense=value;}}};
- c.coinShopSheet={querySelectorAll:()=>[]};c.renderHubOrders=()=>{};c.updateBoostHub=()=>{};
- vm.runInContext(slice('function renderStarsCatalog()', 'async function loadCoinPacks('),c);c.renderStarsCatalog();
- const rendered=c.coinPackList.innerHTML;
+ const {markup:rendered,classes}=cards(p);
+ const details=rendered.indexOf('<details');
+ assert.ok(rendered.indexOf('JC_SMALL')<details);
+ assert.ok(rendered.indexOf('JC_MEDIUM')>details);
+ assert.match(rendered,/<summary>All other coin packs<\/summary>/);
  assert.equal((rendered.match(/data-stars-sku=/g)||[]).length,5);
  assert.ok(rendered.indexOf('JC_SMALL')<rendered.indexOf('JC_MEDIUM'));
  assert.ok(rendered.indexOf('JC_LARGE')<rendered.indexOf('JC_GROWTH'));
  assert.ok(rendered.indexOf('JC_GROWTH')<rendered.indexOf('JC_MAX_700K'));
  assert.match(rendered,/700,000/);assert.match(rendered,/35,000/);assert.match(rendered,/20 coins per Star/);
  assert.equal((rendered.match(/Best value/g)||[]).length,1);
- assert.doesNotMatch(rendered,/hubMorePacks|View all packs|hidden/);assert.equal(dense,true);
+ assert.ok(classes.has('hub-catalog-dense'));
 });

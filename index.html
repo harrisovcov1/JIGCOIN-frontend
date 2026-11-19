@@ -2232,7 +2232,15 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 /* Stable type and control geometry in iOS WebViews; browser zoom stays enabled. */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #mainScroll .home-session-row{display:grid;grid-template-columns:80px minmax(0,1fr);min-height:52px;align-items:center}
-#homeSaveStatus{min-width:0;white-space:nowrap;text-align:left}
+#homeSaveStatus{min-width:0;white-space:nowrap;text-align:left;grid-column:1;grid-row:1}
+#homeSessionControls #homeJourneyOpen{grid-column:2;grid-row:1}
+#homeSessionControls #homeBoostAction{grid-column:3;grid-row:1}
+#tapSaveDialog{box-sizing:border-box;width:min(22rem,calc(100% - 32px));max-height:80dvh;margin:auto;padding:18px;border:1px solid var(--mint-rim);border-radius:var(--mint-corner);background:var(--mint-bg);color:var(--mint-text);overflow:auto;overflow-wrap:anywhere}
+#tapSaveDialog::backdrop{background:rgb(4 9 16 / .8)}
+#tapSaveDialog h2{margin:0 0 8px;font:600 23px/1.2 Georgia,serif}
+#tapSaveDialog p,#tapSaveDialog .tap-sync-status{font-size:14px;line-height:1.45;margin:8px 0;color:var(--mint-muted);text-align:left}
+#tapSaveDialog form button{width:100%;min-height:44px;margin-top:8px}
+#journeySaveOpen{display:block;width:100%;min-height:44px;margin:4px 0 0;text-align:left}
 #mainScroll .home-boost-action{width:100%;max-width:none;min-height:52px;padding:6px 8px}
 #todayText,#energyText,#perTap{font-variant-numeric:tabular-nums}
 </style>
@@ -2537,10 +2545,12 @@ body{justify-content:flex-start}
 #withdrawSheet .vault-utility>button,#withdrawSheet .vault-utility summary{min-height:40px;padding:5px 2px;line-height:1.3}
 #homeJourneySheet .sheet-body{padding:10px 12px}
 .journey-focus{display:grid;grid-template-columns:49px minmax(0,1fr);align-items:center;gap:12px;padding:10px 12px;border:1px solid #51647a;border-radius:14px;background:radial-gradient(ellipse at 5% 5%,#334b5b,#18253a 70%);margin-bottom:9px}
-#journeyCoin svg{width:49px;height:49px}.journey-focus small{font-size:11px;color:#c3d0df}.journey-focus h3{margin:2px 0;font-size:19px}
+#journeyCoin{display:block;width:49px;max-width:100%;aspect-ratio:1;min-width:0}
+#journeyCoin :is(img,svg){display:block;width:100%;height:100%;object-fit:contain}
+.journey-focus>div{min-width:0;overflow-wrap:anywhere}.journey-focus small{font-size:11px;color:#c3d0df}.journey-focus h3{margin:2px 0;font-size:19px}
 #homeJourneySheet .journey-focus p{margin:2px 0;color:#f4d68d;font-size:12px}
 #journeyProgress{display:block;margin-top:4px;width:100%;height:5px;accent-color:#e7be6c}
-#homeTierGrid{gap:5px}
+#homeTierGrid{gap:5px;grid-template-columns:repeat(2,minmax(0,1fr))}
 #homeTierGrid .coin-tier{grid-template-columns:31px minmax(0,1fr);min-height:46px;border-radius:11px;padding:5px 7px;gap:1px 6px}
 #homeTierGrid .mini-coin{width:31px;height:31px}
 #homeTierGrid strong{font-size:12px;line-height:1.1}#homeTierGrid small{font-size:10px;line-height:1.15}
@@ -2648,7 +2658,7 @@ body{justify-content:flex-start}
     margin: 0;
     padding: 14px;
   }
-  #journeyCoin svg { display: block; width: clamp(56px, 10cqh, 76px); height: auto; aspect-ratio: 1; }
+  #journeyCoin { width: clamp(56px, 10cqh, 76px); }
   #homeJourneySheet .journey-focus h3 { font-size: clamp(21px, 6cqw, 27px); }
   #homeJourneySheet .journey-focus small, #homeJourneySheet .journey-focus p { font-size: 13px; }
   #journeyProgress { height: 7px; margin-top: 7px; }
@@ -2799,9 +2809,19 @@ body{justify-content:flex-start}
 #leaderboardScreen .podium-medallion:has(svg){border:0;background:none;filter:none}#leaderboardScreen .podium-medallion svg{width:100%;height:100%}
 </style>
   <link rel="stylesheet" href="./assets/mint.css?v=full-ranks-1">
-  <link rel="stylesheet" href="./assets/mint-world.css?v=worlds-1">
+  <link rel="stylesheet" href="./assets/mint-world.css?v=phone-fit-2">
   <link rel="stylesheet" href="./assets/mint-home.css?v=worlds-1">
   <script defer src="./assets/race-card.js?v=full-ranks-1"></script>
+<style>
+#purchaseReview{box-sizing:border-box;width:min(92vw,380px);max-height:85vh;max-height:85dvh;overflow:auto;margin:auto;padding:18px;border:1px solid var(--press-light,#e5c88e);border-radius:12px;background:#1b2028;color:#f4f1e9;overflow-wrap:anywhere}
+#purchaseReview::backdrop{background:#080b10c9}
+#purchaseReview h2{font:600 23px/1.2 Georgia,serif;margin:0 0 10px}
+#purchaseReview p{margin:8px 0;font:400 14px/1.4 system-ui,sans-serif}
+#purchaseReview #purchaseReviewPrice{font-weight:700;color:#ffe0a6}
+#purchaseReview form{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+#purchaseReview button{flex:1 1 auto;min-height:44px;margin:0;font:600 15px/1.25 system-ui,sans-serif}
+#purchaseReviewCancel{color:inherit;border:1px solid #7b8792;background:#262e38;border-radius:8px}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -2810,8 +2830,8 @@ body{justify-content:flex-start}
       <div class="mint-masthead">
         <h1 class="mint-wordmark">JigCoin</h1>
         <div id="homeSessionControls" class="home-session-row mint-instruments">
-          <button id="homeSaveStatus" class="quiet-button" type="button" aria-label="View saved tap details">Syncing…</button>
-          <button id="homeJourneyOpen" class="mint-rank-plaque" type="button" aria-label="View your coin evolution"><span id="rankName">—</span></button>
+          <button id="homeSaveStatus" class="quiet-button" type="button" aria-haspopup="dialog" aria-controls="tapSaveDialog" hidden>Check tap sync ›</button>
+          <button id="homeJourneyOpen" class="mint-rank-plaque" type="button" aria-label="View your rank journey" aria-controls="homeJourneySheet"><span id="rankName">—</span></button>
           <button id="homeBoostAction" class="home-boost-action" type="button" aria-controls="weeklySheet" disabled>Weekly race</button>
         </div>
       </div>
@@ -2860,7 +2880,7 @@ body{justify-content:flex-start}
         <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
         <div class="tap-metrics">
           <div class="tap-metric" id="homeEnergyMetric">
-            <div class="energy-readout"><span class="metric-label">Energy</span><span id="energyText">0 / 50</span></div>
+            <div class="energy-readout"><span class="metric-label" id="energyLabel">Energy</span><span id="energyText">0 / 50</span></div>
             <div class="energy-bar" aria-hidden="true">
               <div class="energy-fill" id="energyFill"></div>
             </div>
@@ -2960,7 +2980,7 @@ body{justify-content:flex-start}
 
   <div class="sheet" id="homeJourneySheet" role="dialog" aria-labelledby="homeJourneyTitle">
     <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Your rank journey</div><div class="sheet-subtitle">Coin collection · ranked by saved balance</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
-    <div class="sheet-body"><section class="journey-focus"><span id="journeyCoin" aria-hidden="true"></span><div><small id="journeyCurrent">Your rank</small><h3 id="journeyTarget">Next unlock</h3><p class="journey-next" id="homeJourneyNext"></p><progress id="journeyProgress" max="1" value="0" aria-label="Progress to next coin"></progress></div></section><div class="coin-tier-grid" id="homeTierGrid"></div><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><details class="journey-settings" id="journeySettings"><summary>Collection details &amp; settings</summary><p class="journey-record" id="homeMilestoneRecord"></p><p class="journey-footnote">Coin designs are cosmetic.</p><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><details class="home-sync-details" id="homeSyncDetails"><summary>Tap saving details</summary><p>Home totals show whole coins. Fractional tap bonuses continue to accumulate.</p><div id="tapSyncStatus" class="tap-sync-status" hidden></div><p id="homeNormalSyncStatus"></p></details></details></div>
+    <div class="sheet-body"><section class="journey-focus"><span id="journeyCoin" aria-hidden="true"></span><div><small id="journeyCurrent">Your rank</small><h3 id="journeyTarget">Next unlock</h3><p class="journey-next" id="homeJourneyNext"></p><progress id="journeyProgress" max="1" value="0" aria-label="Progress to next coin"></progress></div></section><div class="coin-tier-grid" id="homeTierGrid"></div><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><details class="journey-settings" id="journeySettings"><summary>Collection details &amp; settings</summary><p class="journey-record" id="homeMilestoneRecord"></p><p class="journey-footnote">Coin designs are cosmetic.</p><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><button id="journeySaveOpen" type="button" class="quiet-button" aria-haspopup="dialog" aria-controls="tapSaveDialog">Tap saving details ›</button></details></div>
   </div>
 
   <div class="sheet" id="friendsSheet">
@@ -3032,6 +3052,25 @@ body{justify-content:flex-start}
       </div>
     </div>
   </div>
+  <dialog id="purchaseReview" aria-labelledby="purchaseReviewTitle" aria-describedby="purchaseReviewItem purchaseReviewPrice">
+    <h2 id="purchaseReviewTitle">Review purchase</h2>
+    <p id="purchaseReviewItem"></p>
+    <p id="purchaseReviewPrice"></p>
+    <p>This purchase grants the in-game benefit shown. In-game coins have no cash-out value or guaranteed airdrop allocation.</p>
+    <p>For payment help or refunds, send /paysupport to the JigCoin bot with your order reference.</p>
+    <form method="dialog">
+      <button type="submit" value="cancel" id="purchaseReviewCancel" autofocus>Cancel</button>
+      <button type="submit" value="agree" class="pilot-primary">Agree and continue</button>
+    </form>
+  </dialog>
+  <dialog id="tapSaveDialog" aria-labelledby="tapSaveTitle">
+    <h2 id="tapSaveTitle">Tap saving</h2>
+    <p id="homeNormalSyncStatus"></p>
+    <div id="tapSyncStatus" class="tap-sync-status" hidden></div>
+    <p id="historicalTapStatus" hidden></p>
+    <p>Your balance shows whole coins. Fractional tap bonuses continue to accumulate.</p>
+    <form method="dialog"><button type="submit" class="quest-action">Close</button></form>
+  </dialog>
   <dialog id="crownPreview" aria-labelledby="crownPreviewTitle">
     <div class="mint-cabinet-scene"><span id="cabinetCoin" aria-hidden="true"></span></div>
     <div class="mint-preview-heading">
@@ -3128,8 +3167,9 @@ body{justify-content:flex-start}
         <span><strong>Midnight Crown</strong><small>30-day VIP · Double tap coins and energy capacity</small></span>
         <span class="pass-chevron" aria-hidden="true">›</span>
       </button>
-      <details class="hub-history">
+      <details class="hub-history" id="hubOrderDetails">
         <summary>Orders &amp; payment help</summary>
+        <p id="hubOrderNotice" class="hub-small" tabindex="-1" hidden></p>
         <p class="hub-small">Packs add in-game coins to your balance after payment confirmation. Pay with Telegram Stars.</p>
         <p class="hub-small">In-game coins have no cash value. Buying a pack does not guarantee an airdrop allocation or future value.</p>
         <div id="hubOrderHistory"></div>
@@ -3666,12 +3706,13 @@ function homeTierIndex(balance) {
 function homeMajorMilestones() {
   return HOME_TIERS.slice(1).map(tier=>tier.min);
 }
-function homeGoalModel(balance) {
+function homeGoalModel(balance, displayedBalance=balance) {
   if(!Number.isSafeInteger(balance)||balance<0)return null;
   const tier=homeTierIndex(balance),current=HOME_TIERS[tier],next=HOME_TIERS[tier+1];
+  const coins=Number.isFinite(displayedBalance)?Math.max(0,Math.floor(displayedBalance)):balance;
   return{tier,current,next:next?.min??null,nextName:next?.name??null,
-    remaining:next?next.min-balance:0,complete:!next,
-    progress:next?Math.max(0,Math.min(1,(balance-current.min)/(next.min-current.min))):1};
+    remaining:next?Math.max(0,next.min-coins):0,complete:!next,
+    progress:next?Math.max(0,Math.min(1,(coins-current.min)/(next.min-current.min))):1};
 }
 function advanceHomeMilestone(previous,balance,bootstrap=false) {
   if(!Number.isSafeInteger(balance)||balance<0)return{record:previous,milestone:null};
@@ -3680,21 +3721,25 @@ function advanceHomeMilestone(previous,balance,bootstrap=false) {
   const crossed=old===null||bootstrap?[]:homeMajorMilestones().filter(n=>n>old&&n<=balance);
   return{record:{highWater},milestone:crossed.at(-1)??null};
 }
-function homeRaceModel(snapshot,identity) {
+function homeRaceModel(snapshot,identity,displayedBalance=snapshot?.me?.balance) {
   const me=snapshot?.me,rows=snapshot?.window;
   if(!snapshot?.ok||!me||me.telegram_id!==identity||!Array.isArray(rows)||!Number.isSafeInteger(me.balance)||me.balance<0||!Number.isSafeInteger(me.global_rank)||me.global_rank<1||!Number.isSafeInteger(me.global_total)||me.global_total<me.global_rank)return null;
+  const coins=Math.floor(displayedBalance);
+  if(!Number.isFinite(displayedBalance)||!Number.isSafeInteger(coins)||coins<0)return null;
   const valid=row=>row&&Number.isSafeInteger(row.balance)&&row.balance>=0&&Number.isSafeInteger(row.telegram_id)&&row.telegram_id>0&&row.telegram_id!==identity;
   if(me.global_rank===1){
     if(me.global_total===1)return{rank:1,text:'First on the leaderboard · No rival yet'};
     const below=rows.find(row=>row.global_rank===2);
     if(!valid(below)||below.balance>me.balance)return null;
-    const lead=me.balance-below.balance;
-    return{rank:1,text:lead>0?`${lead.toLocaleString('en-GB')} coins ahead of #2`:'#1 by ranking order · Tied on coins'};
+    const lead=coins-below.balance;
+    if(lead<0)return{rank:1,text:'Updating your position…',refreshNeeded:true};
+    return{rank:1,text:lead>0?`${lead.toLocaleString('en-GB')} coin${lead===1?'':'s'} ahead of #2`:'#1 by ranking order · Tied on coins'};
   }
   const above=rows.find(row=>row.global_rank===me.global_rank-1);
   if(!valid(above)||above.balance<me.balance)return null;
-  const needed=above.balance-me.balance+1;
+  const needed=above.balance-coins+1;
   if(!Number.isSafeInteger(needed))return null;
+  if(needed<=0)return{rank:me.global_rank,text:'Rival target reached · Updating standings…',refreshNeeded:true};
   return{rank:me.global_rank,text:`${needed.toLocaleString('en-GB')} coin${needed===1?'':'s'} to pass #${above.global_rank.toLocaleString('en-GB')}`};
 }
 function homeBoostRemaining(active,until,now=Date.now()) {
@@ -3822,29 +3867,30 @@ function animateHomeTap(points) {
   } catch (_) { /* Feedback is optional; tap accounting continues. */ }
 }
 function renderHomeProgress(view) {
-  // Rank progress uses the same saved balance everywhere. Pending taps can
-  // animate the total but cannot unlock a rank before the server confirms it.
-  const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null);
-  document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
+  // Distance follows the displayed coins. The saved tier controls artwork and unlocks.
+  const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null,view.bal);
+  document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':goal.remaining===0?`${goal.nextName} target reached · Saving…`:`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
   document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':(MINT_FINISHES['rank-'+(goal.tier+1)]?.name || 'Unlock the '+homeCoinUnlock(goal.tier+1))+' · Preview ›'):'Build your score, one tap at a time.';
   document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
   document.getElementById('homeCoinWrap').dataset.coinTier=String(goal?.tier??0);
   rankNameEl.textContent=goal?goal.current.name:'—';
-  rankPointsTextEl.textContent=goal?formatNumber(homeConfirmedBalance):'—';
+  rankPointsTextEl.textContent=goal?formatNumber(Math.floor(view.bal)):'—';
   document.getElementById('homeRankGoalLabel').textContent=goal?.complete?'Top rank':'Next rank';
   nextRankPointsTextEl.textContent=goal?(goal.complete?'unlocked':formatNumber(goal.next)):'—';
   rankProgressFill.style.transform=`scaleX(${goal?.progress??0})`;
-  renderHomeRace();renderHomeSession();renderCollectibleCoin(goal);
+  renderHomeRace(view.bal);renderHomeSession();renderCollectibleCoin(goal);
 }
 function renderHomeSession() {
   const status=document.getElementById('homeSaveStatus'),action=document.getElementById('homeBoostAction');if(!status||!action)return;
   let pending=0,message='';
   if(window.__lastState?.recovery_gameplay){const q=readRecoveryQueue();pending=q.pending+(q.packet?.count||0);message=recoveryTapMessage;}
-  else{pending=getPendingTaps()||getTapQueue().length;message=typeof ordinarySaveNotice==='string'?(ordinarySaveNotice||legacyTapNotice):'';}
-  const connecting=['loading','connecting'].includes(window.__accountPhase);
-  status.textContent=!accountIsReady()?(connecting?'Syncing…':'Sync paused'):message?'Save details ›':pending?'Saving…':'Saved ✓';
-  status.dataset.state=message?'error':pending?'pending':'saved';
-  document.getElementById('homeNormalSyncStatus').textContent=message||(!accountIsReady()?'Reconnect to refresh your saved balance.':pending?'Your taps are stored on this device while confirmation is pending.':'All queued taps have been confirmed.');
+  else{pending=getPendingTaps()||getTapQueue().length;message=typeof ordinarySaveNotice==='string'?ordinarySaveNotice:'';}
+  status.hidden=!accountIsReady() || !message;
+  status.dataset.state=message?'error':'saved';
+  const historical=document.getElementById('historicalTapStatus');
+  historical.textContent=typeof legacyTapNotice==='string'?legacyTapNotice:'';
+  historical.hidden=!historical.textContent;
+  document.getElementById('homeNormalSyncStatus').textContent=message||(!accountIsReady()?'Reconnect to refresh your saved balance.':pending?'Your taps are stored on this device while confirmation is pending.':'Your account’s taps are up to date.');
   const remaining=homeBoostRemaining(state.doubleBoostActive,state.doubleBoostUntil);
   document.getElementById("homeCoinWrap").dataset.double=String(remaining>0);
   const projected=recoveryTapView(state);
@@ -3870,33 +3916,38 @@ async function refreshHomeRefillStatus(){
   await refreshBoostMissions().catch(()=>{});
   renderHomeSession();
 }
-function renderHomeRace(){
+function renderHomeRace(displayedBalance=recoveryTapView(state).bal){
   const el=document.getElementById('homeRace');if(!el)return;
-  const race=homeRaceModel(homeRaceSnapshot,homeUserId());
+  const race=homeRaceModel(homeRaceSnapshot,homeUserId(),displayedBalance);
   const fresh=Date.now()-homeRaceSyncedAt<90000;
-  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text;el.title='Based on the latest leaderboard snapshot, refreshed while Home is open.';}
+  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text;el.title='Your tap total against the latest saved rival score. Standings update after confirmation.';}
   else{el.textContent=accountIsReady()?'View your nearest rivals':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
 }
 async function refreshHomeRace(force=false){
-  const delay=homeRaceSnapshot&&homeRaceSnapshot.me.global_rank!==state.globalRank?8000:60000;
+  const stale=Date.now()-homeRaceSyncedAt>=90000;
+  if(stale&&homeRaceSnapshot)renderHomeRace();
+  const confirmedRace=homeRaceModel(homeRaceSnapshot,homeUserId(),homeConfirmedBalance);
+  const delay=confirmedRace&&(confirmedRace.refreshNeeded||confirmedRace.rank!==state.globalRank)?8000:60000;
   if(homeRaceBusy||!accountIsReady()||document.hidden||navigator.onLine===false||(!force&&document.getElementById('mainScroll').inert)||Date.now()-homeRaceAttemptAt<(force?3000:delay))return;
   const id=homeUserId();if(!id)return;
   homeRaceBusy=true;homeRaceAttemptAt=Date.now();
   try{const res=await apiPost('/api/leaderboard/window',{},{silent:true,timeoutMs:8000});
     if(id!==homeUserId()||!accountIsReady())return;
-    if(homeRaceModel(res,id)){observeHomeRace(res,id);}else homeRaceSnapshot=null;
-  }catch(_){homeRaceSnapshot=null;}finally{homeRaceBusy=false;renderHomeRace();}
+    if(homeRaceModel(res,id))observeHomeRace(res,id);
+    else if(res?.ok||res?.status===401||res?.status===403)homeRaceSnapshot=null;
+  }catch(_){ /* The last verified rival stays visible until its freshness window expires. */ }
+  finally{homeRaceBusy=false;renderHomeRace();}
 }
-function openHomeJourney(showSync=false){
+function openHomeJourney(){
   if(!accountIsReady())return;
   const tier=homeTierIndex(homeConfirmedBalance),next=HOME_TIERS[tier+1];
-  const goal=homeGoalModel(homeConfirmedBalance);
+  const goal=homeGoalModel(homeConfirmedBalance,recoveryTapView(state).bal);
   setCoinArtwork(document.getElementById('journeyCoin'),next?tier+1:tier);
   document.getElementById('journeyCurrent').textContent='Current rank · '+HOME_TIERS[tier].name;
   document.getElementById('journeyTarget').textContent=next?'Unlock '+next.name:'JigCoin Legend';
   document.getElementById('journeyProgress').value=goal?.progress||0;
-  document.getElementById('journeySettings').open=showSync;
-  document.getElementById('homeJourneyNext').textContent=next?`${formatNumber(Math.max(0,next.min-homeConfirmedBalance))} coins to go · ${formatNumber(next.min)} total`:'JigCoin Legend unlocked · Keep climbing the leaderboard.';
+  document.getElementById('journeySettings').open=false;
+  document.getElementById('homeJourneyNext').textContent=next?(goal.remaining===0?'Target reached · Saving taps…':`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to go · ${formatNumber(next.min)} total`):'JigCoin Legend unlocked · Keep climbing the leaderboard.';
   const grid=document.getElementById('homeTierGrid');grid.replaceChildren();
   HOME_TIERS.forEach((rank,index)=>{
     const key='rank-'+index;
@@ -3925,12 +3976,17 @@ function openHomeJourney(showSync=false){
   const highest=HOME_TIERS.find(tier=>tier.min===milestone);
   document.getElementById('homeMilestoneRecord').textContent=highest?`Highest rank recorded here: ${highest.name} · ${formatNumber(milestone)} coins`:'First rank unlock: Grinder · 10,000 coins';
   document.getElementById('homeHaptics').checked=appStorage.getItem('jigcoin_home_haptics')!=='off';
-  document.getElementById('homeSyncDetails').open=showSync;
   showAppSheet(document.getElementById('homeJourneySheet'),tabFarm);document.getElementById('mainScroll').inert=true;
   document.getElementById('homeJourneyClose').focus();
 }
 document.getElementById('homeJourneyOpen').addEventListener('click',()=>openHomeJourney());
-document.getElementById('homeSaveStatus').addEventListener('click',()=>openHomeJourney(true));
+function openTapSaveDetails(){
+  renderHomeSession();
+  const dialog=document.getElementById('tapSaveDialog');
+  if(!dialog.open)dialog.showModal();
+}
+document.getElementById('homeSaveStatus').addEventListener('click',openTapSaveDetails);
+document.getElementById('journeySaveOpen').addEventListener('click',openTapSaveDetails);
 document.getElementById('homeJourneyClose').addEventListener('click',()=>{document.getElementById('homeJourneySheet').classList.remove('show');sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);document.getElementById('homeJourneyOpen').focus();});
 document.getElementById('homeBoostAction').addEventListener('click',()=>document.getElementById('homeBoostAction').dataset.focus==='weekly'?window.JigPilot?.openRace():openBoostSheet('sp_emergency_energy'));
 document.getElementById('homeHaptics').addEventListener('change',e=>appStorage.setItem('jigcoin_home_haptics',e.target.checked?'on':'off'));
@@ -3984,6 +4040,7 @@ function renderCollectibleCoin(goal){
   const art=document.getElementById('homeCoinArtwork'),preview=document.getElementById('homeNextCoin');
   document.getElementById('homeCoinWrap').dataset.loading=String(loading);
   document.getElementById('homeNextPreview').dataset.loading=String(loading);
+  document.getElementById('homeNextPreview').disabled=loading;
   document.getElementById('tapBtn').setAttribute('aria-busy',String(loading));
   const finishKey=loading ? '' : window.JigPilot?.equipped() ? 'midnight' : launchEquipped() ? 'launch' : 'rank-'+goal.tier;
   const card=document.getElementById('mintPressCard');
@@ -4071,7 +4128,13 @@ function renderRivals(){
   rows.sort((a,b)=>a.global_rank-b.global_rank).forEach(row=>{const me=row.telegram_id===homeUserId(),el=document.createElement('div');el.className='rival-row';el.dataset.me=String(me);const rank=document.createElement('strong');rank.textContent='#'+row.global_rank;const name=document.createElement('span');name.innerHTML=dailyCosmeticMarkup(row.cosmetics||[],me?'You':row.first_name||row.username||'Player #'+row.global_rank);const coins=document.createElement('b');coins.textContent=formatNumber(row.balance)+' coins';el.append(rank,name,coins);box.append(el);});
 }
 async function openHomeRivals(){if(!accountIsReady())return;showAppSheet(document.getElementById('homeRivalsSheet'),tabFarm);document.getElementById('mainScroll').inert=true;document.getElementById('homeRivalsClose').focus();renderRivals();await refreshHomeRace(true);renderRivals();}
-document.getElementById('homeNextPreview').addEventListener('click',()=>openHomeJourney());
+document.getElementById('homeNextPreview').addEventListener('click',()=>{
+  if(!accountIsReady() || homeIdentity!==homeUserId())return;
+  const goal=homeGoalModel(homeConfirmedBalance);
+  if(!goal)return;
+  if(goal.complete)openHomeJourney();
+  else previewMint('rank-'+(goal.tier+1));
+});
 document.getElementById('homeRace').addEventListener('click',openHomeRivals);
 document.getElementById('homeQuestClose').addEventListener('click',backToHome);
 document.getElementById('homeRivalsClose').addEventListener('click',backToHome);
@@ -4084,6 +4147,21 @@ document.getElementById('launchQuestAction').addEventListener('click',async()=>{
 // End collectible edition.
 
 // Daily rewards v4. Rewards and cosmetics always come from the current account snapshot.
+function reviewGamePurchase(title,grant,stars) {
+  const dialog=document.getElementById('purchaseReview');
+  if(dialog.open || dialog.dataset.reviewing==='true' || !Number.isSafeInteger(stars) || stars<1)return Promise.resolve(false);
+  document.getElementById('purchaseReviewTitle').textContent=title;
+  document.getElementById('purchaseReviewItem').textContent=grant;
+  document.getElementById('purchaseReviewPrice').textContent=formatNumber(stars)+' Telegram Stars · One payment';
+  dialog.returnValue='';
+  if(typeof dialog.showModal!=='function'){showToast('Open JigCoin in an up-to-date Telegram app to review this purchase.');return Promise.resolve(false);}
+  dialog.showModal();
+  dialog.dataset.reviewing='true';
+  return new Promise(resolve=>dialog.addEventListener('close',()=>{
+    delete dialog.dataset.reviewing;
+    resolve(dialog.returnValue==='agree');
+  },{once:true}));
+}
 let dailyRewardsBusy=false;
 let restorePurchaseBusy=false,dailyRewardsOrigin='home',restorePendingAccount=null;
 let dailyNoticeTimer=null,dailyNoticeAccount=null;
@@ -4123,12 +4201,13 @@ function dailyBenefitPreview(c) {
 }
 function renderRestoreOption(c,fresh,now){
   const r=c?.restore,eligible=fresh&&c.broken&&r?.eligible&&Date.parse(r.expires_at)>now;
+  const priced=Number.isSafeInteger(r?.stars)&&r.stars>0;
   const el=id=>document.getElementById(id);
   el('dailyRestoreCard').hidden=!eligible;
   el('dailyRestoreBenefits').textContent=eligible?`Restore ${r.days} days: ${Number.isFinite(r.next_reward)?`next claim ${formatNumber(r.next_reward)} coins`:`${formatNumber(r.daily_reward)} regular daily coins`} · +${r.tap_bonus_percent}% tap coins · +${r.energy_bonus} energy capacity.`:'';
   el('dailyRestoreDeadline').textContent=eligible?`Available until 00:00 UTC · ${msToCountdown(Date.parse(r.expires_at)-now)} left`:'';
-  el('dailyRestoreBuy').disabled=!eligible||!r.enabled||restorePurchaseBusy||dailyRewardsBusy||restorePendingAccount===homeUserId();
-  el('dailyRestoreBuy').textContent=restorePurchaseBusy?'Checking payment…':restorePendingAccount===homeUserId()?'Payment confirmation pending':!r?.enabled?'Restore purchases are unavailable':'Restore · ★ 250';
+  el('dailyRestoreBuy').disabled=!eligible||!priced||!r.enabled||restorePurchaseBusy||dailyRewardsBusy||restorePendingAccount===homeUserId();
+  el('dailyRestoreBuy').textContent=restorePurchaseBusy?'Checking payment…':restorePendingAccount===homeUserId()?'Payment confirmation pending':!r?.enabled||!priced?'Restore purchases are unavailable':`Restore · ★ ${formatNumber(r.stars)}`;
   el('rewardsDailyAmount').textContent=!fresh?'':c.broken?'':c.claimed?'Collected ✓':`+${formatNumber(c.today_reward)}`;
   el('rewardsDailyCard').dataset.claimed=String(!!(fresh&&c.claimed));
   el('rewardsDailyCard').dataset.ready=String(!!(fresh&&!c.claimed&&!c.broken));
@@ -4173,6 +4252,15 @@ async function buyStreakRestore(){
   if(restorePurchaseBusy||restorePendingAccount===id||dailyRewardsBusy||!accountIsReady()||progressionError||!c?.broken||!r?.eligible||!r.enabled||Date.parse(r.expires_at)<=progressionNow())return;
   const tg=window.Telegram?.WebApp;
   if(typeof tg?.openInvoice!=='function'){showToast('Open JigCoin in Telegram to purchase with Stars.');return;}
+  if(!Number.isSafeInteger(r.days)||r.days<1||!Number.isSafeInteger(r.stars)||r.stars<1)return;
+  const accepted=await reviewGamePurchase('Review streak restore',`Restore your ${r.days}-day streak. This restores continuity only. You can claim today’s reward separately or restart for free.`,r.stars);
+  if(!accepted || !accountIsReady() || id!==homeUserId())return;
+  const latestCheckin=dailyCheckinModel(),current=latestCheckin?.restore;
+  if(restorePurchaseBusy||restorePendingAccount===id||dailyRewardsBusy||progressionError||!latestCheckin?.broken||
+     !current?.eligible||!current.enabled||current.days!==r.days||current.stars!==r.stars||current.expires_at!==r.expires_at||
+     Date.parse(current.expires_at)<=progressionNow()){
+    restoreReceipt('Your streak offer has changed. Check the current options before buying.');return;
+  }
   restorePurchaseBusy=true;renderDailyRewards();
   try{
     const invoice=await apiPost('/api/streak/restore/create-checkout',{});if(id!==homeUserId())return;
@@ -4278,7 +4366,7 @@ function updateGlobalRankVisuals() {
 }
 
 function accountIsReady() {
-  return window.__accountPhase === "ready";
+  return window.__accountPhase === "ready" && homeIdentity !== null && homeIdentity === homeUserId();
 }
 
 function setAccountPhase(phase) {
@@ -4311,6 +4399,8 @@ function setAccountPhase(phase) {
   }
   // An old open overlay must not hide a connection/maintenance message.
   if (phase !== "ready") {
+    const review=document.getElementById('purchaseReview');
+    if(review?.open)review.close('cancel');
     stopRewardWait();
     const main=document.getElementById("mainScroll");if(main)main.inert=false;
     const leaderboard=document.getElementById("leaderboardScreen");if(leaderboard)leaderboard.style.display="none";
@@ -4351,25 +4441,7 @@ function render() {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
   }
 
-  const energyPct = confirmed ? Math.max(0, Math.min(1, view.energy / maxEnergy)) : 0;
-  const energyFill = document.getElementById("energyFill");
-  if (energyFill) {
-    energyFill.style.transform = `scaleX(${energyPct})`;
-    energyFill.dataset.low=String(confirmed && homeEnergyLow(view.energy,maxEnergy));
-  }
-  energyText.textContent = confirmed ? `${view.energy} / ${maxEnergy}` : "—";
-  if (energySubText) {
-    if (!confirmed) {
-      energySubText.textContent = "Waiting for your account.";
-    } else if ((view.energy || 0) >= maxEnergy) {
-      energySubText.textContent = "Full — now is the time to push.";
-    } else if ((view.energy || 0) <= 0) {
-      energySubText.textContent = "Empty — energy refills automatically, or choose a refill in Rewards.";
-    } else {
-      energySubText.textContent = "Regenerating — energy refills automatically over time.";
-    }
-  }
-
+  renderHomeEnergy(view.energy, confirmed);
 
   const rankMetricPoints = document.getElementById("rankMetricPointsText");
   if (rankMetricPoints) {
@@ -4539,6 +4611,17 @@ function updateTaskCardStates() {
 
 // keep task timers fresh
 setInterval(() => {
+  // Telegram normally opens a fresh WebView per account. Reset all panels together
+  // if it replaces the identity in place. Durable tap queues are keyed by owner.
+  const activeOwner=homeUserId();
+  if (homeIdentity && activeOwner && homeIdentity !== activeOwner) {
+    window.location.reload();
+    return;
+  }
+  if (!document.hidden && accountIsReady() && energySample) {
+    const projected = updateProjectedEnergy();
+    renderHomeEnergy(recoveryTapView(state).energy, Number.isFinite(state.bal), projected);
+  }
   updateTaskCardStates();
   updateBoostHub();
   renderHomeSession();
@@ -4558,16 +4641,17 @@ async function apiPost(path, body, opts = {}) {
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
   for (let i = 0; i < tries; i++) {
     const current = window.Telegram?.WebApp;
-    initData = current?.initData || window.__tgAuthCache?.initData || "";
-    telegram_id = current?.initDataUnsafe?.user?.id || window.__tgAuthCache?.telegram_id || null;
-    if (initData) break;
+    telegram_id = current?.initDataUnsafe?.user?.id;
+    const cache = window.__tgAuthCache;
+    initData = current?.initData || (telegram_id && cache?.telegram_id === telegram_id ? cache.initData : "");
+    if (initData && Number.isSafeInteger(telegram_id) && telegram_id > 0) break;
+    initData = "";
     if (i + 1 < tries) await new Promise(resolve => setTimeout(resolve, 150));
   }
   // A cached user ID alone is not authentication.
   if (!initData) return { ok: false, reason: "NO_TELEGRAM_ID" };
-  if (opts.tapOwner && safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id !== opts.tapOwner) {
-    return {ok:false, reason:"ACCOUNT_CHANGED"};
-  }
+  const payloadOwner = safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id;
+  if (payloadOwner !== telegram_id || (opts.tapOwner && opts.tapOwner !== telegram_id)) return {ok:false,reason:"TELEGRAM_ACCOUNT_CHANGED"};
   window.__tgAuthCache = { initData, telegram_id };
   const controller = (readOnly || /^\/api\/(weekly|pilot|mission)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
@@ -4579,6 +4663,7 @@ async function apiPost(path, body, opts = {}) {
       body: JSON.stringify({ ...body, initData, telegram_id, client: getClientSignals() }),
     });
     const data = await response.json().catch(() => null);
+    if (homeUserId() !== telegram_id) return {ok:false,reason:"TELEGRAM_ACCOUNT_CHANGED"};
     if (!response.ok) return { ...(data || {}), ok: false,
       reason: data?.reason || data?.error || `HTTP_${response.status}`, status: response.status };
     return data && typeof data === "object" ? data : { ok: false, reason: "BAD_RESPONSE" };
@@ -4941,7 +5026,7 @@ async function refreshState(attempt = 0) {
       setAccountPhase("maintenance"); render(); return res;
     }
     const auth = reason === "NO_TELEGRAM_ID" || /AUTH|INIT_DATA|TELEGRAM/.test(reason) || res?.status === 401 || res?.status === 403;
-    const transient = ["NETWORK", "TIMEOUT", "BAD_RESPONSE", "NO_TELEGRAM_ID"].includes(reason) ||
+    const transient = ["NETWORK", "TIMEOUT", "BAD_RESPONSE", "NO_TELEGRAM_ID", "TELEGRAM_ACCOUNT_CHANGED"].includes(reason) ||
       /^HTTP_5\d\d$/.test(reason) || res?.status >= 500;
     const retry = transient && n < 6 && !document.hidden;
     setAccountPhase(navigator.onLine === false ? "offline" : auth ? "auth" : retry ? "connecting" : "error");
@@ -4961,6 +5046,11 @@ function syncStateIfIdle() {
       resumeRecoveryTaps();
       return Promise.resolve(window.__lastState);
     }
+  }
+  // A receipt carries a fresh clock. An older queued input that needs a
+  // different browser must not block ordinary account refresh indefinitely.
+  if (accountIsReady() && !window.__lastState?.recovery_test && __tapFlushing) {
+    return Promise.resolve(window.__lastState);
   }
   if (__stateInFlight) return __stateInFlight;
   const pending = refreshState().finally(() => {
@@ -5015,6 +5105,7 @@ function setupWithdrawRequest() {
 
 function applyBackendState(data) {
   if (!data || !data.ok) return;
+  if (homeIdentity && homeIdentity !== homeUserId()) return;
   // Keep the last successful server state and invalidate older in-flight polls.
   window.__lastState = data;
   if("vip_until" in data)state.vipUntil=data.vip_until;
@@ -5028,7 +5119,7 @@ function applyBackendState(data) {
   // Reconciliation rules:
   // - While actively tapping or while there are queued (unflushed) taps, never let
   //   a stale /api/state response roll back the optimistic UI.
-  // - Energy must never increase during active tapping (regen is for idle time).
+  //   Reconcile energy separately from its server refill clock.
   const now = Date.now();
   const activeTapping = now - (window.__lastTapAt || 0) < 1200;
   const pending = (typeof getPendingTaps === "function") ? getPendingTaps() : 0;
@@ -5075,7 +5166,7 @@ function applyBackendState(data) {
   if (Number.isFinite(data.energy) && data.energy >= 0) {
     const allowIncrease = !!window.__allowEnergyIncreaseOnce;
     window.__allowEnergyIncreaseOnce = false;
-    if (allowIncrease || recoveryTest || !tapWorkPending || data.energy <= state.energy) {
+    if (!acceptEnergyClock(data) && (allowIncrease || recoveryTest || !tapWorkPending || data.energy <= state.energy)) {
       state.energy = Math.min(maxEnergy, data.energy);
     }
   }
@@ -5342,7 +5433,14 @@ async function sendOrdinaryPacket(owner, canBatch) {
   if (homeUserId() === owner && !window.__lastState?.recovery_test) {
     if (newlyAcknowledged && res.applied < count) window.__allowBalanceDecreaseOnce = true;
     ordinarySaveNotice = "";
-    if (newlyAcknowledged) applyBackendState(res);
+    if (newlyAcknowledged) {
+      applyBackendState(res);
+      // A receipt settles only its own input keys. Another touch may have
+      // arrived in flight, including when this batch was partially accepted.
+      const outstandingPoints = getPendingTaps() * effectiveTapRate(state);
+      if (Number.isSafeInteger(res.balance)) state.bal = res.balance + outstandingPoints;
+      if (Number.isSafeInteger(res.today)) state.today = res.today + outstandingPoints;
+    }
     render();
   }
   return true;
@@ -5404,6 +5502,64 @@ function recoveryTapView(saved) {
   return {...saved, bal:saved.bal + points, today:saved.today + points,
     energy:Math.max(0, saved.energy - pending)};
 }
+// The server projects its refill schedule at the end of each account response.
+let energySample = null;
+function isOlderAccountSample(data) {
+  const revision = data.energy_clock?.sampled_us;
+  return Number.isSafeInteger(revision) && energySample?.owner === homeUserId() &&
+    Number.isSafeInteger(energySample.revision) && revision < energySample.revision;
+}
+function projectEnergySample(sample, cap, now) {
+  let energy = Math.min(cap, sample.energy);
+  let elapsed = sample.elapsed + Math.max(0, now - sample.received);
+  for (const band of sample.bands) {
+    const ceiling = Math.min(cap, band.below ?? cap);
+    if (energy >= ceiling) continue;
+    const gain = Math.min(ceiling - energy, Math.floor(elapsed / band.ms));
+    energy += gain;
+    elapsed -= gain * band.ms;
+    if (energy < ceiling) return {energy, nextMs: band.ms - elapsed};
+  }
+  return {energy, nextMs: null};
+}
+function acceptEnergyClock(data) {
+  const clock = data.energy_clock;
+  if (!Number.isSafeInteger(data.energy) || data.energy < 0 ||
+      !Number.isFinite(clock?.elapsed_ms) || clock.elapsed_ms < 0 ||
+      !Array.isArray(clock.bands) || clock.bands.length < 1 ||
+      !clock.bands.every((b, i) => b && Number.isSafeInteger(b.ms) && b.ms > 0 &&
+        (i === clock.bands.length - 1 ? b.below === null :
+          Number.isSafeInteger(b.below) && b.below > (i ? clock.bands[i - 1].below : 0)))) {
+    energySample = null;
+    return false;
+  }
+  energySample = {owner: homeUserId(), revision: clock.sampled_us, energy: data.energy, elapsed: clock.elapsed_ms,
+    bands: clock.bands, received: performance.now()};
+  updateProjectedEnergy();
+  return true;
+}
+function updateProjectedEnergy() {
+  if (!energySample || energySample.owner !== homeUserId()) return null;
+  const projected = projectEnergySample(energySample, maxEnergy, performance.now());
+  // The private tester projects its queue separately in recoveryTapView().
+  const pending = window.__lastState?.recovery_gameplay ? 0 : getPendingTaps();
+  state.energy = Math.max(0, projected.energy - pending);
+  return projected;
+}
+function renderHomeEnergy(energy, confirmed, projected = null) {
+  const label = document.getElementById('energyLabel');
+  if (!projected && confirmed && accountIsReady() && energySample && energySample.owner === homeUserId()) {
+    projected = projectEnergySample(energySample, maxEnergy, performance.now());
+  }
+  label.textContent = projected?.nextMs != null && energy < maxEnergy
+    ? 'Energy +1 in ' + Math.ceil(projected.nextMs / 1000) + 's' : 'Energy';
+  const fill = document.getElementById('energyFill');
+  fill.style.transform = 'scaleX(' + (confirmed ? Math.min(1, Math.max(0, energy / maxEnergy)) : 0) + ')';
+  fill.dataset.low = String(confirmed && homeEnergyLow(energy, maxEnergy));
+  energyText.textContent = confirmed ? energy + ' / ' + maxEnergy : '—';
+  if (energySubText) energySubText.textContent = !confirmed ? 'Waiting for your account.' :
+    energy >= maxEnergy ? 'Energy is full.' : 'Energy refills automatically.';
+}
 function recoveryQueueKey() {
   const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || tg?.initDataUnsafe?.user?.id;
   return Number.isSafeInteger(id) && id > 0 ? "jigcoin_owner_taps_v2_" + id : null;
@@ -5442,6 +5598,7 @@ async function runRecoveryTap(addTap = true) {
   if (!accountIsReady() || !window.__lastState?.recovery_gameplay) return;
   let q = readRecoveryQueue();
   if (addTap) {
+    updateProjectedEnergy();
     if (q.pending + (q.packet?.count || 0) >= state.energy) {
       recoveryTapMessage = "Energy is reserved for pending taps; wait for confirmation or refill.";
       updateRecoveryTapFeedback(); return;
@@ -5501,7 +5658,7 @@ async function runRecoveryTap(addTap = true) {
 }
 setInterval(() => {
   if (!document.hidden && navigator.onLine !== false && accountIsReady() &&
-      window.__lastState?.recovery_gameplay && state.energy < maxEnergy) {
+      window.__lastState?.recovery_gameplay && !energySample && state.energy < maxEnergy) {
     const q = readRecoveryQueue();
     if (!window.__recoveryTapBusy && !q.pending && !q.packet) void syncStateIfIdle();
   }
@@ -5530,6 +5687,7 @@ function onTapPress(ev) {
   const now = Date.now();
   if (ev && ev.type === "click" && now - __lastPointerTapAt < 450) return;
 
+  updateProjectedEnergy();
   if (state.energy <= 0) {
     showToast("⚡ Out of energy – come back later.");
     return;
@@ -5544,6 +5702,7 @@ function onTapPress(ev) {
     return;
   }
 
+  ++__stateRequestVersion; // A poll started before this input may have an older snapshot.
   // Optimistic UI update for responsiveness
   const perTap = effectiveTapRate(state);
   state.energy = Math.max(0, (state.energy || 0) - 1);
@@ -5700,6 +5859,7 @@ function showAppSheet(sheet, tab) {
 
 // Coin Shop: Telegram Stars packs and order history.
 function openCoinShopSheet() {
+  clearOrderNotice();
   showAppSheet(coinShopSheet, tabShop);
   void loadCoinPacks();
 }
@@ -5750,10 +5910,12 @@ function packGoal(packs){
   const milestone=Math.min(goal.next,(Math.floor(homeConfirmedBalance/step)+1)*step);
   const gap=milestone-homeConfirmedBalance;
   const product=small.find(p=>p.coins>=gap)||small[0];
-  return {product,goal:{...goal,label:'Reach '+formatNumber(milestone)+' coins',rankGoal:false}};
+  const verb=product.coins>=gap?'Reach ':'Work towards ';
+  return {product,goal:{...goal,label:verb+formatNumber(milestone)+' coins',rankGoal:false}};
 }
 function renderPackChoices(packs,preview,target=packGoal(packs)){
-  const bestRate=packs.length>1?Math.max(...packs.map(p=>p.coins/p.stars)):0;
+  const rates=packs.map(p=>p.coins/p.stars);
+  const bestRate=new Set(rates).size>1?Math.max(...rates):0;
   const featured=target?.product||packs.filter(p=>p.stars<=500).sort((a,b)=>a.stars-b.stars)[0];
   const wasOpen=coinPackList.querySelector('details')?.open;
   const card=p=>starsProductCard(p,false,preview,p===target?.product?target.goal:null,bestRate);
@@ -5804,6 +5966,7 @@ async function loadCoinPacks({preview=false,force=false}={}) {
   if(!accountIsReady()||owner===null)return;
   if(hubCatalogOwner!==owner){
     ++hubLoadVersion;hubCatalog=null;hubCatalogOwner=owner;hubCatalogRequest=null;
+    clearOrderNotice();
     hubCatalogLoadedAt=0;hubCatalogVisitedAt=0;hubCatalogError=false;
     document.getElementById('hubStarter').hidden=true;
     document.getElementById('hubOrderHistory').replaceChildren();
@@ -5851,6 +6014,21 @@ async function loadCoinPacks({preview=false,force=false}={}) {
   return request.promise;
 }
 window.addEventListener('jigcoin:account-ready',()=>setTimeout(()=>loadCoinPacks({preview:true}),0));
+function clearOrderNotice() {
+  const notice=document.getElementById('hubOrderNotice');
+  if(notice){notice.hidden=true;notice.textContent='';}
+}
+function showOrderNotice(message) {
+  const details=document.getElementById('hubOrderDetails');
+  const notice=document.getElementById('hubOrderNotice');
+  details.open=true;
+  notice.textContent=message;
+  notice.hidden=false;
+  if(coinShopSheet.classList.contains('show')){
+    notice.focus({preventScroll:true});
+    notice.scrollIntoView({block:'nearest'});
+  }
+}
 function renderHubOrders() {
   const box=document.getElementById('hubOrderHistory');
   const orders=hubCatalog?.recent_orders||[];
@@ -5866,6 +6044,7 @@ async function checkStarsOrder(id,poll=true,owner=homeUserId()) {
     if(r?.ok && ['paid','refunded'].includes(r.order?.status)) {
       await syncStateIfIdle();
       if(owner!==homeUserId()||!accountIsReady())return false;
+      clearOrderNotice();
       showToast(r.order.status==='paid'?'Payment confirmed — your coins are saved.':'This payment was refunded.');
       await loadCoinPacks({force:true});return true;
     }
@@ -5894,11 +6073,32 @@ async function buyStarsPack(sku) {
   if(product.starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow())){showToast('This starter offer has ended.');return;}
   const tg=window.Telegram?.WebApp;
   if(typeof tg?.openInvoice!=='function'){showToast('Open JigCoin in an up-to-date Telegram app to purchase.');return;}
+  const accepted=await reviewGamePurchase('Review coin pack',`${product.title} · ${formatNumber(product.coins)} in-game coins after payment confirmation.`,product.stars);
+  if(!accepted || owner!==homeUserId() || !accountIsReady() || hubPurchaseBusy)return;
+  const current=(hubCatalog?.products||[]).find(p=>p.sku===sku && validStarsProduct(p));
+  if(!hubCatalog?.enabled || !shopCatalogFresh() || !current || current.coins!==product.coins || current.stars!==product.stars ||
+      (current.starter && !(Date.parse(hubCatalog.offer_expires_at||'')>hubNow()))){
+    await loadCoinPacks({force:true});
+    if(owner===homeUserId())showToast('Shop refreshed. Review the current pack before buying.');
+    return;
+  }
   hubPurchaseBusy=true;renderStarsCatalog();
   try {
     const r=await apiPost('/api/stars/invoice',{sku});
     if(owner!==homeUserId()||!accountIsReady())return;
-    if(!r?.ok || !r.url || !r.order_id){showToast((r?.reason||r?.error)==='OFFER_EXPIRED'?'This starter offer has ended.':'Checkout is not ready. Please try again or contact payment support.');return;}
+    if(!r?.ok || !r.url || !r.order_id){
+      const reason=r?.reason || r?.error;
+      if(reason==='PAYMENT_PENDING' || reason==='PAYMENT_SUPPORT_REQUIRED'){
+        showOrderNotice(reason==='PAYMENT_PENDING'
+          ? 'Your previous payment for this pack is awaiting confirmation. Select Check order below before buying again.'
+          : 'Payment support needs to review an earlier refund. Send /paysupport to the JigCoin bot with your order reference.');
+        await loadCoinPacks({force:true});
+      }else{
+        showToast(reason==='OFFER_EXPIRED'?'This starter offer has ended.':'Checkout is not ready. Please try again or contact payment support.');
+      }
+      return;
+    }
+    clearOrderNotice();
     // Once created, the order is recoverable from the server even if the app closes.
     const outcome=await new Promise(resolve=>tg.openInvoice(r.url,resolve));
     if(owner!==homeUserId()||!accountIsReady())return;
@@ -6145,8 +6345,7 @@ function renderBoostCards() {
     button.setAttribute('aria-label',`${view.label}: ${placement.name}`);
     let description=view.detail===view.label?'':view.detail;
     if(refill && view.action==='start'){
-      const energy=Math.max(0,Math.floor(Number(state.energy)||0));
-      description='Refill now with an optional advert. Free energy returns about every '+(energy<10?'1 second':energy<30?'3 seconds':'6 seconds')+' at this level.';
+      description = 'Refill now with an optional advert, or wait for energy to return automatically.';
     }
     if(code==='sp_double_points' && view.action==='start' && rewardsOfferOwner!==null && rewardsOfferOwner===homeUserId()) {
       const rate=effectiveTapRate(state);
@@ -6804,7 +7003,7 @@ function renderLeaderboard(){
  lbEl('lbView').textContent=lbView==='overview'?'Full rankings':'Your race';lbEl('lbHistory').setAttribute('aria-pressed',String(lbView==='history'));lbEl('lbRules').setAttribute('aria-pressed',String(lbView==='rules'));
  lbEl('lbActions').hidden=lbView==='rules'||lbView==='history';
  lbEl('lbPrimary').textContent=lbMode==='friends'&&d?.total<=1?'Invite your first challenger':d?.me?.rank===1?'Defend your lead':d?.me?.rank?'Chase the next place':'Start tapping';
- lbEl('lbSecondary').textContent=lbMode==='friends'?'Invite friends':lbMode==='global'?'Coin Shop':lbHasVip()?'Ad boost':'Explore VIP';
+ lbEl('lbSecondary').textContent=lbMode==='friends'?'Invite friends':lbMode==='global'?'Coin Shop':lbHasVip()?'Daily rewards':'Explore VIP';
  if(lbView==='rules'){
   content.innerHTML=`<div class="lb-detail"><h3>Airdrop information</h3><p>A JigCoin token airdrop is planned. Airdrop eligibility and allocations have not been announced. The current leaderboard tracks in-game competition.</p><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Podium medals:</b> The top three eligible players receive dated cosmetic badges after a two-minute closing check. No coin or cash prize. System accounts and currently banned accounts are excluded. Badges record the results at finalization.</p><p>Your coins and VIP remain when the Daily board resets. Medal races start on ${escapeHtml(d?.award_start_day?lbDate(d.award_start_day):'the first full UTC day after installation')}.</p></div>`;
  }else if(lbView==='history'){
