@@ -103,3 +103,13 @@ test('a Telegram account switch discards the previous reply and never borrows it
   app.initData='';assert.equal((await ctx.apiPost('/api/state',{}, {fastAuth:true})).balance,50);
   assert.equal(calls,3);
 });
+
+test('ordinary refill handoff runs after a valid tap receipt and unlocked queue, never after failure',async()=>{
+  const {ctx,responses}=account(),handoffs=[];
+  ctx.navigator.locks.request=async(_key,work)=>work();
+  ctx.resumeRefillAfterTapAck=owner=>handoffs.push({owner,pending:ctx.getPendingTaps(),flushing:vm.runInContext('__tapFlushing',ctx)});
+  ctx.addOrdinaryTap();responses.push(async()=>({ok:false,reason:'NETWORK'}));await ctx.flushPendingTaps();
+  assert.equal(handoffs.length,0);assert.equal(ctx.getPendingTaps(),1);
+  responses.push(async()=>({ok:true,applied:1,balance:101,today:11}));await ctx.flushPendingTaps();
+  assert.deepEqual(handoffs,[{owner:101,pending:0,flushing:false}]);assert.equal(ctx.getPendingTaps(),0);
+});

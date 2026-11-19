@@ -10,8 +10,8 @@ test('overtake needs two verified snapshots, increased saved coins and a new bes
  for(const [before,after,id,best] of [[null,snap(2,200),123,3],[snap(3,100),snap(2,100),123,3],[snap(3,200),snap(2,100),123,3],[snap(3,100),snap(3,200),123,3],[snap(3,100),snap(4,200),123,3],[snap(3,100),snap(2,200),456,3],[snap(3,100),snap(2,200),123,2]])assert.equal(c.homeOvertakeModel(before,after,id,best),null);
 });
 test('low-energy threshold uses actual capacity and rejects invalid or full values',()=>{
- const c=models();for(const [n,cap] of [[0,50],[10,50],[20,100]])assert.equal(c.homeEnergyLow(n,cap),true);
- for(const [n,cap] of [[11,50],[50,50],[21,100],[-1,50],[NaN,50],[0,0],[0,NaN]])assert.equal(c.homeEnergyLow(n,cap),false);
+ const c=models();for(const [n,cap] of [[0,50],[15,50],[30,100]])assert.equal(c.homeEnergyLow(n,cap),true);
+ for(const [n,cap] of [[16,50],[50,50],[31,100],[-1,50],[NaN,50],[0,0],[0,NaN]])assert.equal(c.homeEnergyLow(n,cap),false);
 });
 function race(){
  const el={hidden:true,replaceChildren(t){this.text=t;},append(t){this.sub=t.textContent;}};
@@ -40,24 +40,24 @@ test('stale, mismatched, hidden or covered snapshots cannot interrupt Home',()=>
 });
 function refill(){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},setAttribute(name,value){this[name]=value;}});return nodes.get(id);};
- const c={document:{getElementById:get},window:{JigPilot:{canRefill:()=>true}},navigator:{onLine:true},state:{energy:10},maxEnergy:50,accountIsReady:()=>true,homeUserId:()=>101,missionsOwner:101,refillPreparation:{owner:101,status:'idle'},getPendingTaps:()=>0,getTapQueue:()=>[],preparedRefillFor:()=>null,requestRefillPreparation(){},
+ const c={document:{getElementById:get},window:{JigPilot:{canRefill:()=>true}},navigator:{onLine:true},state:{energy:10},maxEnergy:50,accountIsReady:()=>true,homeUserId:()=>101,missionsOwner:101,refillPreparation:{owner:101,status:'idle'},getPendingTaps:()=>0,getTapQueue:()=>[],preparedRefillFor:()=>null,requestRefillPreparation(){},recordRefillPrompt(){},
  recoveryTapView:s=>({energy:s.energy}),hubMissions:[{code:'sp_emergency_energy',provider:'monetag',status:'available',countdown_as_of_ms:Date.now()}],hubMissionLoadedAt:Date.now(),msToCountdown:()=> '04:30',getBoostView:()=>({action:'prepare',disabled:false,label:'Check ad availability',detail:'Watch ad becomes available when ready.'})};
  vm.createContext(c);vm.runInContext(pure+html.slice(html.indexOf('function renderHomeSession('),html.indexOf('async function refreshHomeRefillStatus(')),c);return {c,get};
 }
-test('Home routes low-energy players to optional refill and others to the weekly race',()=>{
- const {c,get}=refill();c.renderHomeSession();
- const button=get('homeBoostAction');
- assert.equal(button.dataset.focus,'sp_emergency_energy');assert.equal(button['aria-controls'],'boostSheet');
- assert.match(button.textContent,/Refill energy.*ad/i);
- c.state.energy=14;c.preparedRefillFor=()=>({});c.renderHomeSession();assert.equal(button.dataset.focus,'sp_emergency_energy','a prepared refill remains reachable after natural regeneration');
- c.preparedRefillFor=()=>null;
- c.state.energy=50;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');assert.equal(button['aria-controls'],'weeklySheet');
- c.state.energy=0;c.window.JigPilot.canRefill=()=>false;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');
+test('Home promotes only a prepared advert or a confirmed refill, otherwise the weekly race',()=>{
+ const {c,get}=refill(),button=get('homeBoostAction');
+ for(const view of [{action:'prepare',disabled:false,label:'Check ads'},{action:'none',disabled:true,label:'Preparing'},{action:'none',disabled:true,label:'Available in 2m'}]){
+  c.getBoostView=()=>view;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');assert.equal(button['aria-controls'],'weeklySheet');
+ }
+ c.getBoostView=()=>({action:'show',disabled:false,label:'Watch ad to refill'});c.renderHomeSession();
+ assert.equal(button.dataset.focus,'sp_emergency_energy');assert.equal(button['aria-controls'],'boostSheet');assert.match(button.textContent,/Refill energy.*ad/i);
+ c.getBoostView=()=>({action:'claim',disabled:false,label:'Claim full energy'});c.renderHomeSession();assert.equal(button.textContent,'Claim refill');
+ c.navigator.onLine=false;c.renderHomeSession();assert.equal(button.dataset.focus,'weekly');
  c.accountIsReady=()=>false;c.renderHomeSession();assert.equal(button.disabled,true);
 });
-test('energy-strip refill entry appears at 20% before exhaustion and stays hidden for healthy or ineligible accounts',()=>{
+test('energy-strip refill entry appears at 30% before exhaustion and stays hidden for healthy or ineligible accounts',()=>{
  const {c,get}=refill(),button=get('homeRefillOpen');
- for(const [energy,cap,visible] of [[11,55,true],[12,55,false],[0,55,true],[20,100,true],[21,100,false],[100,100,false]]){
+ for(const [energy,cap,visible] of [[16,55,true],[17,55,false],[0,55,true],[30,100,true],[31,100,false],[100,100,false]]){
   c.state.energy=energy;c.maxEnergy=cap;c.renderHomeSession();assert.equal(button.hidden,!visible,`${energy}/${cap}`);
  }
  c.state.energy=2;c.window.JigPilot.canRefill=()=>false;c.renderHomeSession();assert.equal(button.hidden,true);
@@ -83,6 +83,7 @@ test('energy-strip entry distinguishes ready, preparation, retry, cooldown and u
 test('a preparation or owned confirmed refill stays reachable after natural energy regeneration',()=>{
  const {c,get}=refill(),button=get('homeRefillOpen');c.state.energy=14;
  c.refillPreparation.status='loading';c.renderHomeSession();assert.equal(button.hidden,false);
+ assert.equal(c.refillPreparation.offerVisible,true);c.state.energy=20;c.renderHomeSession();assert.equal(button.hidden,false,'a visible loading offer stays reachable above 30%');
  c.refillPreparation.status='idle';c.preparedRefillFor=()=>({});c.renderHomeSession();assert.equal(button.hidden,false);
  c.preparedRefillFor=()=>null;Object.assign(c.hubMissions[0],{status:'claimable',attempt_id:'receipt'});c.renderHomeSession();assert.equal(button.hidden,false);
  c.window.JigPilot.canRefill=()=>false;c.renderHomeSession();assert.equal(button.hidden,false,'a confirmed receipt remains reachable when new adverts are disabled');
@@ -90,11 +91,21 @@ test('a preparation or owned confirmed refill stays reachable after natural ener
  c.missionsOwner=101;c.state.energy=50;c.renderHomeSession();assert.equal(button.hidden,true,'full energy does not invite a refill');
 });
 test('refill availability polling pauses for hidden, offline, covered, busy and healthy sessions',async()=>{
- let loads=0,renders=0;const c={accountIsReady:()=>true,document:{hidden:false,getElementById:()=>({inert:false})},navigator:{onLine:true},window:{},rewardAvailabilityNeedsRetry:()=>false,boostCheckedAt:0,boostRefreshInFlight:null,homeRefillCheckedAt:0,state:{energy:3},maxEnergy:50,recoveryTapView:s=>s,refreshBoostMissions:async()=>{loads++;},renderHomeSession:()=>{renders++;}};
+ let loads=0,renders=0;const c={accountIsReady:()=>true,document:{hidden:false,getElementById:()=>({inert:false})},navigator:{onLine:true},window:{},rewardAvailabilityNeedsRetry:()=>false,boostCheckedAt:0,boostRefreshInFlight:null,homeRefillCheckedAt:0,hubMissions:[],state:{energy:3},maxEnergy:50,recoveryTapView:s=>s,refreshBoostMissions:async()=>{loads++;},renderHomeSession:()=>{renders++;}};
  vm.createContext(c);vm.runInContext(pure+html.slice(html.indexOf('async function refreshHomeRefillStatus('),html.indexOf('function renderHomeRace(')),c);
  await c.refreshHomeRefillStatus();await c.refreshHomeRefillStatus();assert.equal(loads,1);assert.equal(renders,1);
  for(const field of ['hidden','offline','covered','busy','inflight','healthy']){
   c.homeRefillCheckedAt=0;c.document.hidden=field==='hidden';c.navigator.onLine=field!=='offline';c.document.getElementById=()=>({inert:field==='covered'});c.window.__rewardActionBusy=field==='busy';c.boostRefreshInFlight=field==='inflight'?{}:null;c.state.energy=field==='healthy'?50:3;
   await c.refreshHomeRefillStatus();assert.equal(loads,1,field);
  }
+});
+
+test('background preparation stays quiet at40%, latches an offer at30%, then remains visible during regeneration',()=>{
+ const {c,get}=refill(),button=get('homeRefillOpen');c.maxEnergy=55;c.state.energy=22;
+ c.refillPreparation={status:'loading',owner:101,offerVisible:false};
+ c.renderHomeSession();assert.equal(button.hidden,true);
+ c.state.energy=16;c.renderHomeSession();assert.equal(button.hidden,false);assert.equal(c.refillPreparation.offerVisible,true);
+ c.state.energy=17;c.renderHomeSession();assert.equal(button.hidden,false);assert.equal(get('homeRefillState').textContent,'Preparing');
+ c.refillPreparation.status='ready';c.preparedRefillFor=()=>({});c.state.energy=23;c.renderHomeSession();assert.equal(button.hidden,false);
+ c.preparedRefillFor=()=>null;c.refillPreparation.status='expired';c.renderHomeSession();assert.equal(button.hidden,true);
 });

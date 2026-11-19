@@ -1,7 +1,8 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8');
-const source=html.slice(html.indexOf('const rewardedSDKs ='),html.indexOf('// Unified Rewards.'));
+const source=html.slice(html.indexOf('function homeEnergyLow('),html.indexOf('function homeCoinUnlock('))+html.slice(html.indexOf('const rewardedSDKs ='),html.indexOf('// Unified Rewards.'));
+const lifecycleCodes=new Set(['PROMPT_SHOWN','PREPARED','PREPARED_EXPIRED']);
 const code='sp_emergency_energy',ymid='12345678-1234-4123-8123-123456789abc';
 const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
 function setup({failure,loadFailure=false,result={reward_event_type:'valued'},sdkLoaded=true}={}){
@@ -22,7 +23,8 @@ function setup({failure,loadFailure=false,result={reward_event_type:'valued'},sd
   if(sdkLoaded)ctx.window.show_123=handler;
   vm.createContext(ctx);vm.runInContext('let adNotice=null;'+source,ctx);vm.runInContext('refillPreparation={status:"idle",owner:101};',ctx);
   return {ctx,calls,scripts,mission,prepare:manual=>ctx.prepareMonetagRefill(manual),watch:()=>ctx.runMonetagQuest(code,()=>visible),
-    prepared:()=>vm.runInContext('refillPreparation',ctx),outcomes:()=>calls.filter(x=>x.path==='/api/mission/outcome').map(x=>x.body),
+    prepared:()=>vm.runInContext('refillPreparation',ctx),outcomes:()=>calls.filter(x=>x.path==='/api/mission/outcome'&&!lifecycleCodes.has(x.body.error_code)).map(x=>x.body),
+    lifecycle:()=>calls.filter(x=>x.path==='/api/mission/outcome'&&lifecycleCodes.has(x.body.error_code)).map(x=>x.body),
     setVisible:v=>visible=v,setOwner:v=>owner=v,
     advance(ms){at+=ms;for(const [id,item] of [...timers])if(item.at<=at){timers.delete(id);item.fn();}}
   };
@@ -107,8 +109,8 @@ test('manual retry waits for server availability and never turns pending into a 
   h.advance(60000);h.mission.status='available';await h.prepare(true);
   assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
 });
-test('a fresh prepared refill survives expected pending and natural regeneration above20%',async()=>{
-  const h=setup();await h.prepare();h.ctx.state.energy=14;h.ctx.reconcileRefillPreparation();
+test('a fresh prepared refill survives expected pending and natural regeneration above30%',async()=>{
+  const h=setup();await h.prepare();h.ctx.state.energy=23;h.ctx.reconcileRefillPreparation();
   assert.equal(h.ctx.preparedRefillFor(),h.prepared());assert.equal(h.prepared().status,'ready');
   await h.watch();assert.equal(h.calls.filter(x=>x.options?.type==='end').length,1);
 });
@@ -207,4 +209,110 @@ test('eligibility reason fields are handled without classifying them as provider
   const h=setup(),api=h.ctx.apiPost;
   h.ctx.apiPost=(path,body)=>path==='/api/mission/start'?Promise.resolve({ok:false,reason:'ENERGY_ABOVE_REFILL_THRESHOLD'}):api(path,body);
   await h.prepare();assert.equal(h.outcomes().length,0);assert.equal(h.prepared().status,'failed');
+});
+
+test('preparation at40% requires explicit fresh server eligibility; older servers remain limited to20%',async()=>{
+  for(const [energy,availability,expected] of [[22,true,true],[23,true,false],[22,false,false],[22,undefined,false],[11,undefined,true]]){
+    const h=setup();h.ctx.state.energy=energy;
+    h.mission.refill_policy={offer_threshold_pct:30,prepare_threshold_pct:40,cooldown_seconds:120,ready_ttl_ms:30000,retry_seconds:60};
+    if(availability!==undefined)h.mission.prepare_available=availability;
+    await h.prepare();
+    assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),expected,`${energy}/55, eligibility ${availability}`);
+    assert.equal(h.calls.some(x=>x.options?.type==='end'),false);
+  }
+});
+test('the final tap acknowledgement refreshes stale eligibility and prepares before exhaustion without changing queued input',async()=>{
+  for(const kind of ['ordinary','recovery']){
+    const h=setup(),q={pending:1,packet:null};h.ctx.state.energy=22;
+    h.mission.prepare_available=false;h.mission.refill_policy={prepare_threshold_pct:40,offer_threshold_pct:30};
+    if(kind==='ordinary')h.ctx.getPendingTaps=()=>q.pending;
+    else{h.ctx.window.__lastState={recovery_gameplay:true};h.ctx.readRecoveryQueue=()=>q;}
+    h.ctx.refreshBoostMissions=async force=>{h.calls.push({missions:true,force});h.mission.prepare_available=true;return[h.mission];};
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(h.calls.length,0);assert.equal(q.pending,1);
+    q.pending=0;
+    if(kind==='ordinary')h.ctx.__tapFlushing=true;else h.ctx.window.__recoveryTapBusy=true;
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(h.calls.length,0);
+    h.ctx.__tapFlushing=false;h.ctx.window.__recoveryTapBusy=false;
+    h.ctx.resumeRefillAfterTapAck(101);h.ctx.resumeRefillAfterTapAck(101);await settle();
+    assert.equal(h.calls.filter(x=>x.missions&&x.force===true).length,1);
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+    assert.equal(h.prepared().status,'ready');assert.equal(h.ctx.state.energy,22);
+    assert.deepEqual(q,{pending:0,packet:null});assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
+  }
+});
+test('tap-ack preparation does not refresh for a different owner or re-arm a failed automatic preload',async()=>{
+  const h=setup({failure:'Timeout'});h.mission.prepare_available=true;h.ctx.state.energy=22;
+  h.ctx.resumeRefillAfterTapAck(202);await settle();assert.equal(h.calls.length,0);
+  h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(h.prepared().status,'failed');
+  h.advance(60000);h.mission.status='available';h.ctx.resumeRefillAfterTapAck(101);await settle();
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+});
+test('successful preparation and unused expiry each emit one owned lifecycle event, never a reward',async()=>{
+  const h=setup();await h.prepare();await settle();
+  assert.deepEqual(h.lifecycle().map(x=>x.error_code),['PREPARED']);
+  assert.equal(h.lifecycle()[0].attempt_id,ymid);assert.equal(h.lifecycle()[0].stage,'preload');
+  h.advance(30000);await settle();h.advance(30000);await settle();
+  assert.deepEqual(h.lifecycle().map(x=>x.error_code),['PREPARED','PREPARED_EXPIRED']);
+  assert.equal(h.lifecycle()[1].elapsed_ms,30000);
+  assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
+  const consumed=setup();await consumed.prepare();await consumed.watch();consumed.advance(30000);await settle();
+  assert.deepEqual(consumed.lifecycle().map(x=>x.error_code),['PREPARED']);
+});
+test('prompt telemetry is visible-only and deduplicated across Home/Rewards until the next successful cooldown cycle',async()=>{
+  const h=setup();h.ctx.document.querySelector=()=>({});
+  h.ctx.recordRefillPrompt(h.mission,'home');await settle();assert.equal(h.lifecycle().length,0);
+  h.ctx.recordRefillPrompt(h.mission,'rewards');h.ctx.recordRefillPrompt(h.mission,'rewards');
+  h.ctx.document.querySelector=()=>null;h.ctx.recordRefillPrompt(h.mission,'home');await settle();
+  assert.deepEqual(h.lifecycle().map(x=>[x.stage,x.error_code,x.attempt_id]),[['offer','PROMPT_SHOWN',null]]);
+  h.advance(120000);h.mission.status='cooldown';h.ctx.reconcileRefillPreparation();
+  h.mission.status='available';h.ctx.reconcileRefillPreparation();h.ctx.recordRefillPrompt(h.mission,'home');await settle();
+  assert.equal(h.lifecycle().length,2);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false);
+});
+test('attempt policy controls retry and shorter ready lifetime without extending the30s cache ceiling',async()=>{
+  for(const [ttl,expected] of [[10000,10000],[90000,30000]]){
+    const h=setup(),post=h.ctx.apiPost;
+    h.ctx.apiPost=async(path,body)=>({...await post(path,body),refill_policy:{retry_seconds:45,ready_ttl_ms:ttl}});
+    await h.prepare();assert.equal(h.mission.retry_after_seconds,45);
+    h.advance(expected-1);assert.ok(h.ctx.preparedRefillFor());h.advance(1);assert.equal(h.ctx.preparedRefillFor(),null);
+  }
+});
+
+test('a final tap ACK inside the refresh throttle gets exactly one delayed eligibility refresh before the30s poll',async()=>{
+  for(const failure of [undefined,'Timeout']){
+    const h=setup({failure});let refreshes=0;h.ctx.state.energy=22;h.mission.prepare_available=false;
+    h.ctx.refreshBoostMissions=async force=>{
+      h.calls.push({missions:true,force});if(force)refreshes++;
+      h.mission.prepare_available=refreshes>=2;return[h.mission];
+    };
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(1000);h.ctx.state.energy=16;
+    h.ctx.resumeRefillAfterTapAck(101);h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(3999);await settle();assert.equal(refreshes,1);
+    h.advance(1);await settle();assert.equal(refreshes,2);
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+    assert.equal(h.prepared().status,failure?'failed':'ready');
+    h.advance(60000);await settle();assert.equal(refreshes,2,'the follow-up is not a polling or failed-ad retry loop');
+    assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  }
+});
+test('a deferred tap-ACK refresh rechecks account, visibility, connectivity, pending taps, cooldown and energy',async()=>{
+  for(const reason of ['owner','hidden','covered','offline','pending','cooldown','full','holdout','cancelled']){
+    const h=setup(),q={pending:0,packet:null};let refreshes=0;h.ctx.state.energy=22;h.mission.prepare_available=false;
+    h.ctx.getPendingTaps=()=>q.pending;
+    h.ctx.refreshBoostMissions=async()=>{refreshes++;return[h.mission];};
+    h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(refreshes,1);
+    h.advance(1000);h.ctx.state.energy=16;h.ctx.resumeRefillAfterTapAck(101);
+    if(reason==='owner')h.setOwner(202);
+    if(reason==='hidden')h.ctx.document.hidden=true;
+    if(reason==='covered')h.setVisible(false);
+    if(reason==='offline')h.ctx.navigator.onLine=false;
+    if(reason==='pending')q.pending=1;
+    if(reason==='cooldown')Object.assign(h.mission,{status:'cooldown',cooldown_remaining_seconds:120,countdown_as_of_ms:h.ctx.Date.now()});
+    if(reason==='full')h.ctx.state.energy=55;
+    if(reason==='holdout')h.ctx.window.JigPilot.canRefill=()=>false;
+    if(reason==='cancelled')h.ctx.invalidateRefillPreparation();
+    h.advance(4000);await settle();h.advance(60000);await settle();
+    assert.equal(refreshes,1,reason);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false,reason);
+    assert.equal(q.pending,reason==='pending'?1:0,'the timer does not touch saved taps');
+  }
 });
