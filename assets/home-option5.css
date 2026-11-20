@@ -506,3 +506,227 @@ html[data-mint-rank="1"] #mainScroll.home-compact .mint-chamber-bay #homeCoinWra
   #mainScroll.home-compact #homeLeaderboard::before,#mainScroll.home-compact #homeLeaderboard::after {height:30px;}
   #mainScroll.home-compact #homeRace {filter:none;}
 }
+
+
+/* Option 5 final fidelity V3 — matched header geometry and luminous Foundry Gold finish. */
+/* The two top controls have equal grid columns already. The rank's gold
+   ::before surface had a 4px top and 5px bottom inset, making its VISIBLE
+   height smaller than the full-height Weekly Race control. Correct geometry
+   without increasing the total dashboard height. */
+#mainScroll.home-compact #homeSessionControls.mint-instruments {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;
+  gap:clamp(6px,2vw,10px);
+}
+#mainScroll.home-compact #homeJourneyOpen,
+#mainScroll.home-compact #homeBoostAction {
+  box-sizing:border-box;
+  align-self:stretch;
+  justify-self:stretch;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  height:44px;
+  min-height:44px;
+  margin:0;
+  padding-block:6px;
+  overflow:visible;
+}
+#mainScroll.home-compact #homeJourneyOpen {
+  position:relative;
+  border:0;
+  background:transparent;
+  border-radius:6px;
+}
+#mainScroll.home-compact #homeJourneyOpen::before {
+  inset:0;
+  border:1px solid color-mix(in srgb,var(--mint-highlight) 60%,var(--mint-accent));
+  clip-path:polygon(2.5% 0,97.5% 0,100% 22%,100% 80%,97.5% 100%,2.5% 100%,0 80%,0 22%);
+  background:var(--home-satin),var(--mint-button);
+  box-shadow:inset 0 1px 1px #fff9,inset 0 -2px 2px #0008;
+}
+#mainScroll.home-compact #homeBoostAction {
+  border:1px solid var(--h5-hot);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--mint-metal) 39%,var(--mint-panel)),var(--mint-ink) 83%);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -2px #000b,0 0 3px var(--h5-gold-wash);
+  border-radius:6px;
+}
+#mainScroll.home-compact #homeJourneyOpen #rankName {
+  text-overflow:ellipsis;
+  min-width:0;
+}
+#mainScroll.home-compact #homeBoostAction[data-focus="sp_emergency_energy"] {
+  background:linear-gradient(180deg,color-mix(in srgb,var(--mint-accent) 35%,var(--mint-panel)),var(--mint-ink));
+  border-color:var(--h5-hot);
+}
+#mainScroll.home-compact #homeBoostAction:active:not(:disabled),
+#mainScroll.home-compact #homeJourneyOpen:active:not(:disabled) {
+  filter:brightness(1.10);
+}
+/* Keep approved single-screen spacing even if a refill state appears. */
+#mainScroll.home-compact .mint-dashboard {gap:clamp(2px,.6cqh,5px);}
+#mainScroll.home-compact #homeSessionControls.mint-instruments {
+  min-height:44px;
+}
+/* A deeper, more substantial metallic engraved balance + laurel plaque. */
+#mainScroll.home-compact .mint-dashboard .home-balance-card {
+  border-color:color-mix(in srgb,var(--h5-hot) 76%,var(--mint-metal));
+  background:
+    linear-gradient(180deg,#ffffff09,transparent 26%,#00000015 84%,#0005),
+    var(--mint-grain),var(--home-steel);
+  box-shadow:inset 0 1px 1px var(--mint-seam),inset 0 -2px 2px #000b,0 1px 4px #0007;
+}
+#mainScroll.home-compact #homeLeaderboard {
+  border-left-color:color-mix(in srgb,var(--h5-hot) 48%,var(--mint-edge));
+}
+#mainScroll.home-compact #homeLeaderboard::before,
+#mainScroll.home-compact #homeLeaderboard::after {
+  background-color:var(--h5-hot);
+  opacity:1;
+}
+#mainScroll.home-compact .mint-dashboard #homeLeaderboard .global-rank-top-row {
+  text-shadow:0 1px 3px #000b,0 0 2px var(--h5-gold-wash);
+}
+/* Luminous competitive target. Preserve the original verified text and
+   button handlers. Intensify glow but keep the compact actual height. */
+#mainScroll.home-compact .mint-dashboard #homeRace {
+  border:2px solid var(--h5-hot);
+  color:var(--h5-light);
+  filter:drop-shadow(0 0 4px var(--h5-gold-wash))
+         drop-shadow(0 0 3px var(--h5-gold-wash));
+  text-shadow:0 1px 2px #000d,0 0 5px var(--h5-gold-wash);
+  box-shadow:inset 0 2px 1px color-mix(in srgb,var(--h5-light) 70%,transparent),
+             inset 0 -2px 2px color-mix(in srgb,var(--h5-hot) 65%,transparent);
+}
+#mainScroll.home-compact #homeRace[data-rival-confirmed="true"]::before {
+  background-color:var(--h5-light);
+  filter:drop-shadow(0 0 2px var(--h5-gold-wash));
+}
+html[data-mint-rank="1"] #mainScroll.home-compact .mint-dashboard #homeRace {
+  background-color:#261508;
+  background-blend-mode:screen,normal,normal,normal;
+}
+#mainScroll.home-compact #homeRace::after {
+  color:var(--h5-light);
+  text-shadow:0 0 5px var(--h5-gold-wash);
+}
+/* Foundry coin lighting. Keep the REAL SVG coin art and press for rank changes.
+   The more cinematic rendering is achieved with subtle brightening + glow
+   rather than hardcoded coin images or extra interactive overlays. */
+html[data-mint-rank="1"] #mainScroll.home-compact #homeCoinArtwork svg {
+  filter:brightness(1.105) contrast(1.11) saturate(1.19)
+         drop-shadow(0 0 6px #ffae345e);
+}
+html[data-mint-rank="1"] #mainScroll.home-compact
+.mint-chamber-bay #homeCoinWrap:not([data-double="true"]) {
+  filter:drop-shadow(0 0 6px #faae304d)
+         drop-shadow(0 0 12px #ffac2725);
+}
+html[data-mint-rank="1"] #mainScroll.home-compact
+.mint-chamber-bay .mint-press-scene::after {
+  background:
+    radial-gradient(ellipse at 50% 64%,#f0a5252e 0,transparent 58%),
+    radial-gradient(ellipse at 50% 10%,#ffb13a40 0,transparent 35%),
+    linear-gradient(180deg,#0003,transparent 19%,transparent 82%,#0004);
+}
+html[data-mint-rank="1"] #mainScroll.home-compact
+.mint-chamber-bay .mint-press-scene::before {
+  filter:brightness(1.065) contrast(1.09) saturate(1.12);
+}
+#mainScroll.home-compact #mintPressCard .mint-chamber-caption {
+  border-color:color-mix(in srgb,var(--h5-hot) 74%,var(--mint-edge));
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.055),transparent 24%,rgba(0,0,0,.35)),
+    var(--mint-grain),var(--h5-plate);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -1px 1px #000d;
+}
+/* Angular Aurora Glass teaser: vibrant colour must be confined to the
+   CURRENT Grinder skin; future ranks keep their own next-rank previews. */
+#mainScroll.home-compact #homeNextPreview {
+  border:2px solid var(--h5-hot);
+  box-shadow:inset 0 1px var(--mint-seam),
+             inset 0 -2px color-mix(in srgb,var(--h5-hot) 42%,transparent);
+  filter:drop-shadow(0 0 3px var(--h5-gold-wash))
+         drop-shadow(0 0 4px var(--h5-gold-wash));
+}
+html[data-mint-rank="1"] #mainScroll.home-compact #homeNextPreview {
+  background:
+    radial-gradient(ellipse at 94% 50%,#8239d36a 0,#0ca9d633 38%,transparent 70%),
+    linear-gradient(132deg,transparent 58%,#0b416c33 77%,#7d2adb74),
+    var(--mint-grain),var(--h5-plate);
+}
+html[data-mint-rank="1"] #mainScroll.home-compact #homeNextPreview::before {
+  background:
+    linear-gradient(155deg,transparent 43%,#49c8ff00 57%,#36e9ffb6 58%,transparent 60%),
+    linear-gradient(162deg,transparent 49%,#8b3fd900 68%,#af89ffb6 69%,transparent 71%),
+    radial-gradient(ellipse at 78% 42%,#26dbff96,#6b39c05c 50%,transparent 74%);
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  opacity:.92;
+}
+#mainScroll.home-compact #homeNextPreview::after {
+  opacity:1;
+  filter:drop-shadow(0 0 2px var(--h5-gold-wash));
+}
+#mainScroll.home-compact #homeNextPreview #homeGoal {
+  color:var(--mint-text);
+  font-weight:790;
+  text-shadow:0 1px 2px #000d;
+}
+#mainScroll.home-compact #homeNextPreview>span:last-child::before {
+  color:var(--h5-light);
+  font-weight:780;
+  letter-spacing:.20em;
+}
+#mainScroll.home-compact #homeNextPreview #homeGoalCaption {
+  color:var(--mint-text);
+  opacity:.93;
+}
+/* The lower two instruments should look cut from the same expensive metal. */
+#mainScroll.home-compact #homeEnergyMetric,
+#mainScroll.home-compact #homeTodayMetric {
+  border:1px solid color-mix(in srgb,var(--h5-hot) 78%,var(--mint-edge));
+  background:
+    radial-gradient(ellipse at 51% 111%,color-mix(in srgb,var(--h5-hot) 15%,transparent),transparent 67%),
+    linear-gradient(180deg,rgba(255,255,255,.055),transparent 25%,rgba(0,0,0,.13)),
+    var(--mint-grain),var(--home-steel);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -2px 2px #0009;
+}
+#mainScroll.home-compact #homeTodayMetric .metric-label::before {
+  height:clamp(14px,3.8vw,19px);
+  width:clamp(14px,3.8vw,19px);
+}
+#mainScroll.home-compact #homeTodayMetric .metric-value {
+  font-weight:840;
+  text-shadow:0 1px 2px #000d,0 0 4px var(--h5-gold-wash);
+}
+#mainScroll.home-compact #homeEnergyMetric .energy-fill {
+  box-shadow:0 0 5px color-mix(in srgb,var(--mint-accent) 32%,transparent);
+}
+#mainScroll.home-compact .home-shortcuts .home-streak-strip {
+  background:linear-gradient(180deg,#ffffff08,transparent 33%,#0004),var(--mint-grain),var(--home-steel);
+  border-color:color-mix(in srgb,var(--h5-hot) 70%,var(--mint-edge));
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+#mainScroll.home-compact .bottom-nav .nav-btn.active .nav-icon {
+  filter:drop-shadow(0 0 3px var(--h5-gold-wash));
+}
+@media(max-width:360px) {
+  #mainScroll.home-compact #homeSessionControls.mint-instruments {gap:5px;}
+  #mainScroll.home-compact #homeJourneyOpen,
+  #mainScroll.home-compact #homeBoostAction {font-size:11px;padding-inline:5px;}
+}
+@media(max-height:600px){
+  #mainScroll.home-compact #homeJourneyOpen,
+  #mainScroll.home-compact #homeBoostAction {height:36px;min-height:36px;}
+  #mainScroll.home-compact #homeSessionControls.mint-instruments{min-height:36px;}
+  #mainScroll.home-compact .mint-dashboard #homeRace {filter:none;}
+  #mainScroll.home-compact #homeNextPreview {filter:none;}
+  html[data-mint-rank="1"] #mainScroll.home-compact #homeCoinArtwork svg {
+    filter:brightness(1.08) saturate(1.12);
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #mainScroll.home-compact #homeRace,
+  #mainScroll.home-compact #homeNextPreview {transition:none;}
+}
