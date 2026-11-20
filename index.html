@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v16-home-option5-3">
+<meta name="jigcoin-build" content="v17-option-a-world-refill-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2835,6 +2835,7 @@ body{justify-content:flex-start}
 </style>
 <!-- Approved Home Option 5; cosmetic layer inherits the authenticated rank skin. -->
 <link rel="stylesheet" href="./assets/home-option5.css?v=20261120-3">
+<link rel="stylesheet" href="./assets/option-a-world.css?v=20261120-1">
 </head>
 <body>
   <div class="app-shell">
@@ -6637,7 +6638,7 @@ async function prepareMonetagRefill(manual=false) {
       // syncStateIfIdle alone does not wait for tap packets. Recheck the queues
       // after this refresh so a projected low-energy view cannot spend a start.
       await syncStateIfIdle();
-      await refreshBoostMissions(false);
+      await refreshBoostMissions(manual);
       const mission=hubMissions.find(m=>m.code===code);
       if(!current() || !refillTapsSettled() || !window.JigPilot?.canRefill() ||
         !homeRefillCanPrepare(mission,Number(state.energy),Number(maxEnergy)))return;
