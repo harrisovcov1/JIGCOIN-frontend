@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v22-rewards-weekly-action-1">
+<meta name="jigcoin-build" content="v23-rewards-weekly-label-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -7126,7 +7126,7 @@ async function refreshRewardsWeeklyStatus(){
         limit>=1 && limit<=10 && left>=0 && left<=limit &&
         ['day','week'].includes(response?.policy?.period)){
         target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
-        action.textContent=left===0?'View standings & practice ›':'Race for gold ›';
+        action.textContent=left===0?'Standings & practice ›':'Race for gold ›';
       }else reset();
     }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))reset();}
   })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
