@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v23-rewards-weekly-label-1">
+<meta name="jigcoin-build" content="v24-shop-layout-review-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -1967,6 +1967,14 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 
 </style>
 <style>
+/* Shop refinement: preserve the page frame and keep checkout controls legible. */
+#coinShopSheet .sheet-body{padding:9px 12px 12px;min-height:0;overscroll-behavior:contain}
+#coinShopSheet .shop-vip-pass{margin-bottom:7px}
+#coinShopSheet .shop-balance-strip{margin-bottom:6px}
+#coinShopSheet .shop-section-heading{margin-bottom:6px}
+#coinShopSheet .hub-catalog-dense .hub-product{margin-bottom:6px}
+#coinShopSheet .hub-catalog-dense .hub-buy{min-height:44px}
+@media (max-height:740px){#coinShopSheet .sheet-body{padding:7px 10px 9px}}
 /* Extended catalogue: all amounts remain visible in the same Shop. */
 #coinShopSheet .hub-catalog-dense .hub-product{padding:9px 12px;margin-bottom:8px;gap:2px 8px}
 #coinShopSheet .hub-catalog-dense .hub-product-coins{font-size:22px}
@@ -3230,7 +3238,7 @@ body{justify-content:flex-start}
     </div>
     <div class="sheet-body">
       <button type="button" class="vip-summary shop-vip-pass" id="shopVipPass">
-        <img src="./assets/vip-crown.svg" alt="" width="64" height="56"><span><strong>JigCoin VIP Pass</strong><small id="shopVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="shopVipState">30 days · ★500 · View pass</small></span><span class="summary-chevron" aria-hidden="true">›</span>
+        <img src="./assets/vip-crown.svg" alt="" width="64" height="56"><span><strong>JigCoin VIP Pass</strong><small id="shopVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="shopVipState">30 days · ★500 · View VIP benefits</small></span><span class="summary-chevron" aria-hidden="true">›</span>
       </button>
       <div class="shop-balance-strip" id="shopBalanceStrip">Your saved balance appears after checking.</div>
       <div class="shop-section-heading"><h2>Coin packs</h2><span>Added after confirmed payment</span></div>
@@ -3240,7 +3248,7 @@ body{justify-content:flex-start}
       <details class="hub-history" id="hubOrderDetails">
         <summary>Orders &amp; payment help</summary>
         <p id="hubOrderNotice" class="hub-small" tabindex="-1" hidden></p>
-        <p class="hub-small">Packs add in-game coins to your balance after payment confirmation. Pay with Telegram Stars.</p>
+        <p class="hub-small">Your exact coin amount and Telegram Stars price appear on each pack. Coins are credited after confirmed payment.</p>
         <p class="hub-small">In-game coins have no cash value. Buying a pack does not guarantee an airdrop allocation or future value.</p>
         <div id="hubOrderHistory"></div>
         <p id="hubSupport" class="hub-small"></p><p class="hub-small">App version 14</p>
