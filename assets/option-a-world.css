@@ -398,8 +398,8 @@ html body #coinShopSheet #coinPackList {
   display:flex;flex-direction:column;
   flex:0 0 auto;gap:clamp(3px,.55dvh,6px);margin:0;
 }
-html body #coinShopSheet #coinPackList>.hub-product,
-html body #coinShopSheet #coinPackList>.hub-product:first-child {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child),
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child):first-child {
   display:grid;flex:none;
   min-height:clamp(53px,7.6dvh,68px);
   padding:clamp(5px,.8dvh,8px) clamp(7px,2.3vw,10px);
@@ -410,26 +410,26 @@ html body #coinShopSheet #coinPackList>.hub-product:first-child {
   background:var(--world-well);
   box-shadow:inset 0 1px var(--mint-seam),0 0 3px var(--world-glow);
 }
-html body #coinShopSheet #coinPackList>.hub-product .hub-product-label {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .hub-product-label {
   font-size:clamp(10px,2.6vw,12px);
 }
-html body #coinShopSheet #coinPackList>.hub-product .hub-product-coins {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .hub-product-coins {
   font-size:clamp(20px,5.9vw,26px);
 }
-html body #coinShopSheet #coinPackList>.hub-product .hub-unit-value {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .hub-unit-value {
   font-size:clamp(9px,2.35vw,11px);
 }
-html body #coinShopSheet #coinPackList>.hub-product .hub-buy {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .hub-buy {
   min-height:44px;
   padding:4px;
   border-color:var(--world-frame);
   box-shadow:inset 0 1px var(--mint-seam);
 }
-html body #coinShopSheet #coinPackList>.hub-product.hub-goal {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child).hub-goal {
   border:2px solid var(--world-gold);
   box-shadow:inset 0 1px var(--mint-seam),0 0 5px var(--world-glow);
 }
-html body #coinShopSheet #coinPackList>.hub-product .pack-goal {
+html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) .pack-goal {
   margin:3px 0 0;padding-top:3px;
   font-size:clamp(9px,2.35vw,11px);
 }
@@ -499,7 +499,7 @@ html body #leaderboardScreen .lb-footer>button {min-height:42px;}
   html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] {grid-template-columns:56px minmax(0,1fr);}
   html body #boostSheet .pilot-free-activities .pilot-link {padding:6px;}
   html body #coinShopSheet .vip-summary.shop-vip-pass {grid-template-columns:36px minmax(0,1fr) 12px;}
-  html body #coinShopSheet #coinPackList>.hub-product {grid-template-columns:minmax(0,1fr) 79px;}
+  html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) {grid-template-columns:minmax(0,1fr) 79px;}
 }
 @media(max-height:700px) {
   html body .sheet .sheet-header {min-height:58px;padding-block:5px;}
@@ -511,7 +511,7 @@ html body #leaderboardScreen .lb-footer>button {min-height:42px;}
   html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-icon {width:56px;height:56px;}
   html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] {grid-template-columns:56px minmax(0,1fr);}
   html body #boostSheet #boostCooldownNote {font-size:9px;}
-  html body #coinShopSheet #coinPackList>.hub-product {min-height:53px;padding-block:5px;}
+  html body #coinShopSheet #coinPackList>:is(.hub-product,.hub-product:first-child) {min-height:53px;padding-block:5px;}
 }
 @media(prefers-reduced-motion:reduce) {
   html body .sheet :is(button,.boost-card),html body .bottom-nav .nav-btn {transition:none!important;animation:none!important;}
