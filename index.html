@@ -4229,7 +4229,9 @@ function rewardsChallengeView(daily) {
   }
   if (daily.claimed) return {state:'collected', label:'Collected ✓'};
   if (daily.eligible) return {state:'ready', action:'claim', label:`Claim ${formatNumber(daily.reward)} coins`};
-  return {state:'playing', action:'play', label:`${Math.max(0,Number(daily.target)-Number(daily.progress))} taps to unlock ›`};
+  const remaining=Number(daily.target)-Number(daily.progress);
+  return {state:'playing', action:'play', label:Number.isFinite(remaining)?
+    `${formatNumber(Math.max(0,Math.ceil(remaining)))} taps to unlock ›`:'Keep tapping ›'};
 }
 function renderProgression(){
   const s=progressionCurrent(),d=s?.daily,e=s?.event?{...s.event}:null;
