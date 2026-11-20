@@ -1,0 +1,518 @@
+/* JIGCOIN Option A — world-wide, rank-aware metal and collectible identity.
+   Pure presentation. Does not replace any existing DOM controls, backend rules
+   or product terms. Home Option 5 remains the visual baseline. */
+:root {
+  --world-frame:color-mix(in srgb,var(--mint-accent) 72%,var(--mint-metal));
+  --world-highlight:var(--mint-highlight);
+  --world-gold:var(--mint-accent);
+  --world-glow:color-mix(in srgb,var(--mint-accent) 32%,transparent);
+  --world-strong-glow:color-mix(in srgb,var(--mint-accent) 52%,transparent);
+  --world-shadow:#000b;
+  --world-steel:linear-gradient(125deg,var(--mint-ink),color-mix(in srgb,var(--mint-metal) 36%,var(--mint-panel)),var(--mint-ink) 96%);
+  --world-well:radial-gradient(ellipse at 83% -34%,var(--world-glow),transparent 62%),var(--mint-grain),var(--world-steel);
+  --world-primary:var(--mint-button);
+  --world-trophy:var(--mint-accent);
+  --world-cut:var(--mint-corner,6px);
+}
+/* The chosen Option A is Foundry Gold. Other ranks inherit their OWN
+   coin, fascia, chamber and colours, with a polished rank-appropriate glow. */
+html[data-mint-rank="0"] {--world-glow:#e2a47f50;--world-strong-glow:#f1b58e8c;--world-frame:#c58b68;--world-gold:#e2a47f;}
+html[data-mint-rank="1"] {--world-glow:#ffac3870;--world-strong-glow:#fcb64b9e;--world-frame:#d99c48;--world-gold:#f8c067;--world-highlight:#ffe5b1;}
+html[data-mint-rank="2"] {--world-glow:#5ae5ff65;--world-strong-glow:#c7a0ff8a;--world-frame:#71a9cd;--world-gold:#a4e8ff;--world-highlight:#e3f9ff;}
+html[data-mint-rank="3"] {--world-glow:#6ee2b95b;--world-strong-glow:#d4f6b68f;--world-frame:#80baa1;--world-gold:#a9edc9;}
+html[data-mint-rank="4"] {--world-glow:#c38ff76d;--world-strong-glow:#f3b9ff90;--world-frame:#b196db;--world-gold:#dfc2ff;}
+html[data-mint-rank="5"] {--world-glow:#efc26b51;--world-strong-glow:#ffe7a88c;--world-frame:#a98e5a;--world-gold:#ffe0a1;}
+html[data-mint-rank="6"] {--world-glow:#e9959870;--world-strong-glow:#fbd2a78a;--world-frame:#ca8c84;--world-gold:#ffd1b3;}
+html[data-mint-rank="7"] {--world-glow:#ead5bb64;--world-strong-glow:#f8f6e6a1;--world-frame:#bebeb7;--world-gold:#f6e9d3;}
+/* Reuse the live world theme. Stronger border light and press-inspired texture
+   apply to ALL the app's primary and secondary screens. */
+html body .sheet,
+html body #leaderboardScreen {
+  border:1px solid var(--world-frame);
+  color:var(--mint-text);
+  border-radius:var(--world-cut);
+  background:var(--mint-mark),var(--mint-grain),
+    radial-gradient(ellipse at 65% 0,var(--world-glow),transparent 35%),
+    linear-gradient(120deg,var(--mint-ink),var(--mint-bg) 58%,var(--mint-ink));
+  box-shadow:inset 0 0 0 1px var(--mint-rim),0 1px 8px #0007;
+}
+/* Shared decorative fascia, centered irrespective of close-button width. */
+html body .sheet .sheet-header,
+html body #leaderboardScreen .leaderboard-heading {
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  min-height:clamp(62px,9.2dvh,90px);
+  padding:8px 54px;
+  border-bottom:2px solid var(--world-frame);
+  isolation:isolate;
+  background:var(--mint-mark),var(--mint-grain),var(--mint-header);
+  box-shadow:inset 0 2px var(--mint-seam),inset 0 -2px var(--world-glow),0 2px 6px #0008;
+}
+html body .sheet .sheet-header::before,
+html body #leaderboardScreen .leaderboard-heading::before {
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:var(--mint-fascia) center/100% 100% no-repeat;
+  opacity:1;
+}
+html body .sheet .sheet-header::after,
+html body #leaderboardScreen .leaderboard-heading::after {
+  content:"";position:absolute;left:9%;right:9%;bottom:0;height:2px;z-index:0;
+  background:linear-gradient(90deg,transparent,var(--world-gold),var(--world-highlight) 50%,var(--world-gold),transparent);
+  box-shadow:0 0 6px var(--world-strong-glow);
+}
+html body .sheet .sheet-header>div:first-child,
+html body #leaderboardScreen .leaderboard-heading>div:first-child {
+  min-width:0;width:100%;text-align:center;flex:1 1 auto;
+}
+html body .sheet .sheet-header .sheet-title,
+html body #leaderboardScreen .leaderboard-heading h2 {
+  margin:0;
+  color:var(--mint-text);
+  font:680 clamp(20px,5.9vw,35px)/1.08 Georgia,"Times New Roman",serif;
+  text-shadow:0 2px 3px #000e,0 0 5px var(--world-glow);
+}
+html body .sheet .sheet-header .sheet-subtitle,
+html body #leaderboardScreen .leaderboard-heading p {
+  margin:3px 0 0;
+  color:var(--mint-text);
+  font-size:clamp(10px,2.65vw,12px);line-height:1.2;
+  opacity:.93;
+}
+html body .sheet .sheet-header .sheet-close,
+html body #leaderboardScreen #lbCloseBtn {
+  position:absolute;right:clamp(6px,1.7vw,12px);top:50%;
+  transform:translateY(-50%);
+  display:grid;place-items:center;
+  width:clamp(35px,9vw,44px);height:clamp(35px,9vw,44px);min-height:35px;
+  padding:0;z-index:3;
+  background:var(--mint-grain),var(--world-steel);
+  border:1px solid var(--world-frame);
+  color:var(--mint-text);
+  border-radius:var(--world-cut);
+  box-shadow:inset 0 1px var(--mint-seam),0 0 3px var(--world-glow);
+}
+html body #vipOfferSheet .sheet-title,
+html body #inviteDetailsSheet .sheet-title,
+html body #vaultDetailsSheet .sheet-title,
+html body #homeJourneySheet .sheet-title {
+  font-size:clamp(18px,4.8vw,27px);
+}
+html body .sheet :is(button,a,summary):focus-visible,
+html body #leaderboardScreen :is(button,a):focus-visible {
+  outline:2px solid var(--world-highlight);outline-offset:2px;
+}
+/* The universal physical panel surface, applied to existing elements ONLY.
+   The rank palette changes automatically with the confirmed account rank. */
+html body .sheet :is(
+  .boost-card,.pilot-link,.reward-collection,.hub-product,.vip-summary,
+  .invite-reward-card,.friends-summary,.invite-milestone,.incoming-invite-card,
+  .vault-summary,.vault-collection,.vault-airdrop,.vault-vip,.journey-focus,
+  .coin-tier,.quest-card,.daily-reward-hero,.pilot-hero,.pilot-practice,
+  .pilot-target,.weekly-practice,.invite-detail-section,.vault-benefits>div,
+  .vault-details,.lb-race-card,.vip-box
+),
+html body #leaderboardScreen :is(.lb-race-card,.lb-podium>div,.lb-row) {
+  color:var(--mint-text);
+  background:var(--world-well);
+  border:1px solid var(--world-frame);
+  border-radius:var(--world-cut);
+  box-shadow:inset 0 1px var(--mint-seam),inset 0 -2px 1px #0009,
+    0 0 3px var(--world-glow),0 2px 4px #0006;
+}
+html body .sheet :is(
+  .boost-card,.pilot-link,.hub-product,.invite-reward-card,.journey-focus,
+  .vault-summary,.pilot-hero,.vip-summary
+)::before {
+  pointer-events:none;
+}
+/* Top-priority buttons read like forged gold, without turning every click
+   target into a loud CTA. Correct enabled/disabled and pending distinction. */
+html body .sheet :is(
+  .quest-action,.pilot-primary,.vault-buy,.friends-share-btn,
+  #rewardsDailyAction,#energyBoostAction,#rewardsReturn
+):not(:disabled),
+html body #coinShopSheet .hub-product.hub-goal .hub-buy:not(:disabled),
+html body #leaderboardScreen :is(.lb-primary,.lb-tab-btn[aria-pressed="true"]):not(:disabled) {
+  background:var(--world-primary);
+  color:var(--mint-ink);font-weight:750;
+  border:1px solid var(--world-highlight);
+  border-radius:var(--world-cut);
+  box-shadow:inset 0 1px #ffffff8c,inset 0 -2px #0004,
+    0 1px 4px #0009,0 0 4px var(--world-glow);
+  text-shadow:0 1px #fff4;
+}
+html body .sheet :is(button,.hub-buy):disabled {cursor:default;opacity:.64;}
+html body .sheet :is(.pilot-link,.boost-action,.invite-copy,.vault-text-button,.vault-details-link):not(:disabled) {
+  cursor:pointer;
+}
+html body .sheet :is(.hub-history,.vault-medals,.journey-settings,.vault-airdrop),
+html body .sheet .vault-account-links,
+html body #leaderboardScreen .lb-footer {border-color:var(--world-frame);}
+html body .sheet :is(.hub-unit-value,.boost-state,.pilot-link small,.vault-goal,
+  .vault-finish-link small,.invite-pending,.shop-balance-strip,.vault-airdrop small) {
+  color:var(--mint-muted);
+}
+/* Footrail is always the same one created for Option A, regardless of tab. */
+html body .app-shell .bottom-nav {
+  flex-shrink:0;
+  background:var(--mint-grain),linear-gradient(180deg,var(--mint-panel),var(--mint-ink) 56%,var(--mint-bg));
+  border-top:1px solid var(--world-frame);
+  box-shadow:inset 0 1px var(--mint-seam),0 -2px 5px #000b;
+}
+html body .app-shell .bottom-nav .nav-btn.active {
+  color:var(--world-highlight);
+  text-shadow:0 0 4px var(--world-glow);
+}
+html body .app-shell .bottom-nav .nav-btn.active::after {
+  background:var(--world-gold);
+  box-shadow:0 0 6px var(--world-strong-glow);
+}
+/* Primary tab content — compact by default. Scrolling stays as an accessibility
+   fallback rather than clipping data on very short WebViews or large type. */
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-body {
+  min-height:0;overflow-x:hidden;overflow-y:auto;
+  padding:clamp(6px,1.25dvh,11px);
+  padding-bottom:clamp(6px,1dvh,10px);
+  gap:clamp(4px,.7dvh,9px);
+  overscroll-behavior-y:contain;
+}
+html body #boostSheet .sheet-body {display:flex;flex-direction:column;justify-content:flex-start;}
+html body #boostSheet #rewardChoices {
+  display:flex;flex-direction:column;align-items:stretch;
+  gap:clamp(5px,.7dvh,8px);
+  flex:none;margin:0;
+}
+html body #boostSheet #rewardChoices>.boost-card {
+  margin:0;overflow:visible;
+  padding:clamp(7px,1.1dvh,12px);
+  border-radius:var(--world-cut);
+}
+/* Free Daily Streak: first, compact, truthful, seven-day visibility. */
+html body #boostSheet #rewardsDailyCard {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(104px,33%);
+  grid-template-areas:"top action" "status action" "calendar calendar" "reminder reminder";
+  align-items:center;
+  column-gap:8px;row-gap:clamp(3px,.55dvh,6px);
+  min-height:0;
+}
+html body #rewardsDailyCard .boost-card-top {grid-area:top;min-width:0;gap:6px;align-items:center;}
+html body #rewardsDailyCard .boost-icon {
+  flex:0 0 30px;width:30px;height:30px;border-radius:6px;
+  background:linear-gradient(145deg,#245743,#073325);
+  border:1px solid #4ad0a6;color:#baf8dd;
+  box-shadow:inset 0 1px #fff3,0 0 4px #5cbd9260;
+}
+html body #rewardsDailyCard .boost-card-top h3 {
+  min-width:0;margin:0;
+  color:var(--mint-text);
+  font:760 clamp(13px,3.6vw,18px)/1.2 system-ui,sans-serif;
+}
+html body #rewardsDailyAmount {color:var(--world-gold);font:inherit;}
+html body #rewardsDailyCard .boost-state {
+  grid-area:status;
+  min-width:0;margin:0;
+  color:var(--mint-muted);
+  font-size:clamp(10px,2.7vw,12px);line-height:1.28;
+}
+html body #rewardsDailyCard .streak-benefit-preview {
+  display:block;
+  color:var(--world-gold);font-size:clamp(9px,2.5vw,11px);
+  margin-top:2px;
+}
+html body #rewardsDailyCard #rewardsDailyAction {
+  grid-area:action;align-self:center;justify-self:stretch;
+  width:100%;min-width:0;min-height:44px;padding:5px;
+  font:750 clamp(11px,3.1vw,15px)/1.15 system-ui,sans-serif;
+  text-align:center;
+}
+html body #rewardsDailyCard #rewardWeekStrip {
+  grid-area:calendar;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:clamp(3px,1vw,6px);
+  width:100%;margin:3px 0 0;padding:0;
+}
+html body #rewardsDailyCard #rewardWeekStrip[hidden] {display:none!important;}
+html body #rewardWeekStrip .daily-marker {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:0;min-height:clamp(29px,4.3dvh,40px);
+  padding:2px 0;
+  color:var(--mint-text);
+  background:var(--mint-grain),var(--world-steel);
+  border:1px solid var(--mint-edge);
+  border-radius:clamp(4px,.9vw,6px);
+  box-shadow:inset 0 1px var(--mint-seam);
+  font:660 clamp(10px,2.6vw,12px)/1.1 system-ui,sans-serif;
+}
+html body #rewardWeekStrip .daily-marker[data-claimed="true"] {
+  background:linear-gradient(160deg,#1e493d,#073b2e);
+  color:#c5f7e7;border-color:#5aab89;
+}
+html body #rewardWeekStrip .daily-marker[data-focus="true"] {
+  background:var(--mint-grain),var(--world-steel);
+  border:2px solid var(--world-gold);
+  color:var(--world-highlight);
+  box-shadow:0 0 4px var(--world-glow);
+}
+html body #rewardsDailyCard #rewardsTelegramReminder:not([hidden]) {
+  grid-area:reminder;min-height:28px;padding:3px 1px;
+  justify-self:start;font-size:11px;
+}
+/* Refill: visible even when full, but never claims a provider advert is ready
+   until the actual SDK preload succeeds. The CTA is driven by getBoostView(). */
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"]:not([hidden]) {
+  display:grid;
+  grid-template-columns:clamp(58px,16vw,82px) minmax(0,1fr);
+  grid-template-areas:"art title" "art description" "art button" "vip vip";
+  align-content:center;align-items:center;
+  gap:clamp(3px,.6dvh,7px) clamp(8px,2.2vw,13px);
+  padding:clamp(7px,1.1dvh,13px);
+  min-height:0;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-card-top {display:contents;}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-card-top h3 {
+  grid-area:title;margin:0;
+  color:var(--mint-text);
+  font:690 clamp(17px,4.8vw,25px)/1.15 Georgia,serif;
+  text-shadow:0 1px 2px #000b;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-icon {
+  grid-area:art;width:clamp(58px,16vw,82px);height:clamp(58px,16vw,82px);
+  padding:0;margin:0;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:2px solid var(--world-gold);
+  background:radial-gradient(circle at 47% 39%,var(--world-glow),transparent 70%),
+    var(--mint-grain),linear-gradient(135deg,var(--mint-metal),var(--mint-ink));
+  box-shadow:inset 0 0 0 4px var(--mint-ink),inset 0 1px 4px #fff3,
+    0 0 6px var(--world-strong-glow),0 1px 8px #0008;
+  color:var(--world-gold);font-size:clamp(27px,8vw,39px);
+  text-shadow:0 0 8px var(--world-strong-glow),0 2px 3px #0008;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-state {
+  grid-area:description;min-width:0;margin:0;
+  font-size:clamp(10px,2.6vw,12px);
+  line-height:1.3;color:var(--mint-muted);
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] #energyBoostAction {
+  grid-area:button;justify-self:stretch;
+  width:100%;min-width:0;min-height:44px;
+  padding:6px 8px;
+  font:760 clamp(12px,3.3vw,16px)/1.2 system-ui,sans-serif;
+  overflow-wrap:anywhere;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] #energyBoostAction[data-action="claim"] {
+  border-color:#8adaaa;box-shadow:0 0 7px #88d8a65f;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] #rewardRefillVip:not([hidden]) {
+  grid-area:vip;display:flex;align-items:center;justify-content:space-between;
+  margin:4px 0 0;border:0;border-top:1px solid var(--world-frame);
+  padding:5px 3px 0;min-height:30px;
+  font-size:clamp(10px,2.6vw,13px);
+  font-weight:650;text-align:left;white-space:normal;
+  background:transparent;color:var(--mint-text);
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] #rewardRefillVip::after {
+  content:"›";color:var(--world-gold);font-size:20px;flex:none;
+}
+html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] #rewardRefillVip[hidden]{display:none!important;}
+/* No fake "ad ready now" badge; the verified CTA state is sufficient. */
+html body #boostSheet #boostCooldownNote {
+  flex:none;margin:0 1px;
+  padding:2px 0;
+  text-align:center;
+  color:var(--mint-muted);font:440 clamp(9px,2.45vw,11px)/1.3 system-ui,sans-serif;
+}
+html body #boostSheet .pilot-free-activities {
+  flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(5px,1.7vw,9px);margin:0;
+}
+html body #boostSheet .pilot-free-activities .pilot-link {
+  min-width:0;min-height:clamp(106px,15dvh,149px);
+  margin:0;padding:clamp(7px,1.1dvh,13px);
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  text-align:left;gap:clamp(2px,.4dvh,5px);
+  background:var(--world-well);
+  border:1px solid var(--world-frame);
+  border-radius:var(--world-cut);
+  box-shadow:inset 0 1px var(--mint-seam),0 0 4px var(--world-glow);
+}
+html body #boostSheet .pilot-free-activities .pilot-link strong {
+  font:750 clamp(12px,3.5vw,18px)/1.22 Georgia,serif;
+  color:var(--mint-text);
+}
+html body #boostSheet .pilot-free-activities .pilot-link small {
+  font:450 clamp(9px,2.6vw,12px)/1.27 system-ui,sans-serif;color:var(--mint-muted);
+}
+html body #boostSheet .pilot-free-activities .pilot-link span:last-child {
+  color:var(--world-gold);font-weight:740;
+  font-size:clamp(10px,2.7vw,12px);
+}
+html body #boostSheet .pilot-free-activities .pilot-link progress {
+  width:100%;height:clamp(5px,.7dvh,9px);
+  accent-color:#46d8bc;margin-bottom:2px;
+}
+html body #boostSheet .pilot-free-activities .activity-medal {
+  display:block;
+  color:var(--world-gold);font-size:clamp(20px,4vw,27px);
+  filter:drop-shadow(0 0 3px var(--world-glow));
+}
+html body #boostSheet .reward-footer {
+  margin:0;flex:none;
+}
+html body #boostSheet #rewardsReturn:not([hidden]) {
+  width:100%;min-height:44px;margin:0;
+  padding:7px 10px;
+  background:var(--world-primary);
+  color:var(--mint-ink);
+  border:1px solid var(--world-highlight);
+  font-weight:760;
+  box-shadow:inset 0 1px #fff7,0 0 7px var(--world-glow);
+}
+html body #boostSheet .reward-footer #boostRefresh:not([hidden]) {
+  min-height:38px;margin-top:4px;
+}
+/* Shared luxury treatments, without changing the five actual products or
+   the exact Star prices, VIP entitlements, payment state or receipt flow. */
+html body #coinShopSheet .sheet-body {
+  display:flex;flex-direction:column;justify-content:flex-start;
+  gap:clamp(3px,.65dvh,7px);
+}
+html body #coinShopSheet .vip-summary.shop-vip-pass {
+  display:grid;flex:none;
+  grid-template-columns:clamp(40px,10vw,54px) minmax(0,1fr) 15px;
+  gap:8px;align-items:center;
+  min-height:clamp(56px,8dvh,78px);
+  padding:clamp(6px,1dvh,10px);
+  border-color:var(--world-frame);
+}
+html body #coinShopSheet .vip-summary.shop-vip-pass img {
+  width:100%;height:clamp(35px,5.5dvh,51px);object-fit:contain;
+}
+html body #coinShopSheet .vip-summary.shop-vip-pass strong {font-size:clamp(13px,3.7vw,17px);line-height:1.2;}
+html body #coinShopSheet .vip-summary.shop-vip-pass small {font-size:clamp(9px,2.4vw,11px);line-height:1.25;margin-top:2px;}
+html body #coinShopSheet .shop-balance-strip {
+  flex:none;margin:0;font-size:clamp(10px,2.5vw,12px);padding:1px 0;
+}
+html body #coinShopSheet .shop-section-heading {flex:none;margin:0;gap:5px;}
+html body #coinShopSheet .shop-section-heading h2 {font-size:clamp(14px,3.9vw,17px);}
+html body #coinShopSheet .shop-section-heading span {font-size:clamp(9px,2.45vw,11px);}
+html body #coinShopSheet #coinPackList {
+  display:flex;flex-direction:column;
+  flex:0 0 auto;gap:clamp(3px,.55dvh,6px);margin:0;
+}
+html body #coinShopSheet #coinPackList>.hub-product,
+html body #coinShopSheet #coinPackList>.hub-product:first-child {
+  display:grid;flex:none;
+  min-height:clamp(53px,7.6dvh,68px);
+  padding:clamp(5px,.8dvh,8px) clamp(7px,2.3vw,10px);
+  grid-template-columns:minmax(0,1fr) clamp(80px,24vw,102px);
+  gap:2px 6px;
+  border:1px solid var(--world-frame);
+  border-radius:var(--world-cut);
+  background:var(--world-well);
+  box-shadow:inset 0 1px var(--mint-seam),0 0 3px var(--world-glow);
+}
+html body #coinShopSheet #coinPackList>.hub-product .hub-product-label {
+  font-size:clamp(10px,2.6vw,12px);
+}
+html body #coinShopSheet #coinPackList>.hub-product .hub-product-coins {
+  font-size:clamp(20px,5.9vw,26px);
+}
+html body #coinShopSheet #coinPackList>.hub-product .hub-unit-value {
+  font-size:clamp(9px,2.35vw,11px);
+}
+html body #coinShopSheet #coinPackList>.hub-product .hub-buy {
+  min-height:44px;
+  padding:4px;
+  border-color:var(--world-frame);
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+html body #coinShopSheet #coinPackList>.hub-product.hub-goal {
+  border:2px solid var(--world-gold);
+  box-shadow:inset 0 1px var(--mint-seam),0 0 5px var(--world-glow);
+}
+html body #coinShopSheet #coinPackList>.hub-product .pack-goal {
+  margin:3px 0 0;padding-top:3px;
+  font-size:clamp(9px,2.35vw,11px);
+}
+html body #coinShopSheet .hub-history {margin:0;flex:none;}
+html body #coinShopSheet .hub-history summary {min-height:36px;padding:6px 0;}
+html body #coinShopSheet #hubShopNotice {font-size:10px;}
+/* Invite: clear true qualification and progression, not a false token promise. */
+html body #friendsSheet .sheet-body {gap:clamp(5px,.9dvh,10px);}
+html body #friendsSheet .invite-reward-card {min-height:0;padding:clamp(10px,1.4dvh,14px);}
+html body #friendsSheet .invite-reward-card h2 strong {color:var(--world-gold);}
+html body #friendsSheet .invite-actions button {min-height:44px;}
+html body #friendsSheet .friends-summary {gap:0;padding:0;min-height:58px;}
+html body #friendsSheet .friends-summary-col {
+  min-height:54px;padding:8px;
+  color:var(--mint-text);border-color:var(--world-frame);
+}
+html body #friendsSheet .friends-summary-col strong {color:var(--world-highlight);}
+html body #friendsSheet .invite-milestone {padding:clamp(8px,1dvh,12px);}
+html body #friendsSheet .invite-play-links button {min-height:44px;}
+html body #friendsSheet #inviteDetailsOpen {min-height:40px;}
+/* Vault: balance, next rank, VIP, collection, genuine airdrop terms. */
+html body #withdrawSheet .sheet-body {gap:clamp(5px,.85dvh,9px);}
+html body #withdrawSheet .vault-summary {padding:clamp(9px,1.3dvh,13px);}
+html body #withdrawSheet .vault-summary .vault-total strong {
+  color:var(--mint-text);font-size:clamp(28px,7.5vw,35px);
+}
+html body #withdrawSheet .vip-summary {
+  min-height:clamp(62px,8.4dvh,82px);
+  padding:8px 10px;grid-template-columns:48px minmax(0,1fr) 16px;
+}
+html body #withdrawSheet .vip-summary img {width:48px;height:44px;}
+html body #withdrawSheet .vip-summary strong {font-size:clamp(13px,3.7vw,16px);}
+html body #withdrawSheet .vip-summary small {font-size:clamp(9px,2.6vw,11px);}
+html body #withdrawSheet .vault-collection {padding:9px;}
+html body #withdrawSheet .vault-finish-link {min-height:54px;padding:5px 0;}
+html body #withdrawSheet .vault-account-links button {min-height:42px;padding:7px 2px;}
+html body #withdrawSheet .vault-airdrop summary {min-height:46px;}
+/* Rank journey, VIP offer, referrals, detailed Rewards, weekly race and
+   rankings remain scrollable when the player deliberately opens details. */
+html body :is(#homeJourneySheet,#vipOfferSheet,#homeDailySheet,#homeQuestSheet,
+  #inviteDetailsSheet,#vaultDetailsSheet,#weeklySheet) .sheet-body {
+  padding:clamp(9px,1.7dvh,15px);
+  gap:clamp(7px,1.2dvh,12px);
+}
+html body #homeTierGrid .coin-tier[data-current="true"] {border-color:var(--world-highlight);}
+html body #weeklySheet .pilot-clock {
+  border-color:var(--world-gold);
+  background:var(--mint-grain),var(--world-steel);
+  box-shadow:0 0 5px var(--world-glow);
+}
+html body #weeklySheet .weekly-practice,
+html body #vipOfferSheet .vault-vip {border-color:var(--world-frame);}
+html body #leaderboardScreen .lb-podium [data-place="1"] {
+  border-color:var(--world-gold);
+  box-shadow:0 0 7px var(--world-glow),inset 0 1px var(--mint-seam);
+}
+html body #leaderboardScreen #lbContent {padding:5px;}
+html body #leaderboardScreen .lb-actions>button {min-height:44px;}
+html body #leaderboardScreen .lb-footer>button {min-height:42px;}
+@media(max-width:350px) {
+  html body .sheet .sheet-header {padding-inline:43px;}
+  html body .sheet .sheet-header .sheet-title {font-size:clamp(18px,5vw,28px);}
+  html body #boostSheet #rewardChoices>.boost-card {padding:7px;}
+  html body #rewardsDailyCard .boost-card-top h3 {font-size:12px;}
+  html body #rewardsDailyCard #rewardsDailyAction {font-size:11px;}
+  html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-icon {width:56px;height:56px;}
+  html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] {grid-template-columns:56px minmax(0,1fr);}
+  html body #boostSheet .pilot-free-activities .pilot-link {padding:6px;}
+  html body #coinShopSheet .vip-summary.shop-vip-pass {grid-template-columns:36px minmax(0,1fr) 12px;}
+  html body #coinShopSheet #coinPackList>.hub-product {grid-template-columns:minmax(0,1fr) 79px;}
+}
+@media(max-height:700px) {
+  html body .sheet .sheet-header {min-height:58px;padding-block:5px;}
+  html body #boostSheet .sheet-body {padding:5px;gap:4px;}
+  html body #boostSheet #rewardChoices {gap:4px;}
+  html body #boostSheet #rewardChoices>.boost-card {padding:6px;}
+  html body #rewardsDailyCard #rewardWeekStrip .daily-marker {min-height:26px;}
+  html body #boostSheet .pilot-free-activities .pilot-link {min-height:99px;padding:6px;}
+  html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] .boost-icon {width:56px;height:56px;}
+  html body #boostSheet .boost-card[data-boost-code="sp_emergency_energy"] {grid-template-columns:56px minmax(0,1fr);}
+  html body #boostSheet #boostCooldownNote {font-size:9px;}
+  html body #coinShopSheet #coinPackList>.hub-product {min-height:53px;padding-block:5px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  html body .sheet :is(button,.boost-card),html body .bottom-nav .nav-btn {transition:none!important;animation:none!important;}
+}
