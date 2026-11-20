@@ -1,0 +1,106 @@
+/* JIGCOIN Home final five improvements.
+   Preserves the signed-off Option 5 geometry, the rank-aware skin and all gameplay. */
+#mainScroll.home-compact #homeNextPreview>span:last-child .home-next-progress {
+  display:block;position:relative;
+  height:3px;width:100%;margin:4px 0 0;
+  overflow:hidden;border-radius:8px;
+  background:linear-gradient(180deg,#080e16,#262a30);
+  box-shadow:inset 0 1px 2px #000b,0 0 0 1px color-mix(in srgb,var(--mint-accent) 43%,transparent);
+}
+#mainScroll.home-compact #homeNextPreview>span:last-child .home-next-progress[hidden] {display:none!important;}
+#mainScroll.home-compact .home-next-progress i {
+  display:block;box-sizing:border-box;height:100%;width:100%;
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--mint-accent) 65%,var(--mint-metal)),
+    var(--mint-highlight));
+  border-radius:8px;
+  box-shadow:0 0 5px var(--world-glow, #e7a95355);
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform 150ms ease-out;
+}
+#mainScroll.home-compact #homeNextPreview[data-rank-complete="true"] .home-next-progress i {
+  background:linear-gradient(90deg,var(--mint-accent),var(--mint-highlight));
+}
+/* The Today value is tap-earned COINS, not the count of taps. Keep the
+   clarified label in the identical trophy instrument and original footprint. */
+#mainScroll.home-compact #homeTodayMetric .metric-label {
+  font-size:clamp(7.5px,2.15vw,9.5px);
+  letter-spacing:.07em;
+  white-space:nowrap;
+}
+#mainScroll.home-compact #homeTodayMetric .metric-value {
+  font-variant-numeric:tabular-nums;
+}
+/* The per-tap control opens the existing daily-benefit sheet; when launched
+   from Home it now contains a factual multiplier breakdown and an explicit
+   route to the existing VIP offer. No extra Home panel is added. */
+html body #homeDailySheet .home-rate-breakdown:not([hidden]) {
+  display:flex;flex-direction:column;gap:8px;
+  padding:clamp(10px,2vw,14px);
+  margin:0 0 10px;
+  border:1px solid var(--world-frame,var(--mint-edge));
+  background:radial-gradient(ellipse at 80% 0,var(--world-glow,#d89b4233),transparent 60%),
+    var(--mint-grain),linear-gradient(160deg,var(--mint-panel),var(--mint-ink));
+  box-shadow:inset 0 1px var(--mint-seam),0 2px 5px #0007;
+  color:var(--mint-text);border-radius:var(--mint-corner,6px);
+}
+html body #homeDailySheet .home-rate-breakdown[hidden] {display:none!important;}
+html body #homeDailySheet .home-rate-breakdown h3 {
+  margin:0;
+  font:650 clamp(17px,4.2vw,21px)/1.2 Georgia,serif;
+  color:var(--mint-text);
+}
+html body #homeDailySheet .home-rate-total {
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  border-bottom:1px solid var(--mint-edge);padding-bottom:7px;
+}
+html body #homeDailySheet .home-rate-total span {
+  color:var(--mint-muted);font-size:12px;
+}
+html body #homeDailySheet .home-rate-total strong {
+  color:var(--mint-highlight);
+  font-size:clamp(22px,6vw,27px);font-variant-numeric:tabular-nums;
+}
+html body #homeDailySheet .home-rate-components {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+html body #homeDailySheet .home-rate-components span {
+  min-width:0;display:flex;justify-content:space-between;gap:4px;
+  padding:7px 8px;border:1px solid var(--mint-edge);
+  border-radius:var(--mint-corner,6px);
+  background:var(--mint-grain),linear-gradient(150deg,var(--mint-ink),var(--mint-panel));
+  color:var(--mint-muted);font-size:11px;line-height:1.25;
+}
+html body #homeDailySheet .home-rate-components b {
+  color:var(--mint-text);font-size:12px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+html body #homeDailySheet .home-rate-breakdown p {
+  margin:0;color:var(--mint-muted);
+  font-size:11px;line-height:1.4;
+}
+html body #homeDailySheet #homeRateVipShop {
+  display:block;width:100%;min-height:44px;
+  padding:9px 10px;
+  border:1px solid var(--mint-highlight);
+  border-radius:var(--mint-corner,6px);
+  color:var(--mint-ink);
+  background:var(--mint-button);
+  box-shadow:inset 0 1px #fff6,0 2px 4px #0006;
+  font:700 13px/1.2 system-ui,sans-serif;
+  cursor:pointer;
+}
+html body #homeDailySheet #homeRateVipShop:focus-visible,
+#mainScroll.home-compact #homeNextPreview:focus-visible {
+  outline:2px solid var(--mint-highlight);
+  outline-offset:2px;
+}
+@media(max-height:670px){
+  #mainScroll.home-compact #homeNextPreview>span:last-child .home-next-progress {
+    height:2px;margin-top:2px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #mainScroll.home-compact .home-next-progress i {transition:none;}
+}
