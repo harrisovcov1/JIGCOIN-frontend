@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v21-rewards-final-six-1">
+<meta name="jigcoin-build" content="v21-rewards-final-six-2">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2838,6 +2838,7 @@ body{justify-content:flex-start}
 <link rel="stylesheet" href="./assets/option-a-world.css?v=20261120-1">
 <link rel="stylesheet" href="./assets/home-rewards-fidelity.css?v=20261120-2">
 <link rel="stylesheet" href="./assets/home-final-five.css?v=20261120-1">
+<link rel="stylesheet" href="./assets/rewards-final-six.css?v=20261120-1">
 </head>
 <body>
   <div class="app-shell">
@@ -7097,13 +7098,14 @@ function refreshBoostMissions(force=true) {
   document.getElementById('boostRefresh').disabled=true;
   return request;
 }
-let rewardsWeeklyRequest=null;
+let rewardsWeeklyRequest=null,rewardsWeeklyOwner=null;
 async function refreshRewardsWeeklyStatus(){
   const target=document.getElementById('rewardsWeeklyStatus');
   const fallback='Free ranked runs · 45s each';
   const owner=homeUserId();
   if(!owner || !accountIsReady() || navigator.onLine===false){target.textContent=fallback;return;}
-  if(rewardsWeeklyRequest)return rewardsWeeklyRequest;
+  if(rewardsWeeklyRequest&&rewardsWeeklyOwner===owner)return rewardsWeeklyRequest;
+  rewardsWeeklyOwner=owner;
   target.textContent='Checking ranked attempts…';
   const request=(async()=>{
     try{
