@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v20-home-final-five-1">
+<meta name="jigcoin-build" content="v21-rewards-final-six-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3187,7 +3187,7 @@ body{justify-content:flex-start}
         <button type="button" class="reward-upgrade" id="rewardCoinPacks" hidden>See coin packs</button>
       </article>
       <article hidden class="boost-card" data-boost-code="sp_emergency_energy">
-        <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">⚡</span><h3>Refill energy</h3></div>
+        <div class="boost-card-top"><span class="boost-icon" aria-hidden="true">⚡</span><h3>Refill energy <small id="energyBoostMeter" class="refill-energy-live">Energy — / —</small></h3></div>
         <div class="boost-state" id="energyBoostStatus" role="status">Checking availability…</div>
         <button type="button" class="boost-action" id="energyBoostAction" disabled>Checking…</button>
         <button type="button" class="reward-upgrade" id="rewardRefillVip" hidden>See VIP</button>
@@ -3209,7 +3209,7 @@ body{justify-content:flex-start}
       <details id="boostHelp" class="reward-ad-help" hidden><summary>Advert help</summary><p id="boostHelpText"></p></details>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
-        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small>Free ranked runs · 45s each</small><span>Race for gold ›</span></button>
+        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small id="rewardsWeeklyStatus">Free ranked runs · 45s each</small><span>Race for gold ›</span></button>
       </div>
       <div class="reward-footer">
         <button type="button" class="quest-action" id="rewardsReturn" hidden>Back to tapping</button>
@@ -4228,7 +4228,7 @@ function rewardsChallengeView(daily) {
   }
   if (daily.claimed) return {state:'collected', label:'Collected ✓'};
   if (daily.eligible) return {state:'ready', action:'claim', label:`Claim ${formatNumber(daily.reward)} coins`};
-  return {state:'playing', action:'play', label:`Tap for ${formatNumber(daily.reward)} coins ›`};
+  return {state:'playing', action:'play', label:`${Math.max(0,Number(daily.target)-Number(daily.progress))} taps to unlock ›`};
 }
 function renderProgression(){
   const s=progressionCurrent(),d=s?.daily,e=s?.event?{...s.event}:null;
@@ -4241,6 +4241,7 @@ function renderProgression(){
   tile.disabled = !challenge.action;
   tile.dataset.state = challenge.state;
   document.getElementById('pilotChallengeAction').textContent = challenge.label;
+  if(boostSheet.classList.contains('show'))updateRewardsVisualPriority();
   document.getElementById('pilotDailyProgress').textContent = d && !dayChanged ?
     `${formatNumber(d.progress)} / ${formatNumber(d.target)} taps today` : 'Reach 100 taps today';
   const meter=document.getElementById('pilotChallengeMeter');
@@ -6888,20 +6889,43 @@ function updateRewardRecommendation() {
   const summary=document.getElementById('boostRecommendation');
   if(summary.textContent!==note) summary.textContent=note;
   if(rewardsOfferOwner!==null) renderRewardUpgrade(lastUsedReward||requestedReward||preferred);
+  updateRewardsVisualPriority();
+}
+function chooseRewardsPrimaryAction({dailyReady=false,challengeReady=false,refillClaimable=false,refillReady=false}={}){
+  if(refillClaimable)return 'refill';
+  if(dailyReady)return 'daily';
+  if(challengeReady)return 'challenge';
+  if(refillReady)return 'refill';
+  return 'return';
+}
+function updateRewardsVisualPriority(){
+  const c=dailyCheckinModel();
+  const dailyReady=!!c&&!c.claimed&&!c.broken&&!progressionError&&
+    Date.parse(c.resets_at)>progressionNow()&&accountIsReady()&&!dailyRewardsBusy;
+  const challenge=rewardsChallengeView(progressionCurrent()?.daily);
+  const refill=getBoostView('sp_emergency_energy',hubMissions.find(m=>m.code==='sp_emergency_energy'));
+  const priority=chooseRewardsPrimaryAction({
+    dailyReady,
+    challengeReady:challenge.action==='claim',
+    refillClaimable:refill.action==='claim'&&!refill.disabled,
+    refillReady:refill.action==='show'&&!refill.disabled
+  });
+  boostSheet.dataset.priority=priority;
 }
 function renderRewardUpgrade(code) {
   const eligible=accountIsReady() && rewardsOfferOwner===homeUserId() &&
     onboardingState.owner===homeUserId() && onboardingState.completed;
   const vip=eligible?vaultSnapshot():null;
-  const showVip=vip?.product.enabled && !vaultError && !vaultPending() &&
-    !vip.vip_active && !(Date.parse(state.vipUntil||'')>vaultNow());
+  const vipAvailable=eligible && vip?.product?.enabled && !vaultError;
+  const vipActive=!!(vip?.vip_active || Date.parse(state.vipUntil||'')>vaultNow());
+  const vipPending=vipAvailable && vaultPending();
+  const showVip=vipAvailable && !vipActive && !vipPending;
   const catalog=eligible && hubCatalogOwner===rewardsOfferOwner && !hubCatalogError && hubCatalog?.enabled ? hubCatalog : null;
   const packs=(catalog?.products||[]).filter(p=>validStarsProduct(p)&&!p.starter);
   const minStars=packs.reduce((lowest,p)=>Math.min(lowest,p.stars),Infinity);
   const offers=[
     ['rewardCoinPacks','sp_visit_partner',Number.isFinite(minStars)?`See coin packs · From ${formatNumber(minStars)} Stars`:''],
-    ['rewardRefillVip','sp_emergency_energy',showVip?`VIP · 2× capacity · ${vip.product.stars} Stars / ${vip.product.days} days`:''],
-    ['rewardBoostVip','sp_double_points',showVip?`VIP · 2× taps · ${vip.product.stars} Stars / ${vip.product.days} days`:''],
+    ['rewardBoostVip','sp_double_points',showVip?`VIP · 2× tap coins and energy · ${vip.product.stars} Stars / ${vip.product.days} days`:''],
   ];
   for(const [id,placement,label] of offers) {
     const link=document.getElementById(id);
@@ -6909,6 +6933,12 @@ function renderRewardUpgrade(code) {
     link.hidden=!visible;
     if(visible && link.textContent!==label) link.textContent=label;
   }
+  const refillVip=document.getElementById('rewardRefillVip');
+  const label=!vipAvailable?'':vipPending?'VIP payment pending · View status':
+    vipActive?'VIP active · 2× tap coins + 2× energy · View benefits':
+    `VIP · 2× tap coins + 2× energy · ${formatNumber(vip.product.stars)} Stars / ${vip.product.days} days`;
+  refillVip.hidden=!label;
+  if(label && refillVip.textContent!==label)refillVip.textContent=label;
 }
 function arrangeRewardCards(code) {
   const list=document.getElementById('rewardChoices');
@@ -6976,6 +7006,12 @@ function renderBoostCards() {
   for (const [code,placement] of Object.entries(BOOST_PLACEMENTS)) {
     const mission=hubMissions.find(m=>m.code===code),view=getBoostView(code,mission);
     const button=document.getElementById(placement.button),status=document.getElementById(placement.status);
+    if(code==='sp_emergency_energy'){
+      const meter=document.getElementById('energyBoostMeter');
+      const energy=Number(state.energy),capacity=Number(maxEnergy);
+      const safe=Number.isFinite(energy)&&Number.isFinite(capacity)&&capacity>0;
+      meter.textContent=safe?`Energy ${formatNumber(Math.max(0,Math.min(capacity,energy)))} / ${formatNumber(capacity)}`:'Energy status unavailable';
+    }
     const receipt=mission?.status==='claimable' && !!mission.attempt_id;
     const preparing=refillPreparation.owner===homeUserId()&&refillPreparation.status==='loading';
     const refill=code==='sp_emergency_energy' && accountIsReady() &&
@@ -7061,6 +7097,30 @@ function refreshBoostMissions(force=true) {
   document.getElementById('boostRefresh').disabled=true;
   return request;
 }
+let rewardsWeeklyRequest=null;
+async function refreshRewardsWeeklyStatus(){
+  const target=document.getElementById('rewardsWeeklyStatus');
+  const fallback='Free ranked runs · 45s each';
+  const owner=homeUserId();
+  if(!owner || !accountIsReady() || navigator.onLine===false){target.textContent=fallback;return;}
+  if(rewardsWeeklyRequest)return rewardsWeeklyRequest;
+  target.textContent='Checking ranked attempts…';
+  const request=(async()=>{
+    try{
+      const response=await apiPost('/api/weekly/standings',{scope:'global'},
+        {tapOwner:owner,timeoutMs:9000,silent:true});
+      if(owner!==homeUserId() || !boostSheet.classList.contains('show'))return;
+      const left=response?.runs_left,limit=response?.policy?.limit??3;
+      if(response?.ok && String(response.telegram_id)===String(owner) &&
+        Number.isSafeInteger(left) && Number.isSafeInteger(limit) &&
+        limit>=1 && limit<=10 && left>=0 && left<=limit &&
+        ['day','week'].includes(response?.policy?.period)){
+        target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
+      }else target.textContent=fallback;
+    }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))target.textContent=fallback;}
+  })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
+  rewardsWeeklyRequest=request;return request;
+}
 async function openBoostSheet(focusCode) {
   if(!accountIsReady()) return;
   requestedReward=(focusCode==='daily'||Object.hasOwn(BOOST_PLACEMENTS,focusCode))?focusCode:null;
@@ -7072,7 +7132,7 @@ async function openBoostSheet(focusCode) {
   void window.JigStreakReminder?.refresh();
   document.getElementById('boostSheetTitle').focus({preventScroll:true});
   renderBoostCards(); updateBoostHub();
-  const requests=[refreshBoostMissions(false),syncStateIfIdle(),refreshProgression()];
+  const requests=[refreshBoostMissions(false),syncStateIfIdle(),refreshProgression(),refreshRewardsWeeklyStatus()];
   if(onboardingState.owner===rewardsOfferOwner && onboardingState.completed) {
     requests.push(refreshVipStatus(),loadCoinPacks({preview:true}));
   }
@@ -7182,7 +7242,7 @@ document.getElementById('rewardsCollectionAction').addEventListener('click',()=>
   else previewMint('rank-'+(goal.tier+1));
 });
 for(const id of ['rewardRefillVip','rewardBoostVip'])
-  document.getElementById(id).addEventListener('click',()=>openVault());
+  document.getElementById(id).addEventListener('click',()=>openVipOffer('shop'));
 document.getElementById('pilotDailyChallenge').addEventListener('click', () => {
   const {action} = rewardsChallengeView(progressionCurrent()?.daily);
   if (action === 'claim') return claimProgression('daily');
