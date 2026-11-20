@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v19-home-rewards-artwork-1">
+<meta name="jigcoin-build" content="v20-home-final-five-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2837,6 +2837,7 @@ body{justify-content:flex-start}
 <link rel="stylesheet" href="./assets/home-option5.css?v=20261120-3">
 <link rel="stylesheet" href="./assets/option-a-world.css?v=20261120-1">
 <link rel="stylesheet" href="./assets/home-rewards-fidelity.css?v=20261120-2">
+<link rel="stylesheet" href="./assets/home-final-five.css?v=20261120-1">
 </head>
 <body>
   <div class="app-shell">
@@ -2863,7 +2864,7 @@ body{justify-content:flex-start}
         </button>
         <div class="rank-bar"><div class="rank-fill" id="rankProgressFill"></div><span class="rank-label"><span id="rankPointsText">…</span></span><span class="rank-points"><span id="homeRankGoalLabel">Next level</span> <span id="nextRankPointsText">—</span></span></div>
       </div>
-      <button class="home-race" id="homeRace" type="button" aria-label="View your nearest rivals">Your next rival appears after sync.</button>
+      <button class="home-race" id="homeRace" type="button" aria-label="View verified rival scores and competition rules" aria-controls="homeRivalsSheet">Your next rival appears after sync.</button>
     </header>
 
     <div class="account-status sr-only" id="accountStatus" role="status" aria-live="polite">
@@ -2876,7 +2877,7 @@ body{justify-content:flex-start}
           <div class="mint-press-scene" aria-hidden="true"></div>
           <div class="tap-card-header mint-chamber-caption">
             <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><strong id="mintFinishName">JigCoin</strong></button>
-            <button type="button" id="homeTapRate" class="tap-hint" aria-haspopup="dialog" aria-label="View coins per tap and streak perks"><span id="perTap">+1</span> per tap <span aria-hidden="true">›</span></button>
+            <button type="button" id="homeTapRate" class="tap-hint" aria-haspopup="dialog" aria-label="View your tap-rate breakdown, streak benefits and VIP options"><span id="perTap">+1</span> per tap <span aria-hidden="true">›</span></button>
           </div>
           <div class="tap-title" id="homeTapPrompt" aria-live="polite" hidden>Tap to earn coins</div>
         <div class="tap-btn-wrap" id="homeCoinWrap" data-coin-tier="1" data-loading="true">
@@ -2892,7 +2893,7 @@ body{justify-content:flex-start}
 
         </div>
         <button id="homeNextPreview" class="home-next-preview" data-loading="true" type="button"><span id="homeNextCoin" aria-hidden="true"></span><span><div class="home-goal" id="homeGoal">Your next rank is loading…</div>
-        <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div></span></button>
+        <div class="home-goal-caption" id="homeGoalCaption">Build your score, one tap at a time.</div><span id="homeNextProgress" class="home-next-progress" role="progressbar" aria-label="Confirmed progress to the next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><i id="homeNextProgressFill"></i></span></span></button>
         <div class="tap-metrics">
           <div class="tap-metric" id="homeEnergyMetric">
             <div class="home-energy-gauge">
@@ -2904,8 +2905,8 @@ body{justify-content:flex-start}
             </div>
             <button id="homeRefillOpen" type="button" aria-controls="boostSheet" hidden><strong>Refill</strong><span id="homeRefillState">Check ads</span></button>
           </div>
-          <div class="tap-metric" id="homeTodayMetric">
-            <div class="metric-label">Today</div>
+          <div class="tap-metric" id="homeTodayMetric" aria-label="Tap coins earned today (UTC)">
+            <div class="metric-label">Today coins</div>
             <div class="metric-value" id="todayText">0</div>
           </div>
           <div class="tap-metric tap-rank-redundant" hidden>
@@ -2970,7 +2971,19 @@ body{justify-content:flex-start}
       </section>
       <p class="quest-info" id="dailyRestoreReceipt" role="status" hidden></p><button class="shop-retry" id="dailyRestoreCheck" hidden>Check restore payment</button>
       <button id="calendarTelegramReminder" class="reminder-link" type="button" aria-haspopup="dialog" hidden>Remind me tomorrow</button>
-      <section class="daily-benefits-summary" id="dailyRateBenefits" tabindex="-1" aria-label="Your streak benefits">
+      <section class="daily-benefits-summary" id="dailyRateBenefits" tabindex="-1" aria-label="Your tap rate and streak benefits">
+        <div class="home-rate-breakdown" id="homeRateBreakdown" hidden>
+          <h3>Your tap earnings</h3>
+          <div class="home-rate-total"><span>Coins per tap</span><strong id="homeRateTotal">—</strong></div>
+          <div class="home-rate-components">
+            <span>Base <b id="homeRateBase">1×</b></span>
+            <span>Streak <b id="homeRateStreak">1×</b></span>
+            <span>VIP <b id="homeRateVip">1×</b></span>
+            <span>Timed boost <b id="homeRateBoost">1×</b></span>
+          </div>
+          <p>Multipliers combine. Fractional tap coins accumulate until they form whole coins. VIP provides in-game benefits; it does not guarantee an airdrop allocation.</p>
+          <button id="homeRateVipShop" class="home-rate-vip-link" type="button">Explore VIP benefits in Shop ›</button>
+        </div>
         <p class="daily-perks" id="dailyRewardPerks"></p><p class="daily-next-unlock" id="dailyNextUnlock"></p>
         <p class="daily-continuity" id="dailyRewardSchedule"></p>
         <p class="daily-next-unlock" id="dailyDoubleReward"></p>
@@ -3943,8 +3956,16 @@ function animateHomeTap(points) {
   } catch (_) { /* Feedback is optional; tap accounting continues. */ }
 }
 function renderHomeProgress(view) {
-  // Distance follows the displayed coins. The saved tier controls artwork and unlocks.
+  // The headline can include unsaved taps; the small bar uses CONFIRMED coins.
   const goal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null,view.bal);
+  const confirmedGoal=homeGoalModel(accountIsReady()?homeConfirmedBalance:null);
+  const bar=document.getElementById('homeNextProgress');
+  const progress=confirmedGoal?.progress??0;
+  bar.hidden=!confirmedGoal;
+  bar.dataset.complete=String(Boolean(confirmedGoal?.complete));
+  bar.setAttribute('aria-valuenow',String(Math.round(progress*100)));
+  bar.setAttribute('aria-valuetext',confirmedGoal?.complete?'All eight rank skins unlocked':confirmedGoal?`${Math.round(progress*100)}% confirmed progress to ${confirmedGoal.nextName}`:'Waiting for saved rank');
+  document.getElementById('homeNextProgressFill').style.transform=`scaleX(${progress})`;
   document.getElementById('homeNextPreview').dataset.rankComplete=String(Boolean(goal?.complete));
   document.getElementById('homeGoal').textContent=goal?(goal.complete?'JigCoin Legend unlocked':goal.remaining===0?`${goal.nextName} target reached · Saving…`:`${formatNumber(goal.remaining)} coin${goal.remaining===1?'':'s'} to ${goal.nextName}`):'Your next rank appears after sync.';
   document.getElementById('homeGoalCaption').textContent=goal?(goal.complete?'Top rank reached · Keep climbing the leaderboard':(MINT_FINISHES['rank-'+(goal.tier+1)]?.name || 'Unlock the '+homeCoinUnlock(goal.tier+1))+' · Preview ›'):'Build your score, one tap at a time.';
@@ -4033,8 +4054,16 @@ function renderHomeRace(displayedBalance=recoveryTapView(state).bal){
   const race=homeRaceModel(homeRaceSnapshot,homeUserId(),displayedBalance);
   const fresh=Date.now()-homeRaceSyncedAt<90000;
   el.dataset.rivalConfirmed=String(Boolean(accountIsReady()&&race&&fresh&&race.rank===state.globalRank));
-  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){el.textContent=race.text;el.title='Your tap total against the latest saved rival score. Standings update after confirmation.';}
-  else{el.textContent=accountIsReady()?'View your nearest rivals':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';el.title='';}
+  if(accountIsReady()&&race&&fresh&&race.rank===state.globalRank){
+    el.textContent=race.text;
+    el.title='Open the nearby global leaderboard. Rivals use confirmed saved balances, including purchases; your displayed distance may include taps still saving.';
+    el.setAttribute('aria-label',race.text+'. View saved rival balances, your position and competition rules.');
+  }
+  else{
+    el.textContent=accountIsReady()?'View your nearest rivals':['loading','connecting'].includes(window.__accountPhase)?'Loading your progress…':'Race updates when your account reconnects';
+    el.title='Open rival standings';
+    el.setAttribute('aria-label','View nearby global leaderboard standings and competition rules');
+  }
 }
 async function refreshHomeRace(force=false){
   const stale=Date.now()-homeRaceSyncedAt>=90000;
@@ -4416,11 +4445,32 @@ function dailyCosmeticMarkup(keys,name){
   if(!style)return escapeHtml(name);
   return `<span class="player-cosmetic"><span aria-hidden="true" class="cosmetic-avatar ${style.className}">${style.symbol}</span><span>${escapeHtml(name)}<small>${style.label}${key!=='momentum_aura'&&keys.includes('momentum_aura')?' · Momentum':''}</small></span></span>`;
 }
+function renderHomeRateBreakdown(){
+  const el=id=>document.getElementById(id);
+  const panel=el('homeRateBreakdown');
+  if(!panel)return;
+  panel.hidden=dailyRewardsOrigin!=='rate';
+  if(panel.hidden)return;
+  const now=vaultNow(),current=state;
+  const streak=current.streakMeta?.active?Math.max(1,Number(current.streakMeta.tap_multiplier)||1):1;
+  const vip=Date.parse(current.vipUntil||current.vip_until||'')>now?2:1;
+  const boost=Date.parse(current.doubleBoostUntil||'')>now?2:1;
+  const format=n=>Number(n).toLocaleString('en-GB',{maximumFractionDigits:4});
+  el('homeRateTotal').textContent=format(effectiveTapRate(current));
+  el('homeRateBase').textContent='1×';
+  el('homeRateStreak').textContent=format(streak)+'×';
+  el('homeRateVip').textContent=format(vip)+'×';
+  el('homeRateBoost').textContent=format(boost)+'×';
+  el('homeRateVipShop').textContent=vip>1?'View active VIP benefits in Shop ›':'Explore VIP benefits in Shop ›';
+}
 function renderDailyRewards(){
   const c=dailyCheckinModel(),id=homeUserId(),now=progressionNow();
   const fresh=!!c&&!progressionError&&Date.parse(c.resets_at)>now&&accountIsReady();
   const el=id=>document.getElementById(id),num=formatNumber;
   const ready=fresh&&!c.claimed&&!c.broken;
+  el('dailyRewardsTitle').textContent=dailyRewardsOrigin==='rate'?'Tap earnings':'Daily streak';
+  el('homeDailySheet').querySelector('.sheet-subtitle').textContent=dailyRewardsOrigin==='rate'?'Current rate, streak perks and VIP':'Daily coins. Lasting unlocks.';
+  renderHomeRateBreakdown();
   el('homeDailyTitle').textContent=!fresh?'Daily streak':c.broken?'Streak broken':c.claimed?`✓ Day ${c.days} collected`:`🔥 Day ${c.next_day}`;
   el('hubDailyProgress').textContent=!fresh?'Refresh rewards':c.broken?'View recovery options':c.claimed?`Tomorrow ${num(c.next_reward)} coins`:`Collect ${num(c.today_reward)} coins`;
   el('homeDailyOpen').disabled=!accountIsReady();
@@ -4478,6 +4528,7 @@ document.getElementById('dailyNoticeOpen').addEventListener('click',()=>{hideDai
 document.getElementById('dailyNoticeDismiss').addEventListener('click',hideDailyNotice);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)hideDailyNotice();});
 document.getElementById('homeTapRate').addEventListener('click',()=>openDailyRewards('rate'));
+document.getElementById('homeRateVipShop').addEventListener('click',()=>openVipOffer('shop'));
 document.getElementById('dailyRewardsClose').addEventListener('click',()=>{
   document.getElementById('mainScroll').inert=false;
   if(dailyRewardsOrigin==='rewards') return openBoostSheet();
@@ -4589,7 +4640,7 @@ function render() {
   if (perTapText) {
     perTapText.textContent = confirmed ? `+${effectivePerTap}` : "—";
     document.getElementById('homeTapRate').setAttribute('aria-label', confirmed ?
-      `${effectivePerTap} coins per tap. View streak perks` : 'View coins per tap and streak perks');
+      `${effectivePerTap} coins per tap. View your rate breakdown and VIP options` : 'View tap-rate breakdown and VIP options');
   }
 
   renderHomeEnergy(view.energy, confirmed);
