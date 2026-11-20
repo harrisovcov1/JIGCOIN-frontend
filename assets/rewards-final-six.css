@@ -1,0 +1,191 @@
+/* JIGCOIN Rewards final six • rank-aware, compact, verified state styling.
+   Home remains locked. Backend, adverts and Stars payment rules are unchanged. */
+html body #boostSheet #rewardsDailyCard #rewardsDailyAction:not(:disabled),
+html body #boostSheet #rewardChoices #energyBoostAction:not(:disabled),
+html body #boostSheet .pilot-free-activities #pilotChallengeAction,
+html body #boostSheet #rewardsReturn:not([hidden]):not(:disabled) {
+  transition:background-color .14s ease,color .14s ease,box-shadow .14s ease;
+}
+/* 1. Collected streak: Calendar is a legible dark secondary button, not a
+   competing gold call-to-action. Real unclaimed daily rewards remain gold. */
+html body #boostSheet #rewardsDailyCard[data-claimed="true"] #rewardsDailyAction:not(:disabled) {
+  color:var(--world-highlight,var(--mint-highlight))!important;
+  border:1px solid var(--world-frame,var(--mint-accent))!important;
+  background:var(--mint-grain),linear-gradient(150deg,var(--mint-metal),var(--mint-ink))!important;
+  text-shadow:0 1px 1px #000b!important;
+  box-shadow:inset 0 1px var(--mint-seam),0 1px 4px #0008!important;
+}
+/* The reminder is positioned below the seven-day row away from the lower
+   edge rivet, with a usable touch area but no extra permanent Home controls. */
+html body #boostSheet #rewardsDailyCard #rewardsTelegramReminder:not([hidden]) {
+  grid-area:reminder!important;
+  justify-self:center!important;
+  align-self:center;
+  margin:0 10px 0!important;
+  padding:5px 9px!important;
+  min-height:34px;
+  max-width:calc(100% - 24px);
+  text-align:center;
+  font-size:clamp(10px,2.55vw,12px);
+  color:var(--world-highlight,var(--mint-highlight));
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+/* 2. Energy is a true live readout; no artificial "ad ready" badge. Keep
+   the existing refill/claimed/cooldown buttons driven by verified state. */
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] .boost-card-top h3 {
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:1px 7px;
+  min-width:0;
+  font-size:clamp(18px,4.65vw,23px);
+}
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #energyBoostMeter {
+  display:inline-block;
+  white-space:nowrap;
+  margin:0;
+  color:var(--world-highlight,var(--mint-highlight));
+  font:620 clamp(10px,2.55vw,12px)/1.3 system-ui,sans-serif;
+  text-shadow:0 1px 2px #000b;
+}
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #energyBoostAction {
+  min-height:44px;
+  font-weight:750;
+  word-break:normal;
+}
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #energyBoostAction:disabled {
+  color:var(--mint-muted)!important;
+  background:linear-gradient(155deg,var(--mint-panel),var(--mint-ink))!important;
+  border:1px solid var(--mint-edge)!important;
+  box-shadow:inset 0 1px var(--mint-seam)!important;
+}
+/* 3. Real VIP offer from the verified catalog; an elegant separate row,
+   including both 2× advantages rather than another large sales card. */
+html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #rewardRefillVip:not([hidden]) {
+  grid-area:vip!important;
+  align-items:center!important;
+  margin:2px 3px 0!important;
+  padding:7px 8px 5px!important;
+  min-height:40px!important;
+  border-top:1px solid var(--world-frame,var(--mint-edge))!important;
+  border-inline:0!important;
+  border-bottom:0!important;
+  color:var(--mint-text)!important;
+  background:linear-gradient(180deg,#ffffff08,#00000017)!important;
+  font-size:clamp(10px,2.6vw,12px)!important;
+  font-weight:650!important;
+  line-height:1.25!important;
+  white-space:normal!important;
+}
+html body #boostSheet #rewardRefillVip::after {
+  flex:none;
+  color:var(--world-gold,var(--mint-accent));
+}
+/* 4. The challenge is server-backed, and the action appearance explicitly
+   follows ready/playing/claimed/offline status without simulating coins. */
+html body #boostSheet .pilot-free-activities #pilotDailyChallenge {
+  text-align:left;
+}
+html body #boostSheet #pilotDailyChallenge #pilotChallengeMeter:not([hidden]) {
+  display:block;width:100%;
+  height:clamp(5px,.8dvh,9px);
+  margin:1px 0 3px;
+  accent-color:#48d5ba;
+}
+html body #boostSheet #pilotDailyChallenge #pilotChallengeAction {
+  display:flex;justify-content:center;align-items:center;
+  min-height:35px;width:100%;max-width:100%;
+  padding:6px 5px;
+  border:1px solid var(--world-frame,var(--mint-edge));
+  border-radius:6px;
+  background:linear-gradient(155deg,var(--mint-panel),var(--mint-ink))!important;
+  color:var(--world-highlight,var(--mint-highlight))!important;
+  box-shadow:inset 0 1px var(--mint-seam)!important;
+  font-weight:650;
+  text-align:center;
+  white-space:normal;
+  line-height:1.2;
+}
+html body #boostSheet #pilotDailyChallenge[data-state="collected"] #pilotChallengeAction {
+  background:linear-gradient(155deg,#163d32,#0d2624)!important;
+  color:#a6e8cb!important;
+  border-color:#4c9b82!important;
+  font-weight:650;
+  box-shadow:inset 0 1px #ffffff16!important;
+}
+html body #boostSheet #pilotDailyChallenge[data-state="playing"] #pilotChallengeAction {
+  background:linear-gradient(155deg,var(--mint-metal),var(--mint-ink))!important;
+  border-color:var(--mint-edge)!important;
+  color:var(--mint-text)!important;
+}
+html body #boostSheet #pilotDailyChallenge[data-state="offline"] #pilotChallengeAction,
+html body #boostSheet #pilotDailyChallenge[data-state="loading"] #pilotChallengeAction,
+html body #boostSheet #pilotDailyChallenge[data-state="pending"] #pilotChallengeAction {
+  color:var(--mint-muted)!important;
+  opacity:.75;
+}
+/* 5. Verified number of ranked runs appears in the same space that previously
+   had generic static race wording. Time and terms are not invented. */
+html body #boostSheet #rewardsWeeklyStatus {
+  display:block;
+  min-width:0;
+  font-size:clamp(10px,2.65vw,12px);
+  line-height:1.22;
+  color:var(--mint-muted);
+}
+/* 6. Exactly one BRIGHT GOLD dominant action, using the real readiness states.
+   Secondary actions are still accessible and well contrasted. */
+html body #boostSheet #rewardsReturn:not([hidden]):not(:disabled),
+html body #boostSheet #rewardChoices #energyBoostAction:not(:disabled),
+html body #boostSheet #rewardsDailyCard:not([data-claimed="true"]) #rewardsDailyAction:not(:disabled) {
+  background:var(--mint-grain),linear-gradient(155deg,var(--mint-metal),var(--mint-ink))!important;
+  color:var(--world-highlight,var(--mint-highlight))!important;
+  border:1px solid var(--world-frame,var(--mint-edge))!important;
+  box-shadow:inset 0 1px var(--mint-seam),0 1px 4px #0009!important;
+  text-shadow:0 1px 2px #000c!important;
+}
+html body #boostSheet[data-priority="daily"] #rewardsDailyCard[data-ready="true"] #rewardsDailyAction:not(:disabled),
+html body #boostSheet[data-priority="refill"] #rewardChoices #energyBoostAction:not(:disabled),
+html body #boostSheet[data-priority="return"] #rewardsReturn:not([hidden]):not(:disabled) {
+  background:var(--mint-button)!important;
+  border:1px solid var(--mint-highlight)!important;
+  color:var(--mint-ink)!important;
+  font-weight:760!important;
+  box-shadow:inset 0 1px #fff9,inset 0 -2px #0003,0 0 7px var(--world-glow,var(--mint-accent))!important;
+  text-shadow:0 1px #fff4!important;
+}
+html body #boostSheet[data-priority="challenge"] #pilotDailyChallenge[data-state="ready"] #pilotChallengeAction {
+  background:var(--mint-button)!important;
+  border-color:var(--mint-highlight)!important;
+  color:var(--mint-ink)!important;
+  box-shadow:inset 0 1px #fff9,0 0 7px var(--world-glow,var(--mint-accent))!important;
+  font-weight:770!important;
+}
+html body #boostSheet #pilotDailyChallenge[data-state="ready"] #pilotChallengeAction {
+  color:var(--world-highlight,var(--mint-highlight));
+}
+/* Keep physical Home style locked, and the previously approved scroll fallback. */
+@media(max-height:810px) {
+  html body #boostSheet #rewardsDailyCard #rewardsTelegramReminder:not([hidden]) {
+    min-height:29px;padding-block:3px!important;
+  }
+  html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #rewardRefillVip:not([hidden]) {
+    min-height:32px!important;padding:4px 6px 2px!important;
+  }
+  html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] .boost-card-top h3 {
+    font-size:clamp(17px,4.55vw,22px);
+  }
+}
+@media(max-width:350px) {
+  html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] #energyBoostMeter {
+    font-size:10px;
+  }
+  html body #boostSheet #rewardChoices>.boost-card[data-boost-code="sp_emergency_energy"] .boost-card-top h3 {
+    gap:1px 4px;font-size:17px;
+  }
+  html body #boostSheet #rewardRefillVip {font-size:10px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #boostSheet :is(#rewardsDailyAction,#energyBoostAction,#rewardsReturn,#pilotChallengeAction) {
+    transition:none!important;
+  }
+}
