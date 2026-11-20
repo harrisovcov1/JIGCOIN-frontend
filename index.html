@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v21-rewards-final-six-2">
+<meta name="jigcoin-build" content="v22-rewards-weekly-action-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3210,7 +3210,7 @@ body{justify-content:flex-start}
       <details id="boostHelp" class="reward-ad-help" hidden><summary>Advert help</summary><p id="boostHelpText"></p></details>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
-        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small id="rewardsWeeklyStatus">Free ranked runs · 45s each</small><span>Race for gold ›</span></button>
+        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small id="rewardsWeeklyStatus">Free ranked runs · 45s each</small><span id="rewardsWeeklyAction">Check Weekly Race ›</span></button>
       </div>
       <div class="reward-footer">
         <button type="button" class="quest-action" id="rewardsReturn" hidden>Back to tapping</button>
@@ -7103,11 +7103,17 @@ function refreshBoostMissions(force=true) {
 let rewardsWeeklyRequest=null,rewardsWeeklyOwner=null;
 async function refreshRewardsWeeklyStatus(){
   const target=document.getElementById('rewardsWeeklyStatus');
+  const action=document.getElementById('rewardsWeeklyAction');
   const fallback='Free ranked runs · 45s each';
+  const reset=()=>{
+    target.textContent=fallback;
+    action.textContent='Check Weekly Race ›';
+  };
   const owner=homeUserId();
-  if(!owner || !accountIsReady() || navigator.onLine===false){target.textContent=fallback;return;}
+  if(!owner || !accountIsReady() || navigator.onLine===false){reset();return;}
   if(rewardsWeeklyRequest&&rewardsWeeklyOwner===owner)return rewardsWeeklyRequest;
   rewardsWeeklyOwner=owner;
+  action.textContent='Check Weekly Race ›';
   target.textContent='Checking ranked attempts…';
   const request=(async()=>{
     try{
@@ -7120,8 +7126,9 @@ async function refreshRewardsWeeklyStatus(){
         limit>=1 && limit<=10 && left>=0 && left<=limit &&
         ['day','week'].includes(response?.policy?.period)){
         target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
-      }else target.textContent=fallback;
-    }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))target.textContent=fallback;}
+        action.textContent=left===0?'View standings & practice ›':'Race for gold ›';
+      }else reset();
+    }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))reset();}
   })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
   rewardsWeeklyRequest=request;return request;
 }
