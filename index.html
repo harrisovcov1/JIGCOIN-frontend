@@ -8045,6 +8045,7 @@ if (copyShareTextBtn) {
     try {
       const text=buildShareText();if(!text)return;
       await navigator.clipboard.writeText(text);
+      inviteRecord('copy_link');
       showToast("Share text copied");
     } catch (e) {
       showToast("Could not copy share text");
