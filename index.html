@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v30-invite-responsive-fill-1">
+<meta name="jigcoin-build" content="v31-vault-treasury-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3478,17 +3478,30 @@ html body #friendsSheet .invite-active-reminder {flex:0 0 auto;min-height:44px}
       <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
         <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
         <div class="vault-total"><span class="vault-rank-art" id="vaultRankArt" aria-hidden="true"></span><strong id="withdrawBalanceText">…</strong></div>
+        <div class="vault-balance-finish" id="vaultBalanceFinish">Equipped finish · Checking…</div>
         <div class="vault-goal"><span id="vaultGoal">Your next rank appears after sync.</span><span id="vaultProgressLabel"></span></div>
         <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
       </section>
-      <button type="button" class="vip-summary" id="vaultVipOpen" aria-label="View JigCoin VIP Pass">
-        <img src="./assets/vip-crown.svg" width="64" height="56" alt=""><span><strong>JigCoin VIP Pass</strong><small id="vaultVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="vaultVipState">Checking your pass…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
-      </button>
-      <section class="vault-collection" aria-labelledby="vaultCollectionTitle"><h2 id="vaultCollectionTitle">Your collection</h2>
-        <button type="button" class="vault-finish-link" id="vaultCollectionOpen"><span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span><span><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span></button>
+      <section class="vault-collection" aria-labelledby="vaultCollectionTitle">
+        <div class="vault-collection-heading"><h2 id="vaultCollectionTitle">Your collection</h2><span>Owned finishes &amp; medals</span></div>
+        <button type="button" class="vault-finish-link" id="vaultCollectionOpen">
+          <span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span>
+          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Equipped coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
+        </button>
+        <div class="vault-medal-spotlight" id="vaultMedalSpotlight" hidden aria-label="Confirmed recent daily medals"></div>
         <details class="vault-medals" id="vaultMedalCollection"><summary><span>Medal collection</span><span id="vaultMedalCount">View earned medals</span></summary><h3>Daily podiums</h3><div id="vaultDailyMedalList">Open Vault to check your medals.</div><h3>Weekly Race</h3><div id="pilotMedalList">Checking your weekly medals…</div><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
       </section>
-      <div class="vault-account-links"><button type="button" id="vaultHistoryOpen">Purchases &amp; payment help <span aria-hidden="true">›</span></button><button type="button" id="vaultRewardHistoryOpen">Invite reward history <span aria-hidden="true">›</span></button></div>
+      <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
+        <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
+      </button>
+      <details class="vault-account-drawer" id="vaultAccountDrawer">
+        <summary><span><strong>Account activity &amp; support</strong><small>Coin purchases · VIP receipts · referral credits</small></span><span aria-hidden="true">›</span></summary>
+        <div class="vault-account-links">
+          <button type="button" id="vaultCoinOrdersOpen">Coin-pack orders &amp; payment help <span aria-hidden="true">›</span></button>
+          <button type="button" id="vaultHistoryOpen">VIP purchases &amp; payment support <span aria-hidden="true">›</span></button>
+          <button type="button" id="vaultRewardHistoryOpen">Referral reward history <span aria-hidden="true">›</span></button>
+        </div>
+      </details>
       <details class="vault-airdrop" id="vaultWithdrawalDetails"><summary><span>Airdrop status<small>Planned · Rules awaiting publication</small></span><span aria-hidden="true">+</span></summary><p>A JigCoin token airdrop is planned. Eligibility, allocations and conversion terms are awaiting publication. In-game coins currently have no cash-out value. Cash-out is not available.</p><p>Coin ranks, VIP and medals describe your game progress. They do not guarantee an airdrop allocation.</p></details>
     </div>
   </div>
