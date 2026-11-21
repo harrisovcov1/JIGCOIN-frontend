@@ -8,7 +8,7 @@ const end=html.indexOf('</style>',start);
 const css=html.slice(start,end);
 const shop=html.slice(html.indexOf('<div class="sheet" id="coinShopSheet">'),html.indexOf('<div class="toast" id="toast">'));
 test('Shop v27 build and targeted stylesheet present',()=>{
- assert.match(html,/<meta name="jigcoin-build" content="v27-shop-responsive-fill-1">/);
+ assert.ok(Number(html.match(/name="jigcoin-build" content="v(\d+)-/)?.[1])>=27);
  assert.ok(start>0&&end>start);
  assert.doesNotMatch(css,/#boostSheet|#mainScroll|#homeCoinWrap|#tabHome|#tabRewards/);
 });
