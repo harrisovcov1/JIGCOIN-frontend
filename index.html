@@ -5123,7 +5123,7 @@ function inviteReset(owner){
   const welcome=document.getElementById('inviteWelcomeDialog');if(welcome?.open)welcome.close();
   incomingWelcomeOwner=null;incomingWelcomeKey=null;
   inviteOwner=owner;inviteData=null;inviteCheckedAt=0;invitePending=null;inviteVersion++;
-  inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;
+  inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;inviteRenderedView=null;
 }
 function validInviteLink(link,owner){
   try{const url=new URL(link);return url.origin==='https://t.me'&&/^\/[A-Za-z0-9_]{5,32}$/.test(url.pathname)&&
@@ -5213,7 +5213,7 @@ function dismissInviteWelcome(){
   incomingWelcomeOwner=null;incomingWelcomeKey=null;
 }
 function inviteRule(data){
-  if(data.qualification.mode==='cumulative_taps')return `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} verified taps in total. No purchase needed.`;
+  if(data.qualification.mode==='cumulative_taps')return `Your reward is credited after a new friend joins and makes ${formatNumber(data.qualification.min_taps)} verified taps in total. No purchase needed.`;
   return data.qualification.mode==='activity'
     ? `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} taps in one UTC day, or claims one confirmed ad reward.`
     : 'When a new friend joins through your link.';
@@ -5221,7 +5221,7 @@ function inviteRule(data){
 function inviteFriendProgressText(row){
   if(row.status==='rewarded')return row.reward_coins?`+${formatNumber(row.reward_coins)} coins credited`:'Reward credited';
   if(row.status==='qualified')return 'Qualified · reward confirmation pending';
-  if(row.status==='on_hold')return 'Eligibility needs checking. Earlier credited rewards stay unchanged.';
+  if(row.status==='on_hold')return row.qualification_mode==='legacy_unknown'?'Historical referral · reward evidence needs review. No new credit issued.':'Eligibility needs checking. Earlier credited rewards stay unchanged.';
   if(row.qualification_mode==='cumulative_taps'&&row.min_taps>0)return `${formatNumber(Math.min(row.verified_taps||0,row.min_taps))} / ${formatNumber(row.min_taps)} verified taps in total`;
   if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Earlier invite rules · ${formatNumber(row.min_taps)} taps in one UTC day or a confirmed ad reward`:'Earlier invite rules · daily tap activity or a confirmed ad reward';
   if(row.qualification_mode==='join')return 'Earlier invite rules · joining confirmation pending';
@@ -5230,9 +5230,18 @@ function inviteFriendProgressText(row){
 function renderInviteFriends(data){
   const rows=data?.friend_progress;
   const pending=document.getElementById('invitePendingSummary');
-  pending.hidden=!Array.isArray(rows);
-  pending.textContent=Array.isArray(rows)?`${formatNumber(data.friends_joined)} joined · ${formatNumber(data.friends_pending)} working towards a reward${data.friends_on_hold?' · '+formatNumber(data.friends_on_hold)+' to check':''}`:'';
-  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Each friend keeps the rules in effect when they joined.`:'No attributed friends yet. Send your link to start your group.';
+  pending.hidden=!Array.isArray(rows)||data.friends_joined===0;
+  if(Array.isArray(rows)){
+    const parts=[`${formatNumber(data.friends_joined)} joined`];
+    if(data.friends_pending)parts.push(`${formatNumber(data.friends_pending)} progressing`);
+    const awaiting=Math.max(0,data.friends_qualified-data.friends_rewarded);
+    if(awaiting)parts.push(`${formatNumber(awaiting)} qualified`);
+    if(data.friends_on_hold)parts.push(`${formatNumber(data.friends_on_hold)} to review`);
+    if(data.friends_rewarded)parts.push(`${formatNumber(data.friends_rewarded)} rewarded`);
+    parts.push('View friends ›');
+    pending.textContent=parts.join(' · ');
+  } else pending.textContent='';
+  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Historical records may require review before credit can be verified.`:'No attributed friends yet. Send your link to start your group.';
   const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'To check'};
   document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${labels[row.status]}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
 }
@@ -5244,12 +5253,13 @@ function renderInviteOverview(){
   const nextName=data?.next_tier_name;
   el('inviteNextBadge').textContent='Your next successful invite';
   el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'—';
-  el('inviteWelcome').textContent=data?`All new players start with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
+  el('inviteWelcome').textContent=data?`Your friend starts with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
+  el('inviteJoinedCount').textContent=data?formatNumber(data.friends_joined):'—';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
   inviteLinkText.textContent=data?data.invite_link:'Your invite link appears after checking.';
-  for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn])if(button)button.disabled=!data;
+  for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn,el('inviteShareCardOpen')])if(button)button.disabled=!data;
   el('inviteTierName').textContent=data?(data.friends_rewarded?data.tier_name+' inviter':'No level yet'):'—';
   el('inviteNextTitle').textContent=nextName ? `${formatNumber(data.next_at-data.friends_rewarded)} more to ${nextName} inviter` : data ? 'Top inviter level' : 'Invite progress';
   el('inviteNextText').textContent=data?.next_at?`Invite #${formatNumber(data.next_at)} earns ${formatNumber(data.next_reward_coins)} coins. Each later invite uses your new rate.`:data?'Your next successful invite earns '+formatNumber(data.reward_coins)+' coins.':'';
