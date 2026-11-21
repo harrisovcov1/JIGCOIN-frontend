@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v28-invite-growth-1">
+<meta name="jigcoin-build" content="v29-invite-final-three-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3138,6 +3138,61 @@ html body #inviteDetailsSheet .invite-friend-progress li:has(.friend-heading spa
 }
 @media(prefers-reduced-motion:reduce){html body #friendsSheet .invite-overview{scroll-behavior:auto}}
 </style>
+
+<style>
+/* Invite v29: one friends/rewards destination; completed incoming invitations
+   live in details. Original taps, tiers and ledger are intentionally untouched. */
+html body #friendsSheet .invite-overview{
+  gap:5px;padding:7px 12px 8px;
+}
+html body #friendsSheet .invite-reward-card{
+  gap:4px 8px;padding:10px 12px 8px;
+}
+html body #friendsSheet .friends-summary-col{
+  padding:6px 9px;gap:2px;
+}
+html body #friendsSheet .invite-milestone{
+  min-height:74px;padding:8px 11px;
+}
+html body #friendsSheet .invite-details-link {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;min-height:48px;padding:7px 11px;margin:0;
+  font:inherit;font-size:12px;line-height:1.25;text-align:left;
+  border:1px solid var(--mint-rim);border-radius:10px;
+  background:var(--mint-grain),var(--mint-plate);color:var(--mint-text);
+  cursor:pointer;flex:0 0 auto;
+}
+html body #friendsSheet .invite-detail-action-copy{
+  min-width:0;display:flex;flex-direction:column;gap:2px;
+}
+html body #friendsSheet .invite-detail-action-copy strong{font-size:13px;color:var(--mint-highlight)}
+html body #friendsSheet #invitePendingSummary{font-size:11px;color:var(--mint-muted);line-height:1.2}
+html body #friendsSheet #invitePendingSummary[hidden]{display:none!important}
+html body #friendsSheet .invite-active-reminder{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;min-height:44px;padding:7px 11px;flex:0 0 auto;
+  border:1px solid var(--mint-edge);border-radius:9px;
+  background:var(--mint-grain),var(--mint-plate);
+  color:var(--mint-highlight);font:inherit;font-size:11px;text-align:left;
+}
+html body #friendsSheet .invite-active-reminder[hidden]{display:none!important}
+html body #inviteDetailsSheet #incomingInviteSection[hidden]{display:none!important}
+html body #inviteDetailsSheet .invite-incoming-detail{
+  flex:0 0 auto;padding:10px 12px;
+}
+html body #inviteDetailsSheet .invite-incoming-detail .incoming-invite-card{
+  display:flex;align-items:center;justify-content:space-between;width:100%;
+  min-height:48px;margin:5px 0 0;padding:9px 10px;
+  background:var(--mint-grain),var(--mint-feature);
+  border:1px solid var(--mint-edge);border-radius:9px;color:var(--mint-text);
+  text-align:left;font:inherit;
+}
+html body #inviteDetailsSheet .invite-incoming-detail .incoming-invite-card[hidden]{display:none!important}
+html body #inviteDetailsSheet .invite-incoming-detail .incoming-invite-card strong{font-size:12px;display:block}
+html body #inviteDetailsSheet .invite-incoming-detail .incoming-invite-card small{font-size:11px;display:block;color:var(--mint-muted)}
+@media(max-width:350px){html body #friendsSheet .invite-overview{padding:6px 9px;gap:4px}}
+@media(max-height:720px){html body #friendsSheet .invite-overview{gap:4px}}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -3335,16 +3390,22 @@ html body #inviteDetailsSheet .invite-friend-progress li:has(.friend-heading spa
         <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
         <span id="inviteProgressText">—</span>
       </section>
-      <button type="button" class="invite-pending" id="invitePendingSummary" hidden aria-label="View invited friends and reward status"></button>
       <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
-      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Full referral rewards &amp; history <span aria-hidden="true">›</span></button>
-      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
+      <button type="button" id="inviteDetailsOpen" class="invite-details-link" aria-label="Friends and rewards details">
+        <span class="invite-detail-action-copy"><strong>Friends &amp; rewards</strong><small id="invitePendingSummary" hidden></small></span>
+        <span aria-hidden="true">›</span>
+      </button>
+      <button type="button" id="incomingActiveReminder" class="invite-active-reminder" hidden><span id="incomingActiveText">Continue your invitation goal</span><span aria-hidden="true">›</span></button>
     </div>
   </div>
 
   <div class="sheet" id="inviteDetailsSheet">
-    <div class="sheet-header"><div><div class="sheet-title">Your invite rewards</div><div class="sheet-subtitle">How rewards work and what you’ve earned.</div></div><button type="button" class="sheet-close" id="inviteDetailsClose" aria-label="Back to Invite">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title">Friends &amp; rewards</div><div class="sheet-subtitle">Qualification, history and reward tiers.</div></div><button type="button" class="sheet-close" id="inviteDetailsClose" aria-label="Back to Invite">×</button></div>
     <div class="sheet-body">
+      <section class="invite-detail-section invite-incoming-detail" id="incomingInviteSection" hidden>
+        <h2>Your original invitation</h2>
+        <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
+      </section>
       <section class="invite-detail-section"><h2>How to earn</h2><p id="inviteRuleDetail">Checking the current reward rules…</p><p>Each new friend can count once. The milestone invite earns the higher rate: invite #5 earns 1,000 coins. Earlier rewards stay unchanged. Sharing a link alone does not earn coins.</p><div class="friends-link" id="inviteLinkText">Checking your link…</div></section>
       <section class="invite-detail-section"><h2>Your invited friends</h2><p id="inviteFriendStatus">Your latest attributed friends appear here after checking.</p><ul id="inviteFriendProgress" class="invite-friend-progress"></ul></section>
       <section class="invite-detail-section"><h2>Coins per successful invite</h2><div id="inviteTierList"></div></section>
@@ -5252,11 +5313,18 @@ function incomingInviteRule(row){
 function renderIncomingInvite(data){
   const row=data?.incoming_referral,el=id=>document.getElementById(id),card=el('incomingInviteCard');
   if(!card)return;card.hidden=!row;
+  const section=el('incomingInviteSection');if(section)section.hidden=!row;
+  const reminder=el('incomingActiveReminder');
+  if(reminder)reminder.hidden=true;
   if(!row)return;
   el('incomingInviteTitle').textContent='Invited by '+(row.display_name||'a friend');
   const active=['joined','playing'].includes(row.status),cumulative=row.qualification_mode==='cumulative_taps',taps=cumulative?Math.min(row.verified_taps||0,row.min_taps):0;
   const progress=active&&cumulative?`${formatNumber(taps)} / 100 verified taps · View your goal`:row.status==='rewarded'?'Invitation complete':row.status==='qualified'?'Goal complete · confirmation pending':row.status==='on_hold'?'Invitation eligibility to check':'View your original invitation goal';
   el('incomingInviteProgress').textContent=progress;
+  if(reminder&&active&&row.qualification_mode!=='legacy_unknown'){
+    reminder.hidden=false;
+    el('incomingActiveText').textContent=cumulative&&row.min_taps>0?`Your invite goal · ${formatNumber(taps)} / ${formatNumber(row.min_taps)} verified taps`:'Your invite goal · View your original rules';
+  }
   el('inviteWelcomeTitle').textContent=(row.display_name||'A friend')+' invited you';
   el('incomingInviteWelcome').textContent=`All new players start with ${formatNumber(data.welcome_coins)} free in-game coins. Build your collection and compete with friends.`;
   el('incomingInviteRule').textContent=incomingInviteRule(row);
@@ -5300,7 +5368,7 @@ function inviteFriendProgressText(row){
 function renderInviteFriends(data){
   const rows=data?.friend_progress;
   const pending=document.getElementById('invitePendingSummary');
-  pending.hidden=!Array.isArray(rows)||data.friends_joined===0;
+  pending.hidden=!Array.isArray(rows)||!data.friends_joined;
   if(Array.isArray(rows)){
     const parts=[`${formatNumber(data.friends_joined)} joined`];
     if(data.friends_pending)parts.push(`${formatNumber(data.friends_pending)} progressing`);
@@ -5308,7 +5376,6 @@ function renderInviteFriends(data){
     if(awaiting)parts.push(`${formatNumber(awaiting)} qualified`);
     if(data.friends_on_hold)parts.push(`${formatNumber(data.friends_on_hold)} to review`);
     if(data.friends_rewarded)parts.push(`${formatNumber(data.friends_rewarded)} rewarded`);
-    parts.push('View friends ›');
     pending.textContent=parts.join(' · ');
   } else pending.textContent='';
   document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Historical records may require review before credit can be verified.`:'No attributed friends yet. Send your link to start your group.';
@@ -5422,9 +5489,9 @@ async function copyInviteLink(){
   try{await navigator.clipboard.writeText(data.invite_link);inviteRecord('copy_link');showToast('Invite link copied');}
   catch(_){showToast('Could not copy. Try Invite on Telegram.');}
 }
-document.getElementById('invitePendingSummary')?.addEventListener('click',()=>{inviteRecord('friends_open');openInviteDetails();});
 document.getElementById('inviteShareCardOpen')?.addEventListener('click',openInviteShareCard);
 document.getElementById('inviteWeeklyRace')?.addEventListener('click',()=>inviteRecord('race_open'));
+document.getElementById('incomingActiveReminder')?.addEventListener('click',()=>maybeShowInviteWelcome(true));
 document.getElementById('incomingInviteCard')?.addEventListener('click',()=>maybeShowInviteWelcome(true));
 document.getElementById('inviteWelcomeDialog')?.addEventListener('close',dismissInviteWelcome);
 document.getElementById('inviteWelcomePlay')?.addEventListener('click',()=>{dismissInviteWelcome();backToHome();});
@@ -8039,7 +8106,7 @@ sheetBackdrop.addEventListener("click", () => {
 copyInviteBtn.addEventListener('click',copyInviteLink);
 shareTelegramBtn.addEventListener('click',shareInviteOnTelegram);
 document.getElementById('inviteRetry').addEventListener('click',()=>loadInviteSummary({force:true}));
-document.getElementById('inviteDetailsOpen').addEventListener('click',openInviteDetails);
+document.getElementById('inviteDetailsOpen').addEventListener('click',()=>{inviteRecord('friends_open');openInviteDetails();});
 document.getElementById('inviteDetailsClose').addEventListener('click',()=>{openFriendsSheet();document.getElementById('inviteDetailsOpen').focus();});
 document.getElementById('inviteHistoryRetry').addEventListener('click',()=>loadInviteHistory({force:true}));
 document.getElementById('inviteFriendsBoard').addEventListener('click',()=>{inviteRecord('friends_open');openLeaderboard('friends');});
