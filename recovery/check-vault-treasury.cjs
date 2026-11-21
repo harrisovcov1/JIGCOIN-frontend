@@ -5,13 +5,13 @@ const vault=html.slice(html.indexOf('<div class="sheet" id="withdrawSheet"'),htm
 const styleStart=html.indexOf('/* Vault v31 — a personal treasury');
 const css=html.slice(styleStart,html.indexOf('</style>',styleStart));
 const codeFor=(from,to)=>html.slice(html.indexOf(from),html.indexOf(to,html.indexOf(from)));
-test('v31 Vault is a treasury with clear rank and equipped-finish labels',()=>{
- assert.match(html,/name="jigcoin-build" content="v31-vault-treasury-1"/);
+test('v32 Vault keeps rank and collection finish without duplicated treasury text',()=>{
+ assert.match(html,/name="jigcoin-build" content="v32-vault-final-three-1"/);
  assert.match(vault,/id="vaultRank"/);
- assert.match(vault,/id="vaultBalanceFinish"/);
+ assert.doesNotMatch(vault,/id="vaultBalanceFinish"/);
  assert.match(vault,/id="vaultCollectionOpen"/);
  assert.match(html,/Rank · /);
- assert.match(html,/Equipped finish · /);
+ assert.match(vault,/Equipped coin finish/);
 });
 test('collection leads; VIP is a compact membership card, not another Shop card',()=>{
  assert.ok(vault.indexOf('id="vaultCollectionTitle"')<vault.indexOf('id="vaultVipOpen"'));
@@ -56,6 +56,8 @@ test('recent medals appear only from account-matched verified history',()=>{
  make(17)();
  assert.equal(get('vaultMedalSpotlight').hidden,false);
  assert.equal(get('vaultMedalSpotlight').children.length,3);
+ assert.deepEqual(get('vaultMedalSpotlight').children.map(x=>x.children[1].textContent),['18 Nov','19 Nov','20 Nov']);
+ assert.match(get('vaultDailyMedalList').textContent,/^Gold · 20 Nov 2026/);
  assert.equal(get('vaultMedalCount').textContent,'3 daily medals shown');
  make(18)();
  assert.equal(get('vaultMedalSpotlight').hidden,true);
