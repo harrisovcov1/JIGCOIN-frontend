@@ -5320,10 +5320,24 @@ function openInviteDetails(){
   showAppSheet(document.getElementById('inviteDetailsSheet'),tabFriends);
   renderInviteOverview();renderInviteHistory();loadInviteHistory();document.getElementById('inviteDetailsClose').focus();
 }
+function inviteRecord(event){
+  if(!inviteSnapshot())return;
+  void apiPost('/api/invite/interaction',{event},{silent:true,fastAuth:true,timeoutMs:3500}).catch(()=>{});
+}
+function openInviteShareCard(){
+  if(!inviteSnapshot())return;
+  inviteRecord('card_open');
+  openInviteDetails();
+  const details=document.getElementById('sharePreviewDetails');
+  details.open=true;
+  renderShareCardCanvas();
+  details.scrollIntoView?.({block:'nearest'});
+}
 function shareInviteOnTelegram(){
   const data=inviteSnapshot();if(!data)return;
-  const text=`Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and race with friends.`;
+  const text=`Come play JigCoin with me! New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards, unlock ranks and race with friends.`;
   const url=`https://t.me/share/url?url=${encodeURIComponent(data.invite_link)}&text=${encodeURIComponent(text)}`;
+  inviteRecord('share_open');
   try{
     if(typeof window.Telegram?.WebApp?.openTelegramLink==='function')window.Telegram.WebApp.openTelegramLink(url);
     else if(!window.open(url,'_blank','noopener'))showToast('If sharing did not open, use Copy link.');
@@ -5331,9 +5345,12 @@ function shareInviteOnTelegram(){
 }
 async function copyInviteLink(){
   const data=inviteSnapshot();if(!data)return;
-  try{await navigator.clipboard.writeText(data.invite_link);showToast('Invite link copied');}
+  try{await navigator.clipboard.writeText(data.invite_link);inviteRecord('copy_link');showToast('Invite link copied');}
   catch(_){showToast('Could not copy. Try Invite on Telegram.');}
 }
+document.getElementById('invitePendingSummary')?.addEventListener('click',()=>{inviteRecord('friends_open');openInviteDetails();});
+document.getElementById('inviteShareCardOpen')?.addEventListener('click',openInviteShareCard);
+document.getElementById('inviteWeeklyRace')?.addEventListener('click',()=>inviteRecord('race_open'));
 document.getElementById('incomingInviteCard')?.addEventListener('click',()=>maybeShowInviteWelcome(true));
 document.getElementById('inviteWelcomeDialog')?.addEventListener('close',dismissInviteWelcome);
 document.getElementById('inviteWelcomePlay')?.addEventListener('click',()=>{dismissInviteWelcome();backToHome();});
@@ -5342,7 +5359,7 @@ document.getElementById('inviteWelcomeFriends')?.addEventListener('click',()=>{d
 
 function buildShareText() {
   const data=inviteSnapshot();if(!data)return '';
-  return `Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and race with friends.
+  return `Come play JigCoin with me! New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards, unlock ranks and race with friends.
 ${data.invite_link}`;
 }
 
@@ -7984,7 +8001,7 @@ document.getElementById('inviteRetry').addEventListener('click',()=>loadInviteSu
 document.getElementById('inviteDetailsOpen').addEventListener('click',openInviteDetails);
 document.getElementById('inviteDetailsClose').addEventListener('click',()=>{openFriendsSheet();document.getElementById('inviteDetailsOpen').focus();});
 document.getElementById('inviteHistoryRetry').addEventListener('click',()=>loadInviteHistory({force:true}));
-document.getElementById('inviteFriendsBoard').addEventListener('click',()=>openLeaderboard('friends'));
+document.getElementById('inviteFriendsBoard').addEventListener('click',()=>{inviteRecord('friends_open');openLeaderboard('friends');});
 
 if (copyShareTextBtn) {
   copyShareTextBtn.addEventListener("click", async () => {
@@ -8010,6 +8027,7 @@ if (downloadShareCardBtn) {
       document.body.appendChild(a);
       a.click();
       a.remove();
+      inviteRecord("card_download");
       showToast("Share card downloaded");
     } catch (e) {
       showToast("Could not download card");
