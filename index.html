@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v23-rewards-weekly-label-1">
+<meta name="jigcoin-build" content="v24-shop-approved-2">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -1967,6 +1967,21 @@ button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid
 
 </style>
 <style>
+/* Shop refinement: preserve the page frame and keep checkout controls legible. */
+#coinShopSheet .sheet-body{padding:9px 12px 12px;min-height:0;overscroll-behavior:contain}
+#coinShopSheet .shop-vip-pass{margin-bottom:7px}
+#coinShopSheet .shop-balance-strip{margin-bottom:6px}
+#coinShopSheet .shop-section-heading{margin-bottom:6px}
+#coinShopSheet .hub-catalog-dense .hub-product{margin-bottom:6px}
+#coinShopSheet .hub-catalog-dense .hub-buy{min-height:44px}
+@media (max-height:740px){#coinShopSheet .sheet-body{padding:7px 10px 9px}}
+#coinShopSheet .shop-rank-badge{font-size:9px;font-weight:750;color:#fbe5ae;border:1px solid #a78b53;border-radius:5px;padding:2px 5px}
+#coinShopSheet .hub-catalog-dense .hub-product{padding:8px 11px;margin-bottom:6px;gap:2px 8px}
+#coinShopSheet .hub-catalog-dense .hub-product-coins{font-size:21px}
+#coinShopSheet .hub-catalog-dense .hub-buy{min-height:44px}
+#coinShopSheet .hub-goal .pack-goal{margin-bottom:2px;padding-bottom:3px}
+#coinShopSheet .shop-rank-prompt{font-size:11px;line-height:1.4;color:#f9e3b5;border:1px solid #9d7c45;background:linear-gradient(110deg,#342a1e,#182231);border-radius:9px;padding:7px 10px;margin:3px 0 8px}
+#coinShopSheet .shop-rank-prompt[hidden]{display:none}
 /* Extended catalogue: all amounts remain visible in the same Shop. */
 #coinShopSheet .hub-catalog-dense .hub-product{padding:9px 12px;margin-bottom:8px;gap:2px 8px}
 #coinShopSheet .hub-catalog-dense .hub-product-coins{font-size:22px}
@@ -3230,17 +3245,18 @@ body{justify-content:flex-start}
     </div>
     <div class="sheet-body">
       <button type="button" class="vip-summary shop-vip-pass" id="shopVipPass">
-        <img src="./assets/vip-crown.svg" alt="" width="64" height="56"><span><strong>JigCoin VIP Pass</strong><small id="shopVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="shopVipState">30 days · ★500 · View pass</small></span><span class="summary-chevron" aria-hidden="true">›</span>
+        <img src="./assets/vip-crown.svg" alt="" width="64" height="56"><span><strong>JigCoin VIP Pass</strong><small id="shopVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="shopVipState">30 days · ★500 · View VIP benefits</small></span><span class="summary-chevron" aria-hidden="true">›</span>
       </button>
       <div class="shop-balance-strip" id="shopBalanceStrip">Your saved balance appears after checking.</div>
       <div class="shop-section-heading"><h2>Coin packs</h2><span>Added after confirmed payment</span></div>
+      <div class="shop-rank-prompt" id="shopRankPrompt" hidden></div>
       <div id="hubStarter" hidden></div>
       <div id="coinPackList" aria-label="Coin packs" aria-live="polite" aria-busy="true"></div>
       <div id="hubCatalogStatus" class="hub-catalog-status" role="status" hidden></div>
       <details class="hub-history" id="hubOrderDetails">
         <summary>Orders &amp; payment help</summary>
         <p id="hubOrderNotice" class="hub-small" tabindex="-1" hidden></p>
-        <p class="hub-small">Packs add in-game coins to your balance after payment confirmation. Pay with Telegram Stars.</p>
+        <p class="hub-small">Your exact coin amount and Telegram Stars price appear on each pack. Coins are credited after confirmed payment.</p>
         <p class="hub-small">In-game coins have no cash value. Buying a pack does not guarantee an airdrop allocation or future value.</p>
         <div id="hubOrderHistory"></div>
         <p id="hubSupport" class="hub-small"></p><p class="hub-small">App version 14</p>
@@ -6200,15 +6216,15 @@ function renderReferencePacks(){
 function packGoal(packs){
   const goal=homeIdentity===homeUserId() ? homeGoalModel(homeConfirmedBalance) : null;
   if(!goal)return null;
-  const small=packs.filter(p=>p.stars<=500).sort((a,b)=>a.stars-b.stars||a.coins-b.coins);
-  if(!small.length)return null;
-  if(goal.complete)return {product:small[0],goal};
-  const rankPack=small.find(p=>p.coins>=goal.remaining);
+  const available=packs.filter(p=>Number.isSafeInteger(p.coins)&&p.coins>0&&Number.isSafeInteger(p.stars)&&p.stars>0).sort((a,b)=>a.stars-b.stars||a.coins-b.coins);
+  if(!available.length||goal.complete)return null;
+  // Recommend the least-expensive pack that actually reaches the next rank.
+  // If none reaches it, show the most affordable meaningful progression instead.
+  const rankPack=available.find(p=>p.coins>=goal.remaining);
   if(rankPack)return {product:rankPack,goal:{...goal,rankGoal:true}};
-  const step=5000;
-  const milestone=Math.min(goal.next,(Math.floor(homeConfirmedBalance/step)+1)*step);
+  const milestone=Math.min(goal.next,(Math.floor(homeConfirmedBalance/5000)+1)*5000);
   const gap=milestone-homeConfirmedBalance;
-  const product=small.find(p=>p.coins>=gap)||small[0];
+  const product=available.find(p=>p.coins>=gap)||available[0];
   return {product,goal};
 }
 function renderPackChoices(packs,preview,target=packGoal(packs)){
@@ -6216,6 +6232,16 @@ function renderPackChoices(packs,preview,target=packGoal(packs)){
   const bestRate=new Set(rates).size>1?Math.max(...rates):0;
   coinPackList.innerHTML=[...packs].sort((a,b)=>a.stars-b.stars).map(p=>
     starsProductCard(p,false,preview,p===target?.product?target.goal:null,bestRate)).join('');
+  const rankPrompt=document.getElementById('shopRankPrompt');
+  if(rankPrompt){
+    const goal=homeIdentity===homeUserId()?homeGoalModel(homeConfirmedBalance):null;
+    const choice=target?.product;
+    rankPrompt.hidden=!goal||goal.complete||!choice;
+    if(!rankPrompt.hidden){
+      const reaches=choice.coins>=goal.remaining;
+      rankPrompt.textContent=`${formatNumber(goal.remaining)} coins to ${goal.nextName} · ${choice.title}: ${formatNumber(choice.coins)} coins for ★${formatNumber(choice.stars)}${reaches?' · Enough to reach this rank':''}`;
+    }
+  }
   const strip=document.getElementById('shopBalanceStrip');
   if(strip){
     const balance=homeIdentity===homeUserId()?homeConfirmedBalance:null;
@@ -6242,14 +6268,16 @@ function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0) {
   const disabled = preview || !shopCatalogFresh() || !hubCatalog?.enabled || hubPurchaseBusy || (starter && (!hubCatalog.offer_expires_at || Date.parse(hubCatalog.offer_expires_at)<=hubNow()));
   const rate=p.coins/p.stars;
   const best=!starter && rate===bestRate;
-  const after=goal?homeConfirmedBalance+p.coins:null;
+  const recommended=!starter && !!goal;
+  const rankLabel=goal?.rankGoal?'Reaches next rank':recommended?'Progression pick':'';
+  const after=goal&&Number.isSafeInteger(homeConfirmedBalance+p.coins)?homeConfirmedBalance+p.coins:null;
   const afterGoal=Number.isSafeInteger(after)?homeGoalModel(after):null;
-  const progression=afterGoal?(afterGoal.complete?'Highest coin rank':`${formatNumber(afterGoal.remaining)} coins to ${afterGoal.nextName}`):'';
+  const progression=afterGoal?(afterGoal.complete?'Highest coin rank reached':`${formatNumber(afterGoal.remaining)} coins to ${afterGoal.nextName}`):'';
   return `<article class="hub-product ${starter?'hub-starter':''} ${best?'hub-best':''} ${goal?'hub-goal':''}">
-    <div class="hub-product-label">${escapeHtml(label)}${best?'<span class="value-badge">Most coins per Star</span>':''}</div>
+    <div class="hub-product-label">${escapeHtml(label)}${best?'<span class="value-badge">Most coins per Star</span>':''}${rankLabel?`<span class="shop-rank-badge">${rankLabel}</span>`:''}</div>
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
     <div class="hub-unit-value">${rate.toLocaleString('en-GB',{maximumFractionDigits:2})} coins per Star</div>
-    ${goal?`<div class="pack-goal"><small>After purchase: ${formatNumber(after)} coins${goal.rankGoal?' · '+escapeHtml(goal.nextName)+' unlocked':''}</small>${progression?`<small>${escapeHtml(progression)}</small>`:''}</div>`:''}
+    ${goal&&after!==null?`<div class="pack-goal"><small>After purchase: ${formatNumber(after)} coins${goal.rankGoal?' · '+escapeHtml(goal.nextName)+' unlocked':''}</small>${progression?`<small>${escapeHtml(progression)}</small>`:''}</div>`:''}
     ${starter?'<div class="hub-offer-clock" aria-live="off"></div>':''}
     <button type="button" class="hub-buy" ${preview?'data-preview="true"':`data-stars-sku="${p.sku}"`} aria-label="Buy ${formatNumber(p.coins)} coins for ${p.stars.toLocaleString('en-GB')} Telegram Stars" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`<span>Buy for</span><strong>★ ${p.stars.toLocaleString('en-GB')}</strong>`}</button>
   </article>`;
@@ -7345,7 +7373,7 @@ function renderVipSummaries(){
  const d=vaultSnapshot(),active=!!d&&Date.parse(d.vip_until)>vaultNow(),pending=vaultPending();
  const expiry=active?new Date(d.vip_until).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
  const summary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
- const status=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View pass':'VIP currently unavailable';
+ const status=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
  for(const prefix of ['shop','vault']){
    const card=document.getElementById(prefix==='shop'?'shopVipPass':'vaultVipOpen');
    if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
