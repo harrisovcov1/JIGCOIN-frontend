@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v27-shop-responsive-fill-1">
+<meta name="jigcoin-build" content="v28-invite-growth-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3248,7 +3248,6 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
   <div class="sheet" id="friendsSheet">
     <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
-      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
         <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
@@ -3256,18 +3255,20 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
         <p id="inviteWelcome"></p>
         <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <svg class="invite-share-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7 17 10-10M7 7h10v10"/></svg></button>
         <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button></div>
+        <button type="button" id="inviteShareCardOpen" class="invite-card-open" disabled>Share your progress card ›</button>
         <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
       </section>
-      <div class="friends-summary"><div class="friends-summary-col"><span>Rewarded invites</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
+      <div class="friends-summary"><div class="friends-summary-col"><span>Joined</span><strong id="inviteJoinedCount">—</strong></div><div class="friends-summary-col"><span>Rewarded</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
       <section class="invite-milestone" aria-labelledby="inviteNextTitle">
         <div class="invite-milestone-top"><strong id="inviteNextTitle">Your next milestone</strong><span id="inviteTierName">—</span></div>
         <p id="inviteNextText">Your progress appears after checking.</p>
         <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
         <span id="inviteProgressText">—</span>
       </section>
-      <div class="invite-pending" id="invitePendingSummary" hidden></div>
-      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Friends leaderboard <span aria-hidden="true">›</span></button><button type="button" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
-      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Friends, rewards &amp; invite history <span aria-hidden="true">›</span></button>
+      <button type="button" class="invite-pending" id="invitePendingSummary" hidden aria-label="View invited friends and reward status"></button>
+      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Friends leaderboard <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
+      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Full referral rewards &amp; history <span aria-hidden="true">›</span></button>
+      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
     </div>
   </div>
 
