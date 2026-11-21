@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v25-shop-conversion-1">
+<meta name="jigcoin-build" content="v26-shop-final-four-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -2895,6 +2895,123 @@ body{justify-content:flex-start}
 @media(max-width:350px){#coinShopSheet .hub-product,#coinShopSheet .hub-catalog-dense .hub-product{grid-template-columns:minmax(0,1fr) 88px}#coinShopSheet .hub-buy,#coinShopSheet .hub-catalog-dense .hub-buy,#coinShopSheet .hub-goal .hub-buy{width:88px}#coinShopSheet .shop-preview-finish{max-width:94px}}
 @media(prefers-reduced-motion:reduce){#coinShopSheet *{scroll-behavior:auto!important}}
 </style>
+
+<style>
+/* Shop final four · compact layout overrides the shared integrated sheet rules.
+   Only Shop selectors are changed. Do not reduce 44px checkout and help targets. */
+html body #coinShopSheet .sheet-body {
+  flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding:5px 11px 5px!important; gap:3px; justify-content:flex-start;
+  scrollbar-gutter:stable;
+}
+html body #coinShopSheet button.shop-vip-pass {
+  flex:none; min-height:66px; margin:0; padding:7px 10px;
+  display:grid; grid-template-columns:42px minmax(0,1fr) 14px;
+  gap:7px; align-items:center;
+}
+html body #coinShopSheet button.shop-vip-pass img {width:42px;height:42px}
+html body #coinShopSheet button.shop-vip-pass strong {font-size:15px;line-height:1.17}
+html body #coinShopSheet button.shop-vip-pass small {font-size:11px;line-height:1.16;margin-top:2px}
+html body #coinShopSheet .shop-balance-strip {margin:0;line-height:1.2;font-size:11px}
+html body #coinShopSheet .shop-balance-strip[hidden] {display:none!important}
+html body #coinShopSheet .shop-section-heading {margin:1px 0 0;align-items:center}
+html body #coinShopSheet .shop-section-heading h2 {font-size:16px;line-height:1.12}
+html body #coinShopSheet .shop-section-heading span {font-size:10px;line-height:1.2}
+html body #coinShopSheet .shop-rank-prompt {
+  display:grid; grid-template-columns:minmax(0,1fr) 103px;
+  grid-template-rows:auto auto; align-items:center; column-gap:8px;row-gap:1px;
+  min-height:50px; padding:5px 9px; margin:0; border-radius:10px; line-height:1.16;
+}
+html body #coinShopSheet .shop-rank-prompt .shop-rank-title {
+  grid-column:1;grid-row:1;font-size:12px;line-height:1.18;font-weight:800;
+}
+html body #coinShopSheet .shop-rank-prompt small {
+  display:block;grid-column:1;grid-row:2;font-size:10px;line-height:1.16;
+}
+html body #coinShopSheet .shop-rank-prompt .shop-preview-finish {
+  grid-column:2;grid-row:1 / span 2;width:100%;max-width:none;min-height:44px;
+  padding:4px 5px;font-size:11px;line-height:1.2;
+}
+html body #coinShopSheet #coinPackList {
+  display:flex;flex-direction:column;flex:0 0 auto;gap:3px;margin:0;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+html body #coinShopSheet .hub-catalog-dense .hub-product {
+  display:grid;grid-template-columns:minmax(0,1fr) 100px;
+  grid-template-rows:auto auto auto;gap:0 8px;
+  flex:none;min-height:57px!important;padding:4px 9px!important;
+  margin:0!important;align-content:center;border-radius:11px;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-product-label {
+  grid-column:1;grid-row:1;font-size:11px;line-height:1.08;gap:4px;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-product-coins {
+  grid-column:1;grid-row:2;font-size:21px;line-height:1.1;margin:0;letter-spacing:-.3px;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-unit-value {
+  grid-column:1;grid-row:3;font-size:10px;line-height:1.13;margin:0;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy {
+  grid-column:2;grid-row:1 / span 3;min-height:44px!important;
+  width:100%;align-self:center;justify-self:stretch;padding:3px 5px;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .shop-pack-outcome {
+  grid-column:1 / -1;grid-row:4;font-size:10px;line-height:1.15;margin:0;padding-top:2px;
+}
+html body #coinShopSheet #coinPackList .shop-rank-badge,
+html body #coinShopSheet #coinPackList .value-badge {
+  font-size:9px;line-height:1.1;padding:2px 4px;margin:0;
+}
+html body #coinShopSheet #coinPackList .hub-product.shop-unlock .hub-buy:enabled {
+  background:var(--mint-grain),var(--mint-plate);
+  border:1px solid var(--mint-edge);color:var(--mint-highlight);
+  box-shadow:inset 0 1px var(--mint-seam);
+}
+html body #coinShopSheet #coinPackList .hub-product.hub-goal .hub-buy:enabled {
+  background:linear-gradient(125deg,#ffe39c,#f5c456);
+  color:#33250d;border:1px solid #ffe1a0;
+}
+html body #coinShopSheet #hubStarter:not([hidden]) {margin-bottom:3px}
+html body #coinShopSheet #hubStarter > .hub-product {margin:0!important;min-height:57px;padding:4px 9px!important}
+html body #coinShopSheet #hubStarter .hub-buy {min-height:44px!important}
+html body #coinShopSheet .shop-help-dock {
+  flex:0 0 auto;max-height:min(40dvh,330px);min-height:44px;
+  overflow-y:auto;overscroll-behavior:contain;
+  padding:0 11px; margin:0;position:relative;z-index:1;
+  border-top:1px solid var(--mint-rim);
+  background:var(--mint-grain),var(--mint-plate);scrollbar-width:thin;
+}
+html body #coinShopSheet .shop-help-dock > summary {
+  display:flex;align-items:center;min-height:44px;padding:8px 0;
+  margin:0;font-size:12px;line-height:1.25;
+  position:sticky;top:0;z-index:2;
+  background:var(--mint-grain),var(--mint-plate);
+}
+html body #coinShopSheet .shop-help-dock[open] {padding-bottom:12px}
+html body #coinShopSheet .shop-help-dock .hub-small {font-size:11px;line-height:1.35}
+html body #coinShopSheet #hubShopNotice.shop-help-notice {
+  flex:0 0 auto;margin:0;padding:1px 11px 5px;
+  font-size:10px;line-height:1.15;color:var(--mint-muted);
+  background:var(--mint-grain),var(--mint-plate);
+}
+@media(max-width:350px){
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+  html body #coinShopSheet .hub-catalog-dense .hub-product {
+    grid-template-columns:minmax(0,1fr) 89px;
+    padding:5px 7px!important;
+  }
+  html body #coinShopSheet .shop-rank-prompt {grid-template-columns:minmax(0,1fr) 90px}
+}
+@media(max-height:710px){
+  html body #coinShopSheet .sheet-body {gap:2px;padding-top:3px!important;padding-bottom:3px!important}
+  html body #coinShopSheet #coinPackList {gap:2px}
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+  html body #coinShopSheet .hub-catalog-dense .hub-product {min-height:55px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  html body #coinShopSheet .shop-help-dock {scroll-behavior:auto}
+}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -3294,7 +3411,8 @@ body{justify-content:flex-start}
       <div id="hubStarter" hidden></div>
       <div id="coinPackList" aria-label="Coin packs" aria-live="polite" aria-busy="true"></div>
       <div id="hubCatalogStatus" class="hub-catalog-status" role="status" hidden></div>
-      <details class="hub-history" id="hubOrderDetails">
+    </div>
+    <details class="hub-history shop-help-dock" id="hubOrderDetails">
         <summary>Orders &amp; payment help</summary>
         <p id="hubOrderNotice" class="hub-small" tabindex="-1" hidden></p>
         <p class="hub-small">Your exact coin amount and Telegram Stars price appear on each pack. Coins are credited after confirmed payment.</p>
@@ -3302,8 +3420,7 @@ body{justify-content:flex-start}
         <div id="hubOrderHistory"></div>
         <p id="hubSupport" class="hub-small"></p><p class="hub-small">App version 14</p>
       </details>
-      <p id="hubShopNotice" class="hub-small" role="status">In-game coins · Telegram Stars</p>
-    </div>
+    <p id="hubShopNotice" class="hub-small shop-help-notice" role="status">Telegram Stars · Coins after confirmation</p>
   </div>
 
   <div class="toast" id="toast">
@@ -6291,22 +6408,17 @@ function renderPackChoices(packs,preview,target=packGoal(packs)){
       rankPrompt.replaceChildren();
       const summary=document.createElement('span');
       summary.className='shop-rank-title';
-      summary.textContent=`${formatNumber(goal.remaining)} to ${goal.nextName}`;
+      summary.textContent=`${goal.nextName} · ${formatNumber(goal.remaining)} coins to go`;
       rankPrompt.append(summary);
       const sub=document.createElement('small');
       sub.textContent=target?.product
-        ? `Suggested step: ${formatNumber(target.product.coins)} coins · ★${formatNumber(target.product.stars)}`
-        : 'Earn coins through play or choose a pack';
+        ? `${formatNumber(homeConfirmedBalance)} saved · Suggested ${formatNumber(target.product.coins)} for ★${formatNumber(target.product.stars)}`
+        : `${formatNumber(homeConfirmedBalance)} saved · Earn coins by playing`;
       rankPrompt.append(sub);
-      if(rank?.product){
-        const unlock=document.createElement('small');
-        unlock.textContent=`Rank unlock option: ${rank.product.title} · ★${formatNumber(rank.product.stars)}`;
-        rankPrompt.append(unlock);
-      }
       const previewButton=document.createElement('button');
       previewButton.type='button';
       previewButton.className='shop-preview-finish';
-      previewButton.textContent=`Preview ${goal.nextName} finish ›`;
+      previewButton.textContent='Preview finish ›';
       previewButton.addEventListener('click',()=>{shopRecord('finish_preview');previewMint('rank-'+(goal.tier+1));});
       rankPrompt.append(previewButton);
     }
@@ -6316,6 +6428,9 @@ function renderPackChoices(packs,preview,target=packGoal(packs)){
     const balance=homeIdentity===homeUserId()?homeConfirmedBalance:null;
     const goal=homeGoalModel(balance);
     strip.textContent=goal?`${formatNumber(balance)} saved · ${goal.complete?'Highest coin rank reached':formatNumber(goal.remaining)+' coins to '+goal.nextName}`:'Saved balance appears after checking';
+    // On an active rank journey this is already shown in the compact banner.
+    // Preserve the standalone strip on loading/error and highest-rank states.
+    strip.hidden=!!goal&&!goal.complete;
   }
 }
 function shopLoadError(element, result, retry) {
@@ -6344,7 +6459,7 @@ function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0,ran
   const next=after===null?null:homeGoalModel(after);
   const outcome=unlock&&next?`<div class="shop-pack-outcome">After purchase: ${formatNumber(after)} coins · ${escapeHtml(rankGoal.nextName)} unlocked</div>`:'';
   return `<article class="hub-product ${starter?'hub-starter':''} ${best?'hub-best':''} ${affordable?'hub-goal':''} ${unlock?'shop-unlock':''}">
-    <div class="hub-product-label">${escapeHtml(label)}${starter?'<span class="shop-rank-badge">One-time price</span>':''}${affordable?'<span class="shop-rank-badge">Suggested step</span>':''}${unlock?'<span class="shop-rank-badge">Unlocks next rank</span>':''}${best?'<span class="value-badge">Best coins per Star</span>':''}</div>
+    <div class="hub-product-label">${escapeHtml(label)}${starter?'<span class="shop-rank-badge">One-time price</span>':''}${affordable?'<span class="shop-rank-badge">Suggested</span>':''}${unlock?`<span class="shop-rank-badge">${escapeHtml(rankGoal.nextName)} unlock</span>`:''}${best?'<span class="value-badge">Top coin rate</span>':''}</div>
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
     <div class="hub-unit-value">${starter?'20 coins per Star · first purchase only':rate.toLocaleString('en-GB',{maximumFractionDigits:2})+' coins per Star'}</div>
     ${outcome}
