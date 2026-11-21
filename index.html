@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v26-shop-final-four-1">
+<meta name="jigcoin-build" content="v27-shop-responsive-fill-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3010,6 +3010,62 @@ html body #coinShopSheet #hubShopNotice.shop-help-notice {
 }
 @media (prefers-reduced-motion:reduce){
   html body #coinShopSheet .shop-help-dock {scroll-behavior:auto}
+}
+
+/* Shop v27: share spare vertical room between actual product cards. The product
+   list keeps its content-based minimum and scrolls rather than shrinking when
+   a real starter offer, smaller viewport or larger system text needs space. */
+html body #coinShopSheet #coinPackList{
+  flex:1 0 auto;
+  min-height:min-content;
+  gap:clamp(3px,.65dvh,8px);
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+html body #coinShopSheet .hub-catalog-dense .hub-product{
+  flex:1 0 57px;
+  min-height:57px!important;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy{
+  min-height:44px!important;
+  padding:4px 5px;
+  gap:1px;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy span{
+  font-size:11px;
+  line-height:1.1;
+}
+html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy strong{
+  font-size:clamp(15px,4.3vw,18px);
+  line-height:1.13;
+  font-weight:850;
+  letter-spacing:-.025em;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+@media(max-height:710px){
+  html body #coinShopSheet #coinPackList{
+    flex:0 0 auto;
+    gap:2px;
+  }
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+  html body #coinShopSheet .hub-catalog-dense .hub-product{
+    flex:0 0 auto;
+    min-height:55px!important;
+  }
+}
+@media(max-width:350px){
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) .hub-buy strong{
+    font-size:15px;
+  }
+}
+@media(min-height:980px){
+  /* On tablets avoid over-stretched cards. Distribute unused height as gutters. */
+  html body #coinShopSheet #coinPackList{justify-content:space-evenly}
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child),
+  html body #coinShopSheet .hub-catalog-dense .hub-product{
+    flex:0 0 auto;
+    min-height:clamp(70px,10dvh,108px)!important;
+  }
 }
 </style>
 </head>
