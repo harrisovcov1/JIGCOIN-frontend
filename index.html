@@ -7784,10 +7784,12 @@ function renderVault(){
  const d=vaultSnapshot(),ready=accountIsReady(),balance=ready&&homeIdentity===homeUserId()?homeConfirmedBalance:null;
  const goal=homeGoalModel(balance),active=!!d&&Date.parse(d.vip_until)>vaultNow();
  withdrawBalanceText.textContent=Number.isSafeInteger(balance)?formatNumber(balance):'…';
- document.getElementById('vaultRank').textContent=goal?.current.name||'—';
+ document.getElementById('vaultRank').textContent=goal?'Rank · '+goal.current.name:'Rank · —';
+ const equipped=goal?(MINT_FINISHES['rank-'+goal.tier]?.name||goal.current.name):null;
+ document.getElementById('vaultBalanceFinish').textContent=equipped?'Equipped finish · '+equipped:'Equipped finish · Checking…';
  document.getElementById('vaultGoal').textContent=goal?(goal.complete?'Highest coin rank unlocked':`${formatNumber(goal.remaining)} coins to ${goal.nextName}`):'Your next rank appears after sync.';
  const pct=goal?Math.round(goal.progress*100):0;
- document.getElementById('vaultProgressLabel').textContent=goal?(goal.complete?'All coin ranks reached':`${goal.current.name} → ${goal.nextName}`):'';
+ document.getElementById('vaultProgressLabel').textContent=goal?(goal.complete?'All coin ranks reached':`${pct}% through ${goal.current.name} towards ${goal.nextName}`):'';
  document.getElementById('vaultProgressFill').style.width=pct+'%';document.getElementById('vaultProgress').setAttribute('aria-valuenow',String(pct));document.getElementById('vaultProgress').setAttribute('aria-valuetext',goal?`${pct}% through ${goal.current.name}${goal.nextName?' towards '+goal.nextName:''}`:'Checking rank');
  if(goal) setCoinArtwork(document.getElementById('vaultRankArt'),goal.tier);
  vipStatusText.textContent=active?'VIP active':d?`${d.product.days} days · ${d.product.stars} Stars`:'30-day pass';
@@ -7819,15 +7821,21 @@ function renderVault(){
 function renderVipSummaries(){
  const d=vaultSnapshot(),active=!!d&&Date.parse(d.vip_until)>vaultNow(),pending=vaultPending();
  const expiry=active?new Date(d.vip_until).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
- const summary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
- const status=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
+ // Shop is the sales destination. Keep its proven presentation unchanged.
+ const shopSummary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
+ const shopStatus=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
+ // Vault answers the different question: what membership do I own?
+ const vaultSummary=active?`Active perks · 2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× tap coins · 2× energy capacity';
+ const vaultStatus=pending?'Payment pending · Check status':vaultError?'Membership status unavailable · Retry':!d?'Checking membership…':active?`VIP active until ${expiry} · View membership`:d.product.enabled?'Not active · 30 days for ★500 · View benefits':'VIP currently unavailable';
  for(const prefix of ['shop','vault']){
    const card=document.getElementById(prefix==='shop'?'shopVipPass':'vaultVipOpen');
    if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
    const details=document.getElementById(prefix+'VipSummary'),stateLabel=document.getElementById(prefix+'VipState');
-   if(details)details.textContent=summary;if(stateLabel)stateLabel.textContent=status;
+   if(details)details.textContent=prefix==='shop'?shopSummary:vaultSummary;
+   if(stateLabel)stateLabel.textContent=prefix==='shop'?shopStatus:vaultStatus;
  }
 }
+
 function renderVaultCollection(goal){
  if(!goal)return;
  setCoinArtwork(document.getElementById('vaultCurrentFinish'),goal.tier);
@@ -7844,8 +7852,25 @@ function renderVaultMedals(){
  box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):awards.length?awards.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
  if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
  document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medal${awards.length===1?'':'s'} shown`:'Daily & weekly achievements';
+ const spotlight=document.getElementById('vaultMedalSpotlight');
+ if(spotlight){
+   spotlight.replaceChildren();
+   spotlight.hidden=!Array.isArray(awards)||awards.length===0;
+   if(!spotlight.hidden){
+     for(const award of awards.slice(0,3)){
+       const badge=document.createElement('div');
+       badge.className='vault-medal-badge';
+       const place=document.createElement('strong');
+       place.textContent=['','Gold','Silver','Bronze'][award.place]||'Podium';
+       const date=document.createElement('small');
+       date.textContent=new Date(award.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'});
+       badge.append(place,date);spotlight.append(badge);
+     }
+   }
+ }
  const retry=document.getElementById('vaultMedalRetry');if(retry)retry.disabled=!!vaultMedalsRequest;
 }
+
 async function loadVaultMedals(force=false){
  const owner=homeUserId();if(!owner||!accountIsReady())return;
  if(vaultMedalsOwner!==owner){vaultMedalsOwner=owner;vaultMedalsData=null;vaultMedalsRequest=null;vaultMedalsChecked=0;vaultMedalsError=false;}
@@ -7958,6 +7983,14 @@ async function handleVipPass(){openVipOffer('vault');}
 async function handleVipPremium(){openVipOffer('vault');}
 document.getElementById('vipOfferClose').addEventListener('click',()=>vipOfferOrigin==='shop'?openCoinShopSheet():openVault());
 document.getElementById('vipOfferHistory').addEventListener('click',openVaultDetails);
+document.getElementById('vaultCoinOrdersOpen').addEventListener('click',()=>{
+  // Order receipts remain managed by the authenticated Shop catalogue,
+  // with server-verified settlement and refunds only.
+  openCoinShopSheet();
+  const orders=document.getElementById('hubOrderDetails');
+  orders.open=true;
+  orders.scrollIntoView({block:'nearest'});
+});
 document.getElementById('vaultVipOpen').addEventListener('click',()=>openVipOffer('vault'));
 document.getElementById('vaultCollectionOpen').addEventListener('click',()=>openHomeJourney());
 document.getElementById('vaultRewardHistoryOpen').addEventListener('click',()=>openInviteDetails());
