@@ -5325,7 +5325,7 @@ function renderInviteOverview(){
   el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'—';
   el('inviteWelcome').textContent=data?`Your friend starts with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
-  el('inviteJoinedCount').textContent=data?formatNumber(data.friends_joined):'—';
+  el('inviteJoinedCount').textContent=Number.isSafeInteger(data?.friends_joined)?formatNumber(data.friends_joined):'—';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
   inviteLinkText.textContent=data?data.invite_link:'Your invite link appears after checking.';
