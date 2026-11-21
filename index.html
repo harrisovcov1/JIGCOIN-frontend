@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v31-vault-treasury-1">
+<meta name="jigcoin-build" content="v32-vault-final-three-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3415,6 +3415,64 @@ html body #withdrawSheet .vault-airdrop p {font-size:11px;line-height:1.45}
 @media(prefers-reduced-motion:reduce){
   html body #withdrawSheet .vault-content {scroll-behavior:auto}
 }
+
+/* Vault v32 final three: reclaim just enough height to show the full airdrop
+   summary on standard iPhone; preserve touch targets and scroll on short screens. */
+html body #withdrawSheet .vault-content {
+  gap:clamp(4px,.63dvh,8px);
+  padding:7px 11px 8px;
+}
+html body #withdrawSheet .vault-summary {
+  flex:1 1 auto;
+  min-height:126px;
+  padding:8px 12px;
+}
+html body #withdrawSheet .vault-total {margin:2px 0;gap:9px}
+html body #withdrawSheet .vault-rank-art {width:44px;height:44px}
+html body #withdrawSheet .vault-goal {line-height:1.23}
+html body #withdrawSheet #vaultProgressLabel {margin-top:1px;line-height:1.15}
+html body #withdrawSheet .vault-progress {margin-top:4px}
+html body #withdrawSheet .vault-collection {
+  flex:2 1 auto;
+  min-height:176px;
+  padding:9px 11px;
+  gap:4px;
+}
+html body #withdrawSheet .vault-collection-heading h2 {font-size:16px}
+html body #withdrawSheet .vault-finish-link {
+  min-height:64px;
+  padding:3px 0 5px;
+  grid-template-columns:106px minmax(0,1fr) 10px;
+}
+html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){
+  width:47px;height:47px;
+}
+html body #withdrawSheet .vault-medal-spotlight {gap:5px;margin:0}
+html body #withdrawSheet .vault-medal-badge {padding:5px 3px;gap:2px}
+html body #withdrawSheet #vaultMedalCollection summary {min-height:44px}
+html body #withdrawSheet button#vaultVipOpen.vault-membership-card {
+  min-height:62px;padding:6px 10px;
+}
+html body #withdrawSheet button#vaultVipOpen img {width:38px;height:38px}
+html body #withdrawSheet .vault-account-drawer {min-height:46px}
+html body #withdrawSheet .vault-account-drawer>summary {min-height:46px;padding:5px 0}
+html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
+@media(max-height:730px),(max-width:350px){
+  /* Never clip information to force a one-screen claim on smaller devices. */
+  html body #withdrawSheet .vault-content {gap:5px;padding:6px 9px 8px}
+  html body #withdrawSheet .vault-summary {flex:0 0 auto;min-height:126px}
+  html body #withdrawSheet .vault-collection {flex:0 0 auto;min-height:176px}
+  html body #withdrawSheet .vault-finish-link{
+    grid-template-columns:101px minmax(0,1fr) 9px;
+  }
+  html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){
+    width:44px;height:44px;
+  }
+}
+@media(min-height:1000px){
+  html body #withdrawSheet .vault-summary{flex:0 0 auto;min-height:150px}
+  html body #withdrawSheet .vault-collection{flex:0 0 auto;min-height:220px}
+}
 </style>
 </head>
 <body>
@@ -3647,7 +3705,6 @@ html body #withdrawSheet .vault-airdrop p {font-size:11px;line-height:1.45}
       <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
         <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
         <div class="vault-total"><span class="vault-rank-art" id="vaultRankArt" aria-hidden="true"></span><strong id="withdrawBalanceText">…</strong></div>
-        <div class="vault-balance-finish" id="vaultBalanceFinish">Equipped finish · Checking…</div>
         <div class="vault-goal"><span id="vaultGoal">Your next rank appears after sync.</span><span id="vaultProgressLabel"></span></div>
         <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
       </section>
@@ -7954,8 +8011,6 @@ function renderVault(){
  const goal=homeGoalModel(balance),active=!!d&&Date.parse(d.vip_until)>vaultNow();
  withdrawBalanceText.textContent=Number.isSafeInteger(balance)?formatNumber(balance):'…';
  document.getElementById('vaultRank').textContent=goal?'Rank · '+goal.current.name:'Rank · —';
- const equipped=goal?((typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+goal.tier]?.name:null)||goal.current.name):null;
- document.getElementById('vaultBalanceFinish').textContent=equipped?'Equipped finish · '+equipped:'Equipped finish · Checking…';
  document.getElementById('vaultGoal').textContent=goal?(goal.complete?'Highest coin rank unlocked':`${formatNumber(goal.remaining)} coins to ${goal.nextName}`):'Your next rank appears after sync.';
  const pct=goal?Math.round(goal.progress*100):0;
  document.getElementById('vaultProgressLabel').textContent=goal?(goal.complete?'All coin ranks reached':`${pct}% through ${goal.current.name} towards ${goal.nextName}`):'';
@@ -8018,7 +8073,8 @@ function renderVaultMedals(){
  const box=document.getElementById('vaultDailyMedalList'),data=vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
  if(!box)return;
  const awards=data?.my_awards;
- box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):awards.length?awards.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
+ const newestFirst=Array.isArray(awards)?[...awards].sort((a,b)=>b.day.localeCompare(a.day)):[];
+ box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):newestFirst.length?newestFirst.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
  if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
  document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medal${awards.length===1?'':'s'} shown`:'Daily & weekly achievements';
  const spotlight=document.getElementById('vaultMedalSpotlight');
@@ -8026,7 +8082,8 @@ function renderVaultMedals(){
    spotlight.replaceChildren();
    spotlight.hidden=!Array.isArray(awards)||awards.length===0;
    if(!spotlight.hidden){
-     for(const award of awards.slice(0,3)){
+     // Show the three most recent verified medals as a timeline, oldest to newest.
+     for(const award of newestFirst.slice(0,3).reverse()){
        const badge=document.createElement('div');
        badge.className='vault-medal-badge';
        const place=document.createElement('strong');
