@@ -3415,6 +3415,64 @@ html body #withdrawSheet .vault-airdrop p {font-size:11px;line-height:1.45}
 @media(prefers-reduced-motion:reduce){
   html body #withdrawSheet .vault-content {scroll-behavior:auto}
 }
+
+/* Vault v32 final three: reclaim just enough height to show the full airdrop
+   summary on standard iPhone; preserve touch targets and scroll on short screens. */
+html body #withdrawSheet .vault-content {
+  gap:clamp(4px,.63dvh,8px);
+  padding:7px 11px 8px;
+}
+html body #withdrawSheet .vault-summary {
+  flex:1 1 auto;
+  min-height:126px;
+  padding:8px 12px;
+}
+html body #withdrawSheet .vault-total {margin:2px 0;gap:9px}
+html body #withdrawSheet .vault-rank-art {width:44px;height:44px}
+html body #withdrawSheet .vault-goal {line-height:1.23}
+html body #withdrawSheet #vaultProgressLabel {margin-top:1px;line-height:1.15}
+html body #withdrawSheet .vault-progress {margin-top:4px}
+html body #withdrawSheet .vault-collection {
+  flex:2 1 auto;
+  min-height:176px;
+  padding:9px 11px;
+  gap:4px;
+}
+html body #withdrawSheet .vault-collection-heading h2 {font-size:16px}
+html body #withdrawSheet .vault-finish-link {
+  min-height:64px;
+  padding:3px 0 5px;
+  grid-template-columns:106px minmax(0,1fr) 10px;
+}
+html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){
+  width:47px;height:47px;
+}
+html body #withdrawSheet .vault-medal-spotlight {gap:5px;margin:0}
+html body #withdrawSheet .vault-medal-badge {padding:5px 3px;gap:2px}
+html body #withdrawSheet #vaultMedalCollection summary {min-height:44px}
+html body #withdrawSheet button#vaultVipOpen.vault-membership-card {
+  min-height:62px;padding:6px 10px;
+}
+html body #withdrawSheet button#vaultVipOpen img {width:38px;height:38px}
+html body #withdrawSheet .vault-account-drawer {min-height:46px}
+html body #withdrawSheet .vault-account-drawer>summary {min-height:46px;padding:5px 0}
+html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
+@media(max-height:730px),(max-width:350px){
+  /* Never clip information to force a one-screen claim on smaller devices. */
+  html body #withdrawSheet .vault-content {gap:5px;padding:6px 9px 8px}
+  html body #withdrawSheet .vault-summary {flex:0 0 auto;min-height:126px}
+  html body #withdrawSheet .vault-collection {flex:0 0 auto;min-height:176px}
+  html body #withdrawSheet .vault-finish-link{
+    grid-template-columns:101px minmax(0,1fr) 9px;
+  }
+  html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){
+    width:44px;height:44px;
+  }
+}
+@media(min-height:1000px){
+  html body #withdrawSheet .vault-summary{flex:0 0 auto;min-height:150px}
+  html body #withdrawSheet .vault-collection{flex:0 0 auto;min-height:220px}
+}
 </style>
 </head>
 <body>
