@@ -157,3 +157,20 @@ test('incoming attribution is account scoped and its display name is assigned as
  const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:{...incoming(),display_name:'<svg onload=bad()>'}};x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(x.el('inviteWelcomeTitle').textContent,'<svg onload=bad()> invited you');assert.equal(x.el('inviteWelcomeTitle').innerHTML,'');
  x.owner(10002);x.respond(async()=>fixture(10002));await x.c.loadInviteSummary();assert.equal(dialog.open,false);assert.equal(x.el('incomingInviteCard').hidden,true);assert.equal(x.storage.size,0);
 });
+
+test('history message distinguishes five unverified historical invites from no invitations',async()=>{
+ const x=setup(),d=cumulativeFixture();
+ d.friends_joined=5;d.friends_pending=0;d.friends_qualified=0;d.friends_rewarded=0;d.friends_on_hold=5;
+ d.friend_progress=Array.from({length:5},(_,i)=>({...d.friend_progress[0],id:'legacy'+i,status:'on_hold',qualification_mode:'legacy_unknown',policy_version:'legacy_unknown',verified_taps:null,min_taps:null}));
+ x.respond(async()=>d);await x.c.loadInviteSummary();
+ x.respond(async()=>({ok:true,telegram_id:'10001',credits:[]}));await x.c.loadInviteHistory({force:true});
+ assert.match(x.el('inviteHistoryStatus').textContent,/5 historical invitations need eligibility review/);
+ assert.doesNotMatch(x.el('inviteHistoryStatus').textContent,/invite your first friend/i);
+ assert.match(x.el('inviteFriendProgress').innerHTML,/Needs review/);
+});
+test('history distinguishes pending qualification from confirmed credits',async()=>{
+ const x=setup();x.respond(async()=>cumulativeFixture());await x.c.loadInviteSummary();
+ x.respond(async()=>({ok:true,telegram_id:'10001',credits:[]}));await x.c.loadInviteHistory({force:true});
+ assert.match(x.el('inviteHistoryStatus').textContent,/1 friend is progressing/);
+ assert.doesNotMatch(x.el('inviteHistoryStatus').textContent,/coins credited/);
+});
