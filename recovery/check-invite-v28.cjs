@@ -6,7 +6,7 @@ const html=fs.readFileSync('index.html','utf8');
 const invite=html.slice(html.indexOf('<div class="sheet" id="friendsSheet">'),html.indexOf('<div class="sheet" id="inviteDetailsSheet">'));
 const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 test('Invite v28 preserves premium layout and puts the outward referral offer first',()=>{
- assert.match(html,/name="jigcoin-build" content="v29-invite-final-three-1"/);
+ assert.match(html,/name="jigcoin-build" content="v30-invite-responsive-fill-1"/);
  assert.ok(invite.includes('id="shareTelegramBtn"'));
  assert.doesNotMatch(invite,/id="incomingInviteCard"/);
  assert.match(invite,/id="inviteShareCardOpen"/);
