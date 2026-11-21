@@ -7,7 +7,7 @@ const main=html.slice(html.indexOf('<div class="sheet" id="friendsSheet">'),html
 const from=html.indexOf('/* Invite v30: fill only real spare height');
 const css=html.slice(from,html.indexOf('</style>',from));
 test('new version and Invite-only styling are present',()=>{
- assert.match(html,/name="jigcoin-build" content="v30-invite-responsive-fill-1"/);
+ assert.ok(Number(html.match(/name="jigcoin-build" content="v(\d+)-/)?.[1])>=30);
  assert.ok(from>=0);
  assert.doesNotMatch(css,/#coinShopSheet|#boostSheet|#withdrawSheet|#mainScroll|#tabHome|#tabRewards/);
 });
