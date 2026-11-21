@@ -7954,7 +7954,7 @@ function renderVault(){
  const goal=homeGoalModel(balance),active=!!d&&Date.parse(d.vip_until)>vaultNow();
  withdrawBalanceText.textContent=Number.isSafeInteger(balance)?formatNumber(balance):'…';
  document.getElementById('vaultRank').textContent=goal?'Rank · '+goal.current.name:'Rank · —';
- const equipped=goal?(MINT_FINISHES['rank-'+goal.tier]?.name||goal.current.name):null;
+ const equipped=goal?((typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+goal.tier]?.name:null)||goal.current.name):null;
  document.getElementById('vaultBalanceFinish').textContent=equipped?'Equipped finish · '+equipped:'Equipped finish · Checking…';
  document.getElementById('vaultGoal').textContent=goal?(goal.complete?'Highest coin rank unlocked':`${formatNumber(goal.remaining)} coins to ${goal.nextName}`):'Your next rank appears after sync.';
  const pct=goal?Math.round(goal.progress*100):0;
