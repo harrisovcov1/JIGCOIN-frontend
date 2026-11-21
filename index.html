@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v30-invite-responsive-fill-1">
+<meta name="jigcoin-build" content="v31-vault-treasury-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3247,6 +3247,175 @@ html body #friendsSheet .invite-active-reminder {flex:0 0 auto;min-height:44px}
   html body #friendsSheet .invite-details-link{margin-top:0}
 }
 </style>
+
+<style>
+/* Vault v31 — a personal treasury, not a second Shop. Styles scoped to Vault. */
+html body #withdrawSheet .vault-content {
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0;
+  overflow-y:auto;overscroll-behavior:contain;
+  justify-content:flex-start;gap:clamp(7px,1.25dvh,13px);
+  padding:10px 12px 11px;scrollbar-gutter:stable;
+}
+html body #withdrawSheet .vault-summary {
+  flex:1 0 auto;display:flex;flex-direction:column;justify-content:space-evenly;
+  min-height:144px;margin:0;padding:12px 14px;
+  border:1px solid var(--mint-inlay);border-radius:14px;
+  background:var(--mint-mark),var(--mint-grain),var(--mint-feature);
+}
+html body #withdrawSheet .vault-balance-top {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:11px;line-height:1.2;
+}
+html body #withdrawSheet #vaultRank {
+  color:var(--mint-accent);font-size:12px;font-weight:750;
+}
+html body #withdrawSheet .vault-total {margin:4px 0;gap:11px}
+html body #withdrawSheet .vault-total strong {
+  font-size:clamp(30px,7.7vw,39px);line-height:1.03;
+  font-variant-numeric:tabular-nums;
+}
+html body #withdrawSheet .vault-rank-art {width:48px;height:48px}
+html body #withdrawSheet .vault-balance-finish {
+  color:var(--mint-highlight);font-size:11px;line-height:1.3;font-weight:650;
+  margin:0 0 2px;
+}
+html body #withdrawSheet .vault-goal {font-size:11px;line-height:1.3}
+html body #withdrawSheet #vaultProgressLabel {font-size:10px;line-height:1.2;margin-top:2px}
+html body #withdrawSheet .vault-progress {margin-top:5px;height:6px}
+html body #withdrawSheet .vault-collection {
+  flex:2 0 auto;display:flex;flex-direction:column;
+  justify-content:space-evenly;min-height:204px;gap:8px;
+  padding:12px 13px;margin:0;border:1px solid var(--mint-inlay);
+  background:var(--mint-mark),var(--mint-grain),var(--mint-feature);
+  border-radius:14px;
+}
+html body #withdrawSheet .vault-collection-heading {
+  display:flex;justify-content:space-between;align-items:center;gap:6px;
+}
+html body #withdrawSheet .vault-collection-heading h2 {
+  font-size:17px;line-height:1.2;margin:0;color:var(--mint-highlight);
+}
+html body #withdrawSheet .vault-collection-heading span {
+  font-size:10px;line-height:1.2;color:var(--mint-muted);text-align:right;
+}
+html body #withdrawSheet .vault-finish-link {
+  flex:0 0 auto;width:100%;min-height:82px;padding:7px 0;
+  grid-template-columns:120px minmax(0,1fr) 10px;gap:8px;
+  border-bottom:1px solid var(--mint-rim);align-items:center;
+}
+html body #withdrawSheet .vault-finish-pair {gap:3px}
+html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow) {
+  width:54px;height:54px;flex:none;
+  filter:drop-shadow(0 3px 5px #0008);
+}
+html body #withdrawSheet .vault-finish-pair .finish-arrow {font-size:16px}
+html body #withdrawSheet .vault-finish-copy {
+  display:flex;flex-direction:column;gap:2px;min-width:0;
+}
+html body #withdrawSheet .vault-finish-copy .vault-finish-eyebrow {
+  font-size:10px;line-height:1.2;margin:0;color:var(--mint-accent);
+}
+html body #withdrawSheet .vault-finish-link strong {
+  font-size:15px;line-height:1.17;display:block;color:var(--mint-highlight);
+}
+html body #withdrawSheet .vault-finish-link small {
+  font-size:11px;line-height:1.25;margin:0;color:var(--mint-muted);
+}
+html body #withdrawSheet .vault-medal-spotlight {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+  flex:0 0 auto;margin:1px 0;
+}
+html body #withdrawSheet .vault-medal-spotlight[hidden] {display:none!important}
+html body #withdrawSheet .vault-medal-badge {
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;
+  min-width:0;padding:7px 4px;
+  border:1px solid var(--mint-rim);border-radius:9px;
+  background:linear-gradient(135deg,#34332e,#172233);
+  text-align:center;
+}
+html body #withdrawSheet .vault-medal-badge strong {
+  font-size:12px;line-height:1.15;color:var(--mint-highlight);
+}
+html body #withdrawSheet .vault-medal-badge small {
+  font-size:10px;line-height:1.2;color:var(--mint-muted);
+}
+html body #withdrawSheet #vaultMedalCollection {
+  border-top:1px solid var(--mint-rim);margin:0;flex:0 0 auto;
+}
+html body #withdrawSheet #vaultMedalCollection summary {
+  min-height:44px;gap:7px;font-size:12px;
+}
+html body #withdrawSheet #vaultMedalCount {
+  font-size:10px;color:var(--mint-accent);text-align:right;
+}
+html body #withdrawSheet button#vaultVipOpen.vault-membership-card {
+  display:grid;grid-template-columns:42px minmax(0,1fr) 14px;
+  align-items:center;gap:8px;flex:0 0 auto;width:100%;
+  min-height:68px;padding:8px 11px;margin:0;
+  border-radius:11px;
+}
+html body #withdrawSheet button#vaultVipOpen img {width:40px;height:40px;object-fit:contain}
+html body #withdrawSheet button#vaultVipOpen strong {
+  display:block;font-size:15px;line-height:1.15;margin:0;
+}
+html body #withdrawSheet button#vaultVipOpen small {
+  display:block;font-size:10px;line-height:1.22;margin-top:2px;
+}
+html body #withdrawSheet button#vaultVipOpen .summary-chevron {font-size:20px}
+html body #withdrawSheet .vault-account-drawer {
+  flex:0 0 auto;min-height:50px;padding:0 11px;margin:0;
+  border:1px solid var(--mint-rim);border-radius:10px;
+  background:var(--mint-grain),var(--mint-plate);
+}
+html body #withdrawSheet .vault-account-drawer>summary {
+  display:flex;align-items:center;justify-content:space-between;gap:7px;
+  min-height:52px;cursor:pointer;list-style:none;padding:7px 0;
+}
+html body #withdrawSheet .vault-account-drawer>summary::-webkit-details-marker {display:none}
+html body #withdrawSheet .vault-account-drawer>summary strong {
+  display:block;font-size:13px;line-height:1.2;color:var(--mint-highlight);
+}
+html body #withdrawSheet .vault-account-drawer>summary small {
+  display:block;font-size:10px;line-height:1.2;margin-top:3px;color:var(--mint-muted);
+}
+html body #withdrawSheet .vault-account-drawer[open]>summary span:last-child {transform:rotate(90deg)}
+html body #withdrawSheet .vault-account-drawer .vault-account-links {
+  display:flex;flex-direction:column;gap:0;padding:0 0 5px;
+  border-top:1px solid var(--mint-rim);
+}
+html body #withdrawSheet .vault-account-drawer .vault-account-links button {
+  min-height:44px;min-width:0;padding:7px 4px;font-size:12px;line-height:1.3;
+  color:var(--mint-text);background:transparent;border:0;
+  border-bottom:1px solid var(--mint-rim);text-align:left;
+}
+html body #withdrawSheet .vault-airdrop {
+  flex:0 0 auto;margin:0;padding:0 11px;
+  border:1px solid var(--mint-rim);border-radius:10px;
+  background:var(--mint-grain),var(--mint-plate);
+}
+html body #withdrawSheet .vault-airdrop summary {
+  min-height:51px;padding:7px 0;display:flex;align-items:center;
+}
+html body #withdrawSheet .vault-airdrop summary small {
+  display:block;font-size:10px;line-height:1.22;margin-top:2px;
+}
+html body #withdrawSheet .vault-airdrop p {font-size:11px;line-height:1.45}
+@media(max-height:730px),(max-width:350px){
+  html body #withdrawSheet .vault-content {gap:6px;padding:7px 9px 8px}
+  html body #withdrawSheet .vault-summary {flex:0 0 auto;min-height:135px}
+  html body #withdrawSheet .vault-collection {flex:0 0 auto;min-height:188px}
+  html body #withdrawSheet .vault-finish-link {grid-template-columns:100px minmax(0,1fr) 9px}
+  html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){width:44px;height:44px}
+}
+@media(min-height:1000px){
+  html body #withdrawSheet .vault-content {justify-content:space-evenly}
+  html body #withdrawSheet .vault-summary {flex:0 0 auto;min-height:160px}
+  html body #withdrawSheet .vault-collection {flex:0 0 auto;min-height:245px}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #withdrawSheet .vault-content {scroll-behavior:auto}
+}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -3478,17 +3647,30 @@ html body #friendsSheet .invite-active-reminder {flex:0 0 auto;min-height:44px}
       <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
         <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
         <div class="vault-total"><span class="vault-rank-art" id="vaultRankArt" aria-hidden="true"></span><strong id="withdrawBalanceText">…</strong></div>
+        <div class="vault-balance-finish" id="vaultBalanceFinish">Equipped finish · Checking…</div>
         <div class="vault-goal"><span id="vaultGoal">Your next rank appears after sync.</span><span id="vaultProgressLabel"></span></div>
         <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
       </section>
-      <button type="button" class="vip-summary" id="vaultVipOpen" aria-label="View JigCoin VIP Pass">
-        <img src="./assets/vip-crown.svg" width="64" height="56" alt=""><span><strong>JigCoin VIP Pass</strong><small id="vaultVipSummary">2× coins per tap · 2× energy capacity</small><small class="vip-summary-state" id="vaultVipState">Checking your pass…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
-      </button>
-      <section class="vault-collection" aria-labelledby="vaultCollectionTitle"><h2 id="vaultCollectionTitle">Your collection</h2>
-        <button type="button" class="vault-finish-link" id="vaultCollectionOpen"><span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span><span><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span></button>
+      <section class="vault-collection" aria-labelledby="vaultCollectionTitle">
+        <div class="vault-collection-heading"><h2 id="vaultCollectionTitle">Your collection</h2><span>Owned finishes &amp; medals</span></div>
+        <button type="button" class="vault-finish-link" id="vaultCollectionOpen">
+          <span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span>
+          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Equipped coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
+        </button>
+        <div class="vault-medal-spotlight" id="vaultMedalSpotlight" hidden aria-label="Confirmed recent daily medals"></div>
         <details class="vault-medals" id="vaultMedalCollection"><summary><span>Medal collection</span><span id="vaultMedalCount">View earned medals</span></summary><h3>Daily podiums</h3><div id="vaultDailyMedalList">Open Vault to check your medals.</div><h3>Weekly Race</h3><div id="pilotMedalList">Checking your weekly medals…</div><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
       </section>
-      <div class="vault-account-links"><button type="button" id="vaultHistoryOpen">Purchases &amp; payment help <span aria-hidden="true">›</span></button><button type="button" id="vaultRewardHistoryOpen">Invite reward history <span aria-hidden="true">›</span></button></div>
+      <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
+        <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
+      </button>
+      <details class="vault-account-drawer" id="vaultAccountDrawer">
+        <summary><span><strong>Account activity &amp; support</strong><small>Coin purchases · VIP receipts · referral credits</small></span><span aria-hidden="true">›</span></summary>
+        <div class="vault-account-links">
+          <button type="button" id="vaultCoinOrdersOpen">Coin-pack orders &amp; payment help <span aria-hidden="true">›</span></button>
+          <button type="button" id="vaultHistoryOpen">VIP purchases &amp; payment support <span aria-hidden="true">›</span></button>
+          <button type="button" id="vaultRewardHistoryOpen">Referral reward history <span aria-hidden="true">›</span></button>
+        </div>
+      </details>
       <details class="vault-airdrop" id="vaultWithdrawalDetails"><summary><span>Airdrop status<small>Planned · Rules awaiting publication</small></span><span aria-hidden="true">+</span></summary><p>A JigCoin token airdrop is planned. Eligibility, allocations and conversion terms are awaiting publication. In-game coins currently have no cash-out value. Cash-out is not available.</p><p>Coin ranks, VIP and medals describe your game progress. They do not guarantee an airdrop allocation.</p></details>
     </div>
   </div>
@@ -7771,10 +7953,12 @@ function renderVault(){
  const d=vaultSnapshot(),ready=accountIsReady(),balance=ready&&homeIdentity===homeUserId()?homeConfirmedBalance:null;
  const goal=homeGoalModel(balance),active=!!d&&Date.parse(d.vip_until)>vaultNow();
  withdrawBalanceText.textContent=Number.isSafeInteger(balance)?formatNumber(balance):'…';
- document.getElementById('vaultRank').textContent=goal?.current.name||'—';
+ document.getElementById('vaultRank').textContent=goal?'Rank · '+goal.current.name:'Rank · —';
+ const equipped=goal?((typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+goal.tier]?.name:null)||goal.current.name):null;
+ document.getElementById('vaultBalanceFinish').textContent=equipped?'Equipped finish · '+equipped:'Equipped finish · Checking…';
  document.getElementById('vaultGoal').textContent=goal?(goal.complete?'Highest coin rank unlocked':`${formatNumber(goal.remaining)} coins to ${goal.nextName}`):'Your next rank appears after sync.';
  const pct=goal?Math.round(goal.progress*100):0;
- document.getElementById('vaultProgressLabel').textContent=goal?(goal.complete?'All coin ranks reached':`${goal.current.name} → ${goal.nextName}`):'';
+ document.getElementById('vaultProgressLabel').textContent=goal?(goal.complete?'All coin ranks reached':`${pct}% through ${goal.current.name} towards ${goal.nextName}`):'';
  document.getElementById('vaultProgressFill').style.width=pct+'%';document.getElementById('vaultProgress').setAttribute('aria-valuenow',String(pct));document.getElementById('vaultProgress').setAttribute('aria-valuetext',goal?`${pct}% through ${goal.current.name}${goal.nextName?' towards '+goal.nextName:''}`:'Checking rank');
  if(goal) setCoinArtwork(document.getElementById('vaultRankArt'),goal.tier);
  vipStatusText.textContent=active?'VIP active':d?`${d.product.days} days · ${d.product.stars} Stars`:'30-day pass';
@@ -7806,15 +7990,21 @@ function renderVault(){
 function renderVipSummaries(){
  const d=vaultSnapshot(),active=!!d&&Date.parse(d.vip_until)>vaultNow(),pending=vaultPending();
  const expiry=active?new Date(d.vip_until).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
- const summary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
- const status=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
+ // Shop is the sales destination. Keep its proven presentation unchanged.
+ const shopSummary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
+ const shopStatus=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
+ // Vault answers the different question: what membership do I own?
+ const vaultSummary=active?`Active perks · 2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× tap coins · 2× energy capacity';
+ const vaultStatus=pending?'Payment pending · Check status':vaultError?'Membership status unavailable · Retry':!d?'Checking membership…':active?`VIP active until ${expiry} · View membership`:d.product.enabled?'Not active · 30 days for ★500 · View benefits':'VIP currently unavailable';
  for(const prefix of ['shop','vault']){
    const card=document.getElementById(prefix==='shop'?'shopVipPass':'vaultVipOpen');
    if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
    const details=document.getElementById(prefix+'VipSummary'),stateLabel=document.getElementById(prefix+'VipState');
-   if(details)details.textContent=summary;if(stateLabel)stateLabel.textContent=status;
+   if(details)details.textContent=prefix==='shop'?shopSummary:vaultSummary;
+   if(stateLabel)stateLabel.textContent=prefix==='shop'?shopStatus:vaultStatus;
  }
 }
+
 function renderVaultCollection(goal){
  if(!goal)return;
  setCoinArtwork(document.getElementById('vaultCurrentFinish'),goal.tier);
@@ -7831,8 +8021,25 @@ function renderVaultMedals(){
  box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):awards.length?awards.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
  if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
  document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medal${awards.length===1?'':'s'} shown`:'Daily & weekly achievements';
+ const spotlight=document.getElementById('vaultMedalSpotlight');
+ if(spotlight){
+   spotlight.replaceChildren();
+   spotlight.hidden=!Array.isArray(awards)||awards.length===0;
+   if(!spotlight.hidden){
+     for(const award of awards.slice(0,3)){
+       const badge=document.createElement('div');
+       badge.className='vault-medal-badge';
+       const place=document.createElement('strong');
+       place.textContent=['','Gold','Silver','Bronze'][award.place]||'Podium';
+       const date=document.createElement('small');
+       date.textContent=new Date(award.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'});
+       badge.append(place,date);spotlight.append(badge);
+     }
+   }
+ }
  const retry=document.getElementById('vaultMedalRetry');if(retry)retry.disabled=!!vaultMedalsRequest;
 }
+
 async function loadVaultMedals(force=false){
  const owner=homeUserId();if(!owner||!accountIsReady())return;
  if(vaultMedalsOwner!==owner){vaultMedalsOwner=owner;vaultMedalsData=null;vaultMedalsRequest=null;vaultMedalsChecked=0;vaultMedalsError=false;}
@@ -7945,6 +8152,14 @@ async function handleVipPass(){openVipOffer('vault');}
 async function handleVipPremium(){openVipOffer('vault');}
 document.getElementById('vipOfferClose').addEventListener('click',()=>vipOfferOrigin==='shop'?openCoinShopSheet():openVault());
 document.getElementById('vipOfferHistory').addEventListener('click',openVaultDetails);
+document.getElementById('vaultCoinOrdersOpen').addEventListener('click',()=>{
+  // Order receipts remain managed by the authenticated Shop catalogue,
+  // with server-verified settlement and refunds only.
+  openCoinShopSheet();
+  const orders=document.getElementById('hubOrderDetails');
+  orders.open=true;
+  orders.scrollIntoView({block:'nearest'});
+});
 document.getElementById('vaultVipOpen').addEventListener('click',()=>openVipOffer('vault'));
 document.getElementById('vaultCollectionOpen').addEventListener('click',()=>openHomeJourney());
 document.getElementById('vaultRewardHistoryOpen').addEventListener('click',()=>openInviteDetails());
