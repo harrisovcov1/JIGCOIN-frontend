@@ -8,7 +8,7 @@ const details=html.slice(html.indexOf('<div class="sheet" id="inviteDetailsSheet
 const marker=html.indexOf('/* Invite v29: one friends/rewards destination');
 const css=html.slice(marker,html.indexOf('</style>',marker));
 test('A single Friends & rewards action contains the actual friend status',()=>{
- assert.match(html,/name="jigcoin-build" content="v29-invite-final-three-1"/);
+ assert.match(html,/name="jigcoin-build" content="v30-invite-responsive-fill-1"/);
  assert.equal((overview.match(/id="inviteDetailsOpen"/g)||[]).length,1);
  assert.equal((overview.match(/id="invitePendingSummary"/g)||[]).length,1);
  assert.match(overview,/<button type="button" id="inviteDetailsOpen"[\s\S]*?<small id="invitePendingSummary" hidden><\/small>/);
