@@ -6300,7 +6300,7 @@ function renderPackChoices(packs,preview,target=packGoal(packs)){
       rankPrompt.append(sub);
       if(rank?.product){
         const unlock=document.createElement('small');
-        unlock.textContent=`Unlock now: ${rank.product.title} · ★${formatNumber(rank.product.stars)}`;
+        unlock.textContent=`Rank unlock option: ${rank.product.title} · ★${formatNumber(rank.product.stars)}`;
         rankPrompt.append(unlock);
       }
       const previewButton=document.createElement('button');
