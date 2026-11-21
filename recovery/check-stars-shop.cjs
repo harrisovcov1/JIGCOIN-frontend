@@ -6,7 +6,7 @@ function setup({enabled=true,products=[{sku:'JC_SMALL',title:'Small pack',coins:
  const calls=[],toasts=[];let syncs=0;
  const ctx={homeIdentity:null,homeConfirmedBalance:null,homeGoalModel:()=>null,reviewGamePurchase:async()=>true,Date,console,progressionCurrent:()=>null,renderDailyRewards(){},accountIsReady:()=>true,homeUserId:()=>10001,setTimeout:(fn)=>fn(),document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>[]},window:{addEventListener(){},Telegram:{WebApp:openInvoice?{openInvoice}:{} }},
  escapeHtml:s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;'),formatNumber:n=>n.toLocaleString('en-GB'),showToast:s=>toasts.push(s),
- syncStateIfIdle:async()=>{syncs++;},apiPost:async(...args)=>{calls.push(args);const r=replies.shift();return typeof r==='function'?r():r;}};
+ syncStateIfIdle:async()=>{syncs++;},apiPost:async(...args)=>{if(args[0]==='/api/stars/interaction')return {ok:true};calls.push(args);const r=replies.shift();return typeof r==='function'?r():r;}};
  vm.createContext(ctx);vm.runInContext(code,ctx);
  ctx.catalog={enabled,products,offer_expires_at:expires};
  vm.runInContext('hubCatalog=catalog; hubCatalogOwner=10001; hubCatalogLoadedAt=Date.now(); renderStarsCatalog=()=>{}; loadCoinPacks=async()=>{};',ctx);
