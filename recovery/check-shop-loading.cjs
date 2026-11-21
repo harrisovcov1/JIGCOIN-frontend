@@ -72,24 +72,24 @@ test('cold Home has neutral artwork until a rank is confirmed and recovers witho
   assert.deepEqual(themes,[null,1,null]);
 });
 
-test('one accessible pack gives exact resulting balance and rank gap without claiming an unearned rank',()=>{
+test('affordable recommendation and rank unlock are independently accurate',()=>{
   const c=setup();
-  c.ctx.homeConfirmedBalance=18890;
+  c.ctx.homeConfirmedBalance=22009;
   const start=html.indexOf('function homeTierIndex('),end=html.indexOf('function advanceHomeMilestone(',start);
   vm.runInContext(html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+html.slice(start,end),c.ctx);
-  c.ctx.coinArtwork=()=>'<img>';
-  const small={title:'Small coin pack',coins:1000,stars:100},medium={title:'Medium coin pack',coins:3000,stars:250};
-  const card=()=>{const choice=c.ctx.packGoal([small,medium]);return c.ctx.starsProductCard(choice.product,false,true,choice.goal);};
-  assert.equal(c.ctx.packGoal([small,medium]).product,medium);
-  assert.match(card(),/3,000 <span>coins/);
-  assert.match(card(),/After purchase: 21,890 coins/);
-  assert.match(card(),/28,110 coins to Operator/);
-  assert.doesNotMatch(card(),/unlocked|Reach|Work towards/);
-  c.ctx.homeConfirmedBalance=49000;
-  assert.match(card(),/1,000 <span>coins/);
-  assert.match(card(),/After purchase: 50,000 coins · Operator unlocked/);
-  assert.match(card(),/100,000 coins to Commander/);
-  c.ctx.homeConfirmedBalance=11500000;
-  assert.match(card(),/After purchase: 11,501,000 coins/);
-  assert.doesNotMatch(card(),/Operator|unlocked|undefined/);
+  c.ctx.homeIdentity=c.ctx.homeUserId();
+  const packs=[
+    {sku:'JC_SMALL',title:'Small coin pack',coins:1000,stars:100},
+    {sku:'JC_MEDIUM',title:'Medium coin pack',coins:3000,stars:250},
+    {sku:'JC_LARGE',title:'Large coin pack',coins:7000,stars:500},
+    {sku:'JC_GROWTH',title:'Growth coin pack',coins:37500,stars:2500}
+  ];
+  const affordable=c.ctx.packGoal(packs),rank=c.ctx.rankReachPack(packs);
+  assert.equal(affordable.product.sku,'JC_MEDIUM');
+  assert.equal(rank.product.sku,'JC_GROWTH');
+  assert.equal(rank.goal.remaining,27991);
+  assert.match(c.ctx.starsProductCard(rank.product,false,true,null,0,rank.goal),/59,509 coins/);
+  assert.match(c.ctx.starsProductCard(rank.product,false,true,null,0,rank.goal),/Operator unlocked/);
+  assert.doesNotMatch(c.ctx.starsProductCard(affordable.product,false,true,affordable.goal),/Operator unlocked/);
+  assert.equal(c.ctx.packGoal(packs).product.stars,250);
 });
