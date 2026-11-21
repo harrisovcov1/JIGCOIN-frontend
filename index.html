@@ -5364,84 +5364,51 @@ ${data.invite_link}`;
 }
 
 function renderShareCardCanvas() {
-  if(!inviteSnapshot())return;
-  const c = document.getElementById("shareCardCanvas");
-  if (!c) return;
-  const ctx = c.getContext("2d");
-  if (!ctx) return;
-
-  const W = c.width, H = c.height;
-  ctx.clearRect(0, 0, W, H);
-
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "rgba(236, 72, 153, 0.95)");
-  g.addColorStop(0.55, "rgba(59, 130, 246, 0.9)");
-  g.addColorStop(1, "rgba(15, 23, 42, 0.98)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(2, 6, 23, 0.35)";
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(248,250,252,0.95)";
-  ctx.font = "900 48px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("JigCoin", 52, 92);
-
-  ctx.fillStyle = "rgba(226,232,240,0.9)";
-  ctx.font = "600 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Tap · Quests · Invite friends", 52, 132);
-
-  const bal = Number(state.bal || 0);
-  const today = Number(state.today || 0);
-  const streak = Number(state.streakDays || 0);
-  const rank = (document.getElementById("rankName") && document.getElementById("rankName").textContent) ? document.getElementById("rankName").textContent : "Recruit";
-
-  ctx.font = "900 70px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillStyle = "rgba(248,250,252,0.98)";
-  ctx.fillText(bal.toLocaleString("en-GB"), 52, 230);
-
-  ctx.font = "700 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillStyle = "rgba(226,232,240,0.92)";
-  ctx.fillText("balance", 52, 260);
-
-  const pillY = 305;
-  const pills = [
-    { label: "Rank", value: rank },
-    { label: "Today", value: today.toLocaleString("en-GB") },
-    { label: "Streak", value: `${streak} days` },
-  ];
-
-  let x = 52;
-  pills.forEach((p) => {
-    const w = Math.max(210, ctx.measureText(p.value).width + 110);
-    ctx.fillStyle = "rgba(2,6,23,0.42)";
-    roundRect(ctx, x, pillY, w, 74, 22);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(148,163,184,0.22)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(148,163,184,0.9)";
-    ctx.font = "700 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText(p.label.toUpperCase(), x + 18, pillY + 28);
-
-    ctx.fillStyle = "rgba(248,250,252,0.95)";
-    ctx.font = "800 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText(p.value, x + 18, pillY + 58);
-
-    x += w + 14;
-  });
-
-  const link = (inviteLinkText && inviteLinkText.textContent) ? inviteLinkText.textContent.trim() : FALLBACK_REF_LINK;
-  ctx.fillStyle = "rgba(226,232,240,0.95)";
-  ctx.font = "700 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Join:", 52, 485);
-
-  ctx.fillStyle = "rgba(248,250,252,0.95)";
-  ctx.font = "800 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  const maxChars = 44;
-  const safeLink = link.length > maxChars ? (link.slice(0, maxChars - 1) + "…") : link;
-  ctx.fillText(safeLink, 120, 485);
+  const data=inviteSnapshot();if(!data)return;
+  const c=document.getElementById('shareCardCanvas');if(!c)return;
+  const ctx=c.getContext('2d');if(!ctx)return;
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  const background=ctx.createLinearGradient(0,0,W,H);
+  background.addColorStop(0,'#080d15');
+  background.addColorStop(0.56,'#202733');
+  background.addColorStop(1,'#0c1421');
+  ctx.fillStyle=background;ctx.fillRect(0,0,W,H);
+  // Gold and black visual system shared with Home, Rewards and Shop.
+  const metal=ctx.createLinearGradient(0,0,W,0);
+  metal.addColorStop(0,'#8f642e');metal.addColorStop(.24,'#f7d890');
+  metal.addColorStop(.58,'#a47a37');metal.addColorStop(1,'#f3cd7e');
+  ctx.strokeStyle=metal;ctx.lineWidth=7;ctx.strokeRect(15,15,W-30,H-30);
+  ctx.strokeStyle='#463824';ctx.lineWidth=2;ctx.strokeRect(25,25,W-50,H-50);
+  ctx.fillStyle='#f6dfae';ctx.font='bold 62px Georgia,serif';ctx.fillText('JigCoin',52,102);
+  ctx.fillStyle='#d8b777';ctx.font='bold 22px system-ui,sans-serif';
+  ctx.fillText('BRING A FRIEND. START A RIVALRY.',52,144);
+  ctx.fillStyle='#f7d99b';ctx.font='800 54px system-ui,sans-serif';
+  ctx.fillText('1,000 FREE COINS',52,224);
+  ctx.fillStyle='#e0e3e9';ctx.font='500 21px system-ui,sans-serif';
+  ctx.fillText('New players start with an in-game welcome reward.',54,264);
+  ctx.fillText('Tap · Daily rewards · Weekly Race · Coin finishes',54,297);
+  // Decorative embossed emblem. This is original, not an NFT or coin listing.
+  ctx.save();
+  const medallion=ctx.createRadialGradient(802,180,12,802,180,105);
+  medallion.addColorStop(0,'#f6d28a');medallion.addColorStop(.55,'#b68139');
+  medallion.addColorStop(1,'#5a391d');
+  ctx.beginPath();ctx.arc(802,180,98,0,Math.PI*2);
+  ctx.fillStyle=medallion;ctx.fill();ctx.lineWidth=7;ctx.strokeStyle='#e6bd6a';ctx.stroke();
+  ctx.beginPath();ctx.arc(802,180,81,0,Math.PI*2);
+  ctx.strokeStyle='#533c29';ctx.lineWidth=4;ctx.stroke();
+  ctx.textAlign='center';ctx.fillStyle='#332416';ctx.font='bold 138px Georgia,serif';
+  ctx.fillText('J',802,225);ctx.textAlign='left';ctx.restore();
+  ctx.fillStyle='#ba9d6d';ctx.font='700 17px system-ui,sans-serif';ctx.fillText('YOUR GAME PROGRESS',54,362);
+  const confirmed=homeIdentity===homeUserId()&&Number.isSafeInteger(homeConfirmedBalance)?homeConfirmedBalance:null;
+  const goal=confirmed===null?null:homeGoalModel(confirmed);
+  const progress=goal?confirmed.toLocaleString('en-GB')+' saved coins · '+goal.current.name:'Play to unlock your rank';
+  ctx.fillStyle='#fff0ca';ctx.font='bold 29px system-ui,sans-serif';ctx.fillText(progress,54,405,805);
+  ctx.strokeStyle='#9c7848';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(50,432);ctx.lineTo(W-50,432);ctx.stroke();
+  ctx.fillStyle='#f0ca81';ctx.font='bold 18px system-ui,sans-serif';
+  ctx.fillText('JOIN ME IN JIGCOIN',52,464);
+  ctx.fillStyle='#e7e9ed';ctx.font='700 20px system-ui,sans-serif';
+  ctx.fillText(data.invite_link,52,503,850);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
