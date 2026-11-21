@@ -3336,7 +3336,7 @@ html body #inviteDetailsSheet .invite-friend-progress li:has(.friend-heading spa
         <span id="inviteProgressText">—</span>
       </section>
       <button type="button" class="invite-pending" id="invitePendingSummary" hidden aria-label="View invited friends and reward status"></button>
-      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Friends leaderboard <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
+      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
       <button type="button" id="inviteDetailsOpen" class="invite-details-link">Full referral rewards &amp; history <span aria-hidden="true">›</span></button>
       <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
     </div>
@@ -5333,6 +5333,10 @@ function renderInviteOverview(){
   el('inviteTierName').textContent=data?(data.friends_rewarded?data.tier_name+' inviter':'No level yet'):'—';
   el('inviteNextTitle').textContent=nextName ? `${formatNumber(data.next_at-data.friends_rewarded)} more to ${nextName} inviter` : data ? 'Top inviter level' : 'Invite progress';
   el('inviteNextText').textContent=data?.next_at?`Invite #${formatNumber(data.next_at)} earns ${formatNumber(data.next_reward_coins)} coins. Each later invite uses your new rate.`:data?'Your next successful invite earns '+formatNumber(data.reward_coins)+' coins.':'';
+  if(data?.next_at===1&&data.tiers?.[1]){
+    const silver=data.tiers[1];
+    el('inviteNextText').textContent=`First qualifying invite earns ${formatNumber(data.reward_coins)} coins. ${silver.name} begins at #${formatNumber(silver.at)}: ${formatNumber(silver.reward_coins)} coins each.`;
+  }
   el('inviteProgress').max=data?.next_at!==null&&data?data.next_at-data.previous_at:1;
   el('inviteProgress').value=data?(data.next_at===null?1:data.friends_rewarded-data.previous_at):0;
   el('inviteProgressText').textContent=!data?'—':data.next_at===null?`${formatNumber(data.friends_rewarded)} successful invites`:`${formatNumber(data.friends_rewarded)} / ${formatNumber(data.next_at)} successful invites`;
