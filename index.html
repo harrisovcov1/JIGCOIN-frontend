@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v27-shop-responsive-fill-1">
+<meta name="jigcoin-build" content="v28-invite-growth-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3068,6 +3068,76 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
   }
 }
 </style>
+
+<style>
+/* Invite v28: the same metallic premium design, optimised for an actual
+   invitation and follow-through, with safe scrolling at larger text sizes. */
+html body #friendsSheet .invite-overview {
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow-y:auto;
+  gap:6px;padding:9px 12px 10px;justify-content:flex-start;scrollbar-gutter:stable;
+}
+html body #friendsSheet .invite-reward-card{
+  display:grid;flex:0 0 auto;
+  grid-template-columns:minmax(0,1fr) 57px;
+  grid-template-areas:'tier art' 'reward art' 'welcome welcome' 'terms terms' 'actions actions' 'card card' 'message message';
+  gap:5px 8px;padding:11px 12px 9px;border-radius:13px;align-content:start;
+}
+html body #friendsSheet .invite-eyebrow{grid-area:tier;font-size:11px;letter-spacing:.03em;align-self:end}
+html body #friendsSheet .invite-emblem{grid-area:art;width:57px;height:51px;margin:0}
+html body #friendsSheet .invite-emblem img{width:100%;height:100%;object-fit:contain}
+html body #friendsSheet h2{grid-area:reward;margin:0;gap:5px;line-height:1.15}
+html body #friendsSheet h2 strong{font-size:39px;line-height:1.05}
+html body #friendsSheet h2 span{font-size:15px}
+html body #friendsSheet #inviteWelcome{grid-area:welcome;margin:0;font-size:13px;line-height:1.35;color:var(--mint-accent);font-weight:700}
+html body #friendsSheet #inviteQualification{grid-area:terms;margin:0;font-size:12px;line-height:1.35;color:var(--mint-muted)}
+html body #friendsSheet .invite-actions{grid-area:actions;grid-template-columns:minmax(0,1fr) 82px;gap:7px;margin:4px 0 0}
+html body #friendsSheet .invite-actions button{min-height:44px;padding:6px 8px;font-size:12px;line-height:1.15}
+html body #friendsSheet .invite-card-open{
+  grid-area:card;display:block;width:100%;min-height:38px;padding:7px 9px;
+  border:1px solid var(--mint-edge);border-radius:8px;
+  background:var(--mint-grain),var(--mint-plate);
+  color:var(--mint-highlight);font:inherit;font-size:12px;font-weight:700;text-align:center;cursor:pointer;
+}
+html body #friendsSheet .invite-card-open:disabled{opacity:.5;cursor:default}
+html body #friendsSheet .invite-status{grid-area:message}
+html body #friendsSheet .friends-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;flex:0 0 auto;margin:0}
+html body #friendsSheet .friends-summary-col{min-width:0;padding:7px 9px;gap:2px}
+html body #friendsSheet .friends-summary-col span{font-size:10px;line-height:1.2}
+html body #friendsSheet .friends-summary-col strong{font-size:22px;line-height:1.1}
+html body #friendsSheet .invite-milestone{flex:0 0 auto;padding:9px 11px;min-height:78px;border-radius:11px}
+html body #friendsSheet .invite-milestone-top{gap:5px;font-size:12px;line-height:1.2}
+html body #friendsSheet .invite-milestone p{margin:4px 0;font-size:11px;line-height:1.25}
+html body #friendsSheet .invite-milestone progress{margin:5px 0 2px}
+html body #friendsSheet .invite-pending{
+  flex:0 0 auto;width:100%;min-height:44px;display:block;padding:7px 10px;
+  text-align:left;border-radius:9px;cursor:pointer;color:var(--mint-highlight);
+  font:inherit;font-size:11px;line-height:1.25;font-weight:650;
+  background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);
+}
+html body #friendsSheet .invite-pending[hidden]{display:none!important}
+html body #friendsSheet .invite-play-links{gap:6px;flex:0 0 auto}
+html body #friendsSheet .invite-play-links button{min-height:44px;padding:7px 9px;font-size:11px}
+html body #friendsSheet .invite-details-link{flex:0 0 auto;min-height:44px;font-size:12px;padding:7px 9px}
+html body #friendsSheet .incoming-invite-card{
+  order:10;flex:0 0 auto;min-height:44px;width:100%;margin:0;
+  padding:7px 10px;gap:8px;text-align:left;border-radius:9px;
+}
+html body #friendsSheet .incoming-invite-card strong{font-size:12px;line-height:1.2}
+html body #friendsSheet .incoming-invite-card small{font-size:11px;line-height:1.2}
+html body #inviteDetailsSheet .invite-friend-progress li:has(.friend-heading span){padding:10px 0}
+@media(max-width:350px){
+  html body #friendsSheet .invite-overview{padding:7px 9px;gap:5px}
+  html body #friendsSheet .invite-reward-card{padding:10px;grid-template-columns:minmax(0,1fr) 47px}
+  html body #friendsSheet .invite-emblem{width:47px;height:45px}
+  html body #friendsSheet h2 strong{font-size:34px}
+  html body #friendsSheet .invite-actions{grid-template-columns:minmax(0,1fr) 78px}
+}
+@media(max-height:720px){
+  html body #friendsSheet .invite-overview{gap:5px;padding-top:6px;padding-bottom:6px}
+  html body #friendsSheet .invite-reward-card{gap:4px}
+}
+@media(prefers-reduced-motion:reduce){html body #friendsSheet .invite-overview{scroll-behavior:auto}}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -3248,7 +3318,6 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
   <div class="sheet" id="friendsSheet">
     <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
-      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
         <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
@@ -3256,18 +3325,20 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
         <p id="inviteWelcome"></p>
         <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <svg class="invite-share-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7 17 10-10M7 7h10v10"/></svg></button>
         <button type="button" class="invite-copy" id="copyInviteBtn" disabled>Copy link</button></div>
+        <button type="button" id="inviteShareCardOpen" class="invite-card-open" disabled>Share your progress card ›</button>
         <div id="inviteLoadStatus" class="invite-status" role="status" hidden><span id="inviteStatusText"></span> <button type="button" id="inviteRetry">Try again</button></div>
       </section>
-      <div class="friends-summary"><div class="friends-summary-col"><span>Rewarded invites</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
+      <div class="friends-summary"><div class="friends-summary-col"><span>Joined</span><strong id="inviteJoinedCount">—</strong></div><div class="friends-summary-col"><span>Rewarded</span><strong id="friendsJoinedText">—</strong></div><div class="friends-summary-col"><span>Coins earned</span><strong id="referralPointsText">—</strong></div></div>
       <section class="invite-milestone" aria-labelledby="inviteNextTitle">
         <div class="invite-milestone-top"><strong id="inviteNextTitle">Your next milestone</strong><span id="inviteTierName">—</span></div>
         <p id="inviteNextText">Your progress appears after checking.</p>
         <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
         <span id="inviteProgressText">—</span>
       </section>
-      <div class="invite-pending" id="invitePendingSummary" hidden></div>
-      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Friends leaderboard <span aria-hidden="true">›</span></button><button type="button" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
-      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Friends, rewards &amp; invite history <span aria-hidden="true">›</span></button>
+      <button type="button" class="invite-pending" id="invitePendingSummary" hidden aria-label="View invited friends and reward status"></button>
+      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Friends leaderboard <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
+      <button type="button" id="inviteDetailsOpen" class="invite-details-link">Full referral rewards &amp; history <span aria-hidden="true">›</span></button>
+      <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
     </div>
   </div>
 
@@ -5122,7 +5193,7 @@ function inviteReset(owner){
   const welcome=document.getElementById('inviteWelcomeDialog');if(welcome?.open)welcome.close();
   incomingWelcomeOwner=null;incomingWelcomeKey=null;
   inviteOwner=owner;inviteData=null;inviteCheckedAt=0;invitePending=null;inviteVersion++;
-  inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;
+  inviteCredits=null;inviteHistoryPending=null;inviteHistoryCheckedAt=0;inviteError=false;inviteHistoryError=false;inviteRenderedView=null;
 }
 function validInviteLink(link,owner){
   try{const url=new URL(link);return url.origin==='https://t.me'&&/^\/[A-Za-z0-9_]{5,32}$/.test(url.pathname)&&
@@ -5212,7 +5283,7 @@ function dismissInviteWelcome(){
   incomingWelcomeOwner=null;incomingWelcomeKey=null;
 }
 function inviteRule(data){
-  if(data.qualification.mode==='cumulative_taps')return `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} verified taps in total. No purchase needed.`;
+  if(data.qualification.mode==='cumulative_taps')return `Your reward is credited after a new friend joins and makes ${formatNumber(data.qualification.min_taps)} verified taps in total. No purchase needed.`;
   return data.qualification.mode==='activity'
     ? `When a new friend joins through your link and makes ${formatNumber(data.qualification.min_taps)} taps in one UTC day, or claims one confirmed ad reward.`
     : 'When a new friend joins through your link.';
@@ -5220,7 +5291,7 @@ function inviteRule(data){
 function inviteFriendProgressText(row){
   if(row.status==='rewarded')return row.reward_coins?`+${formatNumber(row.reward_coins)} coins credited`:'Reward credited';
   if(row.status==='qualified')return 'Qualified · reward confirmation pending';
-  if(row.status==='on_hold')return 'Eligibility needs checking. Earlier credited rewards stay unchanged.';
+  if(row.status==='on_hold')return row.qualification_mode==='legacy_unknown'?'Historical referral · reward evidence needs review. No new credit issued.':'Eligibility needs checking. Earlier credited rewards stay unchanged.';
   if(row.qualification_mode==='cumulative_taps'&&row.min_taps>0)return `${formatNumber(Math.min(row.verified_taps||0,row.min_taps))} / ${formatNumber(row.min_taps)} verified taps in total`;
   if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Earlier invite rules · ${formatNumber(row.min_taps)} taps in one UTC day or a confirmed ad reward`:'Earlier invite rules · daily tap activity or a confirmed ad reward';
   if(row.qualification_mode==='join')return 'Earlier invite rules · joining confirmation pending';
@@ -5229,9 +5300,18 @@ function inviteFriendProgressText(row){
 function renderInviteFriends(data){
   const rows=data?.friend_progress;
   const pending=document.getElementById('invitePendingSummary');
-  pending.hidden=!Array.isArray(rows);
-  pending.textContent=Array.isArray(rows)?`${formatNumber(data.friends_joined)} joined · ${formatNumber(data.friends_pending)} working towards a reward${data.friends_on_hold?' · '+formatNumber(data.friends_on_hold)+' to check':''}`:'';
-  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Each friend keeps the rules in effect when they joined.`:'No attributed friends yet. Send your link to start your group.';
+  pending.hidden=!Array.isArray(rows)||data.friends_joined===0;
+  if(Array.isArray(rows)){
+    const parts=[`${formatNumber(data.friends_joined)} joined`];
+    if(data.friends_pending)parts.push(`${formatNumber(data.friends_pending)} progressing`);
+    const awaiting=Math.max(0,data.friends_qualified-data.friends_rewarded);
+    if(awaiting)parts.push(`${formatNumber(awaiting)} qualified`);
+    if(data.friends_on_hold)parts.push(`${formatNumber(data.friends_on_hold)} to review`);
+    if(data.friends_rewarded)parts.push(`${formatNumber(data.friends_rewarded)} rewarded`);
+    parts.push('View friends ›');
+    pending.textContent=parts.join(' · ');
+  } else pending.textContent='';
+  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Historical records may require review before credit can be verified.`:'No attributed friends yet. Send your link to start your group.';
   const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'To check'};
   document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${labels[row.status]}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
 }
@@ -5243,12 +5323,13 @@ function renderInviteOverview(){
   const nextName=data?.next_tier_name;
   el('inviteNextBadge').textContent='Your next successful invite';
   el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'—';
-  el('inviteWelcome').textContent=data?`All new players start with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
+  el('inviteWelcome').textContent=data?`Your friend starts with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
+  el('inviteJoinedCount').textContent=Number.isSafeInteger(data?.friends_joined)?formatNumber(data.friends_joined):'—';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
   inviteLinkText.textContent=data?data.invite_link:'Your invite link appears after checking.';
-  for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn])if(button)button.disabled=!data;
+  for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn,el('inviteShareCardOpen')])if(button)button.disabled=!data;
   el('inviteTierName').textContent=data?(data.friends_rewarded?data.tier_name+' inviter':'No level yet'):'—';
   el('inviteNextTitle').textContent=nextName ? `${formatNumber(data.next_at-data.friends_rewarded)} more to ${nextName} inviter` : data ? 'Top inviter level' : 'Invite progress';
   el('inviteNextText').textContent=data?.next_at?`Invite #${formatNumber(data.next_at)} earns ${formatNumber(data.next_reward_coins)} coins. Each later invite uses your new rate.`:data?'Your next successful invite earns '+formatNumber(data.reward_coins)+' coins.':'';
@@ -5309,10 +5390,24 @@ function openInviteDetails(){
   showAppSheet(document.getElementById('inviteDetailsSheet'),tabFriends);
   renderInviteOverview();renderInviteHistory();loadInviteHistory();document.getElementById('inviteDetailsClose').focus();
 }
+function inviteRecord(event){
+  if(!inviteSnapshot())return;
+  void apiPost('/api/invite/interaction',{event},{silent:true,fastAuth:true,timeoutMs:3500}).catch(()=>{});
+}
+function openInviteShareCard(){
+  if(!inviteSnapshot())return;
+  inviteRecord('card_open');
+  openInviteDetails();
+  const details=document.getElementById('sharePreviewDetails');
+  details.open=true;
+  renderShareCardCanvas();
+  details.scrollIntoView?.({block:'nearest'});
+}
 function shareInviteOnTelegram(){
   const data=inviteSnapshot();if(!data)return;
-  const text=`Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and race with friends.`;
+  const text=`Come play JigCoin with me! New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards, unlock ranks and race with friends.`;
   const url=`https://t.me/share/url?url=${encodeURIComponent(data.invite_link)}&text=${encodeURIComponent(text)}`;
+  inviteRecord('share_open');
   try{
     if(typeof window.Telegram?.WebApp?.openTelegramLink==='function')window.Telegram.WebApp.openTelegramLink(url);
     else if(!window.open(url,'_blank','noopener'))showToast('If sharing did not open, use Copy link.');
@@ -5320,9 +5415,12 @@ function shareInviteOnTelegram(){
 }
 async function copyInviteLink(){
   const data=inviteSnapshot();if(!data)return;
-  try{await navigator.clipboard.writeText(data.invite_link);showToast('Invite link copied');}
+  try{await navigator.clipboard.writeText(data.invite_link);inviteRecord('copy_link');showToast('Invite link copied');}
   catch(_){showToast('Could not copy. Try Invite on Telegram.');}
 }
+document.getElementById('invitePendingSummary')?.addEventListener('click',()=>{inviteRecord('friends_open');openInviteDetails();});
+document.getElementById('inviteShareCardOpen')?.addEventListener('click',openInviteShareCard);
+document.getElementById('inviteWeeklyRace')?.addEventListener('click',()=>inviteRecord('race_open'));
 document.getElementById('incomingInviteCard')?.addEventListener('click',()=>maybeShowInviteWelcome(true));
 document.getElementById('inviteWelcomeDialog')?.addEventListener('close',dismissInviteWelcome);
 document.getElementById('inviteWelcomePlay')?.addEventListener('click',()=>{dismissInviteWelcome();backToHome();});
@@ -5331,89 +5429,56 @@ document.getElementById('inviteWelcomeFriends')?.addEventListener('click',()=>{d
 
 function buildShareText() {
   const data=inviteSnapshot();if(!data)return '';
-  return `Come play JigCoin with me. New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards and race with friends.
+  return `Come play JigCoin with me! New players start with ${formatNumber(data.welcome_coins)} free coins. Tap, collect daily rewards, unlock ranks and race with friends.
 ${data.invite_link}`;
 }
 
 function renderShareCardCanvas() {
-  if(!inviteSnapshot())return;
-  const c = document.getElementById("shareCardCanvas");
-  if (!c) return;
-  const ctx = c.getContext("2d");
-  if (!ctx) return;
-
-  const W = c.width, H = c.height;
-  ctx.clearRect(0, 0, W, H);
-
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "rgba(236, 72, 153, 0.95)");
-  g.addColorStop(0.55, "rgba(59, 130, 246, 0.9)");
-  g.addColorStop(1, "rgba(15, 23, 42, 0.98)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(2, 6, 23, 0.35)";
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(248,250,252,0.95)";
-  ctx.font = "900 48px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("JigCoin", 52, 92);
-
-  ctx.fillStyle = "rgba(226,232,240,0.9)";
-  ctx.font = "600 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Tap · Quests · Invite friends", 52, 132);
-
-  const bal = Number(state.bal || 0);
-  const today = Number(state.today || 0);
-  const streak = Number(state.streakDays || 0);
-  const rank = (document.getElementById("rankName") && document.getElementById("rankName").textContent) ? document.getElementById("rankName").textContent : "Recruit";
-
-  ctx.font = "900 70px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillStyle = "rgba(248,250,252,0.98)";
-  ctx.fillText(bal.toLocaleString("en-GB"), 52, 230);
-
-  ctx.font = "700 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillStyle = "rgba(226,232,240,0.92)";
-  ctx.fillText("balance", 52, 260);
-
-  const pillY = 305;
-  const pills = [
-    { label: "Rank", value: rank },
-    { label: "Today", value: today.toLocaleString("en-GB") },
-    { label: "Streak", value: `${streak} days` },
-  ];
-
-  let x = 52;
-  pills.forEach((p) => {
-    const w = Math.max(210, ctx.measureText(p.value).width + 110);
-    ctx.fillStyle = "rgba(2,6,23,0.42)";
-    roundRect(ctx, x, pillY, w, 74, 22);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(148,163,184,0.22)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(148,163,184,0.9)";
-    ctx.font = "700 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText(p.label.toUpperCase(), x + 18, pillY + 28);
-
-    ctx.fillStyle = "rgba(248,250,252,0.95)";
-    ctx.font = "800 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText(p.value, x + 18, pillY + 58);
-
-    x += w + 14;
-  });
-
-  const link = (inviteLinkText && inviteLinkText.textContent) ? inviteLinkText.textContent.trim() : FALLBACK_REF_LINK;
-  ctx.fillStyle = "rgba(226,232,240,0.95)";
-  ctx.font = "700 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Join:", 52, 485);
-
-  ctx.fillStyle = "rgba(248,250,252,0.95)";
-  ctx.font = "800 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  const maxChars = 44;
-  const safeLink = link.length > maxChars ? (link.slice(0, maxChars - 1) + "…") : link;
-  ctx.fillText(safeLink, 120, 485);
+  const data=inviteSnapshot();if(!data)return;
+  const c=document.getElementById('shareCardCanvas');if(!c)return;
+  const ctx=c.getContext('2d');if(!ctx)return;
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  const background=ctx.createLinearGradient(0,0,W,H);
+  background.addColorStop(0,'#080d15');
+  background.addColorStop(0.56,'#202733');
+  background.addColorStop(1,'#0c1421');
+  ctx.fillStyle=background;ctx.fillRect(0,0,W,H);
+  // Gold and black visual system shared with Home, Rewards and Shop.
+  const metal=ctx.createLinearGradient(0,0,W,0);
+  metal.addColorStop(0,'#8f642e');metal.addColorStop(.24,'#f7d890');
+  metal.addColorStop(.58,'#a47a37');metal.addColorStop(1,'#f3cd7e');
+  ctx.strokeStyle=metal;ctx.lineWidth=7;ctx.strokeRect(15,15,W-30,H-30);
+  ctx.strokeStyle='#463824';ctx.lineWidth=2;ctx.strokeRect(25,25,W-50,H-50);
+  ctx.fillStyle='#f6dfae';ctx.font='bold 62px Georgia,serif';ctx.fillText('JigCoin',52,102);
+  ctx.fillStyle='#d8b777';ctx.font='bold 22px system-ui,sans-serif';
+  ctx.fillText('BRING A FRIEND. START A RIVALRY.',52,144);
+  ctx.fillStyle='#f7d99b';ctx.font='800 54px system-ui,sans-serif';
+  ctx.fillText('1,000 FREE COINS',52,224);
+  ctx.fillStyle='#e0e3e9';ctx.font='500 21px system-ui,sans-serif';
+  ctx.fillText('New players start with an in-game welcome reward.',54,264);
+  ctx.fillText('Tap · Daily rewards · Weekly Race · Coin finishes',54,297);
+  // Decorative embossed emblem. This is original, not an NFT or coin listing.
+  ctx.save();
+  const medallion=ctx.createRadialGradient(802,180,12,802,180,105);
+  medallion.addColorStop(0,'#f6d28a');medallion.addColorStop(.55,'#b68139');
+  medallion.addColorStop(1,'#5a391d');
+  ctx.beginPath();ctx.arc(802,180,98,0,Math.PI*2);
+  ctx.fillStyle=medallion;ctx.fill();ctx.lineWidth=7;ctx.strokeStyle='#e6bd6a';ctx.stroke();
+  ctx.beginPath();ctx.arc(802,180,81,0,Math.PI*2);
+  ctx.strokeStyle='#533c29';ctx.lineWidth=4;ctx.stroke();
+  ctx.textAlign='center';ctx.fillStyle='#332416';ctx.font='bold 138px Georgia,serif';
+  ctx.fillText('J',802,225);ctx.textAlign='left';ctx.restore();
+  ctx.fillStyle='#ba9d6d';ctx.font='700 17px system-ui,sans-serif';ctx.fillText('YOUR GAME PROGRESS',54,362);
+  const confirmed=homeIdentity===homeUserId()&&Number.isSafeInteger(homeConfirmedBalance)?homeConfirmedBalance:null;
+  const goal=confirmed===null?null:homeGoalModel(confirmed);
+  const progress=goal?confirmed.toLocaleString('en-GB')+' saved coins · '+goal.current.name:'Play to unlock your rank';
+  ctx.fillStyle='#fff0ca';ctx.font='bold 29px system-ui,sans-serif';ctx.fillText(progress,54,405,805);
+  ctx.strokeStyle='#9c7848';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(50,432);ctx.lineTo(W-50,432);ctx.stroke();
+  ctx.fillStyle='#f0ca81';ctx.font='bold 18px system-ui,sans-serif';
+  ctx.fillText('JOIN ME IN JIGCOIN',52,464);
+  ctx.fillStyle='#e7e9ed';ctx.font='700 20px system-ui,sans-serif';
+  ctx.fillText(data.invite_link,52,503,850);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -7973,13 +8038,14 @@ document.getElementById('inviteRetry').addEventListener('click',()=>loadInviteSu
 document.getElementById('inviteDetailsOpen').addEventListener('click',openInviteDetails);
 document.getElementById('inviteDetailsClose').addEventListener('click',()=>{openFriendsSheet();document.getElementById('inviteDetailsOpen').focus();});
 document.getElementById('inviteHistoryRetry').addEventListener('click',()=>loadInviteHistory({force:true}));
-document.getElementById('inviteFriendsBoard').addEventListener('click',()=>openLeaderboard('friends'));
+document.getElementById('inviteFriendsBoard').addEventListener('click',()=>{inviteRecord('friends_open');openLeaderboard('friends');});
 
 if (copyShareTextBtn) {
   copyShareTextBtn.addEventListener("click", async () => {
     try {
       const text=buildShareText();if(!text)return;
       await navigator.clipboard.writeText(text);
+      inviteRecord('copy_link');
       showToast("Share text copied");
     } catch (e) {
       showToast("Could not copy share text");
@@ -7999,6 +8065,7 @@ if (downloadShareCardBtn) {
       document.body.appendChild(a);
       a.click();
       a.remove();
+      inviteRecord("card_download");
       showToast("Share card downloaded");
     } catch (e) {
       showToast("Could not download card");

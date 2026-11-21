@@ -16,7 +16,7 @@ function setup(){
   const c={setCoinArtwork(){},Date:Clock,URL,console,homeUserId:()=>owner,accountIsReady:()=>ready,document:{getElementById:el},formatNumber:n=>n.toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),appStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},backToHome(){},openLeaderboard:mode=>calls.push({action:'leaderboard',mode}),
     friendsJoinedText:el('friendsJoinedText'),referralPointsText:el('referralPointsText'),inviteLinkText:el('inviteLinkText'),shareTelegramBtn:el('shareTelegramBtn'),copyInviteBtn:el('copyInviteBtn'),copyShareTextBtn:el('copyShareTextBtn'),downloadShareCardBtn:el('downloadShareCardBtn'),
     window:{Telegram:{WebApp:{openTelegramLink:url=>shared.push(url)}},open:url=>{shared.push(url);return {}; }},navigator:{clipboard:{writeText:async value=>copied.push(value)}},showToast:text=>toasts.push(text),
-    showAppSheet:(sheet,tab)=>{c.opened={sheet,tab};},tabFriends:'Invite',apiPost:async(...args)=>{calls.push(args);return response(...args);}};
+    showAppSheet:(sheet,tab)=>{c.opened={sheet,tab};},tabFriends:'Invite',apiPost:async(...args)=>{if(args[0]==='/api/invite/interaction')return {ok:true};calls.push(args);return response(...args);}};
   vm.createContext(c);vm.runInContext(code,c);
   return{c,el,calls,shared,copied,toasts,storage,respond:fn=>response=fn,owner:value=>owner=value,ready:value=>ready=value,advance:ms=>now+=ms};
 }
@@ -81,7 +81,7 @@ test('zero invites shows no earned tier or misleading zero-reward milestone',asy
  const x=setup();await x.c.loadInviteSummary();assert.equal(x.el('inviteTierName').textContent,'No level yet');
  assert.match(x.el('inviteTierList').innerHTML,/Bronze · 1–4 invites/);assert.match(x.el('inviteTierList').innerHTML,/200\+ invites/);
  assert.doesNotMatch(x.el('inviteTierList').innerHTML,/Starter|0 rewarded/);
- assert.match(x.el('inviteWelcome').textContent,/All new players start with 1,000 free in-game coins/);
+ assert.match(x.el('inviteWelcome').textContent,/Your friend starts with 1,000 free in-game coins/);
  x.c.shareInviteOnTelegram();assert.match(new URL(x.shared[0]).searchParams.get('text'),/New players start with 1,000 free coins/);
 });
 test('the milestone invite itself shows the higher rate before it joins',async()=>{
@@ -105,7 +105,24 @@ const cumulativeFixture=()=>({...fixture(),policy_version:'referrals_cumulative_
 test('new invite contract describes cumulative verified activity, general welcome and actual progress',async()=>{
  const x=setup();x.respond(async()=>cumulativeFixture());await x.c.loadInviteSummary();
  assert.match(x.el('inviteQualification').textContent,/100 verified taps in total/);assert.doesNotMatch(x.el('inviteQualification').textContent,/one UTC day|ad reward/);
- assert.match(x.el('inviteWelcome').textContent,/All new players/);assert.match(x.el('inviteFriendProgress').innerHTML,/32 \/ 100 verified taps in total/);assert.match(x.el('invitePendingSummary').textContent,/1 joined/);assert.equal(x.el('shareTelegramBtn').disabled,false);
+ assert.match(x.el('inviteWelcome').textContent,/Your friend starts with/);assert.match(x.el('inviteFriendProgress').innerHTML,/32 \/ 100 verified taps in total/);assert.match(x.el('invitePendingSummary').textContent,/1 joined/);assert.equal(x.el('shareTelegramBtn').disabled,false);
+});
+test('Invite explains historical joined records requiring review without promising credits',async()=>{
+ const x=setup(),d=cumulativeFixture();
+ d.friends_joined=5;d.friends_pending=0;d.friends_qualified=0;d.friends_on_hold=5;
+ d.friend_progress=Array.from({length:5},(_,i)=>({...d.friend_progress[0],
+  id:'legacy'+i,status:'on_hold',qualification_mode:'legacy_unknown',
+  policy_version:'legacy_unknown',verified_taps:null,min_taps:null,
+  rewarded_at:null,reward_coins:null}));
+ x.respond(async()=>d);await x.c.loadInviteSummary();
+ assert.equal(x.el('inviteJoinedCount').textContent,'5');
+ assert.equal(x.el('friendsJoinedText').textContent,'0');
+ assert.match(x.el('invitePendingSummary').textContent,/5 joined/);
+ assert.match(x.el('invitePendingSummary').textContent,/5 to review/);
+ assert.doesNotMatch(x.el('invitePendingSummary').textContent,/working towards a reward/);
+ assert.match(x.el('inviteFriendProgress').innerHTML,/Historical referral/);
+ assert.doesNotMatch(x.el('inviteFriendProgress').innerHTML,/coins credited/);
+ assert.equal(x.el('inviteShareCardOpen').disabled,false);
 });
 test('friend rows retain original qualification and only confirmed rewards show credited coins',async()=>{
  const x=setup(),d=cumulativeFixture();d.friend_progress=[{...d.friend_progress[0],qualification_mode:'daily_taps_or_ad',min_taps:250,display_name:'<img src=x onerror=bad()>'},{...d.friend_progress[0],status:'rewarded',reward_coins:1000}];x.respond(async()=>d);await x.c.loadInviteSummary();
