@@ -6,8 +6,9 @@ const html=fs.readFileSync('index.html','utf8');
 const invite=html.slice(html.indexOf('<div class="sheet" id="friendsSheet">'),html.indexOf('<div class="sheet" id="inviteDetailsSheet">'));
 const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 test('Invite v28 preserves premium layout and puts the outward referral offer first',()=>{
- assert.match(html,/name="jigcoin-build" content="v28-invite-growth-1"/);
- assert.ok(invite.indexOf('id="shareTelegramBtn"')<invite.indexOf('id="incomingInviteCard"'));
+ assert.match(html,/name="jigcoin-build" content="v29-invite-final-three-1"/);
+ assert.ok(invite.includes('id="shareTelegramBtn"'));
+ assert.doesNotMatch(invite,/id="incomingInviteCard"/);
  assert.match(invite,/id="inviteShareCardOpen"/);
  assert.match(invite,/id="inviteJoinedCount"/);
 });
@@ -18,7 +19,7 @@ test('Invite has separate joined, rewarded, and earned counters',()=>{
 });
 test('Review records remain distinguishable from paid referrals',()=>{
  assert.match(html,/Historical referral · reward evidence needs review/);
- assert.match(html,/parts\.push\('View friends ›'\)/);
+ assert.match(html,/parts\.join\(' · '\)/);
  assert.match(html,/if\(data\.friends_on_hold\)parts\.push/);
 });
 test('Share card uses established JigCoin gold design and confirmed-progress fallback',()=>{
