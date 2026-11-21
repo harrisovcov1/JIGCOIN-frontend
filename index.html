@@ -3068,6 +3068,76 @@ html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-chi
   }
 }
 </style>
+
+<style>
+/* Invite v28: the same metallic premium design, optimised for an actual
+   invitation and follow-through, with safe scrolling at larger text sizes. */
+html body #friendsSheet .invite-overview {
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow-y:auto;
+  gap:6px;padding:9px 12px 10px;justify-content:flex-start;scrollbar-gutter:stable;
+}
+html body #friendsSheet .invite-reward-card{
+  display:grid;flex:0 0 auto;
+  grid-template-columns:minmax(0,1fr) 57px;
+  grid-template-areas:'tier art' 'reward art' 'welcome welcome' 'terms terms' 'actions actions' 'card card' 'message message';
+  gap:5px 8px;padding:11px 12px 9px;border-radius:13px;align-content:start;
+}
+html body #friendsSheet .invite-eyebrow{grid-area:tier;font-size:11px;letter-spacing:.03em;align-self:end}
+html body #friendsSheet .invite-emblem{grid-area:art;width:57px;height:51px;margin:0}
+html body #friendsSheet .invite-emblem img{width:100%;height:100%;object-fit:contain}
+html body #friendsSheet h2{grid-area:reward;margin:0;gap:5px;line-height:1.15}
+html body #friendsSheet h2 strong{font-size:39px;line-height:1.05}
+html body #friendsSheet h2 span{font-size:15px}
+html body #friendsSheet #inviteWelcome{grid-area:welcome;margin:0;font-size:13px;line-height:1.35;color:var(--mint-accent);font-weight:700}
+html body #friendsSheet #inviteQualification{grid-area:terms;margin:0;font-size:12px;line-height:1.35;color:var(--mint-muted)}
+html body #friendsSheet .invite-actions{grid-area:actions;grid-template-columns:minmax(0,1fr) 82px;gap:7px;margin:4px 0 0}
+html body #friendsSheet .invite-actions button{min-height:44px;padding:6px 8px;font-size:12px;line-height:1.15}
+html body #friendsSheet .invite-card-open{
+  grid-area:card;display:block;width:100%;min-height:38px;padding:7px 9px;
+  border:1px solid var(--mint-edge);border-radius:8px;
+  background:var(--mint-grain),var(--mint-plate);
+  color:var(--mint-highlight);font:inherit;font-size:12px;font-weight:700;text-align:center;cursor:pointer;
+}
+html body #friendsSheet .invite-card-open:disabled{opacity:.5;cursor:default}
+html body #friendsSheet .invite-status{grid-area:message}
+html body #friendsSheet .friends-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;flex:0 0 auto;margin:0}
+html body #friendsSheet .friends-summary-col{min-width:0;padding:7px 9px;gap:2px}
+html body #friendsSheet .friends-summary-col span{font-size:10px;line-height:1.2}
+html body #friendsSheet .friends-summary-col strong{font-size:22px;line-height:1.1}
+html body #friendsSheet .invite-milestone{flex:0 0 auto;padding:9px 11px;min-height:78px;border-radius:11px}
+html body #friendsSheet .invite-milestone-top{gap:5px;font-size:12px;line-height:1.2}
+html body #friendsSheet .invite-milestone p{margin:4px 0;font-size:11px;line-height:1.25}
+html body #friendsSheet .invite-milestone progress{margin:5px 0 2px}
+html body #friendsSheet .invite-pending{
+  flex:0 0 auto;width:100%;min-height:44px;display:block;padding:7px 10px;
+  text-align:left;border-radius:9px;cursor:pointer;color:var(--mint-highlight);
+  font:inherit;font-size:11px;line-height:1.25;font-weight:650;
+  background:var(--mint-grain),var(--mint-plate);border:1px solid var(--mint-rim);
+}
+html body #friendsSheet .invite-pending[hidden]{display:none!important}
+html body #friendsSheet .invite-play-links{gap:6px;flex:0 0 auto}
+html body #friendsSheet .invite-play-links button{min-height:44px;padding:7px 9px;font-size:11px}
+html body #friendsSheet .invite-details-link{flex:0 0 auto;min-height:44px;font-size:12px;padding:7px 9px}
+html body #friendsSheet .incoming-invite-card{
+  order:10;flex:0 0 auto;min-height:44px;width:100%;margin:0;
+  padding:7px 10px;gap:8px;text-align:left;border-radius:9px;
+}
+html body #friendsSheet .incoming-invite-card strong{font-size:12px;line-height:1.2}
+html body #friendsSheet .incoming-invite-card small{font-size:11px;line-height:1.2}
+html body #inviteDetailsSheet .invite-friend-progress li:has(.friend-heading span){padding:10px 0}
+@media(max-width:350px){
+  html body #friendsSheet .invite-overview{padding:7px 9px;gap:5px}
+  html body #friendsSheet .invite-reward-card{padding:10px;grid-template-columns:minmax(0,1fr) 47px}
+  html body #friendsSheet .invite-emblem{width:47px;height:45px}
+  html body #friendsSheet h2 strong{font-size:34px}
+  html body #friendsSheet .invite-actions{grid-template-columns:minmax(0,1fr) 78px}
+}
+@media(max-height:720px){
+  html body #friendsSheet .invite-overview{gap:5px;padding-top:6px;padding-bottom:6px}
+  html body #friendsSheet .invite-reward-card{gap:4px}
+}
+@media(prefers-reduced-motion:reduce){html body #friendsSheet .invite-overview{scroll-behavior:auto}}
+</style>
 </head>
 <body>
   <div class="app-shell">
