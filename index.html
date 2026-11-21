@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v32-vault-final-three-1">
+<meta name="jigcoin-build" content="v33-referral-clarity-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -5672,7 +5672,7 @@ function renderInviteFriends(data){
     pending.textContent=parts.join(' · ');
   } else pending.textContent='';
   document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Historical records may require review before credit can be verified.`:'No attributed friends yet. Send your link to start your group.';
-  const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'To check'};
+  const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'Needs review'};
   document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${labels[row.status]}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
 }
 function renderInviteOverview(){
@@ -5726,11 +5726,20 @@ async function loadInviteSummary({force=false}={}){
     finally{if(invitePending===request){invitePending=null;renderInviteOverview();}}
   })();return request.promise;
 }
+function inviteHistoryEmptyMessage(data){
+  const hold=Number(data?.friends_on_hold||0);
+  const qualified=Math.max(0,Number(data?.friends_qualified||0)-Number(data?.friends_rewarded||0));
+  const progressing=Number(data?.friends_pending||0);
+  if(hold>0)return `No confirmed referral credits yet. ${formatNumber(hold)} historical invitation${hold===1?' needs':'s need'} eligibility review; no new credit has been issued.`;
+  if(qualified>0)return `No confirmed referral credits yet. ${formatNumber(qualified)} qualified invitation${qualified===1?' is':'s are'} awaiting reward confirmation.`;
+  if(progressing>0)return `No confirmed referral credits yet. ${formatNumber(progressing)} friend${progressing===1?' is':'s are'} progressing towards the verified activity goal.`;
+  return 'No recorded referral credits yet. Invite a friend to start earning when they complete the verified activity goal.';
+}
 function renderInviteHistory(){
   const el=id=>document.getElementById(id),data=inviteSnapshot();
   const credits=data?inviteCredits:null;
   el('inviteHistoryRetry').disabled=!!inviteHistoryPending||!data;
-  el('inviteHistoryStatus').textContent=inviteHistoryPending?'Checking your credits…':inviteHistoryError?'Couldn’t load your credits. Tap Refresh to retry.':!credits?'Check Invite first to load your account.':credits.length?'Latest confirmed referral credits.':'No recorded referral credits yet. Invite your first friend to get started.';
+  el('inviteHistoryStatus').textContent=inviteHistoryPending?'Checking your credits…':inviteHistoryError?'Couldn’t load your credits. Tap Refresh to retry.':!credits?'Check Invite first to load your account.':credits.length?'Latest confirmed referral credits.':inviteHistoryEmptyMessage(data);
   el('inviteHistoryList').innerHTML=credits?credits.map(row=>`<li class="invite-credit"><span>Referral reward<small>${row.credited_at?escapeHtml(new Date(row.credited_at).toLocaleDateString('en-GB')):'Confirmed'}</small></span><strong>+${formatNumber(row.coins)}</strong></li>`).join(''):'';
 }
 async function loadInviteHistory({force=false}={}){
