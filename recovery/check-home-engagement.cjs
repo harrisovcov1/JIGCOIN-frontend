@@ -67,8 +67,8 @@ test('energy-strip entry distinguishes ready, preparation, retry, cooldown and u
  const {c,get}=refill(),button=get('homeRefillOpen'),label=get('homeRefillState');
  for(const [view,expected] of [
   [{action:'show',label:'Watch ad to refill'},'Ad ready'],[{action:'claim',label:'Claim full energy'},'Claim ready'],
-  [{action:'prepare',disabled:false,label:'Check ad availability'},'Check ads'],
-  [{action:'none',disabled:true,label:'Checking ad availability…'},'Checking'],
+  [{action:'prepare',disabled:false,label:'Check ad availability'},'Try ad'],
+  [{action:'none',disabled:true,label:'Checking ad availability…'},'Preparing'],
   [{action:'none',disabled:true,label:'Try again in 37s'},'In 37s'],
   [{action:'none',disabled:true,label:'Available in 4m 30s'},'In 4m 30s'],
   [{action:'none',disabled:true,label:'Ads paused'},'Unavailable']

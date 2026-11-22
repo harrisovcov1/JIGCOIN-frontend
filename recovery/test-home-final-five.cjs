@@ -69,6 +69,6 @@ test('Home geometry, rank skins and advert settings untouched',()=>{
  assert.ok(home.includes('Option 5 final fidelity V3'));
  assert.ok(css.includes('#homeNextPreview>span:last-child .home-next-progress'));
  assert.ok(!css.includes('#boostSheet'));
- assert.ok(html.includes('v20-home-final-five-1'));
+ assert.ok(Number(html.match(/name="jigcoin-build" content="v(\d+)-/)?.[1]) >= 20);
 });
 process.stdout.write('PASS '+passed+' Home contract groups\n');

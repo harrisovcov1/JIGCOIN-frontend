@@ -39,9 +39,9 @@ test('equal value packs and starter offers do not receive unsupported best-value
  assert.doesNotMatch(c.starsProductCard({...packs[0],coins:99999,starter:true},true,false,null,999.99),/Most coins per Star/);
 });
 test('share text uses the confirmed invite link and share image uses saved balance',()=>{
- const drawn=[];const noop=()=>{};const canvasContext={clearRect:noop,createLinearGradient:()=>({addColorStop:noop}),fillRect:noop,fillText:t=>drawn.push(t),measureText:()=>({width:30}),fill:noop,stroke:noop};
- const c={formatNumber:n=>n.toLocaleString('en-GB'),inviteSnapshot:()=>({invite_link:'https://t.me/JIGCOINBOT?startapp=ref_10001',welcome_coins:1000}),state:{bal:12784,balance:0,today:238,streakDays:1},document:{getElementById:id=>id==='rankName'?{textContent:'Grinder'}:id==='shareCardCanvas'?{width:960,height:540,getContext:()=>canvasContext}:null},inviteLinkText:{textContent:'https://t.me/JIGCOINBOT?startapp=ref_test'},FALLBACK_REF_LINK:'fallback',roundRect:noop};
- vm.createContext(c);vm.runInContext(slice('function buildShareText()', 'function roundRect'),c);assert.match(c.buildShareText(),/startapp=ref_10001/);assert.match(c.buildShareText(),/1,000 free coins/);assert.doesNotMatch(c.buildShareText(),/farming|cash|airdrop/i);c.renderShareCardCanvas();assert.ok(drawn.includes('12,784'));assert.ok(!drawn.includes('0'));
+ const drawn=[];const noop=()=>{};const canvasContext={save:noop,restore:noop,beginPath:noop,arc:noop,moveTo:noop,lineTo:noop,createRadialGradient:()=>({addColorStop:noop}),clearRect:noop,strokeRect:noop,createLinearGradient:()=>({addColorStop:noop}),fillRect:noop,fillText:t=>drawn.push(t),measureText:()=>({width:30}),fill:noop,stroke:noop};
+ const c={homeIdentity:1,homeUserId:()=>1,homeConfirmedBalance:12784,homeGoalModel:()=>({current:{name:"Grinder"}}),formatNumber:n=>n.toLocaleString('en-GB'),inviteSnapshot:()=>({invite_link:'https://t.me/JIGCOINBOT?startapp=ref_10001',welcome_coins:1000}),state:{bal:12784,balance:0,today:238,streakDays:1},document:{getElementById:id=>id==='rankName'?{textContent:'Grinder'}:id==='shareCardCanvas'?{width:960,height:540,getContext:()=>canvasContext}:null},inviteLinkText:{textContent:'https://t.me/JIGCOINBOT?startapp=ref_test'},FALLBACK_REF_LINK:'fallback',roundRect:noop};
+ vm.createContext(c);vm.runInContext(slice('function buildShareText()', 'function roundRect'),c);assert.match(c.buildShareText(),/startapp=ref_10001/);assert.match(c.buildShareText(),/1,000 free coins/);assert.doesNotMatch(c.buildShareText(),/farming|cash|airdrop/i);c.renderShareCardCanvas();assert.ok(drawn.includes('12,784 saved coins · Grinder'));assert.ok(!drawn.includes('0'));
 });
 test('starter allocation counts are not presented as limited referral places',()=>{
  assert.doesNotMatch(html,/id="launchBoostInvite"|refreshReferralPromotion|places remaining.*coins per eligible referral/);
@@ -58,7 +58,7 @@ test('all five packs are visible in ascending price order with one accurate valu
  assert.ok(rendered.indexOf('JC_LARGE')<rendered.indexOf('JC_GROWTH'));
  assert.ok(rendered.indexOf('JC_GROWTH')<rendered.indexOf('JC_MAX_700K'));
  assert.match(rendered,/700,000/);assert.match(rendered,/35,000/);assert.match(rendered,/20 coins per Star/);
- assert.equal((rendered.match(/Most coins per Star/g)||[]).length,1);
+ assert.equal((rendered.match(/Top coin rate/g)||[]).length,1);
  assert.ok(classes.has('hub-catalog-dense'));
 });
 test('the compact first pack cannot inherit the retired display-case row or artwork',()=>{

@@ -83,7 +83,7 @@ test('rival gap follows each whole coin, reconciles a rejected tap and never awa
 test('first position handles a lead, tie and sole player without invented opponents',()=>{const c=model();assert.equal(c.homeRaceModel(snapshot(1,13000,12809),123).text,'191 coins ahead of #2');assert.match(c.homeRaceModel(snapshot(1,13000,13000),123).text,/Tied on coins/);assert.match(c.homeRaceModel(snapshot(1,13000,0,1),123).text,/No rival yet/)});
 test('Home uses live tap feedback during a delayed refresh, expires old standings and reloads the opponent',async()=>{
  let now=125000,resolve;
- const label={},c=model();
+ const label={dataset:{},setAttribute(k,v){this[k]=v;}},c=model();
  Object.assign(c,{Date:{now:()=>now},navigator:{onLine:true},document:{hidden:false,getElementById:id=>id==='homeRace'?label:{inert:false}},
   homeUserId:()=>123,accountIsReady:()=>true,recoveryTapView:s=>s,state:{bal:100,globalRank:2},
   homeRaceSnapshot:snapshot(2,100,110),homeConfirmedBalance:100,homeRaceSyncedAt:120000,homeRaceAttemptAt:120000,homeRaceBusy:false,
@@ -128,7 +128,7 @@ test('reduced motion omits all tap particles and coin animation',()=>{
 });
 
 test('pending taps cannot split the rank badge, ring and bar or unlock a rank early',()=>{
- const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',style:{},dataset:{},classList:{toggle(){}}});return nodes.get(id);};
+ const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',style:{},dataset:{},setAttribute(k,v){this[k]=v;},classList:{toggle(){}}});return nodes.get(id);};
  const c={document:{getElementById:get},balanceText:{textContent:'50,001',classList:{toggle(){}}},rankNameEl:get('badge'),rankPointsTextEl:get('points'),nextRankPointsTextEl:get('next'),rankProgressFill:get('bar'),accountIsReady:()=>true,homeConfirmedBalance:49999,formatNumber:n=>n.toLocaleString('en-GB'),renderHomeRace(){},renderHomeSession(){},renderCollectibleCoin(){}};
  vm.createContext(c);vm.runInContext(code+html.slice(html.indexOf('function renderHomeProgress('),html.indexOf('function renderHomeSession(')),c);
  c.renderHomeProgress({bal:50001});assert.equal(get('badge').textContent,'Grinder');assert.match(get('homeGoal').textContent,/Operator target reached · Saving/);assert.equal(get('next').textContent,'50,000');

@@ -106,6 +106,7 @@ test('no-fill and provider timeout leave no enabled or late display; automatic p
 test('manual retry waits for server availability and never turns pending into a second start',async()=>{
   const h=setup({failure:'Timeout'});await h.prepare();await h.prepare(true);
   assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
   h.advance(60000);h.mission.status='available';await h.prepare(true);
   assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
 });
@@ -139,19 +140,19 @@ test('server energy threshold race is ordinary unavailability with manual recove
 });
 test('parallel requests create one preload and abandoned context cannot enable a late advert or remain loading',async()=>{
   const h=setup();let finish;h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(r=>finish=r);};
-  const preparing=h.prepare();await settle();const second=h.prepare(true);h.setVisible(false);finish();await Promise.all([preparing,second]);
+  const preparing=h.prepare();await settle();const second=h.prepare(true);h.setVisible(false);h.ctx.document.hidden=true;finish();await Promise.all([preparing,second]);
   assert.equal(h.prepared().status,'cancelled');assert.equal(h.calls.filter(x=>x.options).length,1);h.setVisible(true);await assert.rejects(h.watch(),/AD_NOT_READY/);
 });
 test('account change invalidates a ready token and late preparation cannot cross owners',async()=>{
   const h=setup();await h.prepare();h.setOwner(202);h.ctx.reconcileRefillPreparation();await assert.rejects(h.watch(),/AD_NOT_READY/);
   assert.equal(h.calls.filter(x=>x.options?.type==='end').length,0);
 });
-test('stalled preload reaches18s watchdog, stays fenced until SDK settles, and never auto-displays',async()=>{
+test('stalled preload reaches the watchdog and a late provider result cannot display or grant',async()=>{
   const h=setup();let finish;h.ctx.window.show_123=options=>{h.calls.push({options});return new Promise(r=>finish=r);};
   const preparing=h.prepare();await settle();h.advance(17999);await settle();assert.equal(h.outcomes().length,0);
   h.advance(1);await preparing;assert.equal(h.outcomes()[0].error_code,'PRELOAD_DEADLINE');assert.equal(h.outcomes()[0].elapsed_ms,18000);
-  h.mission.status='available';await h.prepare(true);assert.equal(h.calls.filter(x=>x.options).length,1);
-  finish();await settle();assert.equal(h.prepared().status,'failed');await assert.rejects(h.watch(),/AD_NOT_READY/);
+  assert.equal(h.calls.filter(x=>x.options).length,1);
+  finish();await settle();assert.equal(h.prepared().status,'failed');await assert.rejects(h.watch(),/AD_NOT_READY/);assert.equal(h.calls.some(x=>x.options?.type==='end'),false);
 });
 test('a14s preload becomes ready without displaying;75s viewing has no application deadline',async()=>{
   const h=setup();let finishPreload,finishDisplay;
@@ -240,12 +241,14 @@ test('the final tap acknowledgement refreshes stale eligibility and prepares bef
     assert.deepEqual(q,{pending:0,packet:null});assert.equal(h.calls.some(x=>x.path==='/api/mission/complete'),false);
   }
 });
-test('tap-ack preparation does not refresh for a different owner or re-arm a failed automatic preload',async()=>{
+test('tap-ack rejects a different owner and retries only after renewed server availability',async()=>{
   const h=setup({failure:'Timeout'});h.mission.prepare_available=true;h.ctx.state.energy=22;
   h.ctx.resumeRefillAfterTapAck(202);await settle();assert.equal(h.calls.length,0);
   h.ctx.resumeRefillAfterTapAck(101);await settle();assert.equal(h.prepared().status,'failed');
-  h.advance(60000);h.mission.status='available';h.ctx.resumeRefillAfterTapAck(101);await settle();
   assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
+  h.advance(60000);h.mission.status='available';h.ctx.resumeRefillAfterTapAck(101);await settle();
+  assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,2);
+  assert.equal(h.calls.some(x=>x.options?.type==='end'),false);
 });
 test('successful preparation and unused expiry each emit one owned lifecycle event, never a reward',async()=>{
   const h=setup();await h.prepare();await settle();
@@ -268,8 +271,8 @@ test('prompt telemetry is visible-only and deduplicated across Home/Rewards unti
   h.mission.status='available';h.ctx.reconcileRefillPreparation();h.ctx.recordRefillPrompt(h.mission,'home');await settle();
   assert.equal(h.lifecycle().length,2);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false);
 });
-test('attempt policy controls retry and shorter ready lifetime without extending the30s cache ceiling',async()=>{
-  for(const [ttl,expected] of [[10000,10000],[90000,30000]]){
+test('attempt policy controls retry and ready lifetime up to the five-minute cache ceiling',async()=>{
+  for(const [ttl,expected] of [[10000,10000],[90000,90000],[600000,300000]]){
     const h=setup(),post=h.ctx.apiPost;
     h.ctx.apiPost=async(path,body)=>({...await post(path,body),refill_policy:{retry_seconds:45,ready_ttl_ms:ttl}});
     await h.prepare();assert.equal(h.mission.retry_after_seconds,45);
@@ -291,7 +294,7 @@ test('a final tap ACK inside the refresh throttle gets exactly one delayed eligi
     h.advance(1);await settle();assert.equal(refreshes,2);
     assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
     assert.equal(h.prepared().status,failure?'failed':'ready');
-    h.advance(60000);await settle();assert.equal(refreshes,2,'the follow-up is not a polling or failed-ad retry loop');
+    h.advance(60000);await settle();assert.equal(refreshes,failure?3:2,'a failed preload schedules one eligibility refresh');
     assert.equal(h.calls.filter(x=>x.path==='/api/mission/start').length,1);
   }
 });
@@ -312,7 +315,7 @@ test('a deferred tap-ACK refresh rechecks account, visibility, connectivity, pen
     if(reason==='holdout')h.ctx.window.JigPilot.canRefill=()=>false;
     if(reason==='cancelled')h.ctx.invalidateRefillPreparation();
     h.advance(4000);await settle();h.advance(60000);await settle();
-    assert.equal(refreshes,1,reason);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false,reason);
+    assert.equal(refreshes,reason==='covered'?2:1,reason);assert.equal(h.calls.some(x=>x.path==='/api/mission/start'),false,reason);
     assert.equal(q.pending,reason==='pending'?1:0,'the timer does not touch saved taps');
   }
 });

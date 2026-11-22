@@ -1,7 +1,8 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8');
-const code=html.slice(html.indexOf('const COIN_REWARD_CODES ='),html.indexOf('async function loadSponsorMissions'));
+const challenge=html.slice(html.indexOf('function rewardsChallengeView('),html.indexOf('function ',html.indexOf('function rewardsChallengeView(')+10));
+const code=challenge+html.slice(html.indexOf('const COIN_REWARD_CODES ='),html.indexOf('async function loadSponsorMissions'));
 const diagnosticCode=html.slice(html.indexOf('function monetagOutcomeCode('),html.indexOf('async function ensureMonetagSDK('));
 const goalCode=html.slice(html.indexOf('const HOME_TIERS ='),html.indexOf('const state ='))+
   html.slice(html.indexOf('const HOME_SEASON_KEY'),html.indexOf('// End of pure Home models.'));
@@ -29,8 +30,8 @@ function setup({status='available',confirm=false,energy=3}={}) {
     reconcileRefillPreparation(){if(ctx.window.__rewardActionBusy)ctx.preparationUsed=true;},refillTapsSettled:()=>true,
     invalidateRefillPreparation(){ctx.preparationUsed=true;},requestRefillPreparation(){},recordRefillPrompt(){},prepareMonetagRefill:async()=>calls.push(['prepare']),
     homeIdentity:101,homeConfirmedBalance:49000,formatNumber:n=>n.toLocaleString('en-GB'),setCoinArtwork:(el,tier)=>{el.dataset.artwork=String(tier);},
-    dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
-    boostSheet:{classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
+    progressionClaimBusy:false,progressionBusy:false,progressionCurrent:()=>null,dailyCheckinModel:()=>null,progressionError:false,progressionNow:()=>Date.now(),accountIsReady:()=>true,dailyRewardsBusy:false,restorePurchaseBusy:false,state:{energy,doubleBoostActive:false},maxEnergy:50,msToCountdown:ms=>`${Math.ceil(ms/1000)}s`,
+    boostSheet:{dataset:{},classList:{contains:()=>visible,remove(){visible=false;}},querySelector:element},
     sheetBackdrop:{classList:{remove(){}}},tabTasks:{},tabFarm:{},setActiveTab(){},showAppSheet(){visible=true;},updateBoostHub(){},syncStateIfIdle:async()=>{},
     openCoinShopSheet(){},handleSponsorQuests(){throw Error('Boost must not open sponsored tasks');},handleEnergyBoostTask(){},handleDoubleBoostTask(){},
     backToHome:()=>calls.push(["home"]),showToast:s=>toasts.push(s),
@@ -83,7 +84,7 @@ test('pending adverts show the server retry timer but never authorize a retry lo
   const now=Date.now();mission.countdown_as_of_ms=now;mission.retry_after_seconds=60;
   assert.equal(h.ctx.getBoostView(mission.code,mission,now+10000).label,'Try again in 50s');
   const expired=h.ctx.getBoostView(mission.code,mission,now+61000);
-  assert.equal(expired.label,'Checking availability…');assert.equal(expired.disabled,true);
+  assert.equal(expired.label,'Awaiting advert confirmation…');assert.equal(expired.disabled,true);
 });
 test('ad holdout blocks new refills including at zero energy',async()=>{
   const h=setup({energy:0});
@@ -191,8 +192,8 @@ test('healthy energy hides an expired failed-ad notice without losing late recei
   const h=setup({status:'pending',energy:23});h.ctx.maxEnergy=55;
   vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-60001,attempt_id:'${attemptId}',stage:'preload',error_code:'SDK_TIMEOUT',text:'Old error'};boostNextPoll=0;`,h.ctx);
   h.ctx.renderBoostCards();
-  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,true);
-  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.elements.boostHelp.hidden,true);
+  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,false);
+  assert.equal(h.elements.rewardsCollectionCard.hidden,true);assert.equal(h.elements.boostHelp.hidden,true);
   assert.doesNotMatch(h.elements.boostCooldownNote.textContent,/Old error/);assert.equal(vm.runInContext('adNotice',h.ctx),null);
   let polls=0;h.ctx.loadSponsorMissions=async()=>{polls++;return h.missions;};h.ctx.pollBoostStatus();
   for(let i=0;i<10;i++)await Promise.resolve();assert.equal(polls,1);
@@ -205,7 +206,7 @@ test('an available state clears expired attempted-ad errors and their support re
   vm.runInContext(`adNotice={owner:101,code:'sp_emergency_energy',kind:'error',at:Date.now()-60001,attempt_id:'${attemptId}',stage:'preload',error_code:'NO_FILL',text:'Old error'};`,h.ctx);
   h.ctx.renderBoostCards();assert.equal(vm.runInContext('adNotice',h.ctx),null);assert.equal(h.elements.boostHelp.hidden,true);
 });
-test('a fresh preload timeout survives natural regeneration and a status refresh while rank progress fills the card',async()=>{
+test('a fresh preload timeout survives natural regeneration and a status refresh while the refill panel stays available',async()=>{
   const h=setup({energy:11});h.ctx.maxEnergy=55;
   h.ctx.runMonetagQuest=async(_code,_here,onStage)=>{
     onStage('preload',attemptId);h.missions[0].status='pending';
@@ -216,8 +217,8 @@ test('a fresh preload timeout survives natural regeneration and a status refresh
   assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostHelpText.textContent,/PRELOAD \/ SDK_TIMEOUT/);
   assert.equal(h.outcomes.length,1);assert.equal(h.outcomes[0].attempt_id,attemptId);
   assert.equal(h.outcomes[0].elapsed_ms,10000);
-  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,true);
-  assert.equal(h.elements.rewardsCollectionCard.hidden,false);assert.equal(h.calls.length,0);
+  assert.equal(h.elements['[data-boost-code="sp_emergency_energy"]'].hidden,false);
+  assert.equal(h.elements.rewardsCollectionCard.hidden,true);assert.equal(h.calls.length,0);
   h.advance(1000);h.missions[0].status='available';await h.ctx.refreshBoostMissions();
   assert.equal(h.elements.boostHelp.hidden,false);assert.match(h.elements.boostCooldownNote.textContent,/No advert loaded in time/);
   h.advance(59000);h.ctx.renderBoostCards();
@@ -252,13 +253,13 @@ test('refill copy follows the assigned two- or five-minute policy and current ca
   assert.equal(view.detail,`Refill to 55 energy · Every ${seconds/60} minutes`);assert.doesNotMatch(view.detail,/\+50/);
  }
 });
-test('Rewards has a quiet40% preparation, a stable30% offer and a fresh ready exception',()=>{
+test('Rewards keeps a single refill panel through preparation, ready and expiry',()=>{
  const h=setup({energy:22});h.ctx.maxEnergy=55;h.ctx.preparedRefillFor=()=>null;
  h.ctx.refillPreparation={status:'loading',owner:101,offerVisible:false};
  const card=()=>h.elements['[data-boost-code="sp_emergency_energy"]'];
- h.ctx.renderBoostCards();assert.equal(card().hidden,true);assert.equal(h.elements.rewardsCollectionCard.hidden,false);
+ h.ctx.renderBoostCards();assert.equal(card().hidden,false);assert.equal(h.elements.rewardsCollectionCard.hidden,true);
  h.ctx.state.energy=16;h.ctx.renderBoostCards();assert.equal(card().hidden,false);assert.equal(h.ctx.refillPreparation.offerVisible,true);
  h.ctx.state.energy=17;h.ctx.renderBoostCards();assert.equal(card().hidden,false);
  h.ctx.state.energy=23;h.ctx.refillPreparation.status='ready';h.ctx.preparedRefillFor=()=>({attemptId});h.ctx.renderBoostCards();assert.equal(card().hidden,false);
- h.ctx.refillPreparation.status='expired';h.ctx.preparedRefillFor=()=>null;h.ctx.renderBoostCards();assert.equal(card().hidden,true);
+ h.ctx.refillPreparation.status='expired';h.ctx.preparedRefillFor=()=>null;h.ctx.renderBoostCards();assert.equal(card().hidden,false);
 });

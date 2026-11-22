@@ -26,7 +26,7 @@ check('Eight complete rank themes and Option A atmosphere',()=>{
   assert.ok(home.includes('Option 5 final fidelity V3'));
 });
 check('No fake ad ready label',()=>{
-  assert.ok(!/ad ready now|ad available now/i.test(css));
+  assert.ok(!/ad ready now|ad available now/i.test(css.replace(/\/\*[\s\S]*?\*\//g,"")));
   assert.ok(index.includes("type:'preload'")&&index.includes("type:'end'"));
 });
 check('All major screens preserve real IDs',()=>{
