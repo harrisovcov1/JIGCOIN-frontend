@@ -6,7 +6,7 @@ const styleStart=html.indexOf('/* Vault v31 — a personal treasury');
 const css=html.slice(styleStart,html.indexOf('</style>',styleStart));
 const codeFor=(from,to)=>html.slice(html.indexOf(from),html.indexOf(to,html.indexOf(from)));
 test('v32 Vault keeps rank and collection finish without duplicated treasury text',()=>{
- assert.match(html,/name="jigcoin-build" content="v32-vault-final-three-1"/);
+ assert.ok(Number(html.match(/name="jigcoin-build" content="v(\d+)-/)?.[1])>=32);
  assert.match(vault,/id="vaultRank"/);
  assert.doesNotMatch(vault,/id="vaultBalanceFinish"/);
  assert.match(vault,/id="vaultCollectionOpen"/);

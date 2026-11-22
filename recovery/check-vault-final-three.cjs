@@ -7,7 +7,7 @@ const vault=html.slice(html.indexOf('<div class="sheet" id="withdrawSheet"'),htm
 const marker=html.indexOf('/* Vault v32 final three: reclaim just enough height');
 const css=html.slice(marker,html.indexOf('</style>',marker));
 test('v32 Vault keeps its coin balance and rank without repeating finish twice',()=>{
- assert.match(html,/name="jigcoin-build" content="v32-vault-final-three-1"/);
+ assert.ok(Number(html.match(/name="jigcoin-build" content="v(\d+)-/)?.[1])>=32);
  assert.match(vault,/id="withdrawBalanceText"/);
  assert.match(vault,/id="vaultRank"/);
  assert.doesNotMatch(vault,/id="vaultBalanceFinish"/);

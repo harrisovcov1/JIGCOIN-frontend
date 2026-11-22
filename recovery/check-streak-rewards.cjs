@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),test=require('node:test'),asse
 const html=fs.readFileSync('index.html','utf8');
 const code=html.slice(html.indexOf('let dailyRewardsBusy=false;'),html.indexOf("document.getElementById('homeDailyOpen').addEventListener"));
 const fixture=()=>({day:'2026-11-16',days:6,claimed:true,broken:false,today_reward:500,next_reward:1250,next_day:7,resets_at:'2026-11-17T00:00:00Z',tier:{name:'Momentum',tap_bonus_percent:5,energy_bonus:5},next_tier:{day:7,name:'Growth',tap_bonus_percent:10,energy_bonus:10},next_milestone:{day:7,reward:1250},calendar:Array.from({length:7},(_,i)=>({day:i+1,reward:i===6?1250:500,claimed:i<6,focus:i===5,cosmetic:i===6?'momentum_aura':null})),milestones:[{day:3,reward:700},{day:7,reward:1250}],cosmetics:[{key:'momentum_aura',days:7,name:'Momentum aura',owned:false},{key:'veteran_frame',days:30,name:'Veteran frame',owned:false}]});
-function setup(){const els=new Map(),storage=new Map(),calls=[];const el=id=>{if(!els.has(id))els.set(id,{dataset:{},append(){},parentElement:{dataset:{}},hidden:true,contains:()=>false,setAttribute(name,value){this[name]=value;},focus(){},inert:false});return els.get(id);};
+function setup(){const els=new Map(),storage=new Map(),calls=[];const el=id=>{if(!els.has(id))els.set(id,{dataset:{},querySelector:selector=>el(id+selector),append(){},parentElement:{dataset:{}},hidden:true,contains:()=>false,setAttribute(name,value){this[name]=value;},focus(){},inert:false});return els.get(id);};
  const ctx={reviewGamePurchase:async()=>true,console,Date,Math,Number,String,window:{},setTimeout:()=>1,clearTimeout(){},progressionError:false,now:Date.parse('2026-11-16T12:00:00Z'),data:{checkin:fixture(),event:{status:'upcoming'}},updateRewardRecommendation(){},document:{createElement:()=>({}),hidden:false,activeElement:null,querySelector:()=>null,getElementById:el},progressionCurrent:()=>ctx.data,progressionNow:()=>ctx.now,homeUserId:()=>10001,accountIsReady:()=>true,formatNumber:n=>Number(n).toLocaleString('en-GB'),escapeHtml:s=>String(s).replaceAll('<','&lt;'),msToCountdown:()=> '12h',collectibleCountdown:()=> '6d',setCoinArtwork(){},appStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},showToast:t=>calls.push(t),backToHome:()=>calls.push('home'),handleDailyTask:async()=>calls.push('claim'),refreshProgression:async()=>calls.push('refresh')};
  vm.createContext(ctx);vm.runInContext(code,ctx);return {ctx,els,storage,calls};}
 test('claimed daily summary shows tomorrow and useful perks without an unclaimed reward label',()=>{const {ctx,els}=setup();ctx.renderDailyRewards();assert.equal(els.get('hubDailyProgress').textContent,'Tomorrow 1,250 coins');assert.equal(els.get('homeDailyTitle').textContent,'✓ Day 6 collected');assert.match(els.get('dailyNextUnlock').textContent,/Day 7 · Momentum aura/);assert.match(els.get('dailyRewardNextPerk').textContent,/\+10% tap coins and \+10 energy/);assert.equal(els.get('rewardsDailyAmount').textContent,'Collected ✓');assert.equal(els.get('dailyRewardBadge').hidden,true);});
@@ -71,4 +71,15 @@ test('restore reviews the correct streak and charge; cancellation, account switc
    if(change==='expired')ctx.now=Date.parse('2026-11-18T00:00:00Z');
    finish(change!=='cancel');await pending;assert.deepEqual(routes,[],change);
  }
+});
+
+test('failed optional history lookup does not imply a player made a purchase',async()=>{
+ const {ctx,els}=setup();
+ ctx.apiPost=async()=>({ok:false});
+ await ctx.checkRestorePayment();
+ assert.equal(els.get('dailyRestoreReceipt').textContent,'Restore history is temporarily unavailable.');
+ assert.equal(els.get('dailyRestoreCheck').textContent,'Retry history');
+ vm.runInContext('restorePendingAccount=homeUserId()',ctx);
+ await ctx.checkRestorePayment();
+ assert.match(els.get('dailyRestoreReceipt').textContent,/payment still needs confirmation/);
 });

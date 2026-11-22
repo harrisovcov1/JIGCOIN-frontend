@@ -31,7 +31,7 @@ test('one first-open request is shared; confirmed data and link are reused withi
   assert.equal(x.calls[0][2].timeoutMs,8000);assert.equal(x.calls[0][2].fastAuth,true);
 });
 test('failed first load shows a usable retry and never presents a fabricated zero/reward/link',async()=>{
-  const x=setup();x.respond(async()=>({ok:false,reason:'TIMEOUT'}));await x.c.loadInviteSummary();assert.equal(x.el('inviteLoadStatus').hidden,false);assert.equal(x.el('inviteRetry').disabled,false);assert.equal(x.el('inviteRewardAmount').textContent,'—');
+  const x=setup();x.respond(async()=>({ok:false,reason:'TIMEOUT'}));await x.c.loadInviteSummary();assert.equal(x.el('inviteLoadStatus').hidden,false);assert.equal(x.el('inviteRetry').disabled,false);assert.equal(x.el('inviteRewardAmount').textContent,'Invite rewards');
   x.c.shareInviteOnTelegram();await x.c.copyInviteLink();assert.equal(x.shared.length,0);assert.equal(x.copied.length,0);
   x.respond(async()=>fixture());await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteLoadStatus').hidden,true);assert.equal(x.el('shareTelegramBtn').disabled,false);
 });
@@ -156,4 +156,21 @@ test('legacy incoming records may lack a date but never receive the new cumulati
 test('incoming attribution is account scoped and its display name is assigned as text',async()=>{
  const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:{...incoming(),display_name:'<svg onload=bad()>'}};x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(x.el('inviteWelcomeTitle').textContent,'<svg onload=bad()> invited you');assert.equal(x.el('inviteWelcomeTitle').innerHTML,'');
  x.owner(10002);x.respond(async()=>fixture(10002));await x.c.loadInviteSummary();assert.equal(dialog.open,false);assert.equal(x.el('incomingInviteCard').hidden,true);assert.equal(x.storage.size,0);
+});
+
+test('history message distinguishes five unverified historical invites from no invitations',async()=>{
+ const x=setup(),d=cumulativeFixture();
+ d.friends_joined=5;d.friends_pending=0;d.friends_qualified=0;d.friends_rewarded=0;d.friends_on_hold=5;
+ d.friend_progress=Array.from({length:5},(_,i)=>({...d.friend_progress[0],id:'legacy'+i,status:'on_hold',qualification_mode:'legacy_unknown',policy_version:'legacy_unknown',verified_taps:null,min_taps:null}));
+ x.respond(async()=>d);await x.c.loadInviteSummary();
+ x.respond(async()=>({ok:true,telegram_id:'10001',credits:[]}));await x.c.loadInviteHistory({force:true});
+ assert.match(x.el('inviteHistoryStatus').textContent,/5 historical invitations need eligibility review/);
+ assert.doesNotMatch(x.el('inviteHistoryStatus').textContent,/invite your first friend/i);
+ assert.match(x.el('inviteFriendProgress').innerHTML,/Needs review/);
+});
+test('history distinguishes pending qualification from confirmed credits',async()=>{
+ const x=setup();x.respond(async()=>cumulativeFixture());await x.c.loadInviteSummary();
+ x.respond(async()=>({ok:true,telegram_id:'10001',credits:[]}));await x.c.loadInviteHistory({force:true});
+ assert.match(x.el('inviteHistoryStatus').textContent,/1 friend is progressing/);
+ assert.doesNotMatch(x.el('inviteHistoryStatus').textContent,/coins credited/);
 });
