@@ -31,7 +31,7 @@ test('one first-open request is shared; confirmed data and link are reused withi
   assert.equal(x.calls[0][2].timeoutMs,8000);assert.equal(x.calls[0][2].fastAuth,true);
 });
 test('failed first load shows a usable retry and never presents a fabricated zero/reward/link',async()=>{
-  const x=setup();x.respond(async()=>({ok:false,reason:'TIMEOUT'}));await x.c.loadInviteSummary();assert.equal(x.el('inviteLoadStatus').hidden,false);assert.equal(x.el('inviteRetry').disabled,false);assert.equal(x.el('inviteRewardAmount').textContent,'—');
+  const x=setup();x.respond(async()=>({ok:false,reason:'TIMEOUT'}));await x.c.loadInviteSummary();assert.equal(x.el('inviteLoadStatus').hidden,false);assert.equal(x.el('inviteRetry').disabled,false);assert.equal(x.el('inviteRewardAmount').textContent,'Invite rewards');
   x.c.shareInviteOnTelegram();await x.c.copyInviteLink();assert.equal(x.shared.length,0);assert.equal(x.copied.length,0);
   x.respond(async()=>fixture());await x.c.loadInviteSummary({force:true});assert.equal(x.el('inviteLoadStatus').hidden,true);assert.equal(x.el('shareTelegramBtn').disabled,false);
 });

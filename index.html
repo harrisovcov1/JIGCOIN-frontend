@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v33-referral-clarity-1">
+<meta name="jigcoin-build" content="v34-release-review-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3474,6 +3474,37 @@ html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
   html body #withdrawSheet .vault-collection{flex:0 0 auto;min-height:220px}
 }
 </style>
+<style>
+html body #friendsSheet [data-offer="waiting"] .invite-unit {display:none}
+html body #friendsSheet [data-offer="waiting"] strong {font-size:20px}
+html body #balanceText {font-variant-numeric:tabular-nums}
+#mainScroll.home-compact .mint-dashboard .home-balance-card #balanceText.long-balance {font-size:clamp(23px,6vw,34px)!important}
+@media (max-width:360px) {
+  html body #homeJourneyOpen #rankName {font-size:12px;white-space:normal;line-height:1.1}
+}
+.vault-footer-links {display:contents}
+@media (max-height:620px) {
+  #mainScroll #homeJourneyOpen #rankName::before {content:""}
+  html body #withdrawSheet .vault-footer-links {display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  html body #withdrawSheet .vault-footer-links:has(details[open]) {grid-template-columns:1fr}
+  html body #withdrawSheet .vault-footer-links details:not([open]) summary small {display:none}
+  html body #boostSheet .sheet-body {padding-bottom:2px}
+
+  html body #withdrawSheet .vault-summary {min-height:84px;padding:4px 8px}
+  html body #withdrawSheet .vault-collection {min-height:115px;padding:4px 8px}
+  html body #withdrawSheet .vault-finish-link {min-height:44px}
+  html body #withdrawSheet button#vaultVipOpen.vault-membership-card {min-height:46px;padding:3px 8px}
+  html body #friendsSheet .invite-overview, html body #coinShopSheet .sheet-body {gap:2px;padding-block:3px}
+  html body #friendsSheet .invite-reward-card {padding:5px 8px;gap:2px}
+  html body #friendsSheet .invite-milestone {min-height:44px;padding:3px 8px;gap:1px}
+  html body #friendsSheet .invite-reward-card:has([data-offer="waiting"]) :is(.invite-actions,.invite-card-open),
+  html body #friendsSheet .invite-overview:has([data-offer="waiting"]) .invite-milestone {display:none}
+  html body #friendsSheet .friends-summary-col {padding:4px 6px}
+  html body #coinShopSheet #coinPackList {gap:1px}
+  html body #coinShopSheet #coinPackList > :is(.hub-product,.hub-product:first-child) {min-height:46px!important;padding-block:0!important}
+  html body #coinShopSheet #shopVipPass {min-height:44px!important;padding-block:2px}
+}
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -3656,7 +3687,7 @@ html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
     <div class="sheet-body invite-overview">
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
-        <h2 id="inviteRewardTitle"><span>Earn</span> <strong id="inviteRewardAmount">—</strong> <span>coins</span></h2>
+        <h2 id="inviteRewardTitle" data-offer="waiting"><span class="invite-unit">Earn</span> <strong id="inviteRewardAmount">Invite rewards</strong> <span class="invite-unit">coins</span></h2>
         <p id="inviteQualification">Checking your reward and invite link…</p>
         <p id="inviteWelcome"></p>
         <div class="invite-actions"><button type="button" class="friends-share-btn" id="shareTelegramBtn" disabled>Invite on Telegram <svg class="invite-share-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7 17 10-10M7 7h10v10"/></svg></button>
@@ -3720,6 +3751,7 @@ html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
       <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
         <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
       </button>
+      <div class="vault-footer-links">
       <details class="vault-account-drawer" id="vaultAccountDrawer">
         <summary><span><strong>Account activity &amp; support</strong><small>Coin purchases · VIP receipts · referral credits</small></span><span aria-hidden="true">›</span></summary>
         <div class="vault-account-links">
@@ -3729,6 +3761,7 @@ html body #withdrawSheet .vault-airdrop summary {min-height:46px;padding:5px 0}
         </div>
       </details>
       <details class="vault-airdrop" id="vaultWithdrawalDetails"><summary><span>Airdrop status<small>Planned · Rules awaiting publication</small></span><span aria-hidden="true">+</span></summary><p>A JigCoin token airdrop is planned. Eligibility, allocations and conversion terms are awaiting publication. In-game coins currently have no cash-out value. Cash-out is not available.</p><p>Coin ranks, VIP and medals describe your game progress. They do not guarantee an airdrop allocation.</p></details>
+      </div>
     </div>
   </div>
   <section class="sheet" id="vipOfferSheet" role="region" aria-labelledby="vipOfferTitle">
@@ -4628,6 +4661,7 @@ function renderHomeProgress(view) {
   document.getElementById('homeGoalRing').style.strokeDashoffset=String(goal?100-goal.progress*100:100);
   document.getElementById('homeCoinWrap').dataset.coinTier=String(goal?.tier??0);
   rankNameEl.textContent=goal?goal.current.name:'—';
+  document.getElementById('balanceText').classList.toggle('long-balance', Boolean(goal?.complete));
   rankPointsTextEl.textContent=goal?formatNumber(Math.floor(view.bal)):'—';
   document.getElementById('homeRankGoalLabel').textContent=goal?.complete?'Top rank':'Next rank';
   nextRankPointsTextEl.textContent=goal?(goal.complete?'unlocked':formatNumber(goal.next)):'—';
@@ -5049,7 +5083,13 @@ async function checkRestorePayment(poll=false){
   const id=homeUserId();let terminal=false;
   for(let i=0;i<(poll?8:1);i++){
     const r=await apiPost('/api/streak/restore/status',{});if(id!==homeUserId())return;
-    if(!r?.ok){restoreReceipt('Could not check the payment. Retry below or send /paysupport to the bot.');break;}
+    if(!r?.ok){
+      const pending = restorePendingAccount === id;
+      restoreReceipt(pending ? 'Your restore payment still needs confirmation. Check again or use /paysupport.' : 'Restore history is temporarily unavailable.');
+      document.getElementById('dailyRestoreCheck').textContent=pending ? 'Check restore payment' : 'Retry history';
+      break;
+    }
+    document.getElementById('dailyRestoreCheck').textContent='Check restore payment';
     const o=r.order;restorePendingAccount=['approved','refund_pending'].includes(o?.status)?id:null;renderDailyRewards();if(!o){restoreReceipt('');terminal=true;break;}
     document.getElementById('dailyRestoreCheck').hidden=false;
     const reference=`Order ${o.payload}.`;
@@ -5087,6 +5127,7 @@ async function buyStreakRestore(){
     const invoice=await apiPost('/api/streak/restore/create-checkout',{});if(id!==homeUserId())return;
     if(!invoice?.ok){restoreReceipt(invoice?.error==='PAYMENT_PENDING'?'Your payment is pending. Check it below before trying again.':'Restore checkout is unavailable. Refresh your streak or use the free restart.');document.getElementById('dailyRestoreCheck').hidden=false;return;}
     if(!/^sr_[a-f0-9]{48}$/.test(invoice.order_id)||!/^https:\/\/t\.me\/\$/.test(invoice.url))throw Error('INVALID_INVOICE');
+    restorePendingAccount=id;
     const outcome=await new Promise(resolve=>tg.openInvoice(invoice.url,resolve));if(id!==homeUserId())return;
     await checkRestorePayment(outcome!=='cancelled');
   }catch(_){if(id===homeUserId()){restoreReceipt('Checkout could not be confirmed. Check your payment below; do not pay again.');document.getElementById('dailyRestoreCheck').hidden=false;}}
@@ -5682,7 +5723,8 @@ function renderInviteOverview(){
   inviteRenderedView=view;
   const nextName=data?.next_tier_name;
   el('inviteNextBadge').textContent='Your next successful invite';
-  el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'—';
+  el('inviteRewardTitle').setAttribute('data-offer',data?'ready':'waiting');
+  el('inviteRewardAmount').textContent=data?formatNumber(data.reward_coins):'Invite rewards';
   el('inviteWelcome').textContent=data?`Your friend starts with ${formatNumber(data.welcome_coins)} free in-game coins.`:'';
   el('inviteQualification').textContent=data?inviteRule(data):inviteError?'Reward details are unavailable. Try again to get your invite link.':'Checking your reward and invite link…';
   el('inviteJoinedCount').textContent=Number.isSafeInteger(data?.friends_joined)?formatNumber(data.friends_joined):'—';
