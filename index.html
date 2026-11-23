@@ -3740,13 +3740,13 @@ html body #balanceText {font-variant-numeric:tabular-nums}
         <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
       </section>
       <section class="vault-collection" aria-labelledby="vaultCollectionTitle">
-        <div class="vault-collection-heading"><h2 id="vaultCollectionTitle">Your collection</h2><span>Owned finishes &amp; medals</span></div>
+        <div class="vault-collection-heading"><h2 id="vaultCollectionTitle">Your collection</h2><span>Finishes &amp; honours</span></div>
         <button type="button" class="vault-finish-link" id="vaultCollectionOpen">
           <span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span>
-          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Equipped coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
+          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Prestige coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
         </button>
         <div class="vault-medal-spotlight" id="vaultMedalSpotlight" hidden aria-label="Confirmed recent daily medals"></div>
-        <details class="vault-medals" id="vaultMedalCollection"><summary><span>Medal collection</span><span id="vaultMedalCount">View earned medals</span></summary><h3>Daily podiums</h3><div id="vaultDailyMedalList">Open Vault to check your medals.</div><h3>Weekly Race</h3><div id="pilotMedalList">Checking your weekly medals…</div><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
+        <details class="vault-medals" id="vaultMedalCollection"><summary><span>Competition honours</span><span id="vaultMedalCount">View earned medals</span></summary><h3>Daily podium medals</h3><div id="vaultDailyMedalList">Open Vault to check your medals.</div><h3>Weekly Race gold medals</h3><div id="pilotMedalList">Checking your weekly medals…</div><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
       </section>
       <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
         <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
@@ -7878,7 +7878,7 @@ async function refreshRewardsWeeklyStatus(){
         limit>=1 && limit<=10 && left>=0 && left<=limit &&
         ['day','week'].includes(response?.policy?.period)){
         target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
-        action.textContent=left===0?'Standings & practice ›':'Race for gold ›';
+        action.textContent=left===0?'Standings & practice ›':'Race for a medal ›';
       }else reset();
     }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))reset();}
   })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
@@ -8118,7 +8118,7 @@ function renderVaultCollection(goal){
  const current=typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+goal.tier]?.name:goal.current.name;
  const next=typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+(goal.tier+1)]?.name:goal.nextName;
  document.getElementById('vaultCollectionLabel').textContent=current||goal.current.name;
- document.getElementById('vaultCollectionNext').textContent=goal.complete?'All rank finishes unlocked · View collection':`Next: ${next||goal.nextName} · View collection`;
+ document.getElementById('vaultCollectionNext').textContent=goal.complete?'All rank finishes unlocked · View collection':`${goal.tier+1}/8 rank finishes · Next: ${next||goal.nextName}`;
 }
 function renderVaultMedals(){
  const box=document.getElementById('vaultDailyMedalList'),data=vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
@@ -8138,7 +8138,7 @@ function renderVaultMedals(){
        const badge=document.createElement('div');
        badge.className='vault-medal-badge';
        const place=document.createElement('strong');
-       place.textContent=['','Gold','Silver','Bronze'][award.place]||'Podium';
+       place.textContent=(['','Gold','Silver','Bronze'][award.place]||'Podium')+' medal';
        const date=document.createElement('small');
        date.textContent=new Date(award.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'});
        badge.append(place,date);spotlight.append(badge);
