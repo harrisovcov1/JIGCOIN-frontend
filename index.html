@@ -3539,7 +3539,19 @@ html body #balanceText {font-variant-numeric:tabular-nums}
   }
 }
 </style>
-</head>
+<style>
+.vip-crown-link{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;cursor:pointer}
+/* Each action owns a full hit area, including on short phones. */
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header {
+  display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;
+  align-items:center;column-gap:6px;padding-inline:10px;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.sheet-close {
+  position:static;transform:none;width:44px;height:44px;
+}
+#coinShopSheet #packDisclosure{width:100%;min-height:44px;background:#182538;color:#ffe19a;border:1px solid #897044;border-radius:10px;font:inherit;font-weight:650}
+#coinPackList .hub-product[hidden]{display:none!important}
+</style></head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
@@ -3578,6 +3590,7 @@ html body #balanceText {font-variant-numeric:tabular-nums}
           <div class="mint-press-scene" aria-hidden="true"></div>
           <div class="tap-card-header mint-chamber-caption">
             <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><strong id="mintFinishName">JigCoin</strong></button>
+            <button type="button" class="vip-crown-link" data-vip-origin="home" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button>
             <button type="button" id="homeTapRate" class="tap-hint" aria-haspopup="dialog" aria-label="View your tap-rate breakdown, streak benefits and VIP options"><span id="perTap">+1</span> per tap <span aria-hidden="true">›</span></button>
           </div>
           <div class="tap-title" id="homeTapPrompt" aria-live="polite" hidden>Tap to earn coins</div>
@@ -3717,7 +3730,7 @@ html body #balanceText {font-variant-numeric:tabular-nums}
   </div>
 
   <div class="sheet" id="friendsSheet">
-    <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button type="button" class="vip-crown-link" data-vip-origin="invite" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
@@ -3765,7 +3778,7 @@ html body #balanceText {font-variant-numeric:tabular-nums}
   </div>
 
   <div class="sheet" id="withdrawSheet" role="region" aria-labelledby="vaultTitle">
-    <div class="sheet-header"><div><div class="sheet-title" id="vaultTitle">Vault</div></div><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title" id="vaultTitle">Vault</div></div><button type="button" class="vip-crown-link" data-vip-origin="vault" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body vault-content">
       <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
         <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
@@ -3890,7 +3903,7 @@ html body #balanceText {font-variant-numeric:tabular-nums}
     <div class="sheet-header">
       <div><div class="sheet-title" id="boostSheetTitle" tabindex="-1">Rewards</div>
         <div class="sheet-subtitle">Daily streaks and free challenges.</div></div>
-      <button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
+      <button type="button" class="vip-crown-link" data-vip-origin="rewards" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
     </div>
     <div class="sheet-body">
       <p class="sr-only" id="boostRecommendation" aria-live="polite">Choose your next reward.</p>
@@ -3947,7 +3960,7 @@ html body #balanceText {font-variant-numeric:tabular-nums}
         <div class="sheet-title">Shop</div>
         <div class="sheet-subtitle">Coin packs &amp; VIP · Telegram Stars</div>
       </div>
-      <button class="sheet-close" id="coinShopClose" aria-label="Close Shop">×</button>
+      <button type="button" class="vip-crown-link" data-vip-origin="shop" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="coinShopClose" aria-label="Close Shop">×</button>
     </div>
     <div class="sheet-body">
       <button type="button" class="vip-summary shop-vip-pass" id="shopVipPass">
@@ -6899,7 +6912,9 @@ function showAppSheet(sheet, tab) {
 }
 
 // Coin Shop: Telegram Stars packs and order history.
+let allPacksVisible=false;
 function openCoinShopSheet() {
+  allPacksVisible=false;
   clearOrderNotice();
   showAppSheet(coinShopSheet, tabShop);
   void loadCoinPacks();
@@ -6968,8 +6983,23 @@ function renderPackChoices(packs,preview,target=packGoal(packs)){
   const rates=packs.map(p=>p.coins/p.stars);
   const bestRate=new Set(rates).size>1?Math.max(...rates):0;
   const rank=rankReachPack(packs);
-  coinPackList.innerHTML=[...packs].sort((a,b)=>a.stars-b.stars).map(p=>
+  const sorted=[...packs].sort((a,b)=>a.stars-b.stars);
+  coinPackList.innerHTML=sorted.map(p=>
     starsProductCard(p,false,preview,p===target?.product?target.goal:null,bestRate,p===rank?.product?rank.goal:null)).join('');
+  const featured=new Set([1000,7000,37500]);
+  const cards=Array.from(coinPackList.children);
+  if(sorted.some(p=>featured.has(p.coins)) && sorted.some(p=>!featured.has(p.coins))){
+    const toggle=document.createElement('button');
+    toggle.id='packDisclosure';toggle.type='button';
+    toggle.setAttribute('aria-controls','coinPackList');
+    function updateDisclosure(){
+      cards.forEach((card,i)=>{card.hidden=!allPacksVisible && !featured.has(sorted[i].coins);});
+      toggle.textContent=allPacksVisible?'Show featured packs':'View all '+sorted.length+' packs';
+      toggle.setAttribute('aria-expanded',String(allPacksVisible));
+    }
+    toggle.addEventListener('click',()=>{allPacksVisible=!allPacksVisible;updateDisclosure();});
+    updateDisclosure();coinPackList.append(toggle);
+  }
   const rankPrompt=document.getElementById('shopRankPrompt');
   if(rankPrompt){
     const goal=homeIdentity===homeUserId()?homeGoalModel(homeConfirmedBalance):null;
@@ -7042,7 +7072,7 @@ function renderStarsCatalog() {
   const products=(hubCatalog.products||[]).filter(validStarsProduct);
   const offer=products.find(p=>p.starter);
   const starterEl=document.getElementById('hubStarter');
-  const target=packGoal(products.filter(p=>!p.starter));
+  const target=packGoal(products.filter(p=>!p.starter&&[1000,7000,37500].includes(p.coins)));
   starterEl.hidden=!offer;
   starterEl.innerHTML=offer?starsProductCard(offer,true,false):'';
   if(offer&&!shopStarterImpressionShown){shopStarterImpressionShown=true;shopRecord('starter_seen',offer.sku);}
@@ -8240,13 +8270,22 @@ function openVault(){
  if(vaultOwner!==homeUserId())resetVault(homeUserId());
  void window.JigPilot?.sync(true);renderVault();void loadVaultMedals();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
 }
+function vipOriginTab(){
+ switch(vipOfferOrigin){
+   case 'home':return tabFarm;
+   case 'rewards':return tabTasks;
+   case 'shop':return tabShop;
+   case 'invite':return tabFriends;
+   default:return tabWithdraw;
+ }
+}
 function openVipOffer(origin='vault'){
- vipOfferOrigin=origin==='shop'?'shop':'vault';vaultReviewing=false;document.getElementById('vipTermsAccepted').checked=false;
- showAppSheet(document.getElementById('vipOfferSheet'),vipOfferOrigin==='shop'?tabShop:tabWithdraw);
+ vipOfferOrigin=origin;vaultReviewing=false;document.getElementById('vipTermsAccepted').checked=false;
+ showAppSheet(document.getElementById('vipOfferSheet'),vipOriginTab());
  if(vaultOwner!==homeUserId())resetVault(homeUserId());
  renderVault();void window.JigPilot?.sync();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
 }
-function openVaultDetails(){vaultDetailsReturn=document.getElementById('vipOfferSheet').classList.contains('show')?'offer':'vault';showAppSheet(vipSheet,vipOfferOrigin==='shop'&&vaultDetailsReturn==='offer'?tabShop:tabWithdraw);renderVipHistory();void refreshVipStatus();}
+function openVaultDetails(){vaultDetailsReturn=document.getElementById('vipOfferSheet').classList.contains('show')?'offer':'vault';showAppSheet(vipSheet,vaultDetailsReturn==='offer'?vipOriginTab():tabWithdraw);renderVipHistory();void refreshVipStatus();}
 async function checkVipPayment(){
  const owner=homeUserId(),order=vaultPending(owner);if(!owner||!order||vaultPolling)return;
  const epoch=vaultEpoch;vaultPolling=true;vaultBusy=true;vaultMessage='Waiting for confirmed payment…';renderVault();
@@ -8292,7 +8331,7 @@ async function buyVipPass(){
 async function handleCoinShop(){openCoinShopSheet();}
 async function handleVipPass(){openVipOffer('vault');}
 async function handleVipPremium(){openVipOffer('vault');}
-document.getElementById('vipOfferClose').addEventListener('click',()=>vipOfferOrigin==='shop'?openCoinShopSheet():openVault());
+document.getElementById('vipOfferClose').addEventListener('click',()=>vipOriginTab().click());
 document.getElementById('vipOfferHistory').addEventListener('click',openVaultDetails);
 document.getElementById('vaultCoinOrdersOpen').addEventListener('click',()=>{
   // Order receipts remain managed by the authenticated Shop catalogue,
@@ -9075,6 +9114,7 @@ initFromBackend();
     img.removeAttribute('src');el('raceCardDownload').removeAttribute('href');
   });
   window.JigPilot={sync,canRefill,equipped,renderCoin,openRace,setStyle};
+document.querySelectorAll('[data-vip-origin]').forEach(button=>button.addEventListener('click',()=>openVipOffer(button.dataset.vipOrigin)));
   el('shopVipPass').addEventListener('click',()=>{shopRecord('vip_opened');openVipOffer('shop');});
   el('pilotPreviewOpen').addEventListener('click',()=>previewMint('midnight'));
   el('crownPreview').addEventListener('click',event=>{
