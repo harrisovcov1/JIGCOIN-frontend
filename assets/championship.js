@@ -23,7 +23,7 @@ window.JigChampionship = (() => {
    main.append(node('p','Global podium · Gold 100,000 · Silver 50,000 · Bronze 25,000 game coins'));
    const clock=node('p');main.append(clock);
    const tick=()=>{const minutes=Math.max(0,Math.ceil((Date.parse(status.close+'T00:00:00Z')-Date.now())/60000));clock.textContent='Closes in '+Math.floor(minutes/1440)+'d '+Math.floor(minutes%1440/60)+'h '+minutes%60+'m · Monday 00:00 UTC';};tick();timer=setInterval(tick,30000);
-   heading(status.name);
+   heading(status.name);if(status.instructions)main.append(node('p',status.instructions));
    main.append(node('p','Five rounds · 200 points per correct round. Your six best days count.'));
    for(const mode of ['practice','ranked']){
     const key=crypto.randomUUID();
@@ -39,15 +39,17 @@ window.JigChampionship = (() => {
    for(const s of ['global','friends'])main.append(button(s==='global'?'Global standings':'Friends comparison',()=>retry(async()=>{scope=s;await reload();})));
    const list=node('ol');for(const r of status.rows)list.append(node('li','#'+r.place+' '+r.name+' · '+r.total));main.append(list);
    const prefs=node('details'),title=node('summary','Daily Telegram reminder');prefs.append(title);
+   prefs.append(node('p',status.reminder?'Daily reminder enabled.':'Daily reminder off.'));
    function input(label,type,value){const wrap=node('label',label+' '),field=node('input');field.type=type;field.value=value;wrap.append(field);prefs.append(wrap);return field;}
    const time=input('Reminder time (UTC)','time','17:00'),from=input('Quiet from (UTC hour)','number','22'),to=input('Quiet until','number','8');
+   if(status.reminder){time.value=[Math.floor(status.reminder.minute/60),status.reminder.minute%60].map(n=>String(n).padStart(2,'0')).join(':');from.value=status.reminder.quiet_from;to.value=status.reminder.quiet_to;}
    const result=node('p');result.setAttribute('role','status');
    prefs.append(button('Enable daily reminder',()=>{const save=async()=>{const [h,m]=time.value.split(':').map(Number);
     const res=await call('reminder',{enabled:true,minute:h*60+m,quietFrom:Number(from.value),quietTo:Number(to.value)});
     result.textContent=res.enabled?'Daily reminder enabled.':res.reason||'Permission required. Try again after allowing bot messages.';};
     const app=window.Telegram?.WebApp;if(app?.requestWriteAccess)app.requestWriteAccess(allowed=>{if(allowed)save();else result.textContent='Telegram permission declined.';});else save();}),
     button('Disable daily reminder',async()=>{const res=await call('reminder',{enabled:false});result.textContent=res.enabled===false?'Daily reminder disabled.':'Could not confirm. Try again.';}),result);main.append(prefs);
-   heading('Previous champions');for(const r of status.history)main.append(node('p',r.week+' · #'+r.place+' '+r.name+' · '+r.score+' points · '+r.coins+' coins'));
+   main.append(node('p','Ties use the six counted scores, highest first, then the lower permanent player ID.'));heading('Previous champions');for(const r of status.history)main.append(node('p',r.week+' · #'+r.place+' '+r.name+' · '+r.score+' points · '+r.coins+' coins'));
    if(!status.history.length)main.append(node('p','The first podium appears after the week closes.'));
   }
   function play(run){
@@ -61,13 +63,26 @@ window.JigChampionship = (() => {
    if(p.targets)main.append(node('p','Targets · '+p.targets.join(' then ')));
    if(p.target!==undefined)main.append(node('p','Starting total '+p.start+' · Target '+p.target));
    function controls(){
-    if(stamp!==generation)return;scene.replaceChildren();const buttons=[];
+    if(stamp!==generation)return;scene.replaceChildren();const buttons=[];if(p.grid||p.kind==='pairs')tray.className='champ-grid';
     for(const [i,label] of p.tiles.entries()){
-     const b=button(label,()=>{if(actions.length>=20)return;actions.push(i);selection.textContent=actions.map(k=>p.tiles[k]).join(' → ');
+     const b=button(label,()=>{if(actions.length>=20)return;
+      if(p.kind==='pairs'){
+       const last=actions.at(-1);
+       if(actions.length%2===1 && last===i)return;
+       if(p.hidden)b.textContent=p.reveal[i];
+       if(actions.length%2===1){
+        const faces=p.hidden?p.reveal:p.tiles;
+        const pairs={'◇':'◆','○':'●','△':'▲','□':'■'};
+        const a=pairs[faces[i]]||faces[i],other=pairs[faces[last]]||faces[last];
+        if(a===other){b.disabled=true;buttons[last].disabled=true;}
+        else if(p.hidden){const previous=buttons[last];tray.inert=true;setTimeout(()=>{b.textContent=p.tiles[i];previous.textContent=p.tiles[last];tray.inert=false;},550);}
+       }
+      }
+      actions.push(i);selection.textContent=actions.map(k=>p.tiles[k]).join(' → ');
       if(p.switchAt&&actions.length>=p.switchAt)prompt.textContent='Switch rule: assign each piece by Light or Dark finish.';
      });buttons.push(b);tray.append(b);
     }
-    tray.append(button('Undo',()=>{actions.pop();selection.textContent=actions.map(k=>p.tiles[k]).join(' → ');if(p.switchAt&&actions.length<p.switchAt)prompt.textContent=p.prompt;}));
+    if(p.kind!=='pairs')tray.append(button('Undo',()=>{actions.pop();selection.textContent=actions.map(k=>p.tiles[k]).join(' → ');if(p.switchAt&&actions.length<p.switchAt)prompt.textContent=p.prompt;}));
     tray.append(button('Submit answer',()=>retry(async()=>{
      tray.inert=true;try{const next=await call('answer',{id:run.id,round:run.round,actions:[...actions]});if(!next.id)throw Error();if(generation===stamp)play(next);}finally{tray.inert=false;}
     })));
@@ -75,7 +90,10 @@ window.JigChampionship = (() => {
    if(p.crossings||p.reveal){
     const sequence=p.crossings||p.reveal;let i=0;
     const show=()=>{if(stamp!==generation)return;if(i>=sequence.length){controls();return;}
-     scene.textContent=p.flash?sequence.join(' '):sequence[i];if(p.crossings){scene.className='champ-cross';scene.animate([{transform:'translateX(-32%)'},{transform:'translateX(32%)'}],600);}
+     scene.replaceChildren();
+     if(p.grid){scene.className='champ-grid';for(let j=0;j<(p.hidden?sequence.length:9);j++){const tile=node('span',p.hidden?sequence[j]:String(j+1));if(!p.hidden&&String(j+1)===sequence[i])tile.className='champ-lit';scene.append(tile);}}
+     else scene.textContent=p.flash?sequence.join(' '):sequence[i];
+     if(p.crossings){scene.textContent='';scene.className='champ-cross';const coin=node('span',sequence[i]);scene.append(coin);coin.animate([{transform:'translateX(-32%)'},{transform:'translateX(32%)'}],600);}
      i=p.flash?sequence.length:i+1;setTimeout(show,p.flash?2200:700);
     };show();
    }else controls();
