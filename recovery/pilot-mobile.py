@@ -170,7 +170,8 @@ def check_race_art(page, account):
         assert max(errors) < 1, (account['race_finishes'], errors)
         page.locator('#resultImage [type=submit]').click()
 
-def check(browser,width,height):
+def check(browser,width,height,championship=None):
+    tg=championship.player if championship else 101
     context=browser.new_context(viewport={'width':width,'height':height},is_mobile=True,has_touch=True, reduced_motion='reduce',service_workers='block')
     page=context.new_page()
     page.set_default_timeout(4800)
@@ -178,6 +179,7 @@ def check(browser,width,height):
     page.on('pageerror',lambda e: errors.append(str(e)))
     base='https://pilot.jigcoin.test'
     a={'balance':17800,'energy':50,'skin':False,'vip':False,'run':None,'left':3,'reward':'available','legacy':False,'claims':0}
+    if championship:a['balance']=championship.balance
     calls=[]
     rival_code='2'*20
     card_code='a'*32
@@ -188,17 +190,21 @@ def check(browser,width,height):
             Path(destination).mkdir(exist_ok=True,parents=True)
             page.screenshot(path=str(Path(destination)/(label+'.png')),animations='disabled')
     fixturejs="""(() => {const user={id:101,first_name:'Pilot'};window.Telegram={WebApp:{initDataUnsafe:{user},initData:new URLSearchParams({user:JSON.stringify(user)}).toString(),ready(){},expand(){},onEvent(){},offEvent(){},HapticFeedback:{impactOccurred(){},selectionChanged(){}},openTelegramLink(url){window.shared=url}}};window.adMode='hang';window.show_123=async function(opt){(window.adCalls||=[]).push(opt); if(opt.type==='preload'){if(window.adMode==='nofill')throw Error('Empty Feed');if(window.adMode==='hang')await new Promise(r=>window.resumePreload=r);}};})();"""
+    if championship:
+        fixturejs=fixturejs.replace("id:101,",f"id:{tg},").replace("new URLSearchParams({user:JSON.stringify(user)}).toString()",repr(championship.init_data))
     page.add_init_script(fixturejs)
     def route(r):
         req=r.request
         u=urlsplit(req.url)
         if u.netloc=='pilot.jigcoin.test':
             f=root/(u.path.lstrip('/') or 'index.html')
-            if f.is_file():return r.fulfill(body=f.read_bytes(),content_type={'.css':'text/css','.js':'application/javascript','.html':'text/html','.webp':'image/webp'}.get(f.suffix,'text/plain'))
+            if f.is_file():return r.fulfill(body=f.read_bytes(),content_type={'.css':'text/css','.js':'application/javascript','.html':'text/html','.webp':'image/webp','.svg':'image/svg+xml'}.get(f.suffix,'text/plain'))
         headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'}
         if u.netloc!='jigcoin.onrender.com':return r.fulfill(body='',content_type='application/javascript')
         if req.method=='OPTIONS':return r.fulfill(status=204,headers=headers)
         p=u.path
+        if championship and championship.routes(p):
+            return championship.forward(r,headers)
         d=req.post_data_json or {} if req.method=='POST' else {}
         calls.append(p)
         out={'ok':False}
@@ -249,7 +255,9 @@ def check(browser,width,height):
     page.route('**/*',route)
     try:
         page.goto(base, wait_until='domcontentloaded')
-        page.wait_for_function("window.JigPilot && window.__accountPhase==='ready' && JigPilot.canRefill()")
+        page.wait_for_function("window.JigPilot && window.__accountPhase==='ready'" if championship else "window.JigPilot && window.__accountPhase==='ready' && JigPilot.canRefill()")
+        if championship:
+            return championship.exercise(page)
         coin_size=page.locator('#tapBtn').bounding_box()
         expect(page.locator('#mintFinishName')).to_have_text('Foundry Gold')
         check_home_rank_and_saving(page)
@@ -403,8 +411,9 @@ def check(browser,width,height):
         print('Client errors:',errors,'recent paths:',calls[-16:],'account:',page.evaluate('window.__accountPhase'),'view:',page.locator('.sheet.show').all_text_contents().__str__()[:350],flush=True)
         raise
     finally:context.close()
-with sync_playwright() as p:
-    for width,height in [(402,874),(390,844),(320,568)]:
-        b=p.chromium.launch(executable_path=os.getenv('CHROMIUM_PATH'),headless=True,args=['--no-sandbox','--no-zygote','--single-process'])
-        check(b,width,height)
-        b.close()
+if __name__=='__main__':
+ with sync_playwright() as p:
+     for width,height in [(402,874),(390,844),(320,568)]:
+         b=p.chromium.launch(executable_path=os.getenv('CHROMIUM_PATH'),headless=True,args=['--no-sandbox','--no-zygote','--single-process'])
+         check(b,width,height)
+         b.close()
