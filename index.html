@@ -3551,7 +3551,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
 }
 #coinShopSheet #packDisclosure{width:100%;min-height:44px;background:#182538;color:#ffe19a;border:1px solid #897044;border-radius:10px;font:inherit;font-weight:650}
 #coinPackList .hub-product[hidden]{display:none!important}
-</style></head>
+</style><link rel="stylesheet" href="assets/championship.css"><script src="assets/championship.js" defer></script></head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
@@ -3793,7 +3793,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
           <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Prestige coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
         </button>
         <div class="vault-medal-spotlight" id="vaultMedalSpotlight" hidden aria-label="Confirmed recent daily medals"></div>
-        <details class="vault-medals" id="vaultMedalCollection"><summary><span>Competition honours</span><span id="vaultMedalCount">View earned medals</span></summary><h3>Daily podium medals</h3><div id="vaultDailyMedalList">Open Vault to check your medals.</div><h3>Weekly Race gold medals</h3><div id="pilotMedalList">Checking your weekly medals…</div><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
+        <details class="vault-medals" id="vaultMedalCollection"><summary><span>Competition honours</span><span id="vaultMedalCount">View earned medals</span></summary><details><summary>Legacy Daily Honours</summary><div id="vaultDailyMedalList">Open Vault to check your medals.</div></details><details><summary>Earlier Weekly Race gold</summary><div id="pilotMedalList">Checking your weekly medals…</div></details><details id="champTrophies"><summary>Weekly Championship Trophies</summary><p aria-live="polite">Open to check your awards.</p></details><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
       </section>
       <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
         <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
@@ -9015,6 +9015,7 @@ initFromBackend();
   }
   async function openRace() {
     if(!accountIsReady())return;
+    if(await window.JigChampionship?.open(apiPost))return;
     if(owner!==homeUserId())void sync();
     practiceMode=false;runViewKey='';
     showAppSheet(sheet,tabFarm);
