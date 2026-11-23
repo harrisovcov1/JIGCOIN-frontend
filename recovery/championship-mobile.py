@@ -11,10 +11,18 @@ with sync_playwright() as w:
   page.route('http://localhost/**',lambda r:r.fulfill(body='<html><meta charset=utf-8><title>Championship QA</title></html>',content_type='text/html'))
   page.goto('http://localhost/');page.add_style_tag(path='assets/championship.css');page.add_script_tag(path='assets/championship.js')
   page.clock.install()
-  page.evaluate("""async board=>{window.submitted=null;await JigChampionship.open(async(route,body)=>{
+  page.evaluate("""async board=>{window.submitted=null;let lastTile,frameIndex=0;await JigChampionship.open(async(route,body)=>{
    if(route.endsWith('status'))return {active:true,name:board.name,close:'2026-11-30',remaining:{practice:1,ranked:3},daily:Array(7).fill(0),podium:0,rows:[],history:[]};
    if(route.endsWith('start'))return {...board,id:'fixture',round:0};
-   window.submitted=body.actions;return {name:board.name,id:'fixture',round:5,finished:true,score:1000};});}""",{k:board[k] for k in ['name','board','variant']})
+   if(route.endsWith('observe')){
+    const p=board.private,frames=p.crossings||(p.hidden?[p.faces]:p.flash?[p.reveal]:p.reveal)||[];
+    return frameIndex<frames.length?{frame:frames[frameIndex++],wait:250}:{done:true};
+   }
+   if(route.endsWith('flip')){
+    const faces=board.private.faces,matched=body.step%2===1&&faces[lastTile]===faces[body.tile];
+    lastTile=body.tile;return {face:faces[body.tile],matched};
+   }
+   window.submitted=body.actions;return {name:board.name,id:'fixture',round:5,finished:true,score:1000};});}""",{k:board[k] for k in ['name','board','variant','private']})
   if i<3:page.screenshot(path=str(out/f'lobby-{width}.png'))
   page.get_by_role('button',name='Practice',exact=False).click()
   page.clock.run_for(12000)
