@@ -12,7 +12,7 @@ test('v32 Vault keeps its coin balance and rank without repeating finish twice',
  assert.match(vault,/id="vaultRank"/);
  assert.doesNotMatch(vault,/id="vaultBalanceFinish"/);
  assert.match(vault,/id="vaultCollectionLabel"/);
- assert.match(vault,/Equipped coin finish/);
+ assert.match(vault,/Prestige coin finish/);
  assert.doesNotMatch(html,/document\.getElementById\('vaultBalanceFinish'\)/);
 });
 test('latest three verified medals show a left-to-right chronological journey',()=>{
