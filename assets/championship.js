@@ -4,10 +4,15 @@ window.JigChampionship = (() => {
  const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
  function button(title,fn){const b=node('button',title);b.type='button';b.onclick=fn;return b;}
  async function open(post){
-  const call=(route,body={})=>post('/api/championship/'+route,body);
+  let preview = false;
+  const call = (route, body = {}) => {
+    const prefix = preview && route !== 'status' ? 'owner-practice/' : '';
+    return post('/api/championship/' + prefix + route, body);
+  };
   const opener=document.activeElement;
   let status=await call('status');
-  if(!status?.active)return false;
+  preview = !status?.active && Boolean(status?.ownerPractice?.variants?.length);
+  if(!status?.active && !preview)return false;
   if(dialog?.open)return true;
   dialog=node('dialog');dialog.className='championship-dialog';dialog.setAttribute('aria-label','Weekly Championship');
   const main=node('section'),close=button('Close',()=>dialog.close());
@@ -18,7 +23,46 @@ window.JigChampionship = (() => {
   async function retry(fn){
    try{await fn();}catch{main.append(node('p','Connection interrupted.'),button('Try again',()=>retry(fn)));}
   }
-  async function reload(){status=await call('status',{scope});if(!status.active)throw Error();lobby();}
+  async function reload(){
+   status=await call('status',{scope});
+   if(preview && status?.ownerPractice){practiceMenu();return;}
+   if(!status?.active)throw Error();
+   preview=false;lobby();
+  }
+  function practiceMenu(){
+   generation++;clearInterval(timer);main.replaceChildren();heading('Owner practice');
+   main.append(node('p','Explore all 30 Championship challenges. Practice scores stay out of standings and earn no coins or medals.'));
+   const {variants,run}=status.ownerPractice;
+   const label=node('label','Challenge'),select=node('select'),instructions=node('p');
+   select.id='ownerPracticeChallenge';label.htmlFor=select.id;
+   for(const item of variants){
+    const option=node('option',item.name);option.value=String(item.id);select.append(option);
+   }
+   select.value=String(run?.variant ?? variants[0].id);
+   const update=()=>{instructions.textContent=variants.find(v=>v.id===Number(select.value))?.instructions||'';};
+   select.onchange=update;update();main.append(label,select,instructions);
+   const message=node('p');message.setAttribute('role','status');
+   let request=crypto.randomUUID();
+   select.addEventListener('change',()=>{request=crypto.randomUUID();});
+   async function launch(route,body){
+    main.inert=true;
+    try{
+     const result=await call(route,body);
+     if(result?.id){play(result);return;}
+     if(result?.reason==='REOPEN_PRACTICE'){await reload();return;}
+     message.textContent='Practice could not open. Try again.';
+    }finally{main.inert=false;}
+   }
+   if(run && !run.finished)main.append(button('Resume '+variants.find(v=>v.id===run.variant).name,()=>retry(()=>launch('resume',{id:run.id}))));
+   main.append(button(run && !run.finished?'Replace current practice':'Start practice',()=>retry(()=>launch('start',{
+    mode:'practice',variant:Number(select.value),previous:run?.id??null,request
+   }))),message);
+   const rules=node('details');
+   rules.append(node('summary','Official championship prizes and rules'),
+    node('p','Gold 100,000 · Silver 50,000 · Bronze 25,000 game coins. Only the global podium awards prizes.'),
+    node('p','One practice and three ranked runs per UTC day. Your best six daily scores count each week. The first ranked week begins on the first full Monday after activation.'));
+   main.append(rules);
+  }
   function lobby(){
    generation++;clearInterval(timer);main.replaceChildren();heading('Weekly Championship');
    main.append(node('p','Global podium · Gold 100,000 · Silver 50,000 · Bronze 25,000 game coins'));
@@ -56,7 +100,8 @@ window.JigChampionship = (() => {
   function play(run){
    clearInterval(timer);const stamp=++generation;main.replaceChildren();heading(run.name);
    if(run.lastCorrect!==undefined)main.append(node('p',run.lastCorrect?'Correct':'Round missed'));
-   if(run.finished){heading('Result · '+run.score+' / 1,000');main.append(button('View standings',()=>retry(reload)));return;}
+   if(run.finished){heading('Result · '+run.score+' / 1,000');main.append(button(preview?'Choose another challenge':'View standings',()=>retry(reload)));return;}
+   if(preview)main.append(button('Back to challenges',()=>retry(reload)));
    const p=run.board, actions=[...(run.flips||[])];
    const prompt=node('p',p.prompt),scene=node('div'),tray=node('div'),selection=node('p');
    main.append(node('p','Round '+(run.round+1)+' of 5'),prompt,scene);
@@ -131,7 +176,7 @@ window.JigChampionship = (() => {
    }
    void show();
   }
-  lobby();return true;
+  if(preview)practiceMenu();else lobby();return true;
  }
  return {open};
 })();
