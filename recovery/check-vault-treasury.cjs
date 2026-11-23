@@ -11,7 +11,7 @@ test('v32 Vault keeps rank and collection finish without duplicated treasury tex
  assert.doesNotMatch(vault,/id="vaultBalanceFinish"/);
  assert.match(vault,/id="vaultCollectionOpen"/);
  assert.match(html,/Rank · /);
- assert.match(vault,/Equipped coin finish/);
+ assert.match(vault,/Prestige coin finish/);
 });
 test('collection leads; VIP is a compact membership card, not another Shop card',()=>{
  assert.ok(vault.indexOf('id="vaultCollectionTitle"')<vault.indexOf('id="vaultVipOpen"'));
