@@ -3541,7 +3541,14 @@ html body #balanceText {font-variant-numeric:tabular-nums}
 </style>
 <style>
 .vip-crown-link{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;cursor:pointer}
-.sheet-header>.vip-crown-link{margin-inline-start:auto}
+/* Each action owns a full hit area, including on short phones. */
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header {
+  display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;
+  align-items:center;column-gap:6px;padding-inline:10px;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.sheet-close {
+  position:static;transform:none;width:44px;height:44px;
+}
 #coinShopSheet #packDisclosure{width:100%;min-height:44px;background:#182538;color:#ffe19a;border:1px solid #897044;border-radius:10px;font:inherit;font-weight:650}
 #coinPackList .hub-product[hidden]{display:none!important}
 </style></head>
