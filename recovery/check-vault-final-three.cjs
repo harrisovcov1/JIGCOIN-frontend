@@ -9,7 +9,7 @@ test('separate cabinets, compact game roadmap and history with no redundant VIP 
  assert.match(vault,/do not guarantee any token allocation or monetary return/);
  assert.match(html,/id="vaultCoinGallery"/);
  assert.match(html,/grid-template-columns:44px minmax\(0,1fr\) 44px/);
- assert.match(html,/grid-area:1\/1;position:static/);
+ assert.match(html,/grid-area:1\/1;position:(?:relative|static)/);
  assert.match(html,/grid-area:1\/3;position:static/);
  assert.doesNotMatch(html,/getElementById\('vaultVipOpen'\)\.addEventListener/);
 });

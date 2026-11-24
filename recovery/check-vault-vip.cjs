@@ -11,6 +11,31 @@ function setup(){
  vm.createContext(ctx);vm.runInContext(code,ctx);return{ctx,el,calls,timers,storage,setReply:v=>reply=v,owner:v=>owner=v,opens:()=>opens,callback:()=>callback,syncs:()=>syncs};
 }
 const flush=async()=>{for(let i=0;i<50;i++)await Promise.resolve();};
+test('each VIP entry records one eligible membership view without a Shop preload or checkout',async()=>{
+ for(const origin of ['home','rewards','shop','invite','vault']){
+  const h=setup();
+  Object.assign(h.ctx,{tabFarm:{},tabTasks:{},tabShop:{},tabFriends:{}});
+  if(origin==='vault')await h.ctx.refreshVipStatus();
+  const visits=()=>h.calls.filter(call=>call.path==='/api/stars/interaction');
+  assert.equal(visits().length,0);
+  h.ctx.openVipOffer(origin);
+  await flush();
+  assert.equal(visits().length,1,origin);
+  assert.equal(JSON.stringify(visits()[0].body),JSON.stringify({event:'vip_opened'}));
+  assert.equal(h.opens(),0);
+ }
+});
+test('closed, unsigned and mismatched VIP views do not record an eligible visit',async()=>{
+ for(const condition of ['closed','unsigned','mismatched']){
+  const h=setup(),offer=data(condition==='mismatched'?999:123);
+  offer.product.enabled=condition!=='closed';
+  h.setReply(offer);
+  h.ctx.accountIsReady=()=>condition!=='unsigned';
+  h.ctx.openVipOffer('vault');
+  await flush();
+  assert.equal(h.calls.filter(call=>call.path==='/api/stars/interaction').length,0,condition);
+ }
+});
 test('VIP requires confirmed offer and terms; actual benefits display 50→100 and 1→2',async()=>{const h=setup();await h.ctx.refreshVipStatus();assert.equal(h.el('vipBuyBtn').disabled,true);h.el('vipTermsAccepted').checked=true;h.ctx.renderVault();assert.equal(h.el('vipBuyBtn').disabled,false);assert.equal(h.el('vipEnergyValue').textContent,'50 → 100 energy');assert.equal(h.el('vipBuyBtn').textContent,'Activate VIP · ★ 500');});
 test('duplicate presses make one invoice; client paid callback cannot activate VIP',async()=>{const h=setup();await h.ctx.refreshVipStatus();h.el('vipTermsAccepted').checked=true;await Promise.all([h.ctx.buyVipPass(),h.ctx.buyVipPass()]);await h.ctx.buyVipPass();assert.equal(h.opens(),1);h.callback()('paid');await flush();assert.equal(h.ctx.state.vipUntil,null);assert.equal(h.ctx.state.bal,15488);assert.equal(h.syncs(),0);assert.match(h.el('vipFeedback').textContent,/awaiting payment/);});
 test('confirmed paid order reloads actual VIP and account state',async()=>{const h=setup();await h.ctx.refreshVipStatus();h.storage.set(h.ctx.vaultPendingKey(123),order);h.setReply(data(123,true));const api=h.ctx.apiPost;h.ctx.apiPost=async(path,body)=>path.endsWith('order-status')?{ok:true,order:{payload:order,status:'paid'}}:api(path,body);await h.ctx.checkVipPayment();assert.equal(h.el('vipStatusText').textContent,'VIP active');assert.equal(h.syncs(),1);assert.equal(h.storage.size,0);assert.match(h.el('vipBonusText').textContent,/512/);});
