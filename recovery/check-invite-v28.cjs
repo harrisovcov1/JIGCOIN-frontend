@@ -18,7 +18,7 @@ test('Invite has separate joined, rewarded, and earned counters',()=>{
  assert.match(invite,/<span>Coins earned<\/span><strong id="referralPointsText">/);
 });
 test('Review records remain distinguishable from paid referrals',()=>{
- assert.match(html,/Historical referral · reward evidence needs review/);
+ assert.match(html,/Historical referral · old credit records are being reconciled/);
  assert.match(html,/parts\.join\(' · '\)/);
  assert.match(html,/if\(data\.friends_on_hold\)parts\.push/);
 });

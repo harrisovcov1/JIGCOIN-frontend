@@ -118,7 +118,7 @@ test('Invite explains historical joined records requiring review without promisi
  assert.equal(x.el('inviteJoinedCount').textContent,'5');
  assert.equal(x.el('friendsJoinedText').textContent,'0');
  assert.match(x.el('invitePendingSummary').textContent,/5 joined/);
- assert.match(x.el('invitePendingSummary').textContent,/5 to review/);
+ assert.match(x.el('invitePendingSummary').textContent,/5 records being checked/);
  assert.doesNotMatch(x.el('invitePendingSummary').textContent,/working towards a reward/);
  assert.match(x.el('inviteFriendProgress').innerHTML,/Historical referral/);
  assert.doesNotMatch(x.el('inviteFriendProgress').innerHTML,/coins credited/);
@@ -151,7 +151,7 @@ test('rewarded incoming invitations never replay onboarding or imply a second we
  const x=setup(),dialog=welcomeDialog(x);x.respond(async()=>({...cumulativeFixture(),incoming_referral:{...incoming(),status:'rewarded',verified_taps:100}}));await x.c.loadInviteSummary();assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteProgress').textContent,/Invitation complete/);assert.match(x.el('incomingInviteRule').textContent,/inviter’s reward has been credited/);assert.equal(x.el('incomingInviteMeter').hidden,true);
 });
 test('legacy incoming records may lack a date but never receive the new cumulative promise',async()=>{
- const x=setup(),dialog=welcomeDialog(x);x.respond(async()=>({...cumulativeFixture(),incoming_referral:{...incoming(),policy_version:'legacy_unknown',qualification_mode:'legacy_unknown',joined_at:null,min_taps:null,verified_taps:null,status:'on_hold'}}));await x.c.loadInviteSummary();assert.equal(x.el('shareTelegramBtn').disabled,false);assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteRule').textContent,/eligibility needs checking/);assert.doesNotMatch(x.el('incomingInviteRule').textContent,/100/);
+ const x=setup(),dialog=welcomeDialog(x);x.respond(async()=>({...cumulativeFixture(),incoming_referral:{...incoming(),policy_version:'legacy_unknown',qualification_mode:'legacy_unknown',joined_at:null,min_taps:null,verified_taps:null,status:'on_hold'}}));await x.c.loadInviteSummary();assert.equal(x.el('shareTelegramBtn').disabled,false);assert.equal(dialog.opens,0);assert.match(x.el('incomingInviteRule').textContent,/No action is needed/);assert.doesNotMatch(x.el('incomingInviteRule').textContent,/100/);
 });
 test('incoming attribution is account scoped and its display name is assigned as text',async()=>{
  const x=setup(),dialog=welcomeDialog(x),d={...cumulativeFixture(),incoming_referral:{...incoming(),display_name:'<svg onload=bad()>'}};x.respond(async()=>d);await x.c.loadInviteSummary();assert.equal(x.el('inviteWelcomeTitle').textContent,'<svg onload=bad()> invited you');assert.equal(x.el('inviteWelcomeTitle').innerHTML,'');
@@ -164,9 +164,9 @@ test('history message distinguishes five unverified historical invites from no i
  d.friend_progress=Array.from({length:5},(_,i)=>({...d.friend_progress[0],id:'legacy'+i,status:'on_hold',qualification_mode:'legacy_unknown',policy_version:'legacy_unknown',verified_taps:null,min_taps:null}));
  x.respond(async()=>d);await x.c.loadInviteSummary();
  x.respond(async()=>({ok:true,telegram_id:'10001',credits:[]}));await x.c.loadInviteHistory({force:true});
- assert.match(x.el('inviteHistoryStatus').textContent,/5 historical invitations need eligibility review/);
+ assert.match(x.el('inviteHistoryStatus').textContent,/team handles reconciliation automatically/);
  assert.doesNotMatch(x.el('inviteHistoryStatus').textContent,/invite your first friend/i);
- assert.match(x.el('inviteFriendProgress').innerHTML,/Needs review/);
+ assert.match(x.el('inviteFriendProgress').innerHTML,/Legacy reconciliation/);
 });
 test('history distinguishes pending qualification from confirmed credits',async()=>{
  const x=setup();x.respond(async()=>cumulativeFixture());await x.c.loadInviteSummary();
