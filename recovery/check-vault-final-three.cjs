@@ -5,8 +5,8 @@ const vault=html.slice(html.indexOf('<div class="sheet" id="withdrawSheet"'),htm
 test('separate cabinets, compact game roadmap and history with no redundant VIP card',()=>{
  for(const id of ['vaultCollectionOpen','vaultMedalCollection','vaultLegacyHonours','vaultDailyMedalList','pilotMedalList','vaultTrophyList','vaultLegendProgress','vaultCoinOrdersOpen','vaultHistoryOpen','vaultRewardHistoryOpen'])assert.match(vault,new RegExp('id="'+id+'"'));
  assert.doesNotMatch(vault,/vaultVipOpen|vaultMedalSpotlight|Airdrop status/);
- assert.match(vault,/Rank 8 · 10,000,000 saved in-game coins/);
- assert.match(vault,/do not guarantee any token allocation or monetary return/);
+ assert.match(vault,/Rank 8 — Legend with 10,000,000 verified saved game coins/);
+ assert.match(vault,/Final token eligibility and allocation terms are pending/);
  assert.match(html,/id="vaultCoinGallery"/);
  assert.match(html,/grid-template-columns:44px minmax\(0,1fr\) 44px/);
  assert.match(html,/grid-area:1\/1;position:(?:relative|static)/);

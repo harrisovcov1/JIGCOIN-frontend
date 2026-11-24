@@ -52,9 +52,14 @@ test('legacy daily medals render only inside the collapsed archive and are accou
  assert.match(vault,/<details id="vaultLegacyHonours">/);assert.doesNotMatch(vault,/id="vaultMedalSpotlight"/);
 });
 test('roadmap states game progress without a purchase or token guarantee',()=>{
- assert.match(vault,/Rank 8 · 10,000,000 saved in-game coins/);
+ assert.match(vault,/Rank 8 — Legend with 10,000,000 verified saved game coins/);
+ assert.match(vault,/<time datetime="2027-12">December 2027<\/time>/);
+ assert.match(vault,/Final token eligibility and allocation terms are pending/);
+ assert.match(vault,/<summary>Project roadmap &amp; game terms<\/summary>/);
+ assert.match(vault,/id="vaultJourneyOpen"/);
+ assert.match(vault,/snapshot and individual allocations have yet to be published/);
  assert.match(vault,/Game coins have no cash-out value/);
- assert.match(vault,/do not guarantee any token allocation or monetary return/);
+ assert.doesNotMatch(vault,/Ranks and purchases do not guarantee|company shares|native Toncoin/);
  assert.doesNotMatch(vault,/airdrop countdown|guaranteed airdrop|buy to qualify/i);
 });
 test('responsive sizing keeps natural overflow and usable account targets',()=>{
