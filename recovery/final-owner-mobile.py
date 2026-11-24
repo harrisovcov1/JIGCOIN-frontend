@@ -96,6 +96,11 @@ class Scenario:
    page.locator(f'#{sheet} .vip-crown-link').click()
    expect(page.locator('#vipOfferSheet')).to_be_visible()
    expect(page.locator('#vipReview')).to_contain_text('500 Stars')
+   review=page.locator('#vipReview')
+   assert review.evaluate("""b=>{
+    const r=b.getBoundingClientRect(), area=b.closest('.sheet-body').getBoundingClientRect();
+    return r.height>=44 && r.top>=area.top-1 && r.bottom<=area.bottom+1;
+   }"""),(self.w,self.h,'VIP review button is partly outside the initial view')
    page.locator('#vipOfferClose').click()
    expect(page.locator('#'+sheet)).to_be_visible()
    if label=='invite':

@@ -21,7 +21,7 @@ class Scenario:
   self.player=10001+i+[320,390,430].index(w)*30
   account=request(cmd='case',player=self.player,variant=i);self.init_data=account['initData'];self.balance=account['balance']
  def routes(self,p):
-  return p.startswith('/api/championship/') or p in ('/api/pilot/profile','/api/leaderboard/history')
+  return p.startswith('/api/championship/') or p in ('/api/pilot/profile','/api/leaderboard/history','/api/vault/trophies')
  def forward(self,r,headers):
   path=urlsplit(r.request.url).path
   if path.endswith('/answer') and self.fail_once:
@@ -73,12 +73,12 @@ class Scenario:
     page.locator('#'+tab).tap();expect(page.locator('#'+sheet)).to_be_visible();page.locator('#'+back).tap()
    page.locator('#tabWithdraw').click()
    page.locator('#vaultMedalCollection>summary').click()
+   page.locator('#vaultLegacyHonours>summary').click()
    page.get_by_text('Legacy Daily Honours',exact=True).click()
    expect(page.locator('#vaultDailyMedalList')).to_contain_text('42')
    page.get_by_text('Earlier Weekly Race gold',exact=True).click()
    expect(page.locator('#pilotMedalList')).to_contain_text('9 pairs')
-   page.locator('#champTrophies summary').click()
-   expect(page.locator('#champTrophies p')).to_contain_text('25000 game coins')
+   expect(page.locator('#vaultTrophyList')).to_contain_text('25,000 awarded coins')
    page.screenshot(path=str(out/f'vault-{self.w}.png'))
   return {'variant':self.i,'width':self.w,'screenshot':shot.name,'correct':True}
 try:

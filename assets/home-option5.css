@@ -150,7 +150,7 @@ html[data-mint-rank="7"] #mainScroll.home-compact {--h5-next-art:linear-gradient
   border-left:1px solid var(--mint-edge);
 }
 #mainScroll.home-compact #homeNextPreview>span:last-child::before {
-  content:"—  NEXT RANK  —";
+  content:"RACE TO LEGEND";
   display:block;
   width:max-content;max-width:100%;
   margin-bottom:2px;
@@ -159,7 +159,7 @@ html[data-mint-rank="7"] #mainScroll.home-compact {--h5-next-art:linear-gradient
   letter-spacing:.21em;
 }
 #mainScroll.home-compact #homeNextPreview[data-rank-complete="true"]>span:last-child::before {
-  content:"—  MAX RANK  —";
+  content:"LEGEND REACHED";
 }
 #mainScroll.home-compact #homeNextPreview[data-loading="true"]>span:last-child::before {display:none;}
 #mainScroll.home-compact #homeNextPreview #homeGoal {
@@ -585,7 +585,21 @@ html[data-mint-rank="1"] #mainScroll.home-compact .mint-chamber-bay #homeCoinWra
   opacity:1;
 }
 #mainScroll.home-compact .mint-dashboard #homeLeaderboard .global-rank-top-row {
+  width:100%;
+  container-type:inline-size;
   text-shadow:0 1px 3px #000b,0 0 2px var(--h5-gold-wash);
+}
+#mainScroll.home-compact #homeLeaderboard #globalRankValue {
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  font-size:min(26px,26cqi,calc(148cqi / var(--position-length,4)));
+}
+#mainScroll.home-compact .mint-dashboard #homeLeaderboard[data-long-position] {
+  padding-inline:4px!important;
+}
+#mainScroll.home-compact #homeLeaderboard[data-long-position]::before,
+#mainScroll.home-compact #homeLeaderboard[data-long-position]::after {
+  display:none;
 }
 /* Luminous competitive target. Preserve the original verified text and
    button handlers. Intensify glow but keep the compact actual height. */

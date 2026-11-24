@@ -15,10 +15,10 @@ test('switching section closes previous panel and leaderboard, cancels old count
 function cards(products) {
  const elements={hubStarter:{},hubShopNotice:{},hubSupport:{}};
  const classes=new Set();
- const coinPackList={innerHTML:'',querySelector:()=>null,classList:{toggle(name,value){if(value)classes.add(name);else classes.delete(name);}}};
- const c={hubCatalog:{products,enabled:true},hubPurchaseBusy:false,shopCatalogFresh:()=>true,
+ const coinPackList={innerHTML:'',children:[],append(){},querySelector:()=>null,classList:{toggle(name,value){if(value)classes.add(name);else classes.delete(name);}}};
+ const c={hubCatalog:{products,enabled:true},allPacksVisible:false,hubPurchaseBusy:false,shopCatalogFresh:()=>true,
   hubCatalogOwner:10001,homeIdentity:10001,homeUserId:()=>10001,homeGoalModel:()=>null,homeConfirmedBalance:0,
-  document:{getElementById:id=>elements[id]},coinPackList,coinShopSheet:{querySelectorAll:()=>[]},renderHubOrders(){},updateBoostHub(){},
+  document:{getElementById:id=>elements[id],createElement:()=>({setAttribute(){},addEventListener(){}})},coinPackList,coinShopSheet:{querySelectorAll:()=>[]},renderHubOrders(){},updateBoostHub(){},
   hubNow:Date.now,escapeHtml:String,formatNumber:x=>x.toLocaleString('en-GB')};
  vm.createContext(c);
  vm.runInContext(slice('function packGoal(', 'async function loadCoinPacks('),c);
