@@ -27,6 +27,7 @@ window.JigChampionship = (() => {
   const invite=document.getElementById('inviteWeeklyRace');
   if(invite?.firstChild?.nodeType===3)invite.firstChild.nodeValue=title+' ';
   set('lbWeeklyEntry',title);
+  set('vaultChampionshipStatus',mode==='active'?'Weekly Championship is live.':mode==='unknown'?'Current competition status unavailable.':'Official play is currently closed.');
   const home=document.getElementById('homeBoostAction');
   if(home?.dataset.focus==='weekly'){
    home.textContent=entryLabel(true);home.ariaLabel='Open '+title;home.title=home.ariaLabel;

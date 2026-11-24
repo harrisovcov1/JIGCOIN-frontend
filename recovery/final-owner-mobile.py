@@ -112,6 +112,32 @@ class Scenario:
     expect(page.locator('#vaultMedalCount')).to_have_text('0 earned')
     expect(page.locator('#vaultCollectionNext')).to_contain_text('2/8 unlocked')
     expect(page.locator('#vaultLegendProgressLabel')).to_contain_text('17,800 / 10,000,000')
+    expect(page.locator('#vaultRoadmapTitle time')).to_have_text('December 2027')
+    expect(page.locator('#vaultGoal')).to_contain_text('32,200 coins to Operator')
+    expect(page.locator('#vaultLegendProgress')).to_have_js_property('value',17800)
+    expect(page.locator('#vaultLegendProgress')).to_have_js_property('max',10000000)
+    roadmap=page.locator('.vault-roadmap')
+    ordered=['.vault-summary','#vaultCollectionOpen','#vaultMedalCollection','.vault-roadmap','#vaultAccountDrawer']
+    boxes=[page.locator(selector).bounding_box() for selector in ordered]
+    assert all(a['y']+a['height']<=b['y']+1 for a,b in zip(boxes,boxes[1:])),boxes
+    assert roadmap.locator('button,summary').evaluate_all('nodes=>nodes.every(n=>n.getBoundingClientRect().height>=44)')
+    assert roadmap.evaluate('n=>n.scrollWidth<=n.clientWidth+1')
+    assert page.locator('#vaultRoadmapTitle time').evaluate("n=>n.getBoundingClientRect().height<=parseFloat(getComputedStyle(n).lineHeight)+1")
+    expect(roadmap.locator('.vault-risk')).to_be_visible()
+    page.locator('#vaultJourneyOpen').tap()
+    expect(page.locator('#homeTierGrid button')).to_have_count(8)
+    page.get_by_role('button',name='Back to Vault',exact=True).tap()
+    expect(page.locator('#vaultJourneyOpen')).to_be_focused()
+    page.locator('#vaultWithdrawalDetails summary').tap()
+    expect(page.locator('.vault-milestone-panel li')).to_have_count(5)
+    assert page.locator('.vault-milestone-panel').bounding_box()['width']>=roadmap.bounding_box()['width']-34
+    expect(page.locator('#vaultChampionshipStatus')).to_have_text('Official play is currently closed.')
+    page.get_by_role('heading',name='December 2027 roadmap').evaluate("node=>node.scrollIntoView({block:'start'})")
+    shot('vault-milestones')
+    page.get_by_role('heading',name='Rank 8 and token eligibility').evaluate("node=>node.scrollIntoView({block:'start'})")
+    shot('vault-terms')
+    page.locator('#vaultWithdrawalDetails summary').tap()
+    page.locator('#withdrawSheet .sheet-body').evaluate('body=>body.scrollTop=0')
     assert not page.locator('#vaultLegacyHonours').evaluate('e=>e.open')
     assert page.locator('#vaultVipOpen').count()==0
     expect(page.locator('#vaultAccountDrawer')).to_be_visible()
@@ -172,6 +198,7 @@ class Scenario:
   }""")
   expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Championship')
   expect(page.locator('#rewardsWeeklyStatus')).to_contain_text('Coin Patterns')
+  expect(page.locator('#vaultChampionshipStatus')).to_have_text('Weekly Championship is live.')
   page.locator('#tabFriends').click()
   expect(page.locator('#inviteWeeklyRace')).to_contain_text('Weekly Championship')
   page.locator('#tabTasks').click()
@@ -215,6 +242,7 @@ class Scenario:
   self.unknown=True
   page.evaluate("window.JigChampionship.refreshEntry(apiPost,true)")
   expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly competition')
+  expect(page.locator('#vaultChampionshipStatus')).to_have_text('Current competition status unavailable.')
   daily_board('unknown')
   assert not self.forbidden,self.forbidden
   return measurements

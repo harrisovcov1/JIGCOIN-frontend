@@ -3609,11 +3609,38 @@ html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary>span{min-
 html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary strong{display:block;overflow-wrap:anywhere}
 html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary small{overflow-wrap:anywhere}
 #inviteLegacyNote{font-size:12px;line-height:1.4;color:var(--mint-muted)}
-html body #withdrawSheet .vault-roadmap {border:1px solid var(--mint-inlay);border-radius:12px;background:var(--mint-grain),var(--mint-feature);padding:8px 10px;min-width:0}
-html body #withdrawSheet .vault-roadmap h2 {font-size:15px;color:var(--mint-highlight);margin:0 0 3px}
-html body #withdrawSheet .vault-roadmap p {font-size:11px;line-height:1.3;margin:3px 0;color:var(--mint-muted)}
-html body #withdrawSheet #vaultLegendProgress{display:block;width:100%;height:7px;accent-color:var(--mint-accent);margin:5px 0}
-html body #withdrawSheet .vault-roadmap summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:var(--mint-highlight);font-size:12px}
+html body #withdrawSheet .vault-roadmap {
+  flex:0 0 auto;min-width:0;padding:7px 10px 2px;border:1px solid #9d754c;border-radius:12px;
+  background:var(--mint-grain),linear-gradient(115deg,#35271e,#25201c 68%);color:#ffebcd;
+}
+#withdrawSheet .vault-launch-heading {display:flex;align-items:center;justify-content:space-between;gap:6px}
+html body #withdrawSheet .vault-roadmap h2 {margin:0;color:#ffdfa4}
+#vaultRoadmapTitle span {display:block;font:700 10px/1.3 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#efd2ab}
+#vaultRoadmapTitle time {display:block;font:700 clamp(22px,6vw,27px)/1.05 Georgia,serif}
+#withdrawSheet #vaultJourneyOpen {min-height:44px;flex:none;border:1px solid #a17d52;border-radius:7px;padding:3px 8px;color:#ffe1b1;background:#33281e;font:650 12px/1.2 system-ui,sans-serif;cursor:pointer}
+@media(max-width:350px) {
+  #withdrawSheet #vaultJourneyOpen {width:84px;white-space:normal;padding-inline:5px}
+  #vaultRoadmapTitle time {white-space:nowrap;font-size:22px}
+}
+html body #withdrawSheet .vault-roadmap h3 {margin:4px 0 1px;font-size:14px;line-height:1.2;color:#fff0d9}
+#withdrawSheet .vault-roadmap h3 span {font-size:11px;font-weight:500}
+html body #withdrawSheet .vault-roadmap p {margin:2px 0;color:#efdfcb;font-size:12px;line-height:1.3}
+#withdrawSheet #vaultLegendProgressLabel {font-variant-numeric:tabular-nums}
+html body #withdrawSheet #vaultLegendProgress {display:block;width:100%;height:6px;margin:3px 0 4px;appearance:none;border:0;border-radius:5px;background:#5a493a;color:#f1be7c}
+#vaultLegendProgress::-webkit-progress-bar {background:#5a493a;border-radius:5px}
+#vaultLegendProgress::-webkit-progress-value {background:#f1be7c;border-radius:5px}
+#vaultLegendProgress::-moz-progress-bar {background:#f1be7c;border-radius:5px}
+html body #withdrawSheet .vault-roadmap summary {display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;color:#ffe1b1;font-size:12px;font-weight:650;list-style:none}
+#withdrawSheet .vault-roadmap summary::-webkit-details-marker {display:none}
+#withdrawSheet .vault-roadmap summary::after {content:'›'}
+#withdrawSheet .vault-roadmap details[open]>summary::after {transform:rotate(90deg)}
+#withdrawSheet .vault-milestone-panel {padding:7px 0;border-top:1px solid #816245}
+#withdrawSheet .vault-milestone-panel h4 {margin:7px 0 3px;font-size:14px}
+#withdrawSheet .vault-milestone-panel ol {margin:8px 0 10px 3px;padding:0 0 0 13px;list-style:none;border-left:1px solid #a47742}
+#withdrawSheet .vault-milestone-panel li {position:relative;margin:0 0 8px;font:12px/1.35 system-ui,sans-serif}
+#withdrawSheet .vault-milestone-panel li::before {content:'';position:absolute;left:-17px;top:4px;width:6px;height:6px;border:1px solid #dca667;border-radius:50%;background:#30251e}
+#withdrawSheet .vault-milestone-panel li:first-child::before {background:#ffd89c}
+#withdrawSheet .vault-milestone-panel li span {display:block;color:#efdfcb}
 html body #withdrawSheet .vault-footer-links{display:contents}
 #vaultCoinGallery{width:min(92vw,430px);max-height:85dvh;overflow:auto;box-sizing:border-box;padding:14px;border:1px solid var(--mint-inlay);border-radius:14px;background:var(--mint-bg,#111b2a);color:var(--mint-text,#eee)}
 #vaultCoinGallery::backdrop{background:#000a}
@@ -3639,7 +3666,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
  html body #withdrawSheet .vault-cabinets .vault-finish-link{min-height:54px;padding:3px 8px}
  html body #withdrawSheet .vault-cabinets #vaultMedalCollection,html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary{min-height:44px}
 }
-</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=entry-cutover1" defer></script></head>
+</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=vault-roadmap1" defer></script></head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
@@ -3886,10 +3913,30 @@ html body #withdrawSheet .vault-footer-links{display:contents}
         </details>
       </div>
       <section class="vault-roadmap" aria-labelledby="vaultRoadmapTitle">
-        <h2 id="vaultRoadmapTitle">Race to Legend · December 2027</h2><p>Rank 8 · 10,000,000 saved in-game coins</p>
-        <progress id="vaultLegendProgress" max="10000000" value="0" aria-label="Saved game coins towards Rank 8"></progress>
+        <div class="vault-launch-heading">
+          <h2 id="vaultRoadmapTitle"><span>JIGCOIN token launch · TON</span><time datetime="2027-12">December 2027</time></h2>
+          <button type="button" id="vaultJourneyOpen" aria-controls="homeJourneySheet">View rank journey <span aria-hidden="true">›</span></button>
+        </div>
+        <h3>The Race to Legend <span>· Rank 8</span></h3>
         <p id="vaultLegendProgressLabel" aria-live="polite">Checking your saved balance…</p>
-        <details id="vaultWithdrawalDetails"><summary>Project roadmap &amp; game terms ›</summary><p>Our objective is to launch the JIGCOIN token on the TON blockchain in December 2027. Rank 8 is the proposed milestone for consideration for a future JIGCOIN token allocation, subject to final eligibility and distribution terms.</p><p>Game coins have no cash-out value. Ranks, medals, VIP and purchases do not guarantee any token allocation or monetary return.</p><p>In-app digital purchases use Telegram Stars. For refunds or purchase questions, open Account activity &amp; support.</p></details>
+        <progress id="vaultLegendProgress" max="10000000" value="0" aria-label="Verified saved game coins towards Rank 8"></progress>
+        <p class="vault-risk">Game coins have no cash-out value. Final token eligibility and allocation terms are pending.</p>
+        <details id="vaultWithdrawalDetails"><summary>Project roadmap &amp; game terms</summary>
+          <div class="vault-milestone-panel">
+            <h4>December 2027 roadmap</h4><p>Last reviewed <time datetime="2026-11-24">24 November 2026</time></p>
+            <ol>
+              <li><strong>Game live</strong><span>Verified 24 Nov 2026. Build your saved balance and unlock eight prestige ranks.</span></li>
+              <li><strong>Weekly Championship</strong><span>First week scheduled for 30 Nov 2026 UTC. One challenge each day from a set of 30, with weekly prizes in game coins.</span><span id="vaultChampionshipStatus" aria-live="polite">Checking competition status…</span></li>
+              <li><strong>Distribution rules · pending publication</strong><span>Final eligibility, qualifying regions, the balance snapshot and individual allocations have yet to be published.</span></li>
+              <li><strong>Security review &amp; claims · pending</strong><span>Completion of the token security review and the opening of claims have yet to be confirmed.</span></li>
+              <li><strong>December 2027 · token launch</strong><span>JIGCOIN’s launch roadmap is for the JIGCOIN token on the TON blockchain.</span></li>
+            </ol>
+            <h4>Rank 8 and token eligibility</h4>
+            <p>Eight ranks. One ultimate milestone. Reach Rank 8 — Legend with 10,000,000 verified saved game coins. Rank 8 is the intended rank requirement for consideration for a JIGCOIN token allocation.</p>
+            <h4>In-game purchases</h4>
+            <p>Coin packs add game coins. VIP doubles the tap rate and energy capacity for 30 days. Purchases use Telegram Stars. For receipts or refunds, open Account activity &amp; support.</p>
+          </div>
+        </details>
       </section>
       <div class="vault-footer-links">
       <details class="vault-account-drawer" id="vaultAccountDrawer">
@@ -4909,7 +4956,7 @@ async function refreshHomeRace(force=false){
   }catch(_){ /* The last verified rival stays visible until its freshness window expires. */ }
   finally{homeRaceBusy=false;renderHomeRace();}
 }
-function openHomeJourney(){
+function openHomeJourney(origin='home'){
   if(!accountIsReady())return;
   renderLegendProgress(homeIdentity===homeUserId()?homeConfirmedBalance:null);
   const tier=homeTierIndex(homeConfirmedBalance),next=HOME_TIERS[tier+1];
@@ -4948,10 +4995,14 @@ function openHomeJourney(){
   const highest=HOME_TIERS.find(tier=>tier.min===milestone);
   document.getElementById('homeMilestoneRecord').textContent=highest?`Highest rank recorded here: ${highest.name} · ${formatNumber(milestone)} coins`:'First rank unlock: Grinder · 10,000 coins';
   document.getElementById('homeHaptics').checked=appStorage.getItem('jigcoin_home_haptics')!=='off';
-  showAppSheet(document.getElementById('homeJourneySheet'),tabFarm);document.getElementById('mainScroll').inert=true;
+  const fromVault=origin==='vault';
+  const close=document.getElementById('homeJourneyClose');
+  close.dataset.origin=origin;close.setAttribute('aria-label',fromVault?'Back to Vault':'Back to Home');
+  showAppSheet(document.getElementById('homeJourneySheet'),fromVault?tabWithdraw:tabFarm);document.getElementById('mainScroll').inert=true;
   document.getElementById('homeJourneyClose').focus();
 }
 document.getElementById('homeJourneyOpen').addEventListener('click',()=>openHomeJourney());
+document.getElementById('vaultJourneyOpen').addEventListener('click',()=>openHomeJourney('vault'));
 function openTapSaveDetails(){
   renderHomeSession();
   const dialog=document.getElementById('tapSaveDialog');
@@ -4959,7 +5010,17 @@ function openTapSaveDetails(){
 }
 document.getElementById('homeSaveStatus').addEventListener('click',openTapSaveDetails);
 document.getElementById('journeySaveOpen').addEventListener('click',openTapSaveDetails);
-document.getElementById('homeJourneyClose').addEventListener('click',()=>{document.getElementById('homeJourneySheet').classList.remove('show');sheetBackdrop.classList.remove('show');setActiveTab(tabFarm);document.getElementById('homeJourneyOpen').focus();});
+document.getElementById('homeJourneyClose').addEventListener('click',event=>{
+  if(event.currentTarget.dataset.origin==='vault'){
+    openVault();
+    document.getElementById('vaultJourneyOpen').focus();
+    return;
+  }
+  document.getElementById('homeJourneySheet').classList.remove('show');
+  sheetBackdrop.classList.remove('show');
+  setActiveTab(tabFarm);
+  document.getElementById('homeJourneyOpen').focus();
+});
 document.getElementById('homeBoostAction').addEventListener('click',()=>document.getElementById('homeBoostAction').dataset.focus==='weekly'?window.JigPilot?.openRace():openBoostSheet('sp_emergency_energy'));
 document.getElementById('homeRefillOpen').addEventListener('click',()=>openBoostSheet('sp_emergency_energy'));
 document.getElementById('homeHaptics').addEventListener('change',e=>appStorage.setItem('jigcoin_home_haptics',e.target.checked?'on':'off'));
