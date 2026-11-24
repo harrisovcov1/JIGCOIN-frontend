@@ -257,7 +257,9 @@ def check(browser,width,height,championship=None):
         page.goto(base, wait_until='domcontentloaded')
         page.wait_for_function("window.JigPilot && window.__accountPhase==='ready'" if championship else "window.JigPilot && window.__accountPhase==='ready' && JigPilot.canRefill()")
         if championship:
-            return championship.exercise(page)
+            result=championship.exercise(page)
+            assert not errors, errors
+            return result
         coin_size=page.locator('#tapBtn').bounding_box()
         expect(page.locator('#mintFinishName')).to_have_text('Foundry Gold')
         check_home_rank_and_saving(page)

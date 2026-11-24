@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v34-release-review-1">
+<meta name="jigcoin-build" content="v35-owner-ux-cutover-2">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3551,7 +3551,74 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
 }
 #coinShopSheet #packDisclosure{width:100%;min-height:44px;background:#182538;color:#ffe19a;border:1px solid #897044;border-radius:10px;font:inherit;font-weight:650}
 #coinPackList .hub-product[hidden]{display:none!important}
-</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=owner-practice1" defer></script></head>
+
+/* Issue 41: symmetric header controls; Home untouched. */
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header {
+ display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;column-gap:6px;padding-inline:10px;min-height:54px;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>div:first-child {
+ grid-area:1/2;min-width:0;width:100%;padding:0;margin:0;text-align:center;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.vip-crown-link {
+ grid-area:1/1;position:static;transform:none;justify-self:start;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.sheet-close {
+ grid-area:1/3;position:static;transform:none;justify-self:end;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;
+}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header .sheet-title {text-align:center;font-size:clamp(19px,5.5vw,25px);line-height:1.12}
+html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header .sheet-subtitle {display:block;white-space:normal;max-width:none;font-size:clamp(10px,3vw,12px);line-height:1.2;margin:2px 0 0}
+html body #withdrawSheet .vault-content {gap:clamp(5px,1dvh,9px);justify-content:flex-start}
+html body #withdrawSheet .vault-summary {flex:0 0 auto}
+html body #withdrawSheet .vault-cabinets {display:flex;flex-direction:column;gap:6px;flex:0 0 auto;min-width:0}
+html body #withdrawSheet .vault-cabinets .vault-finish-link,
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection {border:1px solid var(--mint-inlay);border-radius:12px;background:var(--mint-grain),var(--mint-plate);color:var(--mint-text);width:100%;min-width:0;margin:0}
+html body #withdrawSheet .vault-cabinets .vault-finish-link {display:grid;grid-template-columns:clamp(78px,24vw,106px) minmax(0,1fr) 14px;min-height:66px;padding:7px 10px;gap:6px;text-align:left}
+html body #withdrawSheet .vault-finish-pair>span:not(.finish-arrow){width:clamp(34px,10vw,46px);height:clamp(34px,10vw,46px)}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection {padding:0 10px;min-height:54px}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary {display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:7px;min-height:54px;list-style:none;cursor:pointer}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection summary::-webkit-details-marker{display:none}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection summary strong{font-size:14px;color:var(--mint-highlight)}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection summary small{display:block;font-size:10px;color:var(--mint-muted);margin-top:3px}
+html body #withdrawSheet .vault-cabinets .vault-trophy-symbol{font-size:23px;color:var(--mint-accent)}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection details summary{min-height:44px;cursor:pointer}
+html body #withdrawSheet .vault-cabinets :is(#vaultTrophyList,#vaultDailyMedalList,#pilotMedalList){white-space:pre-line;line-height:1.45;font-size:12px;padding:5px 0;overflow-wrap:anywhere}
+html body #withdrawSheet .vault-cabinets .vault-text-button{min-height:44px}
+html body #withdrawSheet .vault-cabinets #vaultMedalCount{font-size:11px;white-space:normal}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary>span{min-width:0}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary strong{display:block;overflow-wrap:anywhere}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary small{overflow-wrap:anywhere}
+#inviteLegacyNote{font-size:12px;line-height:1.4;color:var(--mint-muted)}
+html body #withdrawSheet .vault-roadmap {border:1px solid var(--mint-inlay);border-radius:12px;background:var(--mint-grain),var(--mint-feature);padding:8px 10px;min-width:0}
+html body #withdrawSheet .vault-roadmap h2 {font-size:15px;color:var(--mint-highlight);margin:0 0 3px}
+html body #withdrawSheet .vault-roadmap p {font-size:11px;line-height:1.3;margin:3px 0;color:var(--mint-muted)}
+html body #withdrawSheet #vaultLegendProgress{display:block;width:100%;height:7px;accent-color:var(--mint-accent);margin:5px 0}
+html body #withdrawSheet .vault-roadmap summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:var(--mint-highlight);font-size:12px}
+html body #withdrawSheet .vault-footer-links{display:contents}
+#vaultCoinGallery{width:min(92vw,430px);max-height:85dvh;overflow:auto;box-sizing:border-box;padding:14px;border:1px solid var(--mint-inlay);border-radius:14px;background:var(--mint-bg,#111b2a);color:var(--mint-text,#eee)}
+#vaultCoinGallery::backdrop{background:#000a}
+#vaultCoinGallery h2{margin:0 0 6px;color:var(--mint-highlight)}
+#vaultCoinGalleryGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#vaultCoinGalleryGrid button{display:flex;align-items:center;gap:5px;min-width:0;min-height:58px;padding:6px;border:1px solid var(--mint-rim);border-radius:8px;background:var(--mint-plate);color:var(--mint-text);text-align:left}
+#vaultCoinGalleryGrid img{width:36px;height:36px;object-fit:contain;flex:none}
+#vaultCoinGalleryGrid strong,#vaultCoinGalleryGrid small{display:block;overflow-wrap:anywhere;font-size:11px}
+#vaultCoinGalleryGrid button[data-current="true"]{border-color:var(--mint-accent)}
+#vaultCoinGallery form button{width:100%;min-height:44px;margin-top:8px}
+@media(min-height:621px){
+ html body #withdrawSheet .vault-summary {flex-grow:1;max-height:218px}
+ html body #withdrawSheet .vault-cabinets .vault-finish-link {min-height:clamp(66px,11dvh,94px)}
+ html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary {min-height:clamp(54px,9dvh,78px)}
+ html body #withdrawSheet .vault-roadmap:not(:has(details[open])) {
+   flex:0.7 0 auto;display:flex;flex-direction:column;justify-content:center;max-height:210px;
+ }
+}
+@media(max-height:620px){
+ html body #withdrawSheet .vault-content{justify-content:flex-start}
+ html body #withdrawSheet .vault-cabinets{flex:0 0 auto;gap:4px}
+ html body #withdrawSheet .vault-roadmap{padding:5px 8px}
+ html body #withdrawSheet .vault-cabinets .vault-finish-link{min-height:54px;padding:3px 8px}
+ html body #withdrawSheet .vault-cabinets #vaultMedalCollection,html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary{min-height:44px}
+}
+</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=entry-cutover1" defer></script></head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
@@ -3749,7 +3816,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
         <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
         <span id="inviteProgressText">—</span>
       </section>
-      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
+      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly competition <span aria-hidden="true">›</span></button></div>
       <button type="button" id="incomingActiveReminder" class="invite-active-reminder" hidden><span id="incomingActiveText">Continue your invitation goal</span><span aria-hidden="true">›</span></button>
       <button type="button" id="inviteDetailsOpen" class="invite-details-link" aria-label="Friends and rewards details">
         <span class="invite-detail-action-copy"><strong>Friends &amp; rewards</strong><small id="invitePendingSummary" hidden></small></span>
@@ -3766,7 +3833,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
         <button type="button" id="incomingInviteCard" class="incoming-invite-card" hidden><span><strong id="incomingInviteTitle"></strong><small id="incomingInviteProgress"></small></span><span aria-hidden="true">›</span></button>
       </section>
       <section class="invite-detail-section"><h2>How to earn</h2><p id="inviteRuleDetail">Checking the current reward rules…</p><p>Each new friend can count once. The milestone invite earns the higher rate: invite #5 earns 1,000 coins. Earlier rewards stay unchanged. Sharing a link alone does not earn coins.</p><div class="friends-link" id="inviteLinkText">Checking your link…</div></section>
-      <section class="invite-detail-section"><h2>Your invited friends</h2><p id="inviteFriendStatus">Your latest attributed friends appear here after checking.</p><ul id="inviteFriendProgress" class="invite-friend-progress"></ul></section>
+      <section class="invite-detail-section"><h2>Your invited friends</h2><p id="inviteFriendStatus">Your latest attributed friends appear here after checking.</p><p id="inviteLegacyNote" hidden></p><ul id="inviteFriendProgress" class="invite-friend-progress"></ul></section>
       <section class="invite-detail-section"><h2>Coins per successful invite</h2><div id="inviteTierList"></div></section>
       <section class="invite-detail-section"><div class="invite-history-heading"><h2>Recent referral credits</h2><button type="button" id="inviteHistoryRetry">Refresh</button></div><p id="inviteHistoryStatus" role="status">Open this view to check your credits.</p><ul id="inviteHistoryList"></ul><p class="invite-history-note">Up to 10 confirmed credits. Your totals appear on Invite.</p></section>
       <details class="app-details" id="sharePreviewDetails"><summary>Create a progress card</summary><div class="share-card" id="shareCard">
@@ -3786,18 +3853,23 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
         <div class="vault-goal"><span id="vaultGoal">Your next rank appears after sync.</span><span id="vaultProgressLabel"></span></div>
         <div class="vault-progress" id="vaultProgress" role="progressbar" aria-label="Progress to next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="vaultProgressFill"></i></div>
       </section>
-      <section class="vault-collection" aria-labelledby="vaultCollectionTitle">
-        <div class="vault-collection-heading"><h2 id="vaultCollectionTitle">Your collection</h2><span>Finishes &amp; honours</span></div>
-        <button type="button" class="vault-finish-link" id="vaultCollectionOpen">
+      <div class="vault-cabinets" aria-label="Your coin and trophy cabinets">
+        <button type="button" class="vault-finish-link" id="vaultCollectionOpen" aria-haspopup="dialog">
           <span class="vault-finish-pair"><span id="vaultCurrentFinish" aria-hidden="true"></span><span class="finish-arrow" aria-hidden="true">›</span><span id="vaultNextFinish" aria-hidden="true"></span></span>
-          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Prestige coin finish</small><strong id="vaultCollectionLabel">Coin finishes</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
+          <span class="vault-finish-copy"><small class="vault-finish-eyebrow">Coin Cabinet · Prestige coin finish</small><strong id="vaultCollectionLabel">Checking your finish…</strong><small id="vaultCollectionNext">Your current finish and next unlock</small></span><span aria-hidden="true">›</span>
         </button>
-        <div class="vault-medal-spotlight" id="vaultMedalSpotlight" hidden aria-label="Confirmed recent daily medals"></div>
-        <details class="vault-medals" id="vaultMedalCollection"><summary><span>Competition honours</span><span id="vaultMedalCount">View earned medals</span></summary><details><summary>Legacy Daily Honours</summary><div id="vaultDailyMedalList">Open Vault to check your medals.</div></details><details><summary>Earlier Weekly Race gold</summary><div id="pilotMedalList">Checking your weekly medals…</div></details><details id="champTrophies"><summary>Weekly Championship Trophies</summary><p aria-live="polite">Open to check your awards.</p></details><button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button></details>
+        <details class="vault-medals" id="vaultMedalCollection"><summary><span class="vault-trophy-symbol" aria-hidden="true">🏆</span><span><strong>Trophy Cabinet</strong><small>Weekly Championship medals</small></span><span id="vaultMedalCount" aria-live="polite">Checking…</span></summary>
+          <div id="vaultTrophyList" aria-live="polite">Open Vault to check your weekly trophies.</div>
+          <details id="vaultLegacyHonours"><summary>Legacy Honours</summary><details><summary>Legacy Daily Honours</summary><div id="vaultDailyMedalList">Open Vault to check your medals.</div></details><details><summary>Earlier Weekly Race gold</summary><div id="pilotMedalList">Checking your weekly medals…</div></details></details>
+          <button type="button" class="vault-text-button" id="vaultMedalRetry">Refresh medals</button>
+        </details>
+      </div>
+      <section class="vault-roadmap" aria-labelledby="vaultRoadmapTitle">
+        <h2 id="vaultRoadmapTitle">Race to Legend</h2><p>Rank 8 · 10,000,000 saved in-game coins</p>
+        <progress id="vaultLegendProgress" max="10000000" value="0" aria-label="Saved game coins towards Rank 8"></progress>
+        <p id="vaultLegendProgressLabel" aria-live="polite">Checking your saved balance…</p>
+        <details id="vaultWithdrawalDetails"><summary>Project roadmap &amp; game terms ›</summary><p>Rank finishes reflect your verified game progress. A future TON token launch is a project objective, subject to separate approval and published terms. Game coins have no cash-out value. Ranks, medals, VIP and purchases do not guarantee any token allocation or monetary return.</p><p>In-app digital purchases use Telegram Stars. For refunds or purchase questions, open Account activity &amp; support.</p></details>
       </section>
-      <button type="button" class="vip-summary vault-membership-card" id="vaultVipOpen" aria-label="View VIP membership and benefits">
-        <img src="./assets/vip-crown.svg" width="48" height="42" alt=""><span><strong>VIP membership</strong><small id="vaultVipSummary">2× tap coins · 2× energy</small><small class="vip-summary-state" id="vaultVipState">Checking your membership…</small></span><span class="summary-chevron" aria-hidden="true">›</span>
-      </button>
       <div class="vault-footer-links">
       <details class="vault-account-drawer" id="vaultAccountDrawer">
         <summary><span><strong>Account activity &amp; support</strong><small>Coin purchases · VIP receipts · referral credits</small></span><span aria-hidden="true">›</span></summary>
@@ -3807,7 +3879,6 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
           <button type="button" id="vaultRewardHistoryOpen">Referral reward history <span aria-hidden="true">›</span></button>
         </div>
       </details>
-      <details class="vault-airdrop" id="vaultWithdrawalDetails"><summary><span>Airdrop status<small>Planned · Rules awaiting publication</small></span><span aria-hidden="true">+</span></summary><p>A JigCoin token airdrop is planned. Eligibility, allocations and conversion terms are awaiting publication. In-game coins currently have no cash-out value. Cash-out is not available.</p><p>Coin ranks, VIP and medals describe your game progress. They do not guarantee an airdrop allocation.</p></details>
       </div>
     </div>
   </div>
@@ -3845,7 +3916,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
     <h2 id="purchaseReviewTitle">Review purchase</h2>
     <p id="purchaseReviewItem"></p>
     <p id="purchaseReviewPrice"></p>
-    <p>This purchase grants the in-game benefit shown. In-game coins have no cash-out value or guaranteed airdrop allocation.</p>
+    <p>This purchase grants the in-game benefit shown and is paid in Telegram Stars. In-game coins have no cash-out value or guaranteed airdrop allocation.</p>
     <p>For payment help or refunds, send /paysupport to the JigCoin bot with your order reference.</p>
     <form method="dialog">
       <button type="submit" value="cancel" id="purchaseReviewCancel" autofocus>Cancel</button>
@@ -3872,6 +3943,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
       <button id="streakMessageClose" type="button" class="shop-retry" autofocus>Close</button>
     </div>
   </dialog>
+  <dialog id="vaultCoinGallery" aria-labelledby="vaultCoinGalleryTitle"><h2 id="vaultCoinGalleryTitle">Coin Cabinet</h2><p id="vaultCoinGalleryStatus">Your eight rank finishes</p><div id="vaultCoinGalleryGrid"></div><form method="dialog"><button type="submit" class="pilot-primary" autofocus>Close cabinet</button></form></dialog>
   <dialog id="crownPreview" aria-labelledby="crownPreviewTitle">
     <div class="mint-cabinet-scene"><span id="cabinetCoin" aria-hidden="true"></span></div>
     <div class="mint-preview-heading">
@@ -3944,7 +4016,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
       <details id="boostHelp" class="reward-ad-help" hidden><summary>Advert help</summary><p id="boostHelpText"></p></details>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
-        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small id="rewardsWeeklyStatus">Free ranked runs · 45s each</small><span id="rewardsWeeklyAction">Check Weekly Race ›</span></button>
+        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong id="rewardsWeeklyTitle">Weekly competition</strong><small id="rewardsWeeklyStatus">Checking competition status…</small><span id="rewardsWeeklyAction">Open competition ›</span></button>
       </div>
       <div class="reward-footer">
         <button type="button" class="quest-action" id="rewardsReturn" hidden>Back to tapping</button>
@@ -4736,9 +4808,9 @@ function renderHomeSession() {
   action.dataset.focus=refill?'sp_emergency_energy':'weekly';
   action.setAttribute('aria-controls',refill?'boostSheet':'weeklySheet');
   action.dataset.active=String(!refill);
-  const label=refill?(view.action==='claim'?'Claim refill':'Refill energy · ad'):'Weekly race';
+  const label=refill?(view.action==='claim'?'Claim refill':'Refill energy · ad'):(window.JigChampionship?.entryLabel?.(true)||'Weekly race');
   if(action.textContent!==label) action.textContent=label;
-  action.ariaLabel=refill?(view.action==='claim'?'Claim your confirmed energy refill':'Watch the prepared optional refill advert'):'Open Weekly Race';
+  action.ariaLabel=refill?(view.action==='claim'?'Claim your confirmed energy refill':'Watch the prepared optional refill advert'):('Open '+(window.JigChampionship?.entryLabel?.()||'Weekly Race'));
   action.title=action.ariaLabel;
   action.disabled=!ready;
   renderHomeRefillEntry(projected.energy,ready);
@@ -5584,7 +5656,7 @@ setInterval(() => {
 
 // 🔐 Centralised POST helper – now refuses to call backend with no Telegram info
 async function apiPost(path, body, opts = {}) {
-  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status|overview|order-status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window|history))$/.test(path);
+  const readOnly = /^\/api\/(state|config|progression|stars\/(catalog|catalog-preview|status)|referrals\/summary|referral\/status|invite\/(summary|history)|withdraw\/(status|info)|events\/active|mission\/list|vip\/(product|status|overview|order-status)|shop\/(coin-packs|momentum-shields)|leaderboard\/(global|daily|friends|window|history)|vault\/trophies)$/.test(path);
   if (!readOnly && !accountIsReady()) return { ok: false, reason: "ACCOUNT_NOT_READY" };
   let initData = "", telegram_id = null;
   const tries = opts.fastAuth || opts.keepalive ? 1 : 8;
@@ -5602,7 +5674,7 @@ async function apiPost(path, body, opts = {}) {
   const payloadOwner = safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id;
   if (payloadOwner !== telegram_id || (opts.tapOwner && opts.tapOwner !== telegram_id)) return {ok:false,reason:"TELEGRAM_ACCOUNT_CHANGED"};
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || /^\/api\/(weekly|pilot|mission|streak\/reminder)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
+  const controller = (readOnly || /^\/api\/(weekly|pilot|mission|championship|streak\/reminder)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -5654,8 +5726,10 @@ function validInviteData(data,owner){
   if(data.policy_version==='referrals_cumulative_v16' &&
     (data.qualification.mode!=='cumulative_taps'||data.qualification.min_taps!==100||data.qualification.period!=='lifetime'||data.qualification.ad_qualifies!==false||data.qualification.purchase_required!==false||
      !['friends_joined','friends_pending','friends_qualified','friends_on_hold'].every(key=>integer(data[key]))||
+     !['friends_legacy_unverified','friends_invalid','friends_credit_unconfirmed','friends_ledger_confirmed','coins_ledger_confirmed'].every(key=>data[key]===undefined||integer(data[key]))||
      !Array.isArray(data.friend_progress)||data.friend_progress.length>20||!data.friend_progress.every(row=>row&&
-       ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&typeof row.display_name==='string'&&[...row.display_name].length<=48&&
+       ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&
+       (row.hold_reason===undefined||row.hold_reason===null||['legacy','invalid','credit_unconfirmed'].includes(row.hold_reason))&&typeof row.display_name==='string'&&[...row.display_name].length<=48&&
        ['cumulative_taps','daily_taps_or_ad','join','legacy_unknown'].includes(row.qualification_mode)&&
        (row.verified_taps===null||integer(row.verified_taps))&&(row.min_taps===null||integer(row.min_taps))&&
        (row.reward_coins===null||integer(row.reward_coins)))))return false;
@@ -5677,6 +5751,7 @@ function validIncomingReferral(row){
   const integer=n=>Number.isSafeInteger(n)&&n>=0;
   return row===null||!!row&&typeof row.display_name==='string'&&[...row.display_name].length<=48&&
     ['joined','playing','qualified','rewarded','on_hold'].includes(row.status)&&
+       (row.hold_reason===undefined||row.hold_reason===null||['legacy','invalid','credit_unconfirmed'].includes(row.hold_reason))&&
     ['cumulative_taps','daily_taps_or_ad','join','legacy_unknown'].includes(row.qualification_mode)&&
     typeof row.policy_version==='string'&&(row.verified_taps===null||integer(row.verified_taps))&&(row.min_taps===null||integer(row.min_taps))&&
     (row.qualification_mode!=='cumulative_taps'||row.min_taps===100)&&
@@ -5685,7 +5760,7 @@ function validIncomingReferral(row){
 function incomingInviteRule(row){
   if(row.status==='rewarded')return 'Your invitation is complete. Your inviter’s reward has been credited.';
   if(row.status==='qualified')return 'Your invitation qualifies. Your inviter’s reward is awaiting confirmation.';
-  if(row.status==='on_hold')return 'This invitation’s eligibility needs checking. You can still play and keep your coins.';
+  if(row.status==='on_hold')return row.hold_reason==='invalid'?'This invitation is not currently eligible. Your saved game coins are unchanged.':'The team is reconciling this invitation’s original records. No action is needed from you.';
   if(row.qualification_mode==='cumulative_taps')return 'Make 100 verified taps in total to complete this invitation and unlock your inviter’s reward. Your progress carries across days. No purchase needed.';
   if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Your original invitation goal: ${formatNumber(row.min_taps)} verified taps in one UTC day, or one confirmed ad reward. No purchase needed.`:'Your original invitation uses daily tap activity or a confirmed ad reward. No purchase needed.';
   if(row.qualification_mode==='join')return 'This invitation keeps its original joining rule. Confirmation is pending.';
@@ -5700,7 +5775,7 @@ function renderIncomingInvite(data){
   if(!row)return;
   el('incomingInviteTitle').textContent='Invited by '+(row.display_name||'a friend');
   const active=['joined','playing'].includes(row.status),cumulative=row.qualification_mode==='cumulative_taps',taps=cumulative?Math.min(row.verified_taps||0,row.min_taps):0;
-  const progress=active&&cumulative?`${formatNumber(taps)} / 100 verified taps · View your goal`:row.status==='rewarded'?'Invitation complete':row.status==='qualified'?'Goal complete · confirmation pending':row.status==='on_hold'?'Invitation eligibility to check':'View your original invitation goal';
+  const progress=active&&cumulative?`${formatNumber(taps)} / 100 verified taps · View your goal`:row.status==='rewarded'?'Invitation complete':row.status==='qualified'?'Goal complete · confirmation pending':row.status==='on_hold'?(row.hold_reason==='invalid'?'Invitation not eligible':'Historical records being checked'):'View your original invitation goal';
   el('incomingInviteProgress').textContent=progress;
   if(reminder&&active&&row.qualification_mode!=='legacy_unknown'){
     reminder.hidden=false;
@@ -5740,7 +5815,7 @@ function inviteRule(data){
 function inviteFriendProgressText(row){
   if(row.status==='rewarded')return row.reward_coins?`+${formatNumber(row.reward_coins)} coins credited`:'Reward credited';
   if(row.status==='qualified')return 'Qualified · reward confirmation pending';
-  if(row.status==='on_hold')return row.qualification_mode==='legacy_unknown'?'Historical referral · reward evidence needs review. No new credit issued.':'Eligibility needs checking. Earlier credited rewards stay unchanged.';
+  if(row.status==='on_hold')return row.hold_reason==='invalid'?'This invitation is not currently eligible. Existing credits are unchanged.':row.hold_reason==='legacy'||row.qualification_mode==='legacy_unknown'?'Historical referral · old credit records are being reconciled. No action needed.':'Reward records are being checked by the team. No action needed.';
   if(row.qualification_mode==='cumulative_taps'&&row.min_taps>0)return `${formatNumber(Math.min(row.verified_taps||0,row.min_taps))} / ${formatNumber(row.min_taps)} verified taps in total`;
   if(row.qualification_mode==='daily_taps_or_ad')return row.min_taps>0?`Earlier invite rules · ${formatNumber(row.min_taps)} taps in one UTC day or a confirmed ad reward`:'Earlier invite rules · daily tap activity or a confirmed ad reward';
   if(row.qualification_mode==='join')return 'Earlier invite rules · joining confirmation pending';
@@ -5753,15 +5828,20 @@ function renderInviteFriends(data){
   if(Array.isArray(rows)){
     const parts=[`${formatNumber(data.friends_joined)} joined`];
     if(data.friends_pending)parts.push(`${formatNumber(data.friends_pending)} progressing`);
-    const awaiting=Math.max(0,data.friends_qualified-data.friends_rewarded);
+    const awaiting=Math.max(0,data.friends_qualified-(data.friends_ledger_confirmed??data.friends_rewarded));
     if(awaiting)parts.push(`${formatNumber(awaiting)} qualified`);
-    if(data.friends_on_hold)parts.push(`${formatNumber(data.friends_on_hold)} to review`);
-    if(data.friends_rewarded)parts.push(`${formatNumber(data.friends_rewarded)} rewarded`);
+    if(data.friends_legacy_unverified!==undefined){
+      if(data.friends_legacy_unverified)parts.push(`${formatNumber(data.friends_legacy_unverified)} historical`);
+      if(data.friends_invalid)parts.push(`${formatNumber(data.friends_invalid)} not eligible`);
+      if(data.friends_credit_unconfirmed)parts.push(`${formatNumber(data.friends_credit_unconfirmed)} credit checks`);
+    }else if(data.friends_on_hold)parts.push(`${formatNumber(data.friends_on_hold)} records being checked`);
+    if(data.friends_ledger_confirmed??data.friends_rewarded)parts.push(`${formatNumber(data.friends_ledger_confirmed??data.friends_rewarded)} confirmed rewards`);
     pending.textContent=parts.join(' · ');
   } else pending.textContent='';
-  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} Historical records may require review before credit can be verified.`:'No attributed friends yet. Send your link to start your group.';
-  const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'Needs review'};
-  document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${labels[row.status]}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
+  document.getElementById('inviteFriendStatus').textContent=!Array.isArray(rows)?'Friend progress is not available for this account yet. Confirmed credits are listed below.':rows.length?`${data.friend_progress_has_more?'Your latest 20 attributed friends.':'Latest attributed friends.'} New qualifying invitations are credited automatically. Historical records are handled by the team; no action is needed.`:'No attributed friends yet. Send your link to start your group.';
+  const labels={joined:'Joined',playing:'Playing',qualified:'Qualified',rewarded:'Rewarded',on_hold:'Credit check'};
+  const friendLabel=row=>row.status==='on_hold'?(row.hold_reason==='invalid'?'Invalid':row.hold_reason==='legacy'||row.qualification_mode==='legacy_unknown'?'Legacy reconciliation':'Credit check'):labels[row.status];
+  document.getElementById('inviteFriendProgress').innerHTML=Array.isArray(rows)?rows.map(row=>`<li><div class="friend-heading"><strong>${escapeHtml(row.display_name||'Player')}</strong><span>${friendLabel(row)}</span></div><small>${escapeHtml(inviteFriendProgressText(row))}</small>${['joined','playing'].includes(row.status)&&row.qualification_mode==='cumulative_taps'&&row.min_taps>0?`<progress value="${Math.min(row.verified_taps||0,row.min_taps)}" max="${row.min_taps}" aria-label="Verified taps towards invite reward"></progress>`:''}</li>`).join(''):'';
 }
 function renderInviteOverview(){
   const el=id=>document.getElementById(id),data=inviteSnapshot();
@@ -5777,6 +5857,12 @@ function renderInviteOverview(){
   el('inviteJoinedCount').textContent=Number.isSafeInteger(data?.friends_joined)?formatNumber(data.friends_joined):'—';
   friendsJoinedText.textContent=data?formatNumber(data.friends_rewarded):'—';
   referralPointsText.textContent=data?formatNumber(data.coins_earned):'—';
+  const legacyNote=el('inviteLegacyNote');
+  if(legacyNote){
+    const hasLegacy=!!data?.friends_on_hold;
+    legacyNote.hidden=!hasLegacy;
+    legacyNote.textContent=hasLegacy?'Rewarded and coins earned show your saved account totals, including recorded historical credits. Individual confirmed payments are listed below; no action is needed.':'';
+  }
   inviteLinkText.textContent=data?data.invite_link:'Your invite link appears after checking.';
   for(const button of [shareTelegramBtn,copyInviteBtn,copyShareTextBtn,downloadShareCardBtn,el('inviteShareCardOpen')])if(button)button.disabled=!data;
   el('inviteTierName').textContent=data?(data.friends_rewarded?data.tier_name+' inviter':'No level yet'):'—';
@@ -5817,9 +5903,9 @@ async function loadInviteSummary({force=false}={}){
 }
 function inviteHistoryEmptyMessage(data){
   const hold=Number(data?.friends_on_hold||0);
-  const qualified=Math.max(0,Number(data?.friends_qualified||0)-Number(data?.friends_rewarded||0));
+  const qualified=Math.max(0,Number(data?.friends_qualified||0)-Number(data?.friends_ledger_confirmed??data?.friends_rewarded??0));
   const progressing=Number(data?.friends_pending||0);
-  if(hold>0)return `No confirmed referral credits yet. ${formatNumber(hold)} historical invitation${hold===1?' needs':'s need'} eligibility review; no new credit has been issued.`;
+  if(hold>0)return 'No itemised referral credits are available for these earlier records. Existing totals are preserved; the team handles reconciliation automatically. No action needed.';
   if(qualified>0)return `No confirmed referral credits yet. ${formatNumber(qualified)} qualified invitation${qualified===1?' is':'s are'} awaiting reward confirmation.`;
   if(progressing>0)return `No confirmed referral credits yet. ${formatNumber(progressing)} friend${progressing===1?' is':'s are'} progressing towards the verified activity goal.`;
   return 'No recorded referral credits yet. Invite a friend to start earning when they complete the verified activity goal.';
@@ -5919,7 +6005,7 @@ function renderShareCardCanvas() {
   ctx.fillText('1,000 FREE COINS',52,224);
   ctx.fillStyle='#e0e3e9';ctx.font='500 21px system-ui,sans-serif';
   ctx.fillText('New players start with an in-game welcome reward.',54,264);
-  ctx.fillText('Tap · Daily rewards · Weekly Race · Coin finishes',54,297);
+  ctx.fillText('Tap · Daily rewards · Weekly competition · Coin finishes',54,297);
   // Decorative embossed emblem. This is original, not an NFT or coin listing.
   ctx.save();
   const medallion=ctx.createRadialGradient(802,180,12,802,180,105);
@@ -7920,30 +8006,32 @@ let rewardsWeeklyRequest=null,rewardsWeeklyOwner=null;
 async function refreshRewardsWeeklyStatus(){
   const target=document.getElementById('rewardsWeeklyStatus');
   const action=document.getElementById('rewardsWeeklyAction');
-  const fallback='Free ranked runs · 45s each';
   const reset=()=>{
-    target.textContent=fallback;
-    action.textContent='Check Weekly Race ›';
+    target.textContent='Competition status unavailable';
+    action.textContent='Check again ›';
   };
   const owner=homeUserId();
   if(!owner || !accountIsReady() || navigator.onLine===false){reset();return;}
   if(rewardsWeeklyRequest&&rewardsWeeklyOwner===owner)return rewardsWeeklyRequest;
   rewardsWeeklyOwner=owner;
-  action.textContent='Check Weekly Race ›';
+  action.textContent='Open competition ›';
   target.textContent='Checking ranked attempts…';
   const request=(async()=>{
     try{
+      const mode=await window.JigChampionship?.refreshEntry?.(apiPost,true);
+      if(owner!==homeUserId() || !boostSheet.classList.contains('show'))return;
+      if(mode!=='legacy'){if(!mode||mode==='unknown')reset();return;}
       const response=await apiPost('/api/weekly/standings',{scope:'global'},
         {tapOwner:owner,timeoutMs:9000,silent:true});
-      if(owner!==homeUserId() || !boostSheet.classList.contains('show'))return;
+      if(owner!==homeUserId() || !boostSheet.classList.contains('show') || window.JigChampionship?.entryMode?.()!=='legacy')return;
       const left=response?.runs_left,limit=response?.policy?.limit??3;
       if(response?.ok && String(response.telegram_id)===String(owner) &&
         Number.isSafeInteger(left) && Number.isSafeInteger(limit) &&
         limit>=1 && limit<=10 && left>=0 && left<=limit &&
         ['day','week'].includes(response?.policy?.period)){
         target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
-        action.textContent=left===0?'Standings & practice ›':'Race for a medal ›';
-      }else reset();
+        action.textContent=left===0?'Standings & practice ›':'Play ranked ›';
+      }else if(window.JigChampionship?.entryMode?.()==='legacy') {target.textContent='Free ranked runs · 45s each';action.textContent='Check Weekly Race ›';}
     }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))reset();}
   })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
   rewardsWeeklyRequest=request;return request;
@@ -8155,7 +8243,7 @@ function renderVault(){
  vipBuyBtn.textContent=vaultBusy?'Checking payment…':pending?'Payment pending':!d?(vaultError?'VIP temporarily unavailable':'Loading VIP offer…'):!d.product.enabled?'VIP currently unavailable':`${active?'Extend':'Activate'} VIP · ★ ${d.product.stars}`;
  document.getElementById('vipFeedback').textContent=vaultMessage||(vaultError?(vaultFailure||'Could not refresh VIP. Please retry.'):pending?'Payment confirmation pending. Check again shortly.':'');
  const retry=document.getElementById('vipRetry');retry.hidden=!(vaultError||pending)||vaultBusy;retry.textContent=pending?'Check payment':'Retry';
- renderVipSummaries();renderVaultCollection(goal);
+ renderVipSummaries();renderVaultCollection(goal);renderVaultRoadmap(balance);renderVaultTrophies();
 }
 function renderVipSummaries(){
  const d=vaultSnapshot(),active=!!d&&Date.parse(d.vip_until)>vaultNow(),pending=vaultPending();
@@ -8163,52 +8251,80 @@ function renderVipSummaries(){
  // Shop is the sales destination. Keep its proven presentation unchanged.
  const shopSummary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
  const shopStatus=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
- // Vault answers the different question: what membership do I own?
- const vaultSummary=active?`Active perks · 2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× tap coins · 2× energy capacity';
- const vaultStatus=pending?'Payment pending · Check status':vaultError?'Membership status unavailable · Retry':!d?'Checking membership…':active?`VIP active until ${expiry} · View membership`:d.product.enabled?'Not active · 30 days for ★500 · View benefits':'VIP currently unavailable';
- for(const prefix of ['shop','vault']){
-   const card=document.getElementById(prefix==='shop'?'shopVipPass':'vaultVipOpen');
-   if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
-   const details=document.getElementById(prefix+'VipSummary'),stateLabel=document.getElementById(prefix+'VipState');
-   if(details)details.textContent=prefix==='shop'?shopSummary:vaultSummary;
-   if(stateLabel)stateLabel.textContent=prefix==='shop'?shopStatus:vaultStatus;
- }
+ // VIP now lives in Shop and the universal crown, not a duplicate Vault card.
+ const card=document.getElementById('shopVipPass');
+ if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
+ const details=document.getElementById('shopVipSummary'),stateLabel=document.getElementById('shopVipState');
+ if(details)details.textContent=shopSummary;
+ if(stateLabel)stateLabel.textContent=shopStatus;
 }
 
 function renderVaultCollection(goal){
- if(!goal)return;
- setCoinArtwork(document.getElementById('vaultCurrentFinish'),goal.tier);
- setCoinArtwork(document.getElementById('vaultNextFinish'),goal.complete?goal.tier:goal.tier+1);
- const current=typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+goal.tier]?.name:goal.current.name;
+ const currentArt=document.getElementById('vaultCurrentFinish'),nextArt=document.getElementById('vaultNextFinish');
+ const label=document.getElementById('vaultCollectionLabel'),nextLabel=document.getElementById('vaultCollectionNext');
+ const button=document.getElementById('vaultCollectionOpen');
+ if(!goal){
+  for(const art of [currentArt,nextArt]){art.innerHTML='';delete art.dataset.artwork;}
+  label.textContent='Checking your finish…';nextLabel.textContent='Rank finishes appear after sync';button.disabled=true;return;
+ }
+ const vip=window.JigPilot?.equipped?.()===true,launch=!vip&&typeof launchEquipped==='function'&&launchEquipped();
+ setCoinArtwork(currentArt,launch?7:goal.tier,vip?'vip':launch);
+ setCoinArtwork(nextArt,goal.complete?goal.tier:goal.tier+1);
+ const current=typeof MINT_FINISHES!=='undefined'?MINT_FINISHES[vip?'midnight':launch?'launch':'rank-'+goal.tier]?.name:goal.current.name;
  const next=typeof MINT_FINISHES!=='undefined'?MINT_FINISHES['rank-'+(goal.tier+1)]?.name:goal.nextName;
- document.getElementById('vaultCollectionLabel').textContent=current||goal.current.name;
- document.getElementById('vaultCollectionNext').textContent=goal.complete?'All rank finishes unlocked · View collection':`${goal.tier+1}/8 rank finishes · Next: ${next||goal.nextName}`;
+ label.textContent=current||goal.current.name;
+ nextLabel.textContent=goal.complete?'8/8 rank finishes unlocked':`${goal.tier+1}/8 unlocked · Next: ${next||goal.nextName}`;
+ button.disabled=false;
+}
+function openVaultCoinGallery(){
+ if(!accountIsReady()||homeIdentity!==homeUserId())return;
+ const goal=homeGoalModel(homeConfirmedBalance),dialog=document.getElementById('vaultCoinGallery'),grid=document.getElementById('vaultCoinGalleryGrid');
+ if(!goal||dialog.open)return;
+ grid.replaceChildren();document.getElementById('vaultCoinGalleryStatus').textContent=`${goal.tier+1} of 8 rank finishes unlocked at your saved balance`;
+ HOME_TIERS.forEach((rank,index)=>{
+  const key='rank-'+index,button=document.createElement('button'),art=document.createElement('span'),copy=document.createElement('span'),title=document.createElement('strong'),detail=document.createElement('small');
+  button.type='button';button.dataset.current=String(index===goal.tier);
+  art.innerHTML=coinArtwork(index);title.textContent=mintFinishName(key);detail.textContent=`${formatNumber(rank.min)} · ${index<=goal.tier?'Unlocked':'Locked'}`;
+  button.setAttribute('aria-label',title.textContent+' · '+detail.textContent+' · Preview');copy.append(title,detail);button.append(art,copy);
+  button.addEventListener('click',()=>previewMint(key));grid.append(button);
+ });dialog.showModal();
+}
+function renderVaultRoadmap(balance){
+ const meter=document.getElementById('vaultLegendProgress'),label=document.getElementById('vaultLegendProgressLabel');
+ const valid=Number.isSafeInteger(balance)&&balance>=0;
+ meter.value=valid?Math.min(balance,10000000):0;
+ label.textContent=valid?`${formatNumber(balance)} / 10,000,000 verified saved coins`:'Checking your saved balance…';
+}
+let vaultTrophyOwner=null,vaultTrophyRequest=null,vaultTrophyRows=null,vaultTrophyError=false;
+function validVaultTrophies(data,owner){
+ return data?.ok===true&&String(data.telegram_id)===String(owner)&&Array.isArray(data.trophies)&&
+  data.trophies.every(r=>r&&typeof r.week==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(r.week)&&Number.isFinite(Date.parse(r.week+'T00:00:00Z'))&&[1,2,3].includes(r.place)&&Number.isSafeInteger(r.coins)&&
+   [100000,50000,25000][r.place-1]===r.coins&&Number.isInteger(r.score)&&r.score>=1&&r.score<=6000)&&
+  new Set(data.trophies.map(r=>r.week)).size===data.trophies.length;
+}
+function renderVaultTrophies(){
+ const same=accountIsReady()&&vaultTrophyOwner===homeUserId(),rows=same?vaultTrophyRows:null,error=same&&vaultTrophyError;
+ const count=document.getElementById('vaultMedalCount'),list=document.getElementById('vaultTrophyList');
+ count.textContent=rows!==null?`${formatNumber(rows.length)} earned`:error?'Unavailable':'Checking…';
+ list.textContent=rows!==null?(rows.length?rows.map(r=>`${['Gold','Silver','Bronze'][r.place-1]} · Week of ${r.week} · Rank #${r.place} · ${formatNumber(r.score)} points · ${formatNumber(r.coins)} awarded coins`).join('\n'):'No Weekly Championship trophies yet.')+(error?'\nShowing last checked history; refresh to retry.':''):error?'Trophy history could not be verified. Tap Refresh medals.':'Checking your weekly trophies…';
+}
+async function loadVaultTrophies(){
+ const owner=homeUserId();if(!owner||!accountIsReady())return;
+ if(vaultTrophyOwner!==owner){vaultTrophyOwner=owner;vaultTrophyRequest=null;vaultTrophyRows=null;}
+ if(vaultTrophyRequest)return vaultTrophyRequest;
+ const request=apiPost('/api/vault/trophies',{}, {tapOwner:owner,timeoutMs:10000});vaultTrophyRequest=request;vaultTrophyError=false;renderVaultTrophies();
+ try{const data=await request;if(vaultTrophyRequest!==request||owner!==homeUserId()||!accountIsReady())return;
+  if(!validVaultTrophies(data,owner))throw Error('TROPHIES_UNVERIFIED');vaultTrophyRows=data.trophies;
+ }catch(_){if(vaultTrophyRequest===request&&owner===homeUserId())vaultTrophyError=true;}
+ finally{if(vaultTrophyRequest===request){vaultTrophyRequest=null;renderVaultTrophies();}}
 }
 function renderVaultMedals(){
- const box=document.getElementById('vaultDailyMedalList'),data=vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
+ const box=document.getElementById('vaultDailyMedalList'),data=accountIsReady()&&vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
  if(!box)return;
  const awards=data?.my_awards;
  const newestFirst=Array.isArray(awards)?[...awards].sort((a,b)=>b.day.localeCompare(a.day)):[];
- box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):newestFirst.length?newestFirst.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'Your confirmed daily podium medals will appear here.';
- if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check for new awards.';
- document.getElementById('vaultMedalCount').textContent=awards?.length?`${formatNumber(awards.length)} daily medal${awards.length===1?'':'s'} shown`:'Daily & weekly achievements';
- const spotlight=document.getElementById('vaultMedalSpotlight');
- if(spotlight){
-   spotlight.replaceChildren();
-   spotlight.hidden=!Array.isArray(awards)||awards.length===0;
-   if(!spotlight.hidden){
-     // Show the three most recent verified medals as a timeline, oldest to newest.
-     for(const award of newestFirst.slice(0,3).reverse()){
-       const badge=document.createElement('div');
-       badge.className='vault-medal-badge';
-       const place=document.createElement('strong');
-       place.textContent=(['','Gold','Silver','Bronze'][award.place]||'Podium')+' medal';
-       const date=document.createElement('small');
-       date.textContent=new Date(award.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'});
-       badge.append(place,date);spotlight.append(badge);
-     }
-   }
- }
+ box.textContent=!data?(vaultMedalsError?'Daily medals could not be checked. Try Refresh medals.':'Checking your daily medals…'):newestFirst.length?newestFirst.map(a=>`${['','Gold','Silver','Bronze'][a.place]} · ${new Date(a.day+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${formatNumber(a.score)} tap coins`).join('\n'):'No verified historical daily medals recorded.';
+ if(data&&vaultMedalsError)box.textContent+='\nShowing the last checked medals. Refresh to check recorded history.';
  const retry=document.getElementById('vaultMedalRetry');if(retry)retry.disabled=!!vaultMedalsRequest;
 }
 
@@ -8268,7 +8384,7 @@ function openVault(){
  vaultReviewing=false;document.getElementById('vipTermsAccepted').checked=false;
  showAppSheet(withdrawSheet,tabWithdraw);
  if(vaultOwner!==homeUserId())resetVault(homeUserId());
- void window.JigPilot?.sync(true);renderVault();void loadVaultMedals();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
+ void window.JigPilot?.sync(true);renderVault();void loadVaultMedals();void loadVaultTrophies();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
 }
 function vipOriginTab(){
  switch(vipOfferOrigin){
@@ -8341,10 +8457,9 @@ document.getElementById('vaultCoinOrdersOpen').addEventListener('click',()=>{
   orders.open=true;
   orders.scrollIntoView({block:'nearest'});
 });
-document.getElementById('vaultVipOpen').addEventListener('click',()=>openVipOffer('vault'));
-document.getElementById('vaultCollectionOpen').addEventListener('click',()=>openHomeJourney());
+document.getElementById('vaultCollectionOpen').addEventListener('click',openVaultCoinGallery);
 document.getElementById('vaultRewardHistoryOpen').addEventListener('click',()=>openInviteDetails());
-document.getElementById('vaultMedalRetry').addEventListener('click',()=>{void loadVaultMedals(true);void window.JigPilot?.sync(true);});
+document.getElementById('vaultMedalRetry').addEventListener('click',()=>{void loadVaultMedals(true);void loadVaultTrophies();void window.JigPilot?.sync(true);});
 document.getElementById('vipReview').addEventListener('click',()=>{
  vaultReviewing=true;renderVault();document.getElementById('vipTermsAccepted').focus({preventScroll:true});
 });
@@ -8367,7 +8482,7 @@ setInterval(()=>{
 async function handleInviteTask() { openFriendsSheet(); }
 function openFriendsSheet() {
   showAppSheet(friendsSheet, tabFriends);
-  renderInviteOverview();loadInviteSummary();
+  renderInviteOverview();loadInviteSummary();void window.JigChampionship?.refreshEntry?.(apiPost);
 }
 
 async function handleEnergyBoostTask() { await openBoostSheet('sp_emergency_energy'); }
@@ -8610,7 +8725,7 @@ const leaderboardHTML=`
   <div id="lbStatus" class="lb-status" role="status" aria-live="polite" hidden></div>
   <div id="lbContent"></div>
   <div id="lbActions" class="lb-actions"><button id="lbPrimary" class="lb-primary">Keep tapping</button><button id="lbSecondary" class="lb-text-btn">Explore VIP</button></div>
-  <div class="lb-footer"><button type="button" data-open-weekly class="lb-text-btn">Weekly race</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; airdrop</button></div>
+  <div class="lb-footer"><button type="button" data-open-weekly id="lbWeeklyEntry" class="lb-text-btn">Weekly competition</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; airdrop</button></div>
  </section>`;
 document.body.insertAdjacentHTML('beforeend',leaderboardHTML);
 const leaderboardScreen=document.getElementById('leaderboardScreen');
@@ -8638,7 +8753,7 @@ function setLeaderboardTabActive(key){
 function openLeaderboard(initialTab='daily'){
  if(!accountIsReady())return;
  backToHome();lbEnsureOwner();leaderboardScreen.style.display='flex';document.getElementById('mainScroll').inert=true;document.body.style.overflow='hidden';
- lbEl('lbCloseBtn').focus();lbSelectMode(['daily','global','friends'].includes(initialTab)?initialTab:'daily');
+ void window.JigChampionship?.refreshEntry?.(apiPost);lbEl('lbCloseBtn').focus();lbSelectMode(['daily','global','friends'].includes(initialTab)?initialTab:'daily');
 }
 function closeLeaderboard(){
  lbEpoch++;lbLoading=false;leaderboardScreen.style.display='none';document.getElementById('mainScroll').inert=false;document.body.style.overflow='';
@@ -8707,14 +8822,14 @@ function renderLeaderboard(){
  lbEl('lbPrimary').textContent=(lbMode==='friends'&&d?.total<=1)||solo?'Invite your first challenger':d?.me?.rank===1?'Defend your lead':d?.me?.rank?'Chase the next place':'Start tapping';
  lbEl('lbSecondary').textContent=lbMode==='friends'?'Invite friends':lbMode==='global'?'Shop':lbHasVip()?'Daily rewards':'Explore VIP';
  if(lbView==='rules'){
-  content.innerHTML=`<div class="lb-detail"><h3>Airdrop information</h3><p>A JigCoin token airdrop is planned. Airdrop eligibility and allocations have not been announced. The current leaderboard tracks in-game competition.</p><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Podium medals:</b> The top three eligible players receive dated cosmetic badges after a two-minute closing check. No coin or cash prize. System accounts and currently banned accounts are excluded. Badges record the results at finalization.</p><p>Your coins and VIP remain when the Daily board resets. Medal races start on ${escapeHtml(d?.award_start_day?lbDate(d.award_start_day):'the first full UTC day after installation')}.</p></div>`;
+  content.innerHTML=`<div class="lb-detail"><h3>Airdrop information</h3><p>A JigCoin token airdrop is planned. Airdrop eligibility and allocations have not been announced. The current leaderboard tracks in-game competition.</p><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Historical podium medals:</b> Recorded daily cosmetic badges remain in Medals and Vault. Today’s standings do not confirm eligibility for a new medal. Historical badges are not cash prizes. System accounts and currently banned accounts are excluded.</p><p>Your coins and VIP remain when the Daily board resets.</p></div>`;
  }else if(lbView==='history'){
   const h=lbHistoryData;
   if(!h)content.innerHTML=`<div class="lb-empty">${lbLoading?'Loading verified medals…':'Medal history is unavailable. Use Retry above.'}</div>`;
   else{
-   const own=h.my_awards.length?h.my_awards.map(a=>`<div class="lb-award">${lbMedalMarkup(a)}<strong>${formatNumber(a.score)} tap coins</strong></div>`).join(''):'<p>No medals yet. Your first podium finish will appear here.</p>';
+   const own=h.my_awards.length?h.my_awards.map(a=>`<div class="lb-award">${lbMedalMarkup(a)}<strong>${formatNumber(a.score)} tap coins</strong></div>`).join(''):'<p>No verified daily medals recorded for this account.</p>';
    let last='',podiums='';for(const a of h.podiums){if(a.day!==last){podiums+=`<h4>${escapeHtml(lbDate(a.day))}</h4>`;last=a.day;}podiums+=`<div class="lb-award"><span>#${a.place} · ${escapeHtml(a.display_name)}</span><strong>${formatNumber(a.score)}</strong></div>`;}
-   content.innerHTML=`<div class="lb-detail"><h3>Your medals</h3>${own}<h3>Verified podiums</h3>${podiums||'<p>No completed medal races yet. Results appear after a full UTC race day and the closing check.</p>'}${lbPager(lbHistoryPage,h.has_more,true)}</div>`;
+   content.innerHTML=`<div class="lb-detail"><h3>Your medals</h3>${own}<h3>Verified podiums</h3>${podiums||'<p>No verified historical podium results recorded.</p>'}${lbPager(lbHistoryPage,h.has_more,true)}</div>`;
   }
  }else if(!d){content.innerHTML=`<div class="lb-empty">${lbLoading?'Loading your race…':'Rank unavailable until the leaderboard reconnects.'}</div>`;
  }else{
@@ -8735,7 +8850,7 @@ function renderLeaderboard(){
    const podium=d.podium.length?`<div class="lb-section-label">${d.total<3?'CURRENT LEADERS':'PODIUM'}</div><div class="lb-podium" data-count="${d.podium.length}" style="--places:${d.podium.length}">${d.podium.map(r=>`<div data-place="${r.rank}"><b class="podium-medallion" aria-label="Place ${r.rank}">${(r.finish||r.rank_finish||r.vip_coin) ? mintFinishArtwork(r.vip_coin?'midnight':String(r.telegram_id)===lbOwner&&launchEquipped()?'launch':r.finish||r.rank_finish) + `<i class="podium-place">${r.rank}</i>` : r.rank}</b><span class="podium-name">${escapeHtml(String(r.telegram_id)===lbOwner?'You':r.display_name)}${lbVipBadge(r)}</span><strong>${formatNumber(r.score)}</strong></div>`).join('')}</div>`:'';
    // Your position is already pinned in the hero; show the adjacent rivals once.
    const near=d.nearby.filter(r=>r.rank!==me?.rank&&Math.abs(r.rank-(me?.rank||0))<=1&&!d.podium.some(p=>p.rank===r.rank));
-   const raceNote=lbMode==='daily'?(d.awards_enabled?'Top three eligible players at the UTC finish earn a dated medal.':'Tap coins set today’s standings.'):lbMode==='global'?'Saved balances include purchased packs.':'Your inviter and players who joined through your link · saved balances.';
+   const raceNote=lbMode==='daily'?'Tap coins set today’s standings.':lbMode==='global'?'Saved balances include purchased packs.':'Your inviter and players who joined through your link · saved balances.';
    const players=d.total===1?'player':'players';
    const context=lbMode==='daily'?`${formatNumber(d.total)} ${players} with saved taps today. VIP, streak and ad multipliers count; packs and invite rewards do not.`:`${formatNumber(d.total)} eligible ${players}${lbMode==='friends'?' in your referral group':''}.`;
    content.innerHTML=hero+podium+(near.length?`<div class="lb-section-label">NEAREST RIVALS</div><div class="lb-list">${near.map(lbRow).join('')}</div>`:'')+`<p class="lb-race-note">${raceNote}</p><p class="lb-score-context">${context}</p>`;
@@ -8752,7 +8867,7 @@ function lbTick(){
  if(!d){el.textContent=lbMode==='daily'?'Today’s tap coins':lbMode==='friends'?'Your referral connections':'Saved coin balances';return;}
  if(lbMode==='daily'){
   const seconds=Math.max(0,Math.ceil((Date.parse(d.ends_at)-Date.now()-lbClockOffset)/1000));
-  const label=d.awards_enabled?'Medal race ends in':'Daily reset in';
+  const label='Daily reset in';
   el.textContent=seconds?`${label} ${Math.floor(seconds/3600)}h ${Math.floor(seconds%3600/60)}m ${seconds%60}s · UTC`:'New UTC day · updating…';
  }else el.textContent=`${formatNumber(d.total)} ${d.total===1?'player':'players'} · ${lbMode==='friends'?'referral connections':'saved coins'}`;
  el.title=lbLoadedAt?'Last loaded '+new Date(lbLoadedAt).toLocaleTimeString('en-GB'):'';
@@ -8839,7 +8954,7 @@ initFromBackend();
     button.setAttribute('aria-pressed',String(equipped()));
     const medals = el('pilotMedalList');
     medals.textContent = !p?'Weekly medals could not be checked yet.':p.medals?.length ? p.medals.map(m=>'Gold · Week of '+fmtDate(m.week+'T00:00:00Z')+' · '+m.score+' pairs').join('\n')
-      : 'Win a Weekly Race to collect a dated gold medal.';
+      : 'No verified earlier Weekly Race gold awards.';
   }
   async function sync(force=false) {
     const id = homeUserId();
@@ -8972,7 +9087,7 @@ initFromBackend();
     const medal=s.last_award?`<div class="weekly-award">Your confirmed gold medal · Week of ${fmtDate(s.last_award.week+'T00:00:00Z')} · ${s.last_award.score} pairs. Saved in Vault.</div>`:'';
     el('weeklyBoard').innerHTML=`<div class="weekly-scopes" role="group" aria-label="Weekly standings scope"><button type="button" data-weekly-scope="global" aria-pressed="${weeklyScope==='global'}">Global</button><button type="button" data-weekly-scope="friends" aria-pressed="${weeklyScope==='friends'}">Friends</button></div>${result?renderResult(result,canStart):''}<div class="pilot-hero"><span class="pilot-medal" aria-hidden="true">✦</span><div><small>Your weekly best · ${weeklyScope==='global'?'Global':'Friends'}</small>
       <strong>${s.best} <em>${s.best===1?'pair':'pairs'}</em></strong><span>${s.place?'Place #'+s.place+(total!==null?' of '+total:'')+' · ':''}${s.runs_left} of 3 ranked runs left ${allowanceLabel()}</span></div></div>
-      ${!result?opponent:''}<p class="pilot-instructions">Pick two coins that add up to the target. Score as many pairs as you can in ${s.seconds} seconds. Your best run counts. Top global score earns Vault gold.</p>
+      ${!result?opponent:''}<p class="pilot-instructions">Pick two coins that add up to the target. Score as many pairs as you can in ${s.seconds} seconds. Your best run counts. Earlier recorded gold medals remain in Vault.</p>
       <div class="weekly-times"><span id="weeklyResetClock"></span><span id="weeklyFinishClock"></span></div>
       <button type="button" class="pilot-primary" data-race-action="start" ${result?'hidden':''} ${!canStart||busy?'disabled':''}>${busy?'Starting…':canStart?'Start ranked run '+(4-s.runs_left):s.runs_left?'Weekly race closing':'Ranked runs used '+allowanceLabel()}</button>
       <section class="weekly-practice"><div><strong>Practice</strong><small>Unlimited · unranked · no energy cost</small></div><button type="button" data-race-action="practice" ${busy?'disabled':''}>${s.practice_run?.live?'Resume':'Play'} practice</button></section>
@@ -8980,7 +9095,7 @@ initFromBackend();
       <div class="pilot-standings-head"><h3>${weeklyScope==='global'?'Global':'Friends'} standings${total!==null?' · '+total:''}</h3><button type="button" class="pilot-text" data-race-action="reload">Refresh</button></div>
       ${leaderList?'<ol class="pilot-standings">'+leaderList+'</ol>':'<p class="pilot-muted">No scored ranked runs in this group yet. Play a ranked run to join.</p>'}
       ${medal}${nextPolicy}<details class="pilot-rules"><summary>Rules &amp; medal</summary><p>${s.policy?.period==='day'?'Three ranked runs per UTC day. New runs become available at 00:00 UTC.':'Three ranked runs per player this week.'} Each correct pair earns one point. A wrong pair moves to the next target. Every player has the same time and puzzle values for each ranked slot. Energy, purchases, VIP and adverts have no effect on race scores.</p>
-      <p>Practice is unlimited and never changes ranked runs, standings or medals. Ranked scores save after each pair. The clock continues if you leave. The highest positive global weekly score wins a dated gold medal in Vault. Tied winners each receive one after results are finalised. Friends is a view of your referral group; it does not award separate medals. Weeks close Monday at 00:00 UTC.</p></details>`;
+      <p>Practice is unlimited and never changes ranked runs, standings or medals. Ranked scores save after each pair. The clock continues if you leave. Previously recorded global Weekly Race gold medals remain in Vault. Standings do not confirm eligibility for a new medal. Friends is a view of your referral group; it does not award separate medals. Weeks close Monday at 00:00 UTC.</p></details>`;
     tickLobby();
   }
   function tickLobby(){
@@ -9015,7 +9130,8 @@ initFromBackend();
   }
   async function openRace() {
     if(!accountIsReady())return;
-    if(await window.JigChampionship?.open(apiPost))return;
+    if(!window.JigChampionship?.open){showToast('Competition status unavailable. Please try again.');return;}
+    if(await window.JigChampionship.open(apiPost))return;
     if(owner!==homeUserId())void sync();
     practiceMode=false;runViewKey='';
     showAppSheet(sheet,tabFarm);

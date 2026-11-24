@@ -13,12 +13,11 @@ test('v32 Vault keeps rank and collection finish without duplicated treasury tex
  assert.match(html,/Rank · /);
  assert.match(vault,/Prestige coin finish/);
 });
-test('collection leads; VIP is a compact membership card, not another Shop card',()=>{
- assert.ok(vault.indexOf('id="vaultCollectionTitle"')<vault.indexOf('id="vaultVipOpen"'));
- assert.match(vault,/class="vip-summary vault-membership-card"/);
- assert.match(vault,/<strong>VIP membership<\/strong>/);
- assert.match(css,/button#vaultVipOpen\.vault-membership-card/);
- assert.match(css,/button#vaultVipOpen\.vault-membership-card[^}]*min-height:68px/);
+test('separate cabinets replace the obsolete VIP card; crown remains accessible',()=>{
+ assert.match(vault,/Coin Cabinet/);assert.match(vault,/Trophy Cabinet/);
+ assert.doesNotMatch(vault,/id="vaultVipOpen"/);
+ assert.match(vault,/data-vip-origin="vault"/);
+ assert.match(html,/id="shopVipPass"/);
 });
 test('account activity consolidates three real destinations and preserves original IDs',()=>{
  assert.match(vault,/id="vaultAccountDrawer"/);
@@ -31,42 +30,31 @@ test('account activity consolidates three real destinations and preserves origin
  assert.match(html,/openCoinShopSheet\(\)/);
  assert.match(html,/orders\.open=true/);
 });
-test('VIP status in Vault uses membership wording while Shop sales wording stays unchanged',()=>{
+test('VIP Shop summary handles active and pending status without removed Vault elements',()=>{
  const script=codeFor('function renderVipSummaries(){','function renderVaultCollection(goal){');
- const nodes=new Map(),el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{}});return nodes.get(id)};
+ const nodes=new Map(),el=id=>{if(id.startsWith('vault'))return null;if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{}});return nodes.get(id)};
  let product={product:{enabled:true},vip_until:null,benefits:{vip_energy:110},vip_bonus_coins:0};
  let pending=null;
  const render=new Function('document','vaultSnapshot','vaultNow','vaultPending','vaultError','formatNumber',script+'\nreturn renderVipSummaries;')({getElementById:el},()=>product,()=>Date.now(),()=>pending,false,n=>Number(n).toLocaleString('en-GB'));
- render();
- assert.match(el('shopVipState').textContent,/30 days · ★500 · View VIP benefits/);
- assert.match(el('vaultVipState').textContent,/Not active · 30 days for ★500 · View benefits/);
+ render();assert.match(el('shopVipState').textContent,/30 days · ★500 · View VIP benefits/);
  product={...product,vip_until:new Date(Date.now()+86400000).toISOString(),benefits:{vip_energy:110},vip_bonus_coins:25};
- render();
- assert.match(el('shopVipState').textContent,/extra tap coins recorded/);
- assert.match(el('vaultVipState').textContent,/VIP active until/);
- pending='vp_pending';render();
- assert.match(el('vaultVipState').textContent,/Payment pending/);
+ render();assert.match(el('shopVipState').textContent,/extra tap coins recorded/);
+ pending='vp_pending';render();assert.match(el('shopVipState').textContent,/Payment confirmation pending/);
 });
-test('recent medals appear only from account-matched verified history',()=>{
+test('legacy daily medals render only inside the collapsed archive and are account-scoped',()=>{
  const script=codeFor('function renderVaultMedals(){','async function loadVaultMedals(');
- const elements=new Map(),create=()=>({hidden:false,textContent:'',children:[],append(...v){this.children.push(...v);},replaceChildren(){this.children=[];}});
- const get=id=>{if(!elements.has(id))elements.set(id,create());return elements.get(id)};
+ const elements=new Map(),get=id=>{if(id==='vaultMedalSpotlight')return null;if(!elements.has(id))elements.set(id,{textContent:'',disabled:false});return elements.get(id)};
  const data={my_awards:[{place:1,day:'2026-11-20',score:200},{place:2,day:'2026-11-19',score:100},{place:3,day:'2026-11-18',score:90}]};
- const make=(owner)=>new Function('document','vaultMedalsOwner','homeUserId','vaultMedalsData','vaultMedalsError','vaultMedalsRequest','formatNumber',script+'\nreturn renderVaultMedals;')({getElementById:get,createElement:create},owner,()=>17,data,false,null,n=>Number(n).toLocaleString('en-GB'));
- make(17)();
- assert.equal(get('vaultMedalSpotlight').hidden,false);
- assert.equal(get('vaultMedalSpotlight').children.length,3);
- assert.deepEqual(get('vaultMedalSpotlight').children.map(x=>x.children[1].textContent),['18 Nov','19 Nov','20 Nov']);
- assert.match(get('vaultDailyMedalList').textContent,/^Gold · 20 Nov 2026/);
- assert.equal(get('vaultMedalCount').textContent,'3 daily medals shown');
- make(18)();
- assert.equal(get('vaultMedalSpotlight').hidden,true);
- assert.equal(get('vaultMedalSpotlight').children.length,0);
+ const make=(owner,ready=true)=>new Function('document','vaultMedalsOwner','homeUserId','vaultMedalsData','vaultMedalsError','vaultMedalsRequest','formatNumber','accountIsReady',script+'\nreturn renderVaultMedals;')({getElementById:get},owner,()=>17,data,false,null,n=>Number(n).toLocaleString('en-GB'),()=>ready);
+ make(17)();assert.match(get('vaultDailyMedalList').textContent,/^Gold · 20 Nov 2026/);assert.match(get('vaultDailyMedalList').textContent,/Silver · 19 Nov 2026/);assert.match(get('vaultDailyMedalList').textContent,/Bronze · 18 Nov 2026/);
+ make(18)();assert.doesNotMatch(get('vaultDailyMedalList').textContent,/20 Nov 2026/);
+ make(17,false)();assert.doesNotMatch(get('vaultDailyMedalList').textContent,/20 Nov 2026/);
+ assert.match(vault,/<details id="vaultLegacyHonours">/);assert.doesNotMatch(vault,/id="vaultMedalSpotlight"/);
 });
-test('airdrop terms remain truthful, inactive and unlinked to purchase eligibility',()=>{
- assert.match(vault,/Planned · Rules awaiting publication/);
- assert.match(vault,/In-game coins currently have no cash-out value/);
- assert.match(vault,/do not guarantee an airdrop allocation/);
+test('roadmap states game progress without a purchase or token guarantee',()=>{
+ assert.match(vault,/Rank 8 · 10,000,000 saved in-game coins/);
+ assert.match(vault,/Game coins have no cash-out value/);
+ assert.match(vault,/do not guarantee any token allocation or monetary return/);
  assert.doesNotMatch(vault,/airdrop countdown|guaranteed airdrop|buy to qualify/i);
 });
 test('responsive sizing keeps natural overflow and usable account targets',()=>{

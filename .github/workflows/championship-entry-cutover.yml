@@ -1,0 +1,31 @@
+name: Championship entry cutover verification
+on:
+  push:
+    branches: [review/championship-entry-cutover]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check assets/championship.js
+      - run: node --test recovery/check-leaderboards.cjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - run: python recovery/final-owner-mobile.py qa-cutover
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jigcoin-cutover-mobile-evidence
+          path: qa-cutover/
+          retention-days: 7

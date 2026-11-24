@@ -9,7 +9,7 @@ function setup(){
   function node(){return {innerHTML:'',textContent:'',hidden:false,dataset:{},children:[],attrs:{},classList:{add(){},toggle(){},contains:()=>true},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(){this.children=[];this.innerHTML='';},append(x){this.children.push(x);},addEventListener(){},querySelector:()=>({addEventListener(){}}),querySelectorAll:()=>[]};}
   const el=id=>{if(!els.has(id))els.set(id,node());return els.get(id);};
   class Clock extends Date{static now(){return now;}}
-  const ctx={Date:Clock,console,homeUserId:()=>id,homeIdentity:id,homeConfirmedBalance:null,homeGoalModel:()=>null,accountIsReady:()=>ready,window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout:fn=>fn(),
+  const ctx={allPacksVisible:false,Date:Clock,console,homeUserId:()=>id,homeIdentity:id,homeConfirmedBalance:null,homeGoalModel:()=>null,accountIsReady:()=>ready,window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout:fn=>fn(),
     document:{getElementById:el,createElement:node},coinPackList:el('coinPackList'),coinShopSheet:node(),escapeHtml:String,formatNumber:n=>n.toLocaleString('en-GB'),
     renderHubOrders(){},updateBoostHub(){},buyStarsPack(){},apiPost:async(...args)=>{calls.push(args);return reply(...args);}};
   vm.createContext(ctx);vm.runInContext(code,ctx);

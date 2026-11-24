@@ -1,0 +1,36 @@
+name: Issue 41 focused review checks
+on:
+  push:
+    branches: [review/final-owner-ux-41]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Affected frontend unit and static regressions
+        run: node --test recovery/check-vault-final-three.cjs recovery/check-vault-treasury.cjs recovery/check-vault-vip.cjs recovery/check-invite.cjs recovery/check-invite-v28.cjs recovery/check-invite-final-three.cjs recovery/check-invite-responsive-fill.cjs recovery/check-shop-final-four.cjs recovery/check-shop-responsive-fill.cjs recovery/check-shop-loading.cjs recovery/check-stars-shop.cjs
+      - uses: actions/setup-python@v5
+        if: always()
+        with:
+          python-version: '3.12'
+      - name: Install isolated mobile browser
+        if: always()
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Actual HTML mobile geometry and screenshot tests
+        if: always()
+        run: python recovery/final-owner-mobile.py qa-issue-41
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jigcoin-issue-41-synthetic-mobile-evidence
+          path: qa-issue-41/
+          retention-days: 7
