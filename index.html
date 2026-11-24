@@ -3567,9 +3567,9 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
 }
 html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header .sheet-title {text-align:center;font-size:clamp(19px,5.5vw,25px);line-height:1.12}
 html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header .sheet-subtitle {display:block;white-space:normal;max-width:none;font-size:clamp(10px,3vw,12px);line-height:1.2;margin:2px 0 0}
-html body #withdrawSheet .vault-content {gap:clamp(5px,1dvh,9px);justify-content:space-between}
+html body #withdrawSheet .vault-content {gap:clamp(5px,1dvh,9px);justify-content:flex-start}
 html body #withdrawSheet .vault-summary {flex:0 0 auto}
-html body #withdrawSheet .vault-cabinets {display:flex;flex-direction:column;gap:6px;flex:1 0 auto;justify-content:center;min-width:0}
+html body #withdrawSheet .vault-cabinets {display:flex;flex-direction:column;gap:6px;flex:0 0 auto;min-width:0}
 html body #withdrawSheet .vault-cabinets .vault-finish-link,
 html body #withdrawSheet .vault-cabinets #vaultMedalCollection {border:1px solid var(--mint-inlay);border-radius:12px;background:var(--mint-grain),var(--mint-plate);color:var(--mint-text);width:100%;min-width:0;margin:0}
 html body #withdrawSheet .vault-cabinets .vault-finish-link {display:grid;grid-template-columns:clamp(78px,24vw,106px) minmax(0,1fr) 14px;min-height:66px;padding:7px 10px;gap:6px;text-align:left}
@@ -3603,6 +3603,14 @@ html body #withdrawSheet .vault-footer-links{display:contents}
 #vaultCoinGalleryGrid strong,#vaultCoinGalleryGrid small{display:block;overflow-wrap:anywhere;font-size:11px}
 #vaultCoinGalleryGrid button[data-current="true"]{border-color:var(--mint-accent)}
 #vaultCoinGallery form button{width:100%;min-height:44px;margin-top:8px}
+@media(min-height:621px){
+ html body #withdrawSheet .vault-summary {flex-grow:1;max-height:218px}
+ html body #withdrawSheet .vault-cabinets .vault-finish-link {min-height:clamp(66px,11dvh,94px)}
+ html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary {min-height:clamp(54px,9dvh,78px)}
+ html body #withdrawSheet .vault-roadmap:not(:has(details[open])) {
+   flex:0.7 0 auto;display:flex;flex-direction:column;justify-content:center;max-height:210px;
+ }
+}
 @media(max-height:620px){
  html body #withdrawSheet .vault-content{justify-content:flex-start}
  html body #withdrawSheet .vault-cabinets{flex:0 0 auto;gap:4px}
