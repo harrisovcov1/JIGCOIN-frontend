@@ -15,16 +15,21 @@ TIERS=[dict(at=1,through=4,name='Bronze',reward_coins=500),dict(at=5,through=19,
 
 class Scenario:
  def __init__(self,w,h):
-  self.player=101;self.balance=17800;self.w=w;self.h=h;self.awarded=False;self.forbidden=[];self.live=False;self.legacy_queries=0
+  self.player=101;self.balance=17800;self.w=w;self.h=h;self.awarded=False;self.forbidden=[];self.live=False;self.unknown=False;self.empty_history=False
   self.init_data=urlencode({'user':json.dumps({'id':101,'first_name':'Pilot'})})
  def routes(self,p):
-  return p in ('/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status','/api/weekly/standings') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
+  return p in ('/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status','/api/weekly/standings','/api/leaderboard/daily','/api/leaderboard/event') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
  def forward(self,r,headers):
   p=urlsplit(r.request.url).path
   if p=='/api/vault/trophies':
    data=dict(ok=True,telegram_id='101',trophies=[dict(week='2026-11-30',place=3,score=4567,coins=25000)] if self.awarded else [])
   elif p=='/api/leaderboard/history':
-   data=dict(ok=True,version=12,telegram_id='101',page=0,podiums=[],my_awards=[dict(day='2026-11-19',place=1,score=42)],has_more=False)
+   data=dict(ok=True,version=12,telegram_id='101',page=0,podiums=[],my_awards=[] if self.empty_history else [dict(day='2026-11-19',place=1,score=42)],has_more=False)
+  elif p=='/api/leaderboard/daily':
+   me=dict(telegram_id=101,display_name='Pilot',rank=2,score=42)
+   rival=dict(telegram_id=88,display_name='Northstar',rank=1,score=100)
+   data=dict(ok=True,version=12,telegram_id='101',mode='daily',page=0,total=2,server_now='2026-11-30T12:00:00Z',day='2026-11-30',ends_at='2026-12-01T00:00:00Z',award_start_day='2026-11-18',awards_enabled=True,me=me,podium=[rival,me],nearby=[rival,me],entries=[rival,me],has_more=False,overtake=dict(target_telegram_id=88,need_points=59))
+  elif p=='/api/leaderboard/event':data=dict(ok=True)
   elif p=='/api/pilot/profile':
    data=dict(ok=True,telegram_id='101',vip_coin=False,refill=True,medals=[dict(week='2026-11-16',score=9)])
   elif p=='/api/invite/summary':
@@ -33,9 +38,8 @@ class Scenario:
   elif p=='/api/invite/history':data=dict(ok=True,telegram_id='101',credits=[])
   elif p=='/api/invite/interaction':data=dict(ok=True)
   elif p=='/api/championship/status':
-   data=dict(active=False) if not self.live else dict(active=True,name='Coin Patterns',instructions='Complete the pattern',day='2026-11-30',week='2026-11-30',close='2026-12-07',remaining=dict(practice=1,ranked=3),daily=[0]*7,rows=[],history=[],podium=0,me=None,rival=None,reminder=None,trophies=[])
+   data=dict(ok=False,reason='NETWORK') if self.unknown else dict(active=False) if not self.live else dict(active=True,name='Coin Patterns',instructions='Complete the pattern',day='2026-11-30',week='2026-11-30',close='2026-12-07',remaining=dict(practice=1,ranked=3),daily=[0]*7,rows=[],history=[],podium=0,me=None,rival=None,reminder=None,trophies=[])
   elif p=='/api/weekly/standings':
-   self.legacy_queries+=1
    data=dict(ok=True,telegram_id='101',runs_left=3,policy=dict(period='day',limit=3))
   else:
    self.forbidden.append(p);data=dict(ok=False,error='FORBIDDEN_IN_QA')
@@ -56,6 +60,21 @@ class Scenario:
    assert result['leftGap']>=5.5 and result['rightGap']>=5.5 and result['hitC'] and result['hitX'],result
    return result
   measurements={}
+  page.evaluate("""() => {
+   const original=window.fetch;
+   window.__cutoverTrace=[];window.__cutoverHeld=[];window.__holdLegacy=false;
+   window.fetch=function(...args){
+    const input=args[0],url=new URL(typeof input==='string'?input:input.url,location.href);
+    if(url.pathname!=='/api/weekly/standings')return original.apply(this,args);
+    const row={path:url.pathname,mode:window.JigChampionship?.entryMode?.()||'unknown',dispatchedAt:performance.now(),completedAt:null,held:window.__holdLegacy};
+    window.__cutoverTrace.push(row);
+    return original.apply(this,args).then(response=>{
+     const finish=()=>{row.completedAt=performance.now();return response};
+     if(!row.held)return finish();
+     return new Promise(resolve=>window.__cutoverHeld.push(()=>resolve(finish())));
+    });
+   };
+  }""")
   shot('home')
   for tab,sheet,label in [('tabTasks','boostSheet','rewards'),('tabShop','coinShopSheet','shop'),('tabFriends','friendsSheet','invite'),('tabWithdraw','withdrawSheet','vault')]:
    page.locator('#'+tab).click()
@@ -106,9 +125,19 @@ class Scenario:
   shot('synthetic-weekly-trophy')
   page.locator('#tabTasks').click()
   expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Race')
+  page.evaluate("async()=>{await refreshRewardsWeeklyStatus();}")
+  expect(page.locator('#rewardsWeeklyStatus')).to_contain_text('3 of 3 ranked runs left')
+  baseline=page.evaluate("window.__cutoverTrace.length")
+  assert baseline>0
+  page.evaluate("()=>{window.__holdLegacy=true;void refreshRewardsWeeklyStatus();}")
+  page.wait_for_function("window.__cutoverHeld.length>0")
   self.live=True
-  before=self.legacy_queries
-  page.evaluate("window.JigChampionship.refreshEntry(apiPost,true)")
+  page.evaluate("""async()=>{const mode=await window.JigChampionship.refreshEntry(apiPost,true);
+   if(mode!=='active')throw Error('Active fixture not confirmed');
+   window.__cutoverActiveAt=performance.now();window.__holdLegacy=false;
+   window.__cutoverHeld.splice(0).forEach(release=>release());
+   await refreshRewardsWeeklyStatus();
+  }""")
   expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Championship')
   expect(page.locator('#rewardsWeeklyStatus')).to_contain_text('Coin Patterns')
   page.locator('#tabFriends').click()
@@ -120,9 +149,41 @@ class Scenario:
   expect(page.locator('.championship-dialog')).to_contain_text('Coin Patterns')
   expect(page.locator('.championship-dialog')).to_contain_text('Gold 100,000')
   assert page.locator('#ownerPracticeChallenge').count()==0
-  assert self.legacy_queries==before
   shot('active-championship')
   page.locator('.championship-dialog').get_by_role('button',name='Close',exact=True).click()
+  def daily_board(label,check_history=False):
+   page.evaluate("openLeaderboard('daily')")
+   expect(page.locator('#lbContent')).to_contain_text('Tap coins set today’s standings.')
+   expect(page.locator('#lbClock')).to_contain_text('Daily reset in')
+   assert 'earn a dated medal' not in page.locator('#lbContent').inner_text()
+   page.locator('#lbRules').click()
+   expect(page.locator('#lbContent')).to_contain_text('Today’s standings do not confirm eligibility for a new medal.')
+   rules=page.locator('#lbContent').inner_text()
+   assert 'receive dated cosmetic badges' not in rules and 'Medal races start on' not in rules
+   shot(label+'-daily-rules')
+   if check_history:
+    page.locator('#lbHistory').click()
+    expect(page.locator('#lbContent')).to_contain_text('Daily Champion')
+    expect(page.locator('#lbContent')).to_contain_text('42')
+    self.empty_history=True
+    page.evaluate("lbLoad(true)")
+    expect(page.locator('#lbContent')).to_contain_text('No verified daily medals recorded')
+    expect(page.locator('#lbContent')).to_contain_text('No verified historical podium results recorded')
+    self.empty_history=False
+   page.locator('#lbCloseBtn').click()
+  daily_board('active',True)
+  trace=page.evaluate("({activeAt:window.__cutoverActiveAt,requests:window.__cutoverTrace})")
+  assert trace['activeAt']>0 and any(r['held'] and r['mode']=='legacy' and r['dispatchedAt']<trace['activeAt']<=r['completedAt'] for r in trace['requests']),trace
+  assert all(r['mode']=='legacy' and r['dispatchedAt']<trace['activeAt'] for r in trace['requests']),trace
+  measurements['cutoverDispatchTrace']=trace
+  self.live=False
+  page.evaluate("window.JigChampionship.refreshEntry(apiPost,true)")
+  expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Race')
+  daily_board('rollback')
+  self.unknown=True
+  page.evaluate("window.JigChampionship.refreshEntry(apiPost,true)")
+  expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly competition')
+  daily_board('unknown')
   assert not self.forbidden,self.forbidden
   return measurements
 

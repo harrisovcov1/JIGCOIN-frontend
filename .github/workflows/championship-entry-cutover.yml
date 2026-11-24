@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --check assets/championship.js
+      - run: node --test recovery/check-leaderboards.cjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
