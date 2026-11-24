@@ -17,8 +17,9 @@ class Scenario:
  def __init__(self,w,h):
   self.player=101;self.balance=17800;self.w=w;self.h=h;self.awarded=False;self.forbidden=[];self.live=False;self.unknown=False;self.empty_history=False
   self.init_data=urlencode({'user':json.dumps({'id':101,'first_name':'Pilot'})})
+  self.vip_visits=0
  def routes(self,p):
-  return p in ('/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status','/api/weekly/standings','/api/leaderboard/daily','/api/leaderboard/event') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
+  return p in ('/api/stars/interaction','/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status','/api/weekly/standings','/api/leaderboard/daily','/api/leaderboard/event') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
  def forward(self,r,headers):
   p=urlsplit(r.request.url).path
   if p=='/api/vault/trophies':
@@ -37,6 +38,9 @@ class Scenario:
    data=dict(ok=True,telegram_id='101',server_now=pilot.iso(pilot.now()),invite_link='https://t.me/JIGCOINBOT?startapp=ref_101',policy_version='referrals_cumulative_v16',welcome_coins=1000,reward_coins=500,friends_rewarded=0,coins_earned=0,tier_name='Get started',next_at=1,previous_at=0,next_reward_coins=500,next_tier_name='Bronze',qualification=dict(mode='cumulative_taps',min_taps=100,period='lifetime',ad_qualifies=False,purchase_required=False),tiers=TIERS,friends_joined=3,friends_pending=1,friends_qualified=0,friends_on_hold=2,friends_legacy_unverified=1,friends_invalid=1,friends_credit_unconfirmed=0,friends_ledger_confirmed=0,coins_ledger_confirmed=0,friend_progress=[row,dict(row,id='old',display_name='Player B',status='on_hold',hold_reason='legacy',qualification_mode='legacy_unknown',verified_taps=None,min_taps=None),dict(row,id='bad',display_name='Player C',status='on_hold',hold_reason='invalid',qualification_mode='legacy_unknown',verified_taps=None,min_taps=None)],friend_progress_has_more=False,incoming_referral=None)
   elif p=='/api/invite/history':data=dict(ok=True,telegram_id='101',credits=[])
   elif p=='/api/invite/interaction':data=dict(ok=True)
+  elif p=='/api/stars/interaction':
+   if r.request.post_data_json.get('event')=='vip_opened':self.vip_visits+=1
+   data=dict(ok=True)
   elif p=='/api/championship/status':
    data=dict(ok=False,reason='NETWORK') if self.unknown else dict(active=False) if not self.live else dict(active=True,name='Coin Patterns',instructions='Complete the pattern',day='2026-11-30',week='2026-11-30',close='2026-12-07',remaining=dict(practice=1,ranked=3),daily=[0]*7,rows=[],history=[],podium=0,me=None,rival=None,reminder=None,trophies=[])
   elif p=='/api/weekly/standings':
@@ -76,6 +80,28 @@ class Scenario:
    };
   }""")
   shot('home')
+  def open_vip(origin):
+   crown=page.get_by_role('button',name='Open VIP membership',exact=True).filter(visible=True)
+   expect(crown).to_have_count(1)
+   expect(crown).to_have_attribute('data-vip-origin',origin)
+   expect(crown.locator('span')).to_have_text('VIP')
+   metrics=crown.evaluate("""b=>{
+    const r=b.getBoundingClientRect(), icon=b.querySelector('img'), label=b.querySelector('span');
+    const i=icon.getBoundingClientRect(), l=label.getBoundingClientRect(), face=getComputedStyle(b,'::before');
+    const hits=[5,r.width-5].every(x=>[5,r.height-5].every(y=>b.contains(document.elementFromPoint(r.x+x,r.y+y))));
+    return {width:r.width,height:r.height,hits,loaded:icon.naturalWidth>0,
+     fits:i.top>=r.top && i.bottom<=l.top+1 && l.bottom<=r.bottom && l.left>=r.left && l.right<=r.right,
+     visibleFace:face.borderTopStyle==='solid' && face.boxShadow!=='none'};
+   }""")
+   assert min(metrics['width'],metrics['height'])>=44 and all(metrics[k] for k in ('hits','loaded','fits','visibleFace')),(origin,metrics)
+   before=self.vip_visits
+   with page.expect_response(lambda response: urlsplit(response.url).path=='/api/stars/interaction' and response.request.post_data_json.get('event')=='vip_opened'):
+    crown.tap()
+   expect(page.locator('#vipOfferSheet')).to_be_visible()
+   assert self.vip_visits==before+1,(origin,before,self.vip_visits)
+  open_vip('home')
+  page.locator('#vipOfferClose').click()
+  expect(page.locator('[data-vip-origin="home"]')).to_be_visible()
   for tab,sheet,label in [('tabTasks','boostSheet','rewards'),('tabShop','coinShopSheet','shop'),('tabFriends','friendsSheet','invite'),('tabWithdraw','withdrawSheet','vault')]:
    page.locator('#'+tab).click()
    expect(page.locator('#'+sheet)).to_be_visible()
@@ -93,8 +119,7 @@ class Scenario:
     measurements['vaultScroll']=body.evaluate('e=>({scrollHeight:e.scrollHeight,clientHeight:e.clientHeight})')
     if self.w>=390:assert body.evaluate('e=>e.scrollHeight<=e.clientHeight+2'),measurements
    shot(label)
-   page.locator(f'#{sheet} .vip-crown-link').click()
-   expect(page.locator('#vipOfferSheet')).to_be_visible()
+   open_vip(label)
    expect(page.locator('#vipReview')).to_contain_text('500 Stars')
    review=page.locator('#vipReview')
    assert review.evaluate("""b=>{
@@ -110,6 +135,8 @@ class Scenario:
     expect(page.locator('#inviteFriendProgress')).to_contain_text('Invalid')
     shot('invite-friends')
     page.locator('#inviteDetailsClose').click()
+  assert self.vip_visits==5,self.vip_visits
+  measurements['vip_crown_visits']=self.vip_visits
   page.locator('#vaultCollectionOpen').click()
   expect(page.locator('#vaultCoinGallery')).to_be_visible()
   expect(page.locator('#vaultCoinGalleryGrid button')).to_have_count(8)

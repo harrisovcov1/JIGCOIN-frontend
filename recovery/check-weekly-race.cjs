@@ -25,8 +25,9 @@ function setup({daily=true,used=false}={}){
  const response=r=>({ok:true,telegram_id:String(identity),server_now:new Clock().toISOString(),run:r});
  const ctx={console,Date:Clock,performance:{now:()=>now},Number,String,Math,Promise,Map,Set,URLSearchParams,location:{search:'',hash:''},navigator:{},
   crypto:{randomUUID:()=>`ticket-${++serial}`},setInterval:f=>timers.push(f),state:{vipUntil:null},HOME_TIERS:Array(8).fill({}),homeConfirmedBalance:20635,
-  document:{hidden:false,getElementById:el,createElement:element,body:{append:n=>els[n.id]=n},addEventListener(){},querySelector:()=>({dataset:{finish:'rank-1'}})},
-  window:{},accountIsReady:()=>ready,homeUserId:()=>identity,setCoinArtwork(){},renderCollectibleCoin(){},homeGoalModel:()=>({tier:1}),renderHomeSession(){},renderBoostCards(){},renderVault(){},
+  document:{hidden:false,getElementById:el,createElement:element,body:{append:n=>els[n.id]=n},addEventListener(){},querySelector:()=>({dataset:{finish:'rank-1'}}),
+   querySelectorAll:selector=>selector==='[data-vip-origin]'?[...html.matchAll(/data-vip-origin="([^"]+)"/g)].map(match=>el('crown-'+match[1])):[]},
+  window:{JigChampionship:{open:async()=>false}},accountIsReady:()=>ready,homeUserId:()=>identity,setCoinArtwork(){},renderCollectibleCoin(){},homeGoalModel:()=>({tier:1}),renderHomeSession(){},renderBoostCards(){},renderVault(){},
   showToast(){},launchEquipped:()=>false,previewMint(){},openVipOffer(){},tabFarm:{},openFriendsSheet:()=>calls.push({action:'invite'}),
   backToHome:()=>Object.values(els).forEach(n=>n.classList.remove('show')),showAppSheet:sheet=>sheet.classList.add('show'),
   mintFinishArtwork:key=>'<img data-finish="'+key+'">',mintFinishName:key=>key,lbVipBadge:()=>'',

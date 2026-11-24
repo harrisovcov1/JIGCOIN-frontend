@@ -3540,7 +3540,28 @@ html body #balanceText {font-variant-numeric:tabular-nums}
 }
 </style>
 <style>
-.vip-crown-link{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;cursor:pointer}
+.vip-crown-link {
+  position:relative;isolation:isolate;box-sizing:border-box;display:inline-grid;
+  place-content:center;justify-items:center;gap:1px;flex:0 0 44px;
+  width:44px;height:44px;min-width:44px;min-height:44px;padding:0;
+  border:0;border-radius:10px;background:transparent;color:#fff4cf;
+  font:750 10px/11px system-ui,sans-serif;letter-spacing:.08em;
+  cursor:pointer;touch-action:manipulation;
+}
+.vip-crown-link::before {
+  content:"";position:absolute;inset:2px;z-index:-1;pointer-events:none;
+  border:1px solid #efc673;border-radius:8px;
+  background:linear-gradient(160deg,#514027,#2b2017 52%,#211a17);
+  box-shadow:inset 0 1px 0 #ffe3a055,0 0 5px 1px #ffba4670;
+}
+.vip-crown-link img {display:block;width:23px;height:20px;object-fit:contain;pointer-events:none}
+.vip-crown-link span {display:block;pointer-events:none}
+body:has(.sheet.show) [data-vip-origin="home"] {visibility:hidden}
+.vip-crown-link:focus-visible {outline:2px solid #fff4cf;outline-offset:-1px}
+.vip-crown-link:active::before {background:#544025;box-shadow:inset 0 1px 3px #160f08}
+@media (hover:hover) {
+  .vip-crown-link:hover::before {border-color:#fff0bc;box-shadow:inset 0 1px 0 #ffebc077,0 0 7px 1px #ffba4688}
+}
 /* Each action owns a full hit area, including on short phones. */
 html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header {
   display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;
@@ -3560,7 +3581,7 @@ html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-he
  grid-area:1/2;min-width:0;width:100%;padding:0;margin:0;text-align:center;
 }
 html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.vip-crown-link {
- grid-area:1/1;position:static;transform:none;justify-self:start;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;
+ grid-area:1/1;position:relative;transform:none;justify-self:start;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;
 }
 html body :is(#boostSheet,#coinShopSheet,#friendsSheet,#withdrawSheet) .sheet-header>.sheet-close {
  grid-area:1/3;position:static;transform:none;justify-self:end;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;
@@ -3657,7 +3678,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
           <div class="mint-press-scene" aria-hidden="true"></div>
           <div class="tap-card-header mint-chamber-caption">
             <button type="button" class="mint-nameplate" id="mintCabinetOpen" aria-haspopup="dialog"><strong id="mintFinishName">JigCoin</strong></button>
-            <button type="button" class="vip-crown-link" data-vip-origin="home" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button>
+            <button type="button" class="vip-crown-link" data-vip-origin="home" aria-label="Open VIP membership" aria-controls="vipOfferSheet"><img src="./assets/vip-crown.svg" width="23" height="20" alt=""><span aria-hidden="true">VIP</span></button>
             <button type="button" id="homeTapRate" class="tap-hint" aria-haspopup="dialog" aria-label="View your tap-rate breakdown, streak benefits and VIP options"><span id="perTap">+1</span> per tap <span aria-hidden="true">›</span></button>
           </div>
           <div class="tap-title" id="homeTapPrompt" aria-live="polite" hidden>Tap to earn coins</div>
@@ -3797,7 +3818,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
   </div>
 
   <div class="sheet" id="friendsSheet">
-    <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button type="button" class="vip-crown-link" data-vip-origin="invite" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title">Invite friends</div><div class="sheet-subtitle">Bring a friend. Start a rivalry.</div></div><button type="button" class="vip-crown-link" data-vip-origin="invite" aria-label="Open VIP membership" aria-controls="vipOfferSheet"><img src="./assets/vip-crown.svg" width="23" height="20" alt=""><span aria-hidden="true">VIP</span></button><button class="sheet-close" id="friendsClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body invite-overview">
       <section class="invite-reward-card" aria-labelledby="inviteRewardTitle">
         <div class="invite-emblem" id="inviteTierArt" aria-hidden="true"><img src="./assets/invite-people.svg" width="78" height="68" alt=""></div><div class="invite-eyebrow" id="inviteNextBadge">Your next successful invite</div>
@@ -3845,7 +3866,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
   </div>
 
   <div class="sheet" id="withdrawSheet" role="region" aria-labelledby="vaultTitle">
-    <div class="sheet-header"><div><div class="sheet-title" id="vaultTitle">Vault</div></div><button type="button" class="vip-crown-link" data-vip-origin="vault" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title" id="vaultTitle">Vault</div></div><button type="button" class="vip-crown-link" data-vip-origin="vault" aria-label="Open VIP membership" aria-controls="vipOfferSheet"><img src="./assets/vip-crown.svg" width="23" height="20" alt=""><span aria-hidden="true">VIP</span></button><button class="sheet-close" id="withdrawClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body vault-content">
       <section class="vault-balance vault-summary" aria-label="Saved balance and rank">
         <div class="vault-balance-top"><span>Saved in-game coins</span><span id="vaultRank">—</span></div>
@@ -3975,7 +3996,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
     <div class="sheet-header">
       <div><div class="sheet-title" id="boostSheetTitle" tabindex="-1">Rewards</div>
         <div class="sheet-subtitle">Earn coins on your Race to Legend.</div></div>
-      <button type="button" class="vip-crown-link" data-vip-origin="rewards" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
+      <button type="button" class="vip-crown-link" data-vip-origin="rewards" aria-label="Open VIP membership" aria-controls="vipOfferSheet"><img src="./assets/vip-crown.svg" width="23" height="20" alt=""><span aria-hidden="true">VIP</span></button><button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
     </div>
     <div class="sheet-body">
       <p class="sr-only" id="boostRecommendation" aria-live="polite">Choose your next reward.</p>
@@ -4032,7 +4053,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
         <div class="sheet-title">Shop</div>
         <div class="sheet-subtitle">Coin packs &amp; VIP · Telegram Stars</div>
       </div>
-      <button type="button" class="vip-crown-link" data-vip-origin="shop" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="coinShopClose" aria-label="Close Shop">×</button>
+      <button type="button" class="vip-crown-link" data-vip-origin="shop" aria-label="Open VIP membership" aria-controls="vipOfferSheet"><img src="./assets/vip-crown.svg" width="23" height="20" alt=""><span aria-hidden="true">VIP</span></button><button class="sheet-close" id="coinShopClose" aria-label="Close Shop">×</button>
     </div>
     <div class="sheet-body">
       <button type="button" class="vip-summary shop-vip-pass" id="shopVipPass">
@@ -8418,7 +8439,13 @@ function openVipOffer(origin='vault'){
  vipOfferOrigin=origin;vaultReviewing=false;document.getElementById('vipTermsAccepted').checked=false;
  showAppSheet(document.getElementById('vipOfferSheet'),vipOriginTab());
  if(vaultOwner!==homeUserId())resetVault(homeUserId());
- renderVault();void window.JigPilot?.sync();void refreshVipStatus().then(()=>{if(vaultPending())void checkVipPayment();});
+ renderVault();void window.JigPilot?.sync();
+ void refreshVipStatus().then(offer=>{
+   if(offer?.product.enabled && vaultSnapshot()===offer){
+     void apiPost('/api/stars/interaction',{event:'vip_opened'},{silent:true,fastAuth:true,timeoutMs:3500}).catch(()=>{});
+   }
+   if(vaultPending())void checkVipPayment();
+ });
 }
 function openVaultDetails(){vaultDetailsReturn=document.getElementById('vipOfferSheet').classList.contains('show')?'offer':'vault';showAppSheet(vipSheet,vaultDetailsReturn==='offer'?vipOriginTab():tabWithdraw);renderVipHistory();void refreshVipStatus();}
 async function checkVipPayment(){
@@ -9251,7 +9278,7 @@ initFromBackend();
   });
   window.JigPilot={sync,canRefill,equipped,renderCoin,openRace,setStyle};
 document.querySelectorAll('[data-vip-origin]').forEach(button=>button.addEventListener('click',()=>openVipOffer(button.dataset.vipOrigin)));
-  el('shopVipPass').addEventListener('click',()=>{shopRecord('vip_opened');openVipOffer('shop');});
+  el('shopVipPass').addEventListener('click',()=>openVipOffer('shop'));
   el('pilotPreviewOpen').addEventListener('click',()=>previewMint('midnight'));
   el('crownPreview').addEventListener('click',event=>{
     const arrow=event.target.closest('[data-browse-rank]');
