@@ -34,7 +34,7 @@ test('sharing, VIP-free referral terms and historical review are preserved',()=>
    assert.ok(main.includes(key),key);
  assert.match(html,/100 verified taps in total/);
  assert.match(html,/No purchase needed/);
- assert.match(html,/Historical referral · reward evidence needs review/);
+ assert.match(html,/Historical referral · old credit records are being reconciled/);
  assert.match(css,/invite-actions button \{min-height:44px/);
 });
 test('all original HTML IDs are unique and scripts parse',()=>{

@@ -3584,6 +3584,10 @@ html body #withdrawSheet .vault-cabinets #vaultMedalCollection details summary{m
 html body #withdrawSheet .vault-cabinets :is(#vaultTrophyList,#vaultDailyMedalList,#pilotMedalList){white-space:pre-line;line-height:1.45;font-size:12px;padding:5px 0;overflow-wrap:anywhere}
 html body #withdrawSheet .vault-cabinets .vault-text-button{min-height:44px}
 html body #withdrawSheet .vault-cabinets #vaultMedalCount{font-size:11px;white-space:normal}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary>span{min-width:0}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary strong{display:block;overflow-wrap:anywhere}
+html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary small{overflow-wrap:anywhere}
+#inviteLegacyNote{font-size:12px;line-height:1.4;color:var(--mint-muted)}
 html body #withdrawSheet .vault-roadmap {border:1px solid var(--mint-inlay);border-radius:12px;background:var(--mint-grain),var(--mint-feature);padding:8px 10px;min-width:0}
 html body #withdrawSheet .vault-roadmap h2 {font-size:15px;color:var(--mint-highlight);margin:0 0 3px}
 html body #withdrawSheet .vault-roadmap p {font-size:11px;line-height:1.3;margin:3px 0;color:var(--mint-muted)}
@@ -8237,16 +8241,12 @@ function renderVipSummaries(){
  // Shop is the sales destination. Keep its proven presentation unchanged.
  const shopSummary=active?`2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× coins per tap · 2× energy capacity';
  const shopStatus=pending?'Payment confirmation pending · Check status':vaultError?'Could not refresh VIP · View status':!d?'Checking your pass…':active?`Active until ${expiry} · +${formatNumber(d.vip_bonus_coins)} extra tap coins recorded`:d.product.enabled?'30 days · ★500 · View VIP benefits':'VIP currently unavailable';
- // Vault answers the different question: what membership do I own?
- const vaultSummary=active?`Active perks · 2× tap coins · ${formatNumber(d.benefits.vip_energy)} energy capacity`:'2× tap coins · 2× energy capacity';
- const vaultStatus=pending?'Payment pending · Check status':vaultError?'Membership status unavailable · Retry':!d?'Checking membership…':active?`VIP active until ${expiry} · View membership`:d.product.enabled?'Not active · 30 days for ★500 · View benefits':'VIP currently unavailable';
- for(const prefix of ['shop','vault']){
-   const card=document.getElementById(prefix==='shop'?'shopVipPass':'vaultVipOpen');
-   if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
-   const details=document.getElementById(prefix+'VipSummary'),stateLabel=document.getElementById(prefix+'VipState');
-   if(details)details.textContent=prefix==='shop'?shopSummary:vaultSummary;
-   if(stateLabel)stateLabel.textContent=prefix==='shop'?shopStatus:vaultStatus;
- }
+ // VIP now lives in Shop and the universal crown, not a duplicate Vault card.
+ const card=document.getElementById('shopVipPass');
+ if(card){card.dataset.active=String(active);card.dataset.pending=String(!!pending);}
+ const details=document.getElementById('shopVipSummary'),stateLabel=document.getElementById('shopVipState');
+ if(details)details.textContent=shopSummary;
+ if(stateLabel)stateLabel.textContent=shopStatus;
 }
 
 function renderVaultCollection(goal){
@@ -8288,7 +8288,7 @@ function renderVaultRoadmap(balance){
 let vaultTrophyOwner=null,vaultTrophyRequest=null,vaultTrophyRows=null,vaultTrophyError=false;
 function validVaultTrophies(data,owner){
  return data?.ok===true&&String(data.telegram_id)===String(owner)&&Array.isArray(data.trophies)&&
-  data.trophies.every(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.week)&&Number.isInteger(r.place)&&
+  data.trophies.every(r=>r&&typeof r.week==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(r.week)&&Number.isFinite(Date.parse(r.week+'T00:00:00Z'))&&[1,2,3].includes(r.place)&&Number.isSafeInteger(r.coins)&&
    [100000,50000,25000][r.place-1]===r.coins&&Number.isInteger(r.score)&&r.score>=1&&r.score<=6000)&&
   new Set(data.trophies.map(r=>r.week)).size===data.trophies.length;
 }
@@ -8302,14 +8302,14 @@ async function loadVaultTrophies(){
  const owner=homeUserId();if(!owner||!accountIsReady())return;
  if(vaultTrophyOwner!==owner){vaultTrophyOwner=owner;vaultTrophyRequest=null;vaultTrophyRows=null;}
  if(vaultTrophyRequest)return vaultTrophyRequest;
- const request=apiPost('/api/vault/trophies',{}, {timeoutMs:10000});vaultTrophyRequest=request;vaultTrophyError=false;renderVaultTrophies();
- try{const data=await request;if(vaultTrophyRequest!==request||owner!==homeUserId())return;
+ const request=apiPost('/api/vault/trophies',{}, {tapOwner:owner,timeoutMs:10000});vaultTrophyRequest=request;vaultTrophyError=false;renderVaultTrophies();
+ try{const data=await request;if(vaultTrophyRequest!==request||owner!==homeUserId()||!accountIsReady())return;
   if(!validVaultTrophies(data,owner))throw Error('TROPHIES_UNVERIFIED');vaultTrophyRows=data.trophies;
  }catch(_){if(vaultTrophyRequest===request&&owner===homeUserId())vaultTrophyError=true;}
  finally{if(vaultTrophyRequest===request){vaultTrophyRequest=null;renderVaultTrophies();}}
 }
 function renderVaultMedals(){
- const box=document.getElementById('vaultDailyMedalList'),data=vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
+ const box=document.getElementById('vaultDailyMedalList'),data=accountIsReady()&&vaultMedalsOwner===homeUserId()?vaultMedalsData:null;
  if(!box)return;
  const awards=data?.my_awards;
  const newestFirst=Array.isArray(awards)?[...awards].sort((a,b)=>b.day.localeCompare(a.day)):[];
@@ -8944,7 +8944,7 @@ initFromBackend();
     button.setAttribute('aria-pressed',String(equipped()));
     const medals = el('pilotMedalList');
     medals.textContent = !p?'Weekly medals could not be checked yet.':p.medals?.length ? p.medals.map(m=>'Gold · Week of '+fmtDate(m.week+'T00:00:00Z')+' · '+m.score+' pairs').join('\n')
-      : 'Win a Weekly Race to collect a dated gold medal.';
+      : 'No verified earlier Weekly Race gold awards.';
   }
   async function sync(force=false) {
     const id = homeUserId();

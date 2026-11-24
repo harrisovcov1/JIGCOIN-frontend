@@ -20,6 +20,8 @@ test('weekly trophy validation rejects wrong account, invalid coins and duplicat
  assert.equal(valid(good,101),true);assert.equal(valid({...good,trophies:[]},101),true);
  assert.equal(valid(good,202),false);assert.equal(valid({...good,trophies:[{...good.trophies[0],coins:0}]},101),false);
  assert.equal(valid({...good,trophies:[...good.trophies,...good.trophies]},101),false);
+ assert.equal(valid({...good,trophies:[{week:'2026-11-30',place:4,score:5000}]},101),false);
+ assert.equal(valid({...good,trophies:[null]},101),false);
 });
 test('inline scripts parse and IDs remain unique',()=>{
  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,new Set(ids).size);

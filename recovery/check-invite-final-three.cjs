@@ -47,7 +47,7 @@ test('No duplicate IDs and all inline scripts parse',()=>{
 test('Invite data contract and earned-credit logic retained',()=>{
  assert.match(html,/friends_rewarded/);
  assert.match(html,/friends_on_hold/);
- assert.match(html,/reward evidence needs review/);
+ assert.match(html,/old credit records are being reconciled/);
  assert.match(html,/data\.qualification\.min_taps/);
  assert.match(html,/data\.invite_link/);
 });
