@@ -15,10 +15,10 @@ TIERS=[dict(at=1,through=4,name='Bronze',reward_coins=500),dict(at=5,through=19,
 
 class Scenario:
  def __init__(self,w,h):
-  self.player=101;self.balance=17800;self.w=w;self.h=h;self.awarded=False;self.forbidden=[]
+  self.player=101;self.balance=17800;self.w=w;self.h=h;self.awarded=False;self.forbidden=[];self.live=False;self.legacy_queries=0
   self.init_data=urlencode({'user':json.dumps({'id':101,'first_name':'Pilot'})})
  def routes(self,p):
-  return p in ('/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
+  return p in ('/api/vault/trophies','/api/leaderboard/history','/api/pilot/profile','/api/invite/summary','/api/invite/history','/api/invite/interaction','/api/championship/status','/api/weekly/standings') or any(x in p for x in ('create-checkout','create-invoice','/refund','/settle'))
  def forward(self,r,headers):
   p=urlsplit(r.request.url).path
   if p=='/api/vault/trophies':
@@ -32,7 +32,11 @@ class Scenario:
    data=dict(ok=True,telegram_id='101',server_now=pilot.iso(pilot.now()),invite_link='https://t.me/JIGCOINBOT?startapp=ref_101',policy_version='referrals_cumulative_v16',welcome_coins=1000,reward_coins=500,friends_rewarded=0,coins_earned=0,tier_name='Get started',next_at=1,previous_at=0,next_reward_coins=500,next_tier_name='Bronze',qualification=dict(mode='cumulative_taps',min_taps=100,period='lifetime',ad_qualifies=False,purchase_required=False),tiers=TIERS,friends_joined=3,friends_pending=1,friends_qualified=0,friends_on_hold=2,friends_legacy_unverified=1,friends_invalid=1,friends_credit_unconfirmed=0,friends_ledger_confirmed=0,coins_ledger_confirmed=0,friend_progress=[row,dict(row,id='old',display_name='Player B',status='on_hold',hold_reason='legacy',qualification_mode='legacy_unknown',verified_taps=None,min_taps=None),dict(row,id='bad',display_name='Player C',status='on_hold',hold_reason='invalid',qualification_mode='legacy_unknown',verified_taps=None,min_taps=None)],friend_progress_has_more=False,incoming_referral=None)
   elif p=='/api/invite/history':data=dict(ok=True,telegram_id='101',credits=[])
   elif p=='/api/invite/interaction':data=dict(ok=True)
-  elif p=='/api/championship/status':data=dict(ok=False,error='CHAMPIONSHIP_INACTIVE')
+  elif p=='/api/championship/status':
+   data=dict(active=False) if not self.live else dict(active=True,name='Coin Patterns',instructions='Complete the pattern',day='2026-11-30',week='2026-11-30',close='2026-12-07',remaining=dict(practice=1,ranked=3),daily=[0]*7,rows=[],history=[],podium=0,me=None,rival=None,reminder=None,trophies=[])
+  elif p=='/api/weekly/standings':
+   self.legacy_queries+=1
+   data=dict(ok=True,telegram_id='101',runs_left=3,policy=dict(period='day',limit=3))
   else:
    self.forbidden.append(p);data=dict(ok=False,error='FORBIDDEN_IN_QA')
   return r.fulfill(json=data,headers=headers)
@@ -100,6 +104,25 @@ class Scenario:
   expect(page.locator('#vaultTrophyList')).to_contain_text('25,000 awarded coins')
   expect(page.locator('#vaultMedalCount')).to_have_text('1 earned')
   shot('synthetic-weekly-trophy')
+  page.locator('#tabTasks').click()
+  expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Race')
+  self.live=True
+  before=self.legacy_queries
+  page.evaluate("window.JigChampionship.refreshEntry(apiPost,true)")
+  expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Championship')
+  expect(page.locator('#rewardsWeeklyStatus')).to_contain_text('Coin Patterns')
+  page.locator('#tabFriends').click()
+  expect(page.locator('#inviteWeeklyRace')).to_contain_text('Weekly Championship')
+  page.locator('#tabTasks').click()
+  expect(page.locator('#rewardsWeeklyTitle')).to_have_text('Weekly Championship')
+  page.locator('#rewardsWeeklyAction').click()
+  expect(page.locator('.championship-dialog')).to_be_visible()
+  expect(page.locator('.championship-dialog')).to_contain_text('Coin Patterns')
+  expect(page.locator('.championship-dialog')).to_contain_text('Gold 100,000')
+  assert page.locator('#ownerPracticeChallenge').count()==0
+  assert self.legacy_queries==before
+  shot('active-championship')
+  page.locator('.championship-dialog').get_by_role('button',name='Close',exact=True).click()
   assert not self.forbidden,self.forbidden
   return measurements
 

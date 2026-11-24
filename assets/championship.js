@@ -2,6 +2,70 @@
 window.JigChampionship = (() => {
  let dialog, timer, generation=0;
  const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
+
+ // Entry state is presentation-only, scoped to the current signed account.
+ // Unknown/network errors must never be interpreted as legacy permission.
+ let entry={owner:null,mode:'unknown',result:null,checked:0},entryPending=null;
+ function classifyEntry(s){
+  if(!s || s.ok===false)return 'unknown';
+  if(s.active===true && typeof s.name==='string' && s.name.length>0 &&
+   Number.isInteger(s.remaining?.ranked)&&s.remaining.ranked>=0&&s.remaining.ranked<=3&&
+   Number.isInteger(s.remaining?.practice)&&s.remaining.practice>=0&&s.remaining.practice<=1)return 'active';
+  if(s.active===false)return Array.isArray(s.ownerPractice?.variants)&&s.ownerPractice.variants.length===30?'preview':'legacy';
+  return 'unknown';
+ }
+ function currentOwner(){return typeof accountIsReady==='function'&&accountIsReady()?homeUserId():null;}
+ function entryMode(){return entry.owner!==null&&entry.owner===currentOwner()?entry.mode:'unknown';}
+ function entryLabel(compact=false){
+  const mode=entryMode();
+  return mode==='active'?(compact?'Championship':'Weekly Championship'):mode==='preview'?'Owner practice':mode==='legacy'?(compact?'Weekly race':'Weekly Race'):(compact?'Weekly play':'Weekly competition');
+ }
+ function renderEntry(){
+  const mode=entryMode(),title=entryLabel(),result=entry.result;
+  const set=(id,value)=>{const el=document.getElementById(id);if(el&&el.textContent!==value)el.textContent=value;};
+  set('rewardsWeeklyTitle',title);
+  const invite=document.getElementById('inviteWeeklyRace');
+  if(invite?.firstChild?.nodeType===3)invite.firstChild.nodeValue=title+' ';
+  set('lbWeeklyEntry',title);
+  const home=document.getElementById('homeBoostAction');
+  if(home?.dataset.focus==='weekly'){
+   home.textContent=entryLabel(true);home.ariaLabel='Open '+title;home.title=home.ariaLabel;
+  }
+  if(mode==='active'){
+   set('rewardsWeeklyStatus',result.name+' · '+result.remaining.ranked+'/3 ranked left');
+   set('rewardsWeeklyAction','View podium & play ›');
+  }else if(mode==='preview'){
+   set('rewardsWeeklyStatus','Practice only · no awards');
+   set('rewardsWeeklyAction','Open owner practice ›');
+  }else if(mode==='unknown'){
+   set('rewardsWeeklyStatus','Competition status unavailable');
+   set('rewardsWeeklyAction','Check again ›');
+  }else{
+   set('rewardsWeeklyStatus','Free ranked runs · 45s each');
+   set('rewardsWeeklyAction','Check Weekly Race ›');
+  }
+ }
+ async function refreshEntry(post,force=false){
+  const owner=currentOwner();
+  if(owner===null){entry={owner:null,mode:'unknown',result:null,checked:0};renderEntry();return 'unknown';}
+  if(entry.owner!==owner)entry={owner,mode:'unknown',result:null,checked:0};
+  if(!force&&Date.now()-entry.checked<15000){renderEntry();return entryMode();}
+  if(entryPending?.owner===owner)return entryPending.promise;
+  const request={owner,promise:null};entryPending=request;
+  request.promise=(async()=>{
+   let result;try{result=await post('/api/championship/status',{}, {tapOwner:owner,timeoutMs:9000,fastAuth:true,silent:true});}catch(_){}
+   if(currentOwner()!==owner||entryPending!==request)return 'unknown';
+   entry={owner,mode:classifyEntry(result),result,checked:Date.now()};renderEntry();return entry.mode;
+  })().finally(()=>{if(entryPending===request)entryPending=null;});
+  return request.promise;
+ }
+ const refresh=()=>{if(!document.hidden&&typeof apiPost==='function')void refreshEntry(apiPost);};
+ window.addEventListener('jigcoin:account-ready',refresh);
+ document.addEventListener('visibilitychange',refresh);
+ // Cover a session which became ready before this deferred script ran.
+ setTimeout(refresh,0);
+ setInterval(refresh,30000);
+
  function button(title,fn){const b=node('button',title);b.type='button';b.onclick=fn;return b;}
  async function open(post){
   let preview = false;
@@ -10,9 +74,11 @@ window.JigChampionship = (() => {
     return post('/api/championship/' + prefix + route, body);
   };
   const opener=document.activeElement;
-  let status=await call('status');
-  preview = !status?.active && Boolean(status?.ownerPractice?.variants?.length);
-  if(!status?.active && !preview)return false;
+  const mode=await refreshEntry(post,true);
+  if(mode==='legacy')return false;
+  if(mode==='unknown'){if(typeof showToast==='function')showToast('Competition status unavailable. Please try again.');return true;}
+  let status=entry.result;
+  preview=mode==='preview';
   if(dialog?.open)return true;
   dialog=node('dialog');dialog.className='championship-dialog';dialog.setAttribute('aria-label','Weekly Championship');
   const main=node('section'),close=button('Close',()=>dialog.close());
@@ -178,7 +244,7 @@ window.JigChampionship = (() => {
   }
   if(preview)practiceMenu();else lobby();return true;
  }
- return {open};
+ return {open,refreshEntry,entryMode,entryLabel};
 })();
 document.getElementById('champTrophies')?.addEventListener('toggle',async function(){
  if(!this.open)return;

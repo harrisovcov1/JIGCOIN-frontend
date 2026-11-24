@@ -2,7 +2,7 @@
 <!-- JigCoin Mini App -->
 <html lang="en">
 <head>
-<meta name="jigcoin-build" content="v35-owner-ux-review-1">
+<meta name="jigcoin-build" content="v35-owner-ux-cutover-1">
   <meta charset="UTF-8" />
   <title>JigCoin</title>
   <meta
@@ -3610,7 +3610,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
  html body #withdrawSheet .vault-cabinets .vault-finish-link{min-height:54px;padding:3px 8px}
  html body #withdrawSheet .vault-cabinets #vaultMedalCollection,html body #withdrawSheet .vault-cabinets #vaultMedalCollection>summary{min-height:44px}
 }
-</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=owner-practice1" defer></script></head>
+</style><link rel="stylesheet" href="assets/championship.css?v=owner-practice1"><script src="assets/championship.js?v=entry-cutover1" defer></script></head>
 <body>
   <div class="app-shell">
     <div class="main home-compact" id="mainScroll">
@@ -3808,7 +3808,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
         <progress id="inviteProgress" value="0" max="1" aria-label="Progress to next referral tier"></progress>
         <span id="inviteProgressText">—</span>
       </section>
-      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly Race <span aria-hidden="true">›</span></button></div>
+      <div class="invite-play-links"><button type="button" id="inviteFriendsBoard">Race with friends <span aria-hidden="true">›</span></button><button type="button" id="inviteWeeklyRace" data-open-weekly>Weekly competition <span aria-hidden="true">›</span></button></div>
       <button type="button" id="incomingActiveReminder" class="invite-active-reminder" hidden><span id="incomingActiveText">Continue your invitation goal</span><span aria-hidden="true">›</span></button>
       <button type="button" id="inviteDetailsOpen" class="invite-details-link" aria-label="Friends and rewards details">
         <span class="invite-detail-action-copy"><strong>Friends &amp; rewards</strong><small id="invitePendingSummary" hidden></small></span>
@@ -4008,7 +4008,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
       <details id="boostHelp" class="reward-ad-help" hidden><summary>Advert help</summary><p id="boostHelpText"></p></details>
       <div class="pilot-free-activities">
         <button type="button" id="pilotDailyChallenge" class="pilot-link" disabled><progress id="pilotChallengeMeter" hidden aria-label="Today’s confirmed taps" max="100" value="0"></progress><strong>100-tap challenge</strong><small id="pilotDailyProgress">Reach 100 taps today</small><span id="pilotChallengeAction">Checking…</span></button>
-        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong>Weekly Race</strong><small id="rewardsWeeklyStatus">Free ranked runs · 45s each</small><span id="rewardsWeeklyAction">Check Weekly Race ›</span></button>
+        <button type="button" data-open-weekly class="pilot-link"><i class="activity-medal" aria-hidden="true">✦</i><strong id="rewardsWeeklyTitle">Weekly competition</strong><small id="rewardsWeeklyStatus">Checking competition status…</small><span id="rewardsWeeklyAction">Open competition ›</span></button>
       </div>
       <div class="reward-footer">
         <button type="button" class="quest-action" id="rewardsReturn" hidden>Back to tapping</button>
@@ -4800,9 +4800,9 @@ function renderHomeSession() {
   action.dataset.focus=refill?'sp_emergency_energy':'weekly';
   action.setAttribute('aria-controls',refill?'boostSheet':'weeklySheet');
   action.dataset.active=String(!refill);
-  const label=refill?(view.action==='claim'?'Claim refill':'Refill energy · ad'):'Weekly race';
+  const label=refill?(view.action==='claim'?'Claim refill':'Refill energy · ad'):(window.JigChampionship?.entryLabel?.(true)||'Weekly race');
   if(action.textContent!==label) action.textContent=label;
-  action.ariaLabel=refill?(view.action==='claim'?'Claim your confirmed energy refill':'Watch the prepared optional refill advert'):'Open Weekly Race';
+  action.ariaLabel=refill?(view.action==='claim'?'Claim your confirmed energy refill':'Watch the prepared optional refill advert'):('Open '+(window.JigChampionship?.entryLabel?.()||'Weekly Race'));
   action.title=action.ariaLabel;
   action.disabled=!ready;
   renderHomeRefillEntry(projected.energy,ready);
@@ -5666,7 +5666,7 @@ async function apiPost(path, body, opts = {}) {
   const payloadOwner = safeParseJSON(new URLSearchParams(initData).get("user"), null)?.id;
   if (payloadOwner !== telegram_id || (opts.tapOwner && opts.tapOwner !== telegram_id)) return {ok:false,reason:"TELEGRAM_ACCOUNT_CHANGED"};
   window.__tgAuthCache = { initData, telegram_id };
-  const controller = (readOnly || /^\/api\/(weekly|pilot|mission|streak\/reminder)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
+  const controller = (readOnly || /^\/api\/(weekly|pilot|mission|championship|streak\/reminder)\//.test(path) || path === "/api/leaderboard/event" || path === "/api/tapPacket" || (path === "/api/stars/invoice" || path === "/api/vip/create-checkout")) ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), opts.timeoutMs || 15000) : null;
   try {
     const response = await fetch(API_BASE + path, {
@@ -5997,7 +5997,7 @@ function renderShareCardCanvas() {
   ctx.fillText('1,000 FREE COINS',52,224);
   ctx.fillStyle='#e0e3e9';ctx.font='500 21px system-ui,sans-serif';
   ctx.fillText('New players start with an in-game welcome reward.',54,264);
-  ctx.fillText('Tap · Daily rewards · Weekly Race · Coin finishes',54,297);
+  ctx.fillText('Tap · Daily rewards · Weekly competition · Coin finishes',54,297);
   // Decorative embossed emblem. This is original, not an NFT or coin listing.
   ctx.save();
   const medallion=ctx.createRadialGradient(802,180,12,802,180,105);
@@ -7998,22 +7998,24 @@ let rewardsWeeklyRequest=null,rewardsWeeklyOwner=null;
 async function refreshRewardsWeeklyStatus(){
   const target=document.getElementById('rewardsWeeklyStatus');
   const action=document.getElementById('rewardsWeeklyAction');
-  const fallback='Free ranked runs · 45s each';
   const reset=()=>{
-    target.textContent=fallback;
-    action.textContent='Check Weekly Race ›';
+    target.textContent='Competition status unavailable';
+    action.textContent='Check again ›';
   };
   const owner=homeUserId();
   if(!owner || !accountIsReady() || navigator.onLine===false){reset();return;}
   if(rewardsWeeklyRequest&&rewardsWeeklyOwner===owner)return rewardsWeeklyRequest;
   rewardsWeeklyOwner=owner;
-  action.textContent='Check Weekly Race ›';
+  action.textContent='Open competition ›';
   target.textContent='Checking ranked attempts…';
   const request=(async()=>{
     try{
+      const mode=await window.JigChampionship?.refreshEntry?.(apiPost,true);
+      if(owner!==homeUserId() || !boostSheet.classList.contains('show'))return;
+      if(mode!=='legacy'){if(!mode||mode==='unknown')reset();return;}
       const response=await apiPost('/api/weekly/standings',{scope:'global'},
         {tapOwner:owner,timeoutMs:9000,silent:true});
-      if(owner!==homeUserId() || !boostSheet.classList.contains('show'))return;
+      if(owner!==homeUserId() || !boostSheet.classList.contains('show') || window.JigChampionship?.entryMode?.()!=='legacy')return;
       const left=response?.runs_left,limit=response?.policy?.limit??3;
       if(response?.ok && String(response.telegram_id)===String(owner) &&
         Number.isSafeInteger(left) && Number.isSafeInteger(limit) &&
@@ -8021,7 +8023,7 @@ async function refreshRewardsWeeklyStatus(){
         ['day','week'].includes(response?.policy?.period)){
         target.textContent=`${left} of ${limit} ranked runs left ${response.policy.period==='day'?'today':'this week'}`;
         action.textContent=left===0?'Standings & practice ›':'Race for a medal ›';
-      }else reset();
+      }else if(window.JigChampionship?.entryMode?.()==='legacy') {target.textContent='Free ranked runs · 45s each';action.textContent='Check Weekly Race ›';}
     }catch(_){if(owner===homeUserId() && boostSheet.classList.contains('show'))reset();}
   })().finally(()=>{if(rewardsWeeklyRequest===request)rewardsWeeklyRequest=null;});
   rewardsWeeklyRequest=request;return request;
@@ -8472,7 +8474,7 @@ setInterval(()=>{
 async function handleInviteTask() { openFriendsSheet(); }
 function openFriendsSheet() {
   showAppSheet(friendsSheet, tabFriends);
-  renderInviteOverview();loadInviteSummary();
+  renderInviteOverview();loadInviteSummary();void window.JigChampionship?.refreshEntry?.(apiPost);
 }
 
 async function handleEnergyBoostTask() { await openBoostSheet('sp_emergency_energy'); }
@@ -8715,7 +8717,7 @@ const leaderboardHTML=`
   <div id="lbStatus" class="lb-status" role="status" aria-live="polite" hidden></div>
   <div id="lbContent"></div>
   <div id="lbActions" class="lb-actions"><button id="lbPrimary" class="lb-primary">Keep tapping</button><button id="lbSecondary" class="lb-text-btn">Explore VIP</button></div>
-  <div class="lb-footer"><button type="button" data-open-weekly class="lb-text-btn">Weekly race</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; airdrop</button></div>
+  <div class="lb-footer"><button type="button" data-open-weekly id="lbWeeklyEntry" class="lb-text-btn">Weekly competition</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; airdrop</button></div>
  </section>`;
 document.body.insertAdjacentHTML('beforeend',leaderboardHTML);
 const leaderboardScreen=document.getElementById('leaderboardScreen');
@@ -8743,7 +8745,7 @@ function setLeaderboardTabActive(key){
 function openLeaderboard(initialTab='daily'){
  if(!accountIsReady())return;
  backToHome();lbEnsureOwner();leaderboardScreen.style.display='flex';document.getElementById('mainScroll').inert=true;document.body.style.overflow='hidden';
- lbEl('lbCloseBtn').focus();lbSelectMode(['daily','global','friends'].includes(initialTab)?initialTab:'daily');
+ void window.JigChampionship?.refreshEntry?.(apiPost);lbEl('lbCloseBtn').focus();lbSelectMode(['daily','global','friends'].includes(initialTab)?initialTab:'daily');
 }
 function closeLeaderboard(){
  lbEpoch++;lbLoading=false;leaderboardScreen.style.display='none';document.getElementById('mainScroll').inert=false;document.body.style.overflow='';
@@ -8840,7 +8842,7 @@ function renderLeaderboard(){
    const podium=d.podium.length?`<div class="lb-section-label">${d.total<3?'CURRENT LEADERS':'PODIUM'}</div><div class="lb-podium" data-count="${d.podium.length}" style="--places:${d.podium.length}">${d.podium.map(r=>`<div data-place="${r.rank}"><b class="podium-medallion" aria-label="Place ${r.rank}">${(r.finish||r.rank_finish||r.vip_coin) ? mintFinishArtwork(r.vip_coin?'midnight':String(r.telegram_id)===lbOwner&&launchEquipped()?'launch':r.finish||r.rank_finish) + `<i class="podium-place">${r.rank}</i>` : r.rank}</b><span class="podium-name">${escapeHtml(String(r.telegram_id)===lbOwner?'You':r.display_name)}${lbVipBadge(r)}</span><strong>${formatNumber(r.score)}</strong></div>`).join('')}</div>`:'';
    // Your position is already pinned in the hero; show the adjacent rivals once.
    const near=d.nearby.filter(r=>r.rank!==me?.rank&&Math.abs(r.rank-(me?.rank||0))<=1&&!d.podium.some(p=>p.rank===r.rank));
-   const raceNote=lbMode==='daily'?(d.awards_enabled?'Top three eligible players at the UTC finish earn a dated medal.':'Tap coins set today’s standings.'):lbMode==='global'?'Saved balances include purchased packs.':'Your inviter and players who joined through your link · saved balances.';
+   const raceNote=lbMode==='daily'?(d.awards_enabled&&window.JigChampionship?.entryMode?.()!=='active'?'Top three eligible players at the UTC finish earn a dated medal.':'Tap coins set today’s standings.'):lbMode==='global'?'Saved balances include purchased packs.':'Your inviter and players who joined through your link · saved balances.';
    const players=d.total===1?'player':'players';
    const context=lbMode==='daily'?`${formatNumber(d.total)} ${players} with saved taps today. VIP, streak and ad multipliers count; packs and invite rewards do not.`:`${formatNumber(d.total)} eligible ${players}${lbMode==='friends'?' in your referral group':''}.`;
    content.innerHTML=hero+podium+(near.length?`<div class="lb-section-label">NEAREST RIVALS</div><div class="lb-list">${near.map(lbRow).join('')}</div>`:'')+`<p class="lb-race-note">${raceNote}</p><p class="lb-score-context">${context}</p>`;
@@ -8857,7 +8859,7 @@ function lbTick(){
  if(!d){el.textContent=lbMode==='daily'?'Today’s tap coins':lbMode==='friends'?'Your referral connections':'Saved coin balances';return;}
  if(lbMode==='daily'){
   const seconds=Math.max(0,Math.ceil((Date.parse(d.ends_at)-Date.now()-lbClockOffset)/1000));
-  const label=d.awards_enabled?'Medal race ends in':'Daily reset in';
+  const label=d.awards_enabled&&window.JigChampionship?.entryMode?.()!=='active'?'Medal race ends in':'Daily reset in';
   el.textContent=seconds?`${label} ${Math.floor(seconds/3600)}h ${Math.floor(seconds%3600/60)}m ${seconds%60}s · UTC`:'New UTC day · updating…';
  }else el.textContent=`${formatNumber(d.total)} ${d.total===1?'player':'players'} · ${lbMode==='friends'?'referral connections':'saved coins'}`;
  el.title=lbLoadedAt?'Last loaded '+new Date(lbLoadedAt).toLocaleTimeString('en-GB'):'';
@@ -9120,7 +9122,8 @@ initFromBackend();
   }
   async function openRace() {
     if(!accountIsReady())return;
-    if(await window.JigChampionship?.open(apiPost))return;
+    if(!window.JigChampionship?.open){showToast('Competition status unavailable. Please try again.');return;}
+    if(await window.JigChampionship.open(apiPost))return;
     if(owner!==homeUserId())void sync();
     practiceMode=false;runViewKey='';
     showAppSheet(sheet,tabFarm);
