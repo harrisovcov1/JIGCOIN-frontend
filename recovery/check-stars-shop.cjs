@@ -12,6 +12,15 @@ function setup({enabled=true,products=[{sku:'JC_SMALL',title:'Small pack',coins:
  vm.runInContext('hubCatalog=catalog; hubCatalogOwner=10001; hubCatalogLoadedAt=Date.now(); renderStarsCatalog=()=>{}; loadCoinPacks=async()=>{};',ctx);
  return Object.assign(ctx,{calls,toasts,syncCount:()=>syncs});
 }
+test('Maximum welcome shows the real unit rate and compares only a matching full-price pack',()=>{
+ const starter={sku:'JC_STARTER_MAX',title:'Maximum welcome offer',coins:700000,stars:17500,starter:true};
+ const regular={sku:'JC_MAX_700K',title:'Maximum coin pack',coins:700000,stars:35000,starter:false};
+ const c=setup({products:[starter,regular],expires:new Date(Date.now()+86400000).toISOString()});
+ const card=()=>c.starsProductCard(starter,true);
+ assert.match(card(),/50% off/);assert.match(card(),/Usually ★ 35,000 · 40 coins per Star/);
+ assert.match(card(),/Buy 700,000 coins for 17,500 Telegram Stars/);
+ regular.stars=30000;assert.doesNotMatch(card(),/50% off|Usually ★/);
+});
 test('disabled shop never requests an invoice',async()=>{const c=setup({enabled:false});await c.buyStarsPack('JC_SMALL');assert.equal(c.calls.length,0);});
 test('Telegram invoice capability required before creating an order',async()=>{const c=setup();await c.buyStarsPack('JC_SMALL');assert.equal(c.calls.length,0);assert.match(c.toasts[0],/Telegram/);});
 test('unknown and expired starter offers cannot start checkout',async()=>{

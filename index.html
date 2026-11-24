@@ -2849,7 +2849,7 @@ body{justify-content:flex-start}
 #purchaseReviewCancel{color:inherit;border:1px solid #7b8792;background:#262e38;border-radius:8px}
 </style>
 <!-- Approved Home Option 5; cosmetic layer inherits the authenticated rank skin. -->
-<link rel="stylesheet" href="./assets/home-option5.css?v=20261120-3">
+<link rel="stylesheet" href="./assets/home-option5.css?v=20261124-position">
 <link rel="stylesheet" href="./assets/option-a-world.css?v=20261120-1">
 <link rel="stylesheet" href="./assets/home-rewards-fidelity.css?v=20261120-2">
 <link rel="stylesheet" href="./assets/home-final-five.css?v=20261120-1">
@@ -3627,7 +3627,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
         <h1 class="mint-wordmark">JigCoin</h1>
         <div id="homeSessionControls" class="home-session-row mint-instruments">
           <button id="homeSaveStatus" class="quiet-button" type="button" aria-haspopup="dialog" aria-controls="tapSaveDialog" hidden>Check tap sync ›</button>
-          <button id="homeJourneyOpen" class="mint-rank-plaque" type="button" aria-label="View your rank journey" aria-controls="homeJourneySheet"><span id="rankName">—</span></button>
+          <button id="homeJourneyOpen" class="mint-rank-plaque" type="button" aria-label="View your Race to Legend progress" aria-controls="homeJourneySheet"><span id="rankName">—</span></button>
           <button id="homeBoostAction" class="home-boost-action" type="button" aria-controls="weeklySheet" disabled>Weekly race</button>
         </div>
       </div>
@@ -3637,7 +3637,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
           <div class="card-balance-value" id="balanceText">…</div>
         </div>
         <button class="global-rank-block" id="homeLeaderboard" type="button" aria-label="Open global leaderboard">
-          <span class="global-rank-top-row"><strong class="global-rank-value" id="globalRankValue">—</strong><span class="global-rank-tier" id="globalRankTierText"></span></span>
+          <span class="global-rank-top-row"><strong class="global-rank-value" id="globalRankValue">—</strong></span>
           <span class="global-rank-label">Leaderboard</span>
           <span class="global-rank-bar"><span class="global-rank-fill" id="globalRankFill"></span></span>
           <span class="sr-only" id="globalRankNextText">Rank is confirmed by the server.</span>
@@ -3783,7 +3783,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
       <section class="quest-card"><div class="quest-kicker">Daily challenge</div><h3>Make 100 taps</h3><p id="dailyQuestProgress">Connecting to your saved progress…</p><div class="quest-progress-bar" aria-hidden="true"><span id="dailyQuestFill"></span></div><p id="dailyQuestReset"></p><button class="quest-action" id="dailyQuestAction" disabled>Checking…</button></section>
       <section class="quest-card launch-card"><div class="launch-title-row"><span id="launchCoinPreview" aria-hidden="true"></span><div><div class="quest-kicker">Seven-day collectible event</div><h3>Launch Edition</h3><p id="launchQuestStatus">Checking event status…</p></div></div><p>Make 250 taps during the event to unlock this coin design permanently. No purchase required.</p><p id="launchQuestProgress"></p><p id="launchQuestDates"></p><button class="quest-action" id="launchQuestAction" disabled>Checking…</button><p class="quest-info">Cosmetic only. Your rank and tap rewards stay the same. If you earn it before closing, you can collect it afterwards.</p></section>
       <div id="progressionError" hidden><p class="quest-info">Progress is temporarily unavailable. Your confirmed taps remain saved.</p><button class="quest-action" id="progressionRetry">Refresh progress</button></div>
-      <details class="quest-info"><summary>Airdrop &amp; coin information</summary><p>No JigCoin airdrop allocation or conversion rate has been announced. In-game coins and collectibles have no cash-out value or guaranteed token conversion. Buying packs or watching adverts does not guarantee an airdrop.</p></details>
+      <details class="quest-info"><summary>Race to Legend · December 2027</summary><p>Build your saved balance through eight ranks. At 10,000,000 verified saved game coins you become a JIGCOIN Legend.</p><p>Our objective is to launch the JIGCOIN token on the TON blockchain in December 2027. Rank 8 is the proposed milestone for consideration for a future allocation, subject to final eligibility and distribution terms.</p></details>
     </div>
   </div>
   <div class="sheet" id="homeRivalsSheet" role="dialog" aria-labelledby="homeRivalsTitle">
@@ -3792,7 +3792,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
   </div>
 
   <div class="sheet" id="homeJourneySheet" role="dialog" aria-labelledby="homeJourneyTitle">
-    <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Your rank journey</div><div class="sheet-subtitle">Coin collection · ranked by saved balance</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
+    <div class="sheet-header"><div><div class="sheet-title" id="homeJourneyTitle">Race to Legend</div><div class="sheet-subtitle" id="journeyLegendStatus">Eight ranks · 10,000,000 saved coins to Legend</div></div><button class="sheet-close" id="homeJourneyClose" aria-label="Back to Home">×</button></div>
     <div class="sheet-body"><section class="journey-focus"><span id="journeyCoin" aria-hidden="true"></span><div><small id="journeyCurrent">Your rank</small><h3 id="journeyTarget">Next unlock</h3><p class="journey-next" id="homeJourneyNext"></p><progress id="journeyProgress" max="1" value="0" aria-label="Progress to next coin"></progress></div></section><div class="coin-tier-grid" id="homeTierGrid"></div><button class="quest-action" id="journeyQuestOpen">Daily challenge &amp; Launch Edition ›</button><details class="journey-settings" id="journeySettings"><summary>Collection details &amp; settings</summary><p class="journey-record" id="homeMilestoneRecord"></p><p class="journey-footnote">Coin designs are cosmetic.</p><label class="haptic-setting"><span>Tap vibrations <small>Light feedback on supported devices</small></span><input id="homeHaptics" type="checkbox" checked></label><button id="journeySaveOpen" type="button" class="quiet-button" aria-haspopup="dialog" aria-controls="tapSaveDialog">Tap saving details ›</button></details></div>
   </div>
 
@@ -3865,10 +3865,10 @@ html body #withdrawSheet .vault-footer-links{display:contents}
         </details>
       </div>
       <section class="vault-roadmap" aria-labelledby="vaultRoadmapTitle">
-        <h2 id="vaultRoadmapTitle">Race to Legend</h2><p>Rank 8 · 10,000,000 saved in-game coins</p>
+        <h2 id="vaultRoadmapTitle">Race to Legend · December 2027</h2><p>Rank 8 · 10,000,000 saved in-game coins</p>
         <progress id="vaultLegendProgress" max="10000000" value="0" aria-label="Saved game coins towards Rank 8"></progress>
         <p id="vaultLegendProgressLabel" aria-live="polite">Checking your saved balance…</p>
-        <details id="vaultWithdrawalDetails"><summary>Project roadmap &amp; game terms ›</summary><p>Rank finishes reflect your verified game progress. A future TON token launch is a project objective, subject to separate approval and published terms. Game coins have no cash-out value. Ranks, medals, VIP and purchases do not guarantee any token allocation or monetary return.</p><p>In-app digital purchases use Telegram Stars. For refunds or purchase questions, open Account activity &amp; support.</p></details>
+        <details id="vaultWithdrawalDetails"><summary>Project roadmap &amp; game terms ›</summary><p>Our objective is to launch the JIGCOIN token on the TON blockchain in December 2027. Rank 8 is the proposed milestone for consideration for a future JIGCOIN token allocation, subject to final eligibility and distribution terms.</p><p>Game coins have no cash-out value. Ranks, medals, VIP and purchases do not guarantee any token allocation or monetary return.</p><p>In-app digital purchases use Telegram Stars. For refunds or purchase questions, open Account activity &amp; support.</p></details>
       </section>
       <div class="vault-footer-links">
       <details class="vault-account-drawer" id="vaultAccountDrawer">
@@ -3893,15 +3893,15 @@ html body #withdrawSheet .vault-footer-links{display:contents}
           <div><span class="vault-benefit-icon" aria-hidden="true">ϟ</span><strong>Energy capacity</strong><span id="vipEnergyValue">2× your usual capacity</span></div>
         </div>
         <p class="vault-vip-note" id="vipPerksText">Your personal comparison appears when Vault connects.</p>
-        <div class="pilot-coin-row" id="pilotCoinRow"><button id="pilotPreviewOpen" type="button" aria-haspopup="dialog" aria-label="Preview Midnight Crown"><span id="pilotCoinPreview" aria-hidden="true"><img class="midnight-coin" src="./assets/midnight-crown.webp" width="64" height="64" alt="" draggable="false"></span><span><strong>Midnight Crown</strong><small>Optional coin finish · Preview ›</small></span></button><button id="pilotCoinEquip" class="vault-text-button" hidden>Equip</button></div>
         <div class="vault-vip-result"><p class="vault-vip-earned" id="vipBonusText" hidden></p><p class="vault-expiry" id="vipExpiryText" hidden></p></div>
         <div id="vipConsentPanel" hidden><label class="vault-terms-consent"><input type="checkbox" id="vipTermsAccepted"><span>I agree to the <button type="button" class="vault-text-button" id="vipTermsOpen">VIP terms</button></span></label></div>
         <button type="button" class="vault-buy" id="vipReview" hidden>Review VIP · 500 Stars</button>
         <button type="button" class="vault-buy" id="vipBuyBtn" disabled>Loading VIP offer…</button>
         <p class="vault-payment-note">One payment · No auto-renewal</p>
         <div class="vault-live-status" role="status" aria-live="polite"><span id="vipFeedback"></span><button type="button" class="vault-text-button" id="vipRetry" hidden>Retry</button></div>
+        <div class="pilot-coin-row" id="pilotCoinRow"><button id="pilotPreviewOpen" type="button" aria-haspopup="dialog" aria-label="Preview Midnight Crown"><span id="pilotCoinPreview" aria-hidden="true"><img class="midnight-coin" src="./assets/midnight-crown.webp" width="64" height="64" alt="" draggable="false"></span><span><strong>Midnight Crown</strong><small>Optional coin finish · Preview ›</small></span></button><button id="pilotCoinEquip" class="vault-text-button" hidden>Equip</button></div>
       </section>
-      <p class="vip-offer-note">Energy regenerates at the same speed. Your extra capacity starts empty. Coin packs and fixed rewards keep their stated amounts.</p>
+      <p class="vip-offer-note">Energy regenerates at the same speed. Your extra capacity starts empty. Tap coins you earn with VIP count towards your in-game rank. Coin packs and fixed rewards keep their stated amounts.</p>
       <button type="button" class="vault-text-button" id="vipOfferHistory">VIP purchases &amp; terms ›</button>
     </div>
   </section>
@@ -3974,7 +3974,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
   <div class="sheet" id="boostSheet" role="region" aria-labelledby="boostSheetTitle">
     <div class="sheet-header">
       <div><div class="sheet-title" id="boostSheetTitle" tabindex="-1">Rewards</div>
-        <div class="sheet-subtitle">Daily streaks and free challenges.</div></div>
+        <div class="sheet-subtitle">Earn coins on your Race to Legend.</div></div>
       <button type="button" class="vip-crown-link" data-vip-origin="rewards" aria-label="Open VIP membership"><img src="./assets/vip-crown.svg" width="27" height="24" alt=""></button><button class="sheet-close" id="boostClose" aria-label="Back to Home">×</button>
     </div>
     <div class="sheet-body">
@@ -4048,7 +4048,7 @@ html body #withdrawSheet .vault-footer-links{display:contents}
     <details class="hub-history shop-help-dock" id="hubOrderDetails">
         <summary>Orders &amp; payment help</summary>
         <p id="hubOrderNotice" class="hub-small" tabindex="-1" hidden></p>
-        <p class="hub-small">Your exact coin amount and Telegram Stars price appear on each pack. Coins are credited after confirmed payment.</p>
+        <p class="hub-small">Your exact coin amount and Telegram Stars price appear on each pack. Purchased coins count towards your in-game rank once payment is confirmed.</p>
         <p class="hub-small">In-game coins have no cash value. Buying a pack does not guarantee an airdrop allocation or future value.</p>
         <div id="hubOrderHistory"></div>
         <p id="hubSupport" class="hub-small"></p><p class="hub-small">App version 14</p>
@@ -4402,7 +4402,6 @@ const withdrawBalanceText = document.getElementById("withdrawBalanceText");
 const globalRankValueEl = document.getElementById("globalRankValue");
 const globalRankFillEl = document.getElementById("globalRankFill");
 const globalRankNextTextEl = document.getElementById("globalRankNextText");
-const globalRankTierTextEl = document.getElementById("globalRankTierText");
 const dailyRewardTextEl = document.getElementById("dailyRewardText");
 const doubleBoostRewardTextEl = document.getElementById("doubleBoostRewardText");
 const energyRefillRewardTextEl = document.getElementById("energyRefillRewardText");
@@ -4891,6 +4890,7 @@ async function refreshHomeRace(force=false){
 }
 function openHomeJourney(){
   if(!accountIsReady())return;
+  renderLegendProgress(homeIdentity===homeUserId()?homeConfirmedBalance:null);
   const tier=homeTierIndex(homeConfirmedBalance),next=HOME_TIERS[tier+1];
   const goal=homeGoalModel(homeConfirmedBalance,recoveryTapView(state).bal);
   setCoinArtwork(document.getElementById('journeyCoin'),next?tier+1:tier);
@@ -5370,11 +5370,13 @@ function updateGlobalRankVisuals() {
   if (!globalRankValueEl || !globalRankFillEl || !globalRankNextTextEl) return;
   const rank = state.globalRank, total = state.globalTotal;
   const valid = Number.isSafeInteger(rank) && rank > 0 && Number.isSafeInteger(total) && total >= rank;
-  globalRankValueEl.textContent = valid ? `#${formatNumber(rank)}` : "—";
+  const position = valid ? `#${formatNumber(rank)}` : "—";
+  const button = document.getElementById("homeLeaderboard");
+  button.toggleAttribute("data-long-position", position.length >= 8);
+  button.setAttribute("aria-label", valid ? `Open global leaderboard, rank ${formatNumber(rank)}` : "Open global leaderboard");
+  globalRankValueEl.style.setProperty("--position-length", String(position.length));
+  globalRankValueEl.textContent = position;
   globalRankFillEl.style.transform = `scaleX(${valid ? (total === 1 ? 1 : (total-rank)/(total-1)) : 0})`;
-  if (globalRankTierTextEl) {
-    globalRankTierTextEl.textContent = valid ? `of ${formatNumber(total)}` : "";
-  }
   globalRankNextTextEl.textContent = valid
     ? (accountIsReady() ? "Based on the latest saved leaderboard." : "Last confirmed rank · reconnect to update.")
     : "Your rank will appear when it is confirmed.";
@@ -7065,13 +7067,15 @@ function shopRecord(event,sku=''){
   if(!hubCatalog?.enabled||!shopCatalogFresh()||!accountIsReady())return;
   void apiPost('/api/stars/interaction',{event,sku},{silent:true,fastAuth:true,timeoutMs:3500}).catch(()=>{});
 }
-function renderPackChoices(packs,preview,target=packGoal(packs)){
+function renderPackChoices(packs,preview,target=packGoal(packs),offer=null){
   const rates=packs.map(p=>p.coins/p.stars);
   const bestRate=new Set(rates).size>1?Math.max(...rates):0;
   const rank=rankReachPack(packs);
   const sorted=[...packs].sort((a,b)=>a.stars-b.stars);
-  coinPackList.innerHTML=sorted.map(p=>
-    starsProductCard(p,false,preview,p===target?.product?target.goal:null,bestRate,p===rank?.product?rank.goal:null)).join('');
+  coinPackList.innerHTML=sorted.map(p=>{
+    if(offer&&offer.coins===p.coins&&offer.stars<p.stars)return starsProductCard(offer,true,false);
+    return starsProductCard(p,false,preview,p===target?.product?target.goal:null,bestRate,p===rank?.product?rank.goal:null);
+  }).join('');
   const featured=new Set([1000,7000,37500]);
   const cards=Array.from(coinPackList.children);
   if(sorted.some(p=>featured.has(p.coins)) && sorted.some(p=>!featured.has(p.coins))){
@@ -7134,10 +7138,13 @@ function packOutcome(product){
   return ` At your current saved balance, this gives ${formatNumber(after)} coins.${rank} ${goal.complete?'Highest coin rank reached.':`${formatNumber(goal.remaining)} coins to ${goal.nextName}.`}`;
 }
 function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0,rankGoal=null) {
-  const label=starter?'First purchase · one-time':p.title;
+  const label=starter?(p.sku==='JC_STARTER_MAX'?'Maximum welcome offer':'First purchase offer'):p.title;
   const disabled=preview||!shopCatalogFresh()||!hubCatalog?.enabled||hubPurchaseBusy||
     (starter&&!(Date.parse(hubCatalog.offer_expires_at||'')>hubNow()));
   const rate=p.coins/p.stars;
+  const regular=starter&&hubCatalog?.products?.find(other=>!other.starter&&validStarsProduct(other)&&other.coins===p.coins&&other.stars===2*p.stars);
+  const offerLabel=regular?'50% off':'One-time price';
+  const unitPrice=rate.toLocaleString('en-GB',{maximumFractionDigits:2})+' coins per Star';
   const best=!starter&&rate===bestRate;
   const affordable=!starter&&!!goal;
   const unlock=!starter&&!!rankGoal;
@@ -7145,9 +7152,9 @@ function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0,ran
   const next=after===null?null:homeGoalModel(after);
   const outcome=unlock&&next?`<div class="shop-pack-outcome">After purchase: ${formatNumber(after)} coins · ${escapeHtml(rankGoal.nextName)} unlocked</div>`:'';
   return `<article class="hub-product ${starter?'hub-starter':''} ${best?'hub-best':''} ${affordable?'hub-goal':''} ${unlock?'shop-unlock':''}">
-    <div class="hub-product-label">${escapeHtml(label)}${starter?'<span class="shop-rank-badge">One-time price</span>':''}${affordable?'<span class="shop-rank-badge">Suggested</span>':''}${unlock?`<span class="shop-rank-badge">${escapeHtml(rankGoal.nextName)} unlock</span>`:''}${best?'<span class="value-badge">Top coin rate</span>':''}</div>
+    <div class="hub-product-label">${escapeHtml(label)}${starter?`<span class="shop-rank-badge">${offerLabel}</span>`:''}${affordable?'<span class="shop-rank-badge">Suggested</span>':''}${unlock?`<span class="shop-rank-badge">${escapeHtml(rankGoal.nextName)} unlock</span>`:''}${best?'<span class="value-badge">Top coin rate</span>':''}</div>
     <div class="hub-product-coins">${formatNumber(p.coins)} <span>coins</span></div>
-    <div class="hub-unit-value">${starter?'20 coins per Star · first purchase only':rate.toLocaleString('en-GB',{maximumFractionDigits:2})+' coins per Star'}</div>
+    <div class="hub-unit-value">${regular?'Usually ★ '+formatNumber(regular.stars)+' · ':''}${unitPrice}</div>
     ${outcome}
     ${starter?'<div class="hub-offer-clock" aria-live="off"></div>':''}
     <button type="button" class="hub-buy" ${preview?'data-preview="true"':`data-stars-sku="${escapeHtml(p.sku)}"`} aria-label="Buy ${formatNumber(p.coins)} coins for ${p.stars.toLocaleString('en-GB')} Telegram Stars" ${disabled?'disabled':''}>${hubPurchaseBusy?'Please wait…':`<span>Buy for</span><strong>★ ${p.stars.toLocaleString('en-GB')}</strong>`}</button>
@@ -7156,15 +7163,17 @@ function starsProductCard(p,starter=false,preview=false,goal=null,bestRate=0,ran
 function renderStarsCatalog() {
   if(!hubCatalog||hubCatalogOwner!==homeUserId())return;
   const products=(hubCatalog.products||[]).filter(validStarsProduct);
-  const offer=products.find(p=>p.starter);
+  const offer=Date.parse(hubCatalog.offer_expires_at)>hubNow()?products.find(p=>p.starter):null;
   const starterEl=document.getElementById('hubStarter');
   const target=packGoal(products.filter(p=>!p.starter&&[1000,7000,37500].includes(p.coins)));
   starterEl.hidden=!offer;
   starterEl.innerHTML=offer?starsProductCard(offer,true,false):'';
-  if(offer&&!shopStarterImpressionShown){shopStarterImpressionShown=true;shopRecord('starter_seen',offer.sku);}
+  if(offer&&!shopStarterImpressionShown&&shopCatalogFresh()&&!document.hidden&&coinShopSheet.classList.contains('show')){
+    shopStarterImpressionShown=true;shopRecord('starter_seen',offer.sku);
+  }
   const packs=products.filter(p=>!p.starter).sort((a,b)=>a.stars-b.stars);
   coinPackList.classList.toggle('hub-catalog-dense',packs.length>3);
-  renderPackChoices(packs,false,target);
+  renderPackChoices(packs,false,target,offer);
   if(!packs.length)coinPackList.innerHTML='<p class="hub-small">Coin packs are being prepared.</p>';
   coinShopSheet.querySelectorAll('[data-stars-sku]').forEach(btn=>btn.addEventListener('click',()=>buyStarsPack(btn.dataset.starsSku)));
   document.getElementById('hubShopNotice').textContent=hubCatalog.enabled?'Telegram Stars · Coins after confirmation':'Preview only — purchases are not enabled. Prices are initial test offers.';
@@ -7325,9 +7334,12 @@ function updateBoostHub() {
   if(Number(state.momentumShieldQty||0)>0)formatShieldStatus();
   const expires=Date.parse(hubCatalog?.offer_expires_at||'');
   coinShopSheet.querySelectorAll('.hub-offer-clock').forEach(el=>{
-    el.textContent=Number.isFinite(expires)?(expires>hubNow()?`Offer ends in ${msToCountdown(expires-hubNow())}`:'Offer ended'):'Offer unavailable';
+    const remaining=expires-hubNow();
+    const time=remaining>=86400000?`${Math.floor(remaining/86400000)}d ${Math.floor(remaining%86400000/3600000)}h`:msToCountdown(remaining);
+    el.textContent=Number.isFinite(expires)?(remaining>0?`First coin pack · ${time} left`:'Offer ended'):'Offer unavailable';
     if(Number.isFinite(expires)&&expires<=hubNow())el.parentElement.querySelector('button').disabled=true;
   });
+  if(Number.isFinite(expires)&&expires<=hubNow()&&document.getElementById('hubStarter')?.hidden===false)renderStarsCatalog();
 }
 document.getElementById('homeLeaderboard')?.addEventListener('click',()=>{if(accountIsReady())openLeaderboard('global');});
 
@@ -8243,7 +8255,7 @@ function renderVault(){
  vipBuyBtn.textContent=vaultBusy?'Checking payment…':pending?'Payment pending':!d?(vaultError?'VIP temporarily unavailable':'Loading VIP offer…'):!d.product.enabled?'VIP currently unavailable':`${active?'Extend':'Activate'} VIP · ★ ${d.product.stars}`;
  document.getElementById('vipFeedback').textContent=vaultMessage||(vaultError?(vaultFailure||'Could not refresh VIP. Please retry.'):pending?'Payment confirmation pending. Check again shortly.':'');
  const retry=document.getElementById('vipRetry');retry.hidden=!(vaultError||pending)||vaultBusy;retry.textContent=pending?'Check payment':'Retry';
- renderVipSummaries();renderVaultCollection(goal);renderVaultRoadmap(balance);renderVaultTrophies();
+ renderVipSummaries();renderVaultCollection(goal);renderLegendProgress(balance);renderVaultTrophies();
 }
 function renderVipSummaries(){
  const d=vaultSnapshot(),active=!!d&&Date.parse(d.vip_until)>vaultNow(),pending=vaultPending();
@@ -8289,11 +8301,18 @@ function openVaultCoinGallery(){
   button.addEventListener('click',()=>previewMint(key));grid.append(button);
  });dialog.showModal();
 }
-function renderVaultRoadmap(balance){
+function renderLegendProgress(balance){
  const meter=document.getElementById('vaultLegendProgress'),label=document.getElementById('vaultLegendProgressLabel');
  const valid=Number.isSafeInteger(balance)&&balance>=0;
- meter.value=valid?Math.min(balance,10000000):0;
- label.textContent=valid?`${formatNumber(balance)} / 10,000,000 verified saved coins`:'Checking your saved balance…';
+ meter.value=valid?Math.min(balance,meter.max):0;
+ let progressText='Checking your saved balance…';
+ if(valid){
+   progressText=balance>=meter.max
+     ? `Legend reached · ${formatNumber(balance)} verified saved coins`
+     : `${formatNumber(balance)} / ${formatNumber(meter.max)} verified saved coins`;
+ }
+ label.textContent=progressText;
+ document.getElementById('journeyLegendStatus').textContent=progressText;
 }
 let vaultTrophyOwner=null,vaultTrophyRequest=null,vaultTrophyRows=null,vaultTrophyError=false;
 function validVaultTrophies(data,owner){
@@ -8725,7 +8744,7 @@ const leaderboardHTML=`
   <div id="lbStatus" class="lb-status" role="status" aria-live="polite" hidden></div>
   <div id="lbContent"></div>
   <div id="lbActions" class="lb-actions"><button id="lbPrimary" class="lb-primary">Keep tapping</button><button id="lbSecondary" class="lb-text-btn">Explore VIP</button></div>
-  <div class="lb-footer"><button type="button" data-open-weekly id="lbWeeklyEntry" class="lb-text-btn">Weekly competition</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; airdrop</button></div>
+  <div class="lb-footer"><button type="button" data-open-weekly id="lbWeeklyEntry" class="lb-text-btn">Weekly competition</button><button id="lbView" class="lb-text-btn">Full rankings</button><button id="lbHistory" class="lb-text-btn">Medals</button><button id="lbRules" class="lb-text-btn">Rules &amp; roadmap</button></div>
  </section>`;
 document.body.insertAdjacentHTML('beforeend',leaderboardHTML);
 const leaderboardScreen=document.getElementById('leaderboardScreen');
@@ -8822,7 +8841,7 @@ function renderLeaderboard(){
  lbEl('lbPrimary').textContent=(lbMode==='friends'&&d?.total<=1)||solo?'Invite your first challenger':d?.me?.rank===1?'Defend your lead':d?.me?.rank?'Chase the next place':'Start tapping';
  lbEl('lbSecondary').textContent=lbMode==='friends'?'Invite friends':lbMode==='global'?'Shop':lbHasVip()?'Daily rewards':'Explore VIP';
  if(lbView==='rules'){
-  content.innerHTML=`<div class="lb-detail"><h3>Airdrop information</h3><p>A JigCoin token airdrop is planned. Airdrop eligibility and allocations have not been announced. The current leaderboard tracks in-game competition.</p><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Historical podium medals:</b> Recorded daily cosmetic badges remain in Medals and Vault. Today’s standings do not confirm eligibility for a new medal. Historical badges are not cash prizes. System accounts and currently banned accounts are excluded.</p><p>Your coins and VIP remain when the Daily board resets.</p></div>`;
+  content.innerHTML=`<div class="lb-detail"><h3>Race to Legend · December 2027</h3><p>Our objective is to launch the JIGCOIN token on the TON blockchain in December 2027. Rank 8 (10,000,000 verified saved game coins) is the proposed milestone for consideration for a future allocation, subject to final eligibility and distribution terms. Your leaderboard position measures in-game competition.</p><h3>How ranking works</h3><p><b>Daily:</b> Tap coins recorded by the server today, from 00:00 to 00:00 UTC. VIP, streak and ad multipliers count. Purchased packs, joining, referral and daily check-in bonuses do not.</p><p><b>Global:</b> Current saved coin balance, including purchases. Spending coins can lower your position.</p><p><b>Friends:</b> You, players who joined through your link and your inviter. This is not your Telegram contact list.</p><p><b>Ties:</b> Equal scores use ascending Telegram ID for a stable position. Earn one more coin than the next player to pass them outright.</p><p><b>Historical podium medals:</b> Recorded daily cosmetic badges remain in Medals and Vault. Today’s standings do not confirm eligibility for a new medal. Historical badges are not cash prizes. System accounts and currently banned accounts are excluded.</p><p>Your coins and VIP remain when the Daily board resets.</p></div>`;
  }else if(lbView==='history'){
   const h=lbHistoryData;
   if(!h)content.innerHTML=`<div class="lb-empty">${lbLoading?'Loading verified medals…':'Medal history is unavailable. Use Retry above.'}</div>`;
